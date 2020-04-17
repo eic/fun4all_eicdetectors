@@ -48,4 +48,4 @@ class BeastMagnetSteppingAction : public PHG4SteppingAction
   double m_EdepSum;
 };
 
-#endif // BEASTMAGNETSTEPPINGACTION_H
+#endif  // BEASTMAGNETSTEPPINGACTION_H

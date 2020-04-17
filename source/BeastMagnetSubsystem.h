@@ -46,7 +46,7 @@ class BeastMagnetSubsystem : public PHG4DetectorSubsystem
   PHG4Detector* GetDetector() const override;
 
   PHG4SteppingAction* GetSteppingAction() const override { return m_SteppingAction; }
-  PHG4DisplayAction* GetDisplayAction() const  override { return m_DisplayAction; }
+  PHG4DisplayAction* GetDisplayAction() const override { return m_DisplayAction; }
 
   //! Print info (from SubsysReco)
   void Print(const std::string& what = "ALL") const override;
@@ -58,15 +58,15 @@ class BeastMagnetSubsystem : public PHG4DetectorSubsystem
  private:
   //! detector construction
   /*! derives from PHG4Detector */
-  BeastMagnetDetector  *m_Detector;
+  BeastMagnetDetector* m_Detector;
 
   //! particle tracking "stepping" action
   /*! derives from PHG4SteppingActions */
-  PHG4SteppingAction *m_SteppingAction;
+  PHG4SteppingAction* m_SteppingAction;
 
   //! display attribute setting
   /*! derives from PHG4DisplayAction */
   PHG4DisplayAction* m_DisplayAction;
 };
 
-#endif // BEASTMAGNETSUBSYSTEM_H
+#endif  // BEASTMAGNETSUBSYSTEM_H

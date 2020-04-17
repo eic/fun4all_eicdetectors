@@ -17,11 +17,11 @@
 #include <phparameter/PHParameters.h>
 
 #include <g4main/PHG4HitContainer.h>
-#include <g4main/PHG4SteppingAction.h> 
+#include <g4main/PHG4SteppingAction.h>
 
 #include <phool/PHCompositeNode.h>
 #include <phool/PHIODataNode.h>
-#include <phool/PHNode.h> 
+#include <phool/PHNode.h>
 #include <phool/PHNodeIterator.h>
 #include <phool/PHObject.h>
 #include <phool/getClass.h>
@@ -41,9 +41,9 @@ BeastMagnetSubsystem::BeastMagnetSubsystem(const std::string &name)
 }
 
 //_______________________________________________________________________
-BeastMagnetSubsystem::~ BeastMagnetSubsystem()
+BeastMagnetSubsystem::~BeastMagnetSubsystem()
 {
-  delete  m_DisplayAction;
+  delete m_DisplayAction;
 }
 
 //_______________________________________________________________________

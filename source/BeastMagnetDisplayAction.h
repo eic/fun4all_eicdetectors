@@ -22,7 +22,7 @@ class BeastMagnetDisplayAction : public PHG4DisplayAction
 
   void ApplyDisplayAction(G4VPhysicalVolume *physvol);
   void SetMyVolume(G4LogicalVolume *vol) { m_MyVolume = vol; }
-  void AddLogicalVolume(G4LogicalVolume *vol) { m_LogVolSet.insert(vol);}
+  void AddLogicalVolume(G4LogicalVolume *vol) { m_LogVolSet.insert(vol); }
 
  private:
   G4LogicalVolume *m_MyVolume;

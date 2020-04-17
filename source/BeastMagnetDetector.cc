@@ -2,22 +2,21 @@
 
 #include "BeastMagnetDisplayAction.h"
 
-
 #include <phparameter/PHParameters.h>
 
 #include <g4main/PHG4Detector.h>
 #include <g4main/PHG4Subsystem.h>
 
 #include <TSystem.h>
-#include <Geant4/G4SolidStore.hh>
-#include <Geant4/G4LogicalVolumeStore.hh>
 #include <Geant4/G4AssemblyVolume.hh>
+#include <Geant4/G4Color.hh>
 #include <Geant4/G4GDMLParser.hh>
 #include <Geant4/G4GDMLReadStructure.hh>  // for G4GDMLReadStructure
-#include <Geant4/G4Color.hh>
 #include <Geant4/G4LogicalVolume.hh>
+#include <Geant4/G4LogicalVolumeStore.hh>
 #include <Geant4/G4Material.hh>
 #include <Geant4/G4PVPlacement.hh>
+#include <Geant4/G4SolidStore.hh>
 #include <Geant4/G4SystemOfUnits.hh>
 #include <Geant4/G4VisAttributes.hh>
 
@@ -63,12 +62,12 @@ void BeastMagnetDetector::ConstructMe(G4LogicalVolume *logicWorld)
   gdmlParser.SetOverlapCheck(OverlapCheck());
   gdmlParser.Read(m_GDMPath, false);
 
-// alright the reader just puts everything into G4 Stores - endless fun
-// print the show out, first solids:
+  // alright the reader just puts everything into G4 Stores - endless fun
+  // print the show out, first solids:
   // for (auto i=G4SolidStore::GetInstance()->begin(); i!=G4SolidStore::GetInstance()->end(); ++i)
-  //   cout << "solid vol name: " << (*i)->GetName() << endl; 
+  //   cout << "solid vol name: " << (*i)->GetName() << endl;
   // for (auto i=G4LogicalVolumeStore::GetInstance()->begin(); i!=G4LogicalVolumeStore::GetInstance()->end(); i++)
-  //   cout << "logvol name " << (*i)->GetName() << endl; 
+  //   cout << "logvol name " << (*i)->GetName() << endl;
 
   G4AssemblyVolume *avol = reader->GetAssembly(m_TopVolName);
   if (!avol)
@@ -78,31 +77,30 @@ void BeastMagnetDetector::ConstructMe(G4LogicalVolume *logicWorld)
 
   G4RotationMatrix *Rot = new G4RotationMatrix();
   G4ThreeVector g4vec;
-  avol->MakeImprint(logicWorld,g4vec,Rot, 0, OverlapCheck());
-vector<G4VPhysicalVolume *>::iterator it = avol->GetVolumesIterator();
-for (unsigned int i = 0; i < avol->TotalImprintedVolumes(); i++)
-{
-      InsertVolumes(*it);
-  ++it;
-}
+  avol->MakeImprint(logicWorld, g4vec, Rot, 0, OverlapCheck());
+  vector<G4VPhysicalVolume *>::iterator it = avol->GetVolumesIterator();
+  for (unsigned int i = 0; i < avol->TotalImprintedVolumes(); i++)
+  {
+    InsertVolumes(*it);
+    ++it;
+  }
 
   return;
 }
 
-void BeastMagnetDetector::InsertVolumes(G4VPhysicalVolume* physvol)
+void BeastMagnetDetector::InsertVolumes(G4VPhysicalVolume *physvol)
 {
-  G4LogicalVolume* logvol = physvol->GetLogicalVolume();
+  G4LogicalVolume *logvol = physvol->GetLogicalVolume();
   m_DisplayAction->AddLogicalVolume(logvol);
   m_PhysicalVolumesSet.insert(physvol);
   for (int i = 0; i < logvol->GetNoDaughters(); ++i)
   {
-    G4VPhysicalVolume* physvol = logvol->GetDaughter(i);
+    G4VPhysicalVolume *physvol = logvol->GetDaughter(i);
     // here we decide which volumes are active
     InsertVolumes(physvol);
   }
   return;
 }
-
 
 //_______________________________________________________________
 void BeastMagnetDetector::Print(const std::string &what) const

@@ -17,12 +17,12 @@
 
 #include <TSystem.h>
 
-#include <Geant4/G4ParticleDefinition.hh> 
+#include <Geant4/G4ParticleDefinition.hh>
 #include <Geant4/G4ReferenceCountedHandle.hh>
 #include <Geant4/G4Step.hh>
-#include <Geant4/G4StepPoint.hh> 
+#include <Geant4/G4StepPoint.hh>
 #include <Geant4/G4StepStatus.hh>
-#include <Geant4/G4String.hh> 
+#include <Geant4/G4String.hh>
 #include <Geant4/G4SystemOfUnits.hh>
 #include <Geant4/G4ThreeVector.hh>
 #include <Geant4/G4TouchableHandle.hh>
@@ -72,7 +72,7 @@ BeastMagnetSteppingAction::~BeastMagnetSteppingAction()
 
 //____________________________________________________________________________..
 // This is the implementation of the G4 UserSteppingAction
-bool BeastMagnetSteppingAction::UserSteppingAction(const G4Step *aStep,bool was_used)
+bool BeastMagnetSteppingAction::UserSteppingAction(const G4Step *aStep, bool was_used)
 {
   G4TouchableHandle touch = aStep->GetPreStepPoint()->GetTouchableHandle();
   G4TouchableHandle touchpost = aStep->GetPostStepPoint()->GetTouchableHandle();
@@ -104,12 +104,12 @@ bool BeastMagnetSteppingAction::UserSteppingAction(const G4Step *aStep,bool was_
   int detector_id = -1;  // we use here only one detector in this simple example
   if (volume->GetName().find("Coil") != string::npos)
   {
-    for (int i=0; i<=4; i++)
+    for (int i = 0; i <= 4; i++)
     {
-      if ( volume->GetName().find(to_string(i)) != string::npos)
+      if (volume->GetName().find(to_string(i)) != string::npos)
       {
-	detector_id = i;
-	break;
+        detector_id = i;
+        break;
       }
     }
   }
@@ -142,18 +142,18 @@ bool BeastMagnetSteppingAction::UserSteppingAction(const G4Step *aStep,bool was_
   G4StepPoint *prePoint = aStep->GetPreStepPoint();
   G4StepPoint *postPoint = aStep->GetPostStepPoint();
 
-// Here we have to decide if we need to create a new hit.  Normally this should 
-// only be neccessary if a G4 Track enters a new volume or is freshly created
-// For this we look at the step status of the prePoint (beginning of the G4 Step).
-// This should be either fGeomBoundary (G4 Track crosses into volume) or 
-// fUndefined (G4 Track newly created)
-// Sadly over the years with different G4 versions we have observed cases where
-// G4 produces "impossible hits" which we try to catch here
-// These errors were always rare and it is not clear if they still exist but we
-// still check for them for safety. We can reproduce G4 runs identically (if given
-// the sequence of random number seeds you find in the log), the printouts help
-// us giving the G4 support information about those failures
-// 
+  // Here we have to decide if we need to create a new hit.  Normally this should
+  // only be neccessary if a G4 Track enters a new volume or is freshly created
+  // For this we look at the step status of the prePoint (beginning of the G4 Step).
+  // This should be either fGeomBoundary (G4 Track crosses into volume) or
+  // fUndefined (G4 Track newly created)
+  // Sadly over the years with different G4 versions we have observed cases where
+  // G4 produces "impossible hits" which we try to catch here
+  // These errors were always rare and it is not clear if they still exist but we
+  // still check for them for safety. We can reproduce G4 runs identically (if given
+  // the sequence of random number seeds you find in the log), the printouts help
+  // us giving the G4 support information about those failures
+  //
   switch (prePoint->GetStepStatus())
   {
   case fPostStepDoItProc:
@@ -183,7 +183,7 @@ bool BeastMagnetSteppingAction::UserSteppingAction(const G4Step *aStep,bool was_
       cout << " previous phys pre vol: " << m_SaveVolPre->GetName()
            << " previous phys post vol: " << m_SaveVolPost->GetName() << endl;
     }
-// These are the normal cases
+    // These are the normal cases
   case fGeomBoundary:
   case fUndefined:
     if (!m_Hit)
@@ -265,8 +265,8 @@ bool BeastMagnetSteppingAction::UserSteppingAction(const G4Step *aStep,bool was_
     gSystem->Exit(1);
   }
 
-// We need to cache a few things from one step to the next
-// to identify impossible hits and subsequent debugging printout
+  // We need to cache a few things from one step to the next
+  // to identify impossible hits and subsequent debugging printout
   m_SavePreStepStatus = prePoint->GetStepStatus();
   m_SavePostStepStatus = postPoint->GetStepStatus();
   m_SaveVolPre = volume;
@@ -307,8 +307,8 @@ bool BeastMagnetSteppingAction::UserSteppingAction(const G4Step *aStep,bool was_
       }
       if (geantino)
       {
- //implement your own here://
- // if you want to do something special for geantinos (normally you do not)
+        //implement your own here://
+        // if you want to do something special for geantinos (normally you do not)
         m_Hit->set_edep(-1);  // only energy=0 g4hits get dropped, this way
                               // geantinos survive the g4hit compression
       }

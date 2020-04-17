@@ -38,8 +38,8 @@ class BeastMagnetDetector : public PHG4Detector
   const std::string SuperDetector() const { return m_SuperDetector; }
 
  private:
-  void InsertVolumes(G4VPhysicalVolume* physvol);
-BeastMagnetDisplayAction *m_DisplayAction;
+  void InsertVolumes(G4VPhysicalVolume *physvol);
+  BeastMagnetDisplayAction *m_DisplayAction;
   PHParameters *m_Params;
 
   std::string m_GDMPath;
@@ -52,4 +52,4 @@ BeastMagnetDisplayAction *m_DisplayAction;
   int m_AbsorberActive;
 };
 
-#endif // BEASTMAGNETDETECTOR_H
+#endif  // BEASTMAGNETDETECTOR_H
