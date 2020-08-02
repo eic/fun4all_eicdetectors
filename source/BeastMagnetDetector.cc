@@ -93,8 +93,8 @@ void BeastMagnetDetector::InsertVolumes(G4VPhysicalVolume *physvol)
   G4LogicalVolume *logvol = physvol->GetLogicalVolume();
   m_DisplayAction->AddLogicalVolume(logvol);
   m_PhysicalVolumesSet.insert(physvol);
-// G4 10.06 returns unsigned int for GetNoDaughters()
-// lower version return int, need to cast to avoid compiler error
+  // G4 10.06 returns unsigned int for GetNoDaughters()
+  // lower version return int, need to cast to avoid compiler error
   for (int i = 0; i < (int) logvol->GetNoDaughters(); ++i)
   {
     G4VPhysicalVolume *physvol = logvol->GetDaughter(i);

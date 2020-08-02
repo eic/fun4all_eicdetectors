@@ -336,7 +336,6 @@ bool BeastMagnetSteppingAction::UserSteppingAction(const G4Step *aStep, bool was
 //____________________________________________________________________________..
 void BeastMagnetSteppingAction::SetInterfacePointers(PHCompositeNode *topNode)
 {
-
   string hitnodename;
   if (m_Detector->SuperDetector() != "NONE")
   {
