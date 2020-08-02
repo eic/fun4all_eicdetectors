@@ -54,29 +54,36 @@ int BeastMagnetSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
   // create display settings before detector
   m_DisplayAction = new BeastMagnetDisplayAction(Name());
 
+  // create detector
+  m_Detector = new BeastMagnetDetector(this, topNode, GetParams(), Name());
+  m_Detector->OverlapCheck(CheckOverlap());
+  m_Detector->SuperDetector(SuperDetector());
+
   PHNodeIterator dstIter(dstNode);
   if (GetParams()->get_int_param("active"))
   {
-    PHCompositeNode *DetNode = dynamic_cast<PHCompositeNode *>(dstIter.findFirst("PHCompositeNode", Name()));
+    string name;
+    if (SuperDetector() != "NONE")
+    {
+      name = SuperDetector();
+    }
+    else
+    {
+      name = Name();
+    }
+    PHCompositeNode *DetNode = dynamic_cast<PHCompositeNode *>(dstIter.findFirst("PHCompositeNode", name));
     if (!DetNode)
     {
-      DetNode = new PHCompositeNode(Name());
+      DetNode = new PHCompositeNode(name);
       dstNode->addNode(DetNode);
     }
-    string g4hitnodename = "G4HIT_" + Name();
+    string g4hitnodename = "G4HIT_" + name;
     PHG4HitContainer *g4_hits = findNode::getClass<PHG4HitContainer>(DetNode, g4hitnodename);
     if (!g4_hits)
     {
       g4_hits = new PHG4HitContainer(g4hitnodename);
       DetNode->addNode(new PHIODataNode<PHObject>(g4_hits, g4hitnodename, "PHObject"));
     }
-  }
-  // create detector
-  m_Detector = new BeastMagnetDetector(this, topNode, GetParams(), Name());
-  m_Detector->OverlapCheck(CheckOverlap());
-  // create stepping action if detector is active
-  if (GetParams()->get_int_param("active"))
-  {
     m_SteppingAction = new BeastMagnetSteppingAction(m_Detector, GetParams());
   }
   return 0;
