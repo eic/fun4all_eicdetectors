@@ -336,7 +336,15 @@ bool BeastMagnetSteppingAction::UserSteppingAction(const G4Step *aStep, bool was
 //____________________________________________________________________________..
 void BeastMagnetSteppingAction::SetInterfacePointers(PHCompositeNode *topNode)
 {
-  string hitnodename = "G4HIT_" + m_Detector->GetName();
+  string hitnodename;
+  if (m_Detector->SuperDetector() != "NONE")
+  {
+    hitnodename = "G4HIT_" + m_Detector->SuperDetector();
+  }
+  else
+  {
+    hitnodename = "G4HIT_" + m_Detector->GetName();
+  }
   // now look for the map and grab a pointer to it.
   m_HitContainer = findNode::getClass<PHG4HitContainer>(topNode, hitnodename);
   // if we do not find the node we need to make it.
