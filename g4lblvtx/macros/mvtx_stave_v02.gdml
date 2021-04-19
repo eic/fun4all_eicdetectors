@@ -1,0 +1,1449 @@
+<?xml version="1.0" encoding="utf-8"?>
+<gdml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://service-spi.web.cern.ch/service-spi/app/releases/GDML/schema/gdml.xsd">
+  <define>
+    <position name="MVTXSensor_1inMVTXChippos" unit="cm" x="0.0620" y="-0.00160" z="0"/>
+    <position name="MVTXChip_0inMVTXModulepos" unit="cm" x="0" y="-0.00875" z="-12.060"/>
+    <position name="MVTXChip_1inMVTXModulepos" unit="cm" x="0" y="-0.00875" z="-9.0450"/>
+    <position name="MVTXChip_2inMVTXModulepos" unit="cm" x="0" y="-0.00875" z="-6.0300"/>
+    <position name="MVTXChip_3inMVTXModulepos" unit="cm" x="0" y="-0.00875" z="-3.0150"/>
+    <position name="MVTXChip_4inMVTXModulepos" unit="cm" x="0" y="-0.00875" z="0"/>
+    <position name="MVTXChip_5inMVTXModulepos" unit="cm" x="0" y="-0.00875" z="3.0150"/>
+    <position name="MVTXChip_6inMVTXModulepos" unit="cm" x="0" y="-0.00875" z="6.0300"/>
+    <position name="MVTXChip_7inMVTXModulepos" unit="cm" x="0" y="-0.00875" z="9.0450"/>
+    <position name="MVTXChip_8inMVTXModulepos" unit="cm" x="0" y="-0.00875" z="12.060"/>
+    <position name="FPCAluminum_1inMVTXModulepos" unit="cm" x="0" y="-0.00375" z="0"/>
+    <position name="FPCKapton_1inMVTXModulepos" unit="cm" x="0" y="0.005" z="0"/>
+    <position name="MVTXModule_0inMVTXHalfStavepos" unit="cm" x="0" y="0" z="0"/>
+    <position name="MVTXHalfStave_0inMVTXStavepos" unit="cm" x="0" y="0.00625" z="0"/>
+    <position name="Glue_1inMVTXStave_StaveStructpos" x="0" y="0.0025" z="0" unit="cm"/>
+    <position name="CarbonFleeceBottom_1inMVTXStave_StaveStructpos" x="0" y="0.006" z="0" unit="cm"/>
+    <position name="CFPlate_1inMVTXStave_StaveStructpos" x="0" y="0.0105" z="0" unit="cm"/>
+    <position name="PolyimidePipe_1inMVTXStave_StaveStructpos" x="-0.25" y="0.06774" z="0" unit="cm"/>
+    <position name="PolyimidePipe_2inMVTXStave_StaveStructpos" x="0.25" y="0.06774" z="0" unit="cm"/>
+    <position name="Water_1inMVTXStave_StaveStructpos" x="-0.25" y="0.06774" z="0" unit="cm"/>
+    <position name="Water_2inMVTXStave_StaveStructpos" x="0.25" y="0.06774" z="0" unit="cm"/>
+    <position name="ThermasolPipeCover_1inMVTXStave_StaveStructpos" x="-0.25" y="0.06774" z="0" unit="cm"/>
+    <position name="ThermasolPipeCover_2inMVTXStave_StaveStructpos" x="0.25" y="0.06774" z="0" unit="cm"/>
+    <position name="CarbonFleecePipeCover_1inMVTXStave_StaveStructpos" x="-0.25" y="0.06774" z="0" unit="cm"/>
+    <position name="CarbonFleecePipeCover_2inMVTXStave_StaveStructpos" x="0.25" y="0.06774" z="0" unit="cm"/>
+    <position name="ThermasolVertical_1inMVTXStave_StaveStructpos" x="-0.19476" y="0.04087" z="0" unit="cm"/>
+    <position name="ThermasolVertical_2inMVTXStave_StaveStructpos" x="0.19476" y="0.04087" z="0" unit="cm"/>
+    <position name="ThermasolVertical_3inMVTXStave_StaveStructpos" x="-0.30524" y="0.04087" z="0" unit="cm"/>
+    <position name="ThermasolVertical_4inMVTXStave_StaveStructpos" x="0.30524" y="0.04087" z="0" unit="cm"/>
+    <position name="ThermasolMiddle_1inMVTXStave_StaveStructpos" x="0" y="0.0155" z="0" unit="cm"/>
+    <position name="ThermasolLeftRight_1inMVTXStave_StaveStructpos" x="-0.61087" y="0.0155" z="0" unit="cm"/>
+    <position name="ThermasolLeftRight_2inMVTXStave_StaveStructpos" x="0.61087" y="0.0155" z="0" unit="cm"/>
+    <position name="CarbonFleeceVertical_1inMVTXStave_StaveStructpos" x="-0.19226" y="0.04237" z="0" unit="cm"/>
+    <position name="CarbonFleeceVertical_2inMVTXStave_StaveStructpos" x="0.19226" y="0.04237" z="0" unit="cm"/>
+    <position name="CarbonFleeceVertical_3inMVTXStave_StaveStructpos" x="-0.30774" y="0.04237" z="0" unit="cm"/>
+    <position name="CarbonFleeceVertical_4inMVTXStave_StaveStructpos" x="0.30774" y="0.04237" z="0" unit="cm"/>
+    <position name="CarbonFleeceMiddle_1inMVTXStave_StaveStructpos" x="0" y="0.018" z="0" unit="cm"/>
+    <position name="CarbonFleeceLeftRight_1inMVTXStave_StaveStructpos" x="-0.53937" y="0.018" z="0" unit="cm"/>
+    <position name="CarbonFleeceLeftRight_2inMVTXStave_StaveStructpos" x="0.53937" y="0.018" z="0" unit="cm"/>
+    <position name="TopVertex_1inMVTXStave_StaveStructpos" x="0" y="0.4651" z="0" unit="cm"/>
+    <rotation name="TopVertex_1inMVTXStave_StaveStructrot" x="90" y="0" z="-0" unit="deg"/>
+    <position name="SideVertex_1inMVTXStave_StaveStructpos" x="0.72" y="0.019" z="0" unit="cm"/>
+    <position name="SideVertex_2inMVTXStave_StaveStructpos" x="-0.72" y="0.019" z="0" unit="cm"/>
+    <rotation name="SideVertex_2inMVTXStave_StaveStructrot" x="-180" y="-7.016709298534876e-15" z="180" unit="deg"/>
+    <position name="EndSupport_1inMVTXStave_StaveStructpos" x="0" y="0" z="14.375" unit="cm"/>
+    <position name="EndSupport_2inMVTXStave_StaveStructpos" x="0" y="0" z="-14.375" unit="cm"/>
+    <position name="TopFilament_1inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="-13.875" unit="cm"/>
+    <rotation name="TopFilament_1inMVTXStave_StaveStructrot" x="-19.54051272704017" y="-29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_2inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="-13.875" unit="cm"/>
+    <rotation name="TopFilament_2inMVTXStave_StaveStructrot" x="-19.540512727040159" y="29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_3inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="-13.125" unit="cm"/>
+    <rotation name="TopFilament_3inMVTXStave_StaveStructrot" x="19.54051272704017" y="29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_4inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="-13.125" unit="cm"/>
+    <rotation name="TopFilament_4inMVTXStave_StaveStructrot" x="19.540512727040159" y="-29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_5inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="-12.375" unit="cm"/>
+    <rotation name="TopFilament_5inMVTXStave_StaveStructrot" x="-19.54051272704017" y="-29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_6inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="-12.375" unit="cm"/>
+    <rotation name="TopFilament_6inMVTXStave_StaveStructrot" x="-19.540512727040159" y="29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_7inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="-11.625" unit="cm"/>
+    <rotation name="TopFilament_7inMVTXStave_StaveStructrot" x="19.54051272704017" y="29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_8inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="-11.625" unit="cm"/>
+    <rotation name="TopFilament_8inMVTXStave_StaveStructrot" x="19.540512727040159" y="-29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_9inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="-10.875" unit="cm"/>
+    <rotation name="TopFilament_9inMVTXStave_StaveStructrot" x="-19.54051272704017" y="-29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_10inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="-10.875" unit="cm"/>
+    <rotation name="TopFilament_10inMVTXStave_StaveStructrot" x="-19.540512727040159" y="29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_11inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="-10.125" unit="cm"/>
+    <rotation name="TopFilament_11inMVTXStave_StaveStructrot" x="19.54051272704017" y="29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_12inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="-10.125" unit="cm"/>
+    <rotation name="TopFilament_12inMVTXStave_StaveStructrot" x="19.540512727040159" y="-29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_13inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="-9.375" unit="cm"/>
+    <rotation name="TopFilament_13inMVTXStave_StaveStructrot" x="-19.54051272704017" y="-29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_14inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="-9.375" unit="cm"/>
+    <rotation name="TopFilament_14inMVTXStave_StaveStructrot" x="-19.540512727040159" y="29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_15inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="-8.625" unit="cm"/>
+    <rotation name="TopFilament_15inMVTXStave_StaveStructrot" x="19.54051272704017" y="29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_16inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="-8.625" unit="cm"/>
+    <rotation name="TopFilament_16inMVTXStave_StaveStructrot" x="19.540512727040159" y="-29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_17inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="-7.875" unit="cm"/>
+    <rotation name="TopFilament_17inMVTXStave_StaveStructrot" x="-19.54051272704017" y="-29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_18inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="-7.875" unit="cm"/>
+    <rotation name="TopFilament_18inMVTXStave_StaveStructrot" x="-19.540512727040159" y="29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_19inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="-7.125" unit="cm"/>
+    <rotation name="TopFilament_19inMVTXStave_StaveStructrot" x="19.54051272704017" y="29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_20inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="-7.125" unit="cm"/>
+    <rotation name="TopFilament_20inMVTXStave_StaveStructrot" x="19.540512727040159" y="-29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_21inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="-6.375" unit="cm"/>
+    <rotation name="TopFilament_21inMVTXStave_StaveStructrot" x="-19.54051272704017" y="-29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_22inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="-6.375" unit="cm"/>
+    <rotation name="TopFilament_22inMVTXStave_StaveStructrot" x="-19.540512727040159" y="29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_23inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="-5.625" unit="cm"/>
+    <rotation name="TopFilament_23inMVTXStave_StaveStructrot" x="19.54051272704017" y="29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_24inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="-5.625" unit="cm"/>
+    <rotation name="TopFilament_24inMVTXStave_StaveStructrot" x="19.540512727040159" y="-29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_25inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="-4.875" unit="cm"/>
+    <rotation name="TopFilament_25inMVTXStave_StaveStructrot" x="-19.54051272704017" y="-29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_26inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="-4.875" unit="cm"/>
+    <rotation name="TopFilament_26inMVTXStave_StaveStructrot" x="-19.540512727040159" y="29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_27inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="-4.125" unit="cm"/>
+    <rotation name="TopFilament_27inMVTXStave_StaveStructrot" x="19.54051272704017" y="29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_28inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="-4.125" unit="cm"/>
+    <rotation name="TopFilament_28inMVTXStave_StaveStructrot" x="19.540512727040159" y="-29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_29inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="-3.375" unit="cm"/>
+    <rotation name="TopFilament_29inMVTXStave_StaveStructrot" x="-19.54051272704017" y="-29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_30inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="-3.375" unit="cm"/>
+    <rotation name="TopFilament_30inMVTXStave_StaveStructrot" x="-19.540512727040159" y="29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_31inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="-2.625" unit="cm"/>
+    <rotation name="TopFilament_31inMVTXStave_StaveStructrot" x="19.54051272704017" y="29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_32inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="-2.625" unit="cm"/>
+    <rotation name="TopFilament_32inMVTXStave_StaveStructrot" x="19.540512727040159" y="-29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_33inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="-1.875" unit="cm"/>
+    <rotation name="TopFilament_33inMVTXStave_StaveStructrot" x="-19.54051272704017" y="-29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_34inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="-1.875" unit="cm"/>
+    <rotation name="TopFilament_34inMVTXStave_StaveStructrot" x="-19.540512727040159" y="29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_35inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="-1.125" unit="cm"/>
+    <rotation name="TopFilament_35inMVTXStave_StaveStructrot" x="19.54051272704017" y="29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_36inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="-1.125" unit="cm"/>
+    <rotation name="TopFilament_36inMVTXStave_StaveStructrot" x="19.540512727040159" y="-29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_37inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="-0.375" unit="cm"/>
+    <rotation name="TopFilament_37inMVTXStave_StaveStructrot" x="-19.54051272704017" y="-29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_38inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="-0.375" unit="cm"/>
+    <rotation name="TopFilament_38inMVTXStave_StaveStructrot" x="-19.540512727040159" y="29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_39inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="0.375" unit="cm"/>
+    <rotation name="TopFilament_39inMVTXStave_StaveStructrot" x="19.54051272704017" y="29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_40inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="0.375" unit="cm"/>
+    <rotation name="TopFilament_40inMVTXStave_StaveStructrot" x="19.540512727040159" y="-29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_41inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="1.125" unit="cm"/>
+    <rotation name="TopFilament_41inMVTXStave_StaveStructrot" x="-19.54051272704017" y="-29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_42inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="1.125" unit="cm"/>
+    <rotation name="TopFilament_42inMVTXStave_StaveStructrot" x="-19.540512727040159" y="29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_43inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="1.875" unit="cm"/>
+    <rotation name="TopFilament_43inMVTXStave_StaveStructrot" x="19.54051272704017" y="29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_44inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="1.875" unit="cm"/>
+    <rotation name="TopFilament_44inMVTXStave_StaveStructrot" x="19.540512727040159" y="-29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_45inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="2.625" unit="cm"/>
+    <rotation name="TopFilament_45inMVTXStave_StaveStructrot" x="-19.54051272704017" y="-29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_46inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="2.625" unit="cm"/>
+    <rotation name="TopFilament_46inMVTXStave_StaveStructrot" x="-19.540512727040159" y="29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_47inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="3.375" unit="cm"/>
+    <rotation name="TopFilament_47inMVTXStave_StaveStructrot" x="19.54051272704017" y="29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_48inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="3.375" unit="cm"/>
+    <rotation name="TopFilament_48inMVTXStave_StaveStructrot" x="19.540512727040159" y="-29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_49inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="4.125" unit="cm"/>
+    <rotation name="TopFilament_49inMVTXStave_StaveStructrot" x="-19.54051272704017" y="-29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_50inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="4.125" unit="cm"/>
+    <rotation name="TopFilament_50inMVTXStave_StaveStructrot" x="-19.540512727040159" y="29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_51inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="4.875" unit="cm"/>
+    <rotation name="TopFilament_51inMVTXStave_StaveStructrot" x="19.54051272704017" y="29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_52inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="4.875" unit="cm"/>
+    <rotation name="TopFilament_52inMVTXStave_StaveStructrot" x="19.540512727040159" y="-29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_53inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="5.625" unit="cm"/>
+    <rotation name="TopFilament_53inMVTXStave_StaveStructrot" x="-19.54051272704017" y="-29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_54inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="5.625" unit="cm"/>
+    <rotation name="TopFilament_54inMVTXStave_StaveStructrot" x="-19.540512727040159" y="29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_55inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="6.375" unit="cm"/>
+    <rotation name="TopFilament_55inMVTXStave_StaveStructrot" x="19.54051272704017" y="29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_56inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="6.375" unit="cm"/>
+    <rotation name="TopFilament_56inMVTXStave_StaveStructrot" x="19.540512727040159" y="-29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_57inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="7.125" unit="cm"/>
+    <rotation name="TopFilament_57inMVTXStave_StaveStructrot" x="-19.54051272704017" y="-29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_58inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="7.125" unit="cm"/>
+    <rotation name="TopFilament_58inMVTXStave_StaveStructrot" x="-19.540512727040159" y="29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_59inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="7.875" unit="cm"/>
+    <rotation name="TopFilament_59inMVTXStave_StaveStructrot" x="19.54051272704017" y="29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_60inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="7.875" unit="cm"/>
+    <rotation name="TopFilament_60inMVTXStave_StaveStructrot" x="19.540512727040159" y="-29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_61inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="8.625" unit="cm"/>
+    <rotation name="TopFilament_61inMVTXStave_StaveStructrot" x="-19.54051272704017" y="-29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_62inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="8.625" unit="cm"/>
+    <rotation name="TopFilament_62inMVTXStave_StaveStructrot" x="-19.540512727040159" y="29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_63inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="9.375" unit="cm"/>
+    <rotation name="TopFilament_63inMVTXStave_StaveStructrot" x="19.54051272704017" y="29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_64inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="9.375" unit="cm"/>
+    <rotation name="TopFilament_64inMVTXStave_StaveStructrot" x="19.540512727040159" y="-29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_65inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="10.125" unit="cm"/>
+    <rotation name="TopFilament_65inMVTXStave_StaveStructrot" x="-19.54051272704017" y="-29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_66inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="10.125" unit="cm"/>
+    <rotation name="TopFilament_66inMVTXStave_StaveStructrot" x="-19.540512727040159" y="29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_67inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="10.875" unit="cm"/>
+    <rotation name="TopFilament_67inMVTXStave_StaveStructrot" x="19.54051272704017" y="29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_68inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="10.875" unit="cm"/>
+    <rotation name="TopFilament_68inMVTXStave_StaveStructrot" x="19.540512727040159" y="-29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_69inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="11.625" unit="cm"/>
+    <rotation name="TopFilament_69inMVTXStave_StaveStructrot" x="-19.54051272704017" y="-29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_70inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="11.625" unit="cm"/>
+    <rotation name="TopFilament_70inMVTXStave_StaveStructrot" x="-19.540512727040159" y="29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_71inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="12.375" unit="cm"/>
+    <rotation name="TopFilament_71inMVTXStave_StaveStructrot" x="19.54051272704017" y="29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_72inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="12.375" unit="cm"/>
+    <rotation name="TopFilament_72inMVTXStave_StaveStructrot" x="19.540512727040159" y="-29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_73inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="13.125" unit="cm"/>
+    <rotation name="TopFilament_73inMVTXStave_StaveStructrot" x="-19.54051272704017" y="-29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_74inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="13.125" unit="cm"/>
+    <rotation name="TopFilament_74inMVTXStave_StaveStructrot" x="-19.540512727040159" y="29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="TopFilament_75inMVTXStave_StaveStructpos" x="0.405" y="0.300225" z="13.875" unit="cm"/>
+    <rotation name="TopFilament_75inMVTXStave_StaveStructrot" x="19.54051272704017" y="29.755560008283801" z="35.569311753117134" unit="deg"/>
+    <position name="TopFilament_76inMVTXStave_StaveStructpos" x="-0.405" y="0.300225" z="13.875" unit="cm"/>
+    <rotation name="TopFilament_76inMVTXStave_StaveStructrot" x="19.540512727040159" y="-29.755560008283805" z="-35.569311753117127" unit="deg"/>
+    <position name="IBConnectorBlockTailASide_1inIBConnectorASidepos" x="0" y="-0.235" z="-1.45" unit="cm"/>
+    <position name="IBConnectorBlockBodyASide_1inIBConnectorASidepos" x="0" y="-0.11" z="-0.5" unit="cm"/>
+    <position name="IBConnectorFitting_1inIBConnectorASidepos" x="0.25" y="-0.11" z="0.575" unit="cm"/>
+    <position name="IBConnectorFitting_2inIBConnectorASidepos" x="-0.25" y="-0.11" z="0.575" unit="cm"/>
+    <position name="IBConnectorASide_1inMVTXStave_StaveStructpos" x="0" y="0.17774" z="15.7" unit="cm"/>
+    <position name="IBConnectorBlockTailCSide_1inIBConnectorCSidepos" x="0" y="-0.235" z="-0.95" unit="cm"/>
+    <position name="IBConnectorBlockBodyCSide_1inIBConnectorCSidepos" x="0" y="-0.11" z="0" unit="cm"/>
+    <position name="IBConnectorPlugC_1inIBConnectorCSidepos" x="0.5" y="-0.11" z="0.5" unit="cm"/>
+    <rotation name="IBConnectorPlugC_1inIBConnectorCSiderot" x="180" y="90" z="0" unit="deg"/>
+    <position name="IBConnectorCSide_1inMVTXStave_StaveStructpos" x="0" y="0.17774" z="-15.2" unit="cm"/>
+    <rotation name="IBConnectorCSide_1inMVTXStave_StaveStructrot" x="-180" y="-7.016709298534876e-15" z="180" unit="deg"/>
+    <position name="MVTXStave_StaveStruct_1inMVTXStavepos" x="0" y="-0.005" z="0" unit="cm"/>
+    <rotation name="MVTXStave_StaveStruct_1inMVTXStaverot" x="-0" y="-0" z="-180" unit="deg"/>
+  </define>
+  <materials>
+    <element name="CARBON_elm" formula="C" Z="6">
+      <atom unit="g/mole" value="12.0107"/>
+    </element>
+    <element name="NITROGEN_elm" formula="N" Z="7">
+      <atom unit="g/mole" value="14.0067"/>
+    </element>
+    <element name="OXYGEN_elm" formula="O" Z="8">
+      <atom unit="g/mole" value="15.9994"/>
+    </element>
+    <element name="ARGON_elm" formula="AR" Z="18">
+      <atom unit="g/mole" value="39.948"/>
+    </element>
+    <material name="ITS_AIR">
+      <D unit="g/cm3" value="0.00120479"/>
+      <fraction n="0.012827" ref="ARGON_elm"/>
+      <fraction n="0.000124" ref="CARBON_elm"/>
+      <fraction n="0.755267" ref="NITROGEN_elm"/>
+      <fraction n="0.231782" ref="OXYGEN_elm"/>
+    </material>
+    <element name="HYDROGEN_elm" formula="H" Z="1">
+      <atom unit="g/mole" value="1.00794"/>
+    </element>
+    <material name="ITS_WATER">
+      <D unit="g/cm3" value="1"/>
+      <fraction n="0.111894" ref="HYDROGEN_elm"/>
+      <fraction n="0.888106" ref="OXYGEN_elm"/>
+    </material>
+    <material name="ITS_SI" Z="14">
+      <D unit="g/cm3" value="2.33"/>
+      <atom unit="g/mole" value="28.086"/>
+    </material>
+    <material name="ITS_BERILLIUM" Z="4">
+      <D unit="g/cm3" value="1.848"/>
+      <atom unit="g/mole" value="9.01"/>
+    </material>
+    <material name="ITS_COPPER" Z="29">
+      <D unit="g/cm3" value="8.96"/>
+      <atom unit="g/mole" value="63.546"/>
+    </material>
+    <material name="ITS_CARBON" Z="6">
+      <D unit="g/cm3" value="1.7"/>
+      <atom unit="g/mole" value="12.0107"/>
+    </material>
+    <material name="ITS_KAPTONPOLYCH2">
+      <D unit="g/cm3" value="1.42"/>
+      <fraction n="0.691130" ref="CARBON_elm"/>
+      <fraction n="0.026365" ref="HYDROGEN_elm"/>
+      <fraction n="0.073270" ref="NITROGEN_elm"/>
+      <fraction n="0.209235" ref="OXYGEN_elm"/>
+    </material>
+    <element name="ALUMINIUM_elm" formula="AL" Z="13">
+      <atom unit="g/mole" value="26.982"/>
+    </element>
+    <element name="SILICON_elm" formula="SI" Z="14">
+      <atom unit="g/mole" value="28.0855"/>
+    </element>
+    <material name="ITS_ALUMINUM" Z="13">
+      <D unit="g/cm3" value="2.6989"/>
+      <atom unit="g/mole" value="26.982"/>
+    </material>
+    <material name="ITS_METALSTACK">
+      <D unit="g/cm3" value="2.28"/>
+      <fraction n="0.170" ref="ALUMINIUM_elm"/>
+      <fraction n="0.442" ref="OXYGEN_elm"/>
+      <fraction n="0.388" ref="SILICON_elm"/>
+    </material>
+    <material name="ITS_GLUE_IBFPC" Z="6">
+      <D unit="g/cm3" value="0.315"/>
+      <atom unit="g/mole" value="12.011"/>
+    </material>
+    <element name="BARIUM_elm" formula="BA" Z="56">
+      <atom unit="g/mole" value="137.327"/>
+    </element>
+    <element name="TITANIUM_elm" formula="TI" Z="22">
+      <atom unit="g/mole" value="47.867"/>
+    </element>
+    <material name="ITS_CERAMIC">
+      <D unit="g/cm3" value="6.02"/>
+      <fraction n="0.58890050" ref="BARIUM_elm"/>
+      <fraction n="0.20583107" ref="OXYGEN_elm"/>
+      <fraction n="0.20526843" ref="TITANIUM_elm"/>
+    </material>
+    <material name="ITS_K13D2U2k" Z="6">
+      <D unit="g/cm3" value="1.643"/>
+      <atom unit="g/mole" value="12.0107"/>
+    </material>
+    <material name="ITS_K13D2U120" Z="6">
+      <D unit="g/cm3" value="1.583"/>
+      <atom unit="g/mole" value="12.0107"/>
+    </material>
+    <material name="ITS_F6151B05M" Z="6">
+      <D unit="g/cm3" value="2.133"/>
+      <atom unit="g/mole" value="12.0107"/>
+    </material>
+    <material name="ITS_M60J3K" Z="6">
+      <D unit="g/cm3" value="2.21"/>
+      <atom unit="g/mole" value="12.0107"/>
+    </material>
+    <material name="ITS_M55J6K" Z="6">
+      <D unit="g/cm3" value="1.63"/>
+      <atom unit="g/mole" value="12.0107"/>
+    </material>
+    <material name="ITS_T300" Z="6">
+      <D unit="g/cm3" value="1.725"/>
+      <atom unit="g/mole" value="12.0107"/>
+    </material>
+    <material name="ITS_FGS003" Z="6">
+      <D unit="g/cm3" value="1.6"/>
+      <atom unit="g/mole" value="12.0107"/>
+    </material>
+    <material name="ITS_CarbonFleece" Z="6">
+      <D unit="g/cm3" value="0.4"/>
+      <atom unit="g/mole" value="12.0107"/>
+    </material>
+    <material name="ITS_PEEKCF30">
+      <D unit="g/cm3" value="1.32"/>
+      <fraction n="0.79155688" ref="CARBON_elm"/>
+      <fraction n="0.04195427" ref="HYDROGEN_elm"/>
+      <fraction n="0.16648885" ref="OXYGEN_elm"/>
+    </material>
+    <material name="ITS_FLEXCABLE">
+      <D unit="g/cm3" value="2.595"/>
+      <fraction n="0.247536000000" ref="ALUMINIUM_elm"/>
+      <fraction n="0.520088819984" ref="CARBON_elm"/>
+      <fraction n="0.019838713360" ref="HYDROGEN_elm"/>
+      <fraction n="0.055136799600" ref="NITROGEN_elm"/>
+      <fraction n="0.157399667056" ref="OXYGEN_elm"/>
+    </material>
+    <material name="ITS_GLUE" Z="6">
+      <D unit="g/cm3" value="0.95781637717121588089"/>
+      <atom unit="g/mole" value="12.011"/>
+    </material>
+    <element name="TUNGSTEN_elm" formula="W" Z="74">
+      <atom unit="g/mole" value="183.84"/>
+    </element>
+    <material name="ITS_TUNGCARB">
+      <D unit="g/cm3" value="15.63"/>
+      <fraction n="0.5" ref="CARBON_elm"/>
+      <fraction n="0.5" ref="TUNGSTEN_elm"/>
+    </material>
+    <element name="CHROMIUM_elm" formula="CR" Z="24">
+      <atom unit="g/mole" value="51.9961"/>
+    </element>
+    <element name="NICKEL_elm" formula="NI" Z="28">
+      <atom unit="g/mole" value="58.6928"/>
+    </element>
+    <element name="IRON_elm" formula="FE" Z="26">
+      <atom unit="g/mole" value="55.845"/>
+    </element>
+    <material name="ITS_INOX304">
+      <D unit="g/cm3" value="7.85"/>
+      <fraction n="0.0003" ref="CARBON_elm"/>
+      <fraction n="0.1800" ref="CHROMIUM_elm"/>
+      <fraction n="0.7197" ref="IRON_elm"/>
+      <fraction n="0.1000" ref="NICKEL_elm"/>
+    </material>
+    <material name="ITS_TUNGSTEN" Z="74">
+      <D unit="g/cm3" value="19.25"/>
+      <atom unit="g/mole" value="183.84"/>
+    </material>
+    <material name="ALPIDE_METALSTACK">
+      <D unit="g/cm3" value="2.28"/>
+      <fraction n="0.170" ref="ALUMINIUM_elm"/>
+      <fraction n="0.442" ref="OXYGEN_elm"/>
+      <fraction n="0.388" ref="SILICON_elm"/>
+    </material>
+    <material name="ALPIDE_AIR">
+      <D unit="g/cm3" value="0.00120479"/>
+      <fraction n="0.012827" ref="ARGON_elm"/>
+      <fraction n="0.000124" ref="CARBON_elm"/>
+      <fraction n="0.755267" ref="NITROGEN_elm"/>
+      <fraction n="0.231782" ref="OXYGEN_elm"/>
+    </material>
+    <material name="ALPIDE_SI" Z="14">
+      <D unit="g/cm3" value="2.33"/>
+      <atom unit="g/mole" value="28.086"/>
+    </material>
+  </materials>
+  <solids>
+    <box lunit="cm" name="TGeoBBox" x="1.5000" y="0.0225" z="27.1200"/>
+    <box lunit="cm" name="TGeoBBox0x1" x="1.500" y="0.0225" z="27.1200"/>
+    <box lunit="cm" name="TGeoBBox0x2" x="1.500" y="0.0050" z="3.000"/>
+    <box lunit="cm" name="TGeoBBox0x3" x="1.376" y="0.0018" z="2.994"/>
+    <box lunit="cm" name="TGeoBBox0x4" x="1.500" y="0.0050" z="27.1200"/>
+    <box lunit="cm" name="TGeoBBox0x5" x="1.500" y="0.0125" z="27.1200"/>
+    <xtru name="mechStruct" lunit="cm">
+      <twoDimVertex x="0.81" y="0"/>
+      <twoDimVertex x="0.81" y="0.113"/>
+      <twoDimVertex x="0.05" y="0.5792091313301222"/>
+      <twoDimVertex x="-0.05" y="0.5792091313301222"/>
+      <twoDimVertex x="-0.81" y="0.113"/>
+      <twoDimVertex x="-0.81" y="0"/>
+      <section zOrder="0" zPosition="-14.5" xOffset="0" yOffset="0" scalingFactor="1"/>
+      <section zOrder="1" zPosition="14.5" xOffset="0" yOffset="0" scalingFactor="1"/>
+    </xtru>
+    <box name="connAsideIB" x="1" y="0.47" z="2.40" lunit="cm"/>
+    <union name="TGeoCompositeShape0x1">
+      <first ref="mechStruct"/>
+      <second ref="connAsideIB"/>
+      <position name="TGeoCompositeShape0x1connAsideIBpos" x="0" y="0.17774" z="15.7" unit="cm"/>
+    </union>
+    <box name="connCsideIB" x="1" y="0.47" z="1.40" lunit="cm"/>
+    <union name="TGeoCompositeShape">
+      <first ref="TGeoCompositeShape0x1"/>
+      <second ref="connCsideIB"/>
+      <position name="TGeoCompositeShapeconnCsideIBpos" x="0" y="0.17774" z="-15.2" unit="cm"/>
+    </union>
+    <box name="TGeoBBox0x12" x="1.54" y="0.005" z="29" lunit="cm"/>
+    <box name="TGeoBBox0x13" x="1.54" y="0.002" z="29" lunit="cm"/>
+    <box name="TGeoBBox0x14" x="1.54" y="0.007" z="29" lunit="cm"/>
+    <tube name="TGeoTube" rmin="0.05120" rmax="0.05374" z="30.20" startphi="0" deltaphi="360" aunit="deg" lunit="cm"/>
+    <tube name="TGeoTube0x1" rmin="0" rmax="0.0512" z="30.2" startphi="0" deltaphi="360" aunit="deg" lunit="cm"/>
+    <tube name="TGeoTubeSeg" rmin="0.05374" rmax="0.05674" z="28" startphi="0" deltaphi="180" aunit="deg" lunit="cm"/>
+    <tube name="TGeoTubeSeg0x1" rmin="0.05674" rmax="0.05874" z="29" startphi="0" deltaphi="180" aunit="deg" lunit="cm"/>
+    <box name="TGeoBBox0x15" x="0.00300" y="0.05374" z="28" lunit="cm"/>
+    <box name="TGeoBBox0x16" x="0.38652" y="0.00300" z="28" lunit="cm"/>
+    <box name="TGeoBBox0x17" x="0.31826" y="0.00300" z="28" lunit="cm"/>
+    <box name="TGeoBBox0x18" x="0.00200" y="0.05074" z="29" lunit="cm"/>
+    <box name="TGeoBBox0x19" x="0.38252" y="0.00200" z="29" lunit="cm"/>
+    <box name="TGeoBBox0x20" x="0.46126" y="0.00200" z="29" lunit="cm"/>
+    <trd name="TGeoTrd1" x1="0.0258" x2="0.072" y1="29" y2="29" z="0.040" lunit="cm"/>
+    <xtru name="TGeoXtru0x1" lunit="cm">
+      <twoDimVertex x="0" y="0"/>
+      <twoDimVertex x="0.0500" y="0"/>
+      <twoDimVertex x="0" y="0.07400"/>
+      <section zOrder="0" zPosition="-14.5" xOffset="0" yOffset="0" scalingFactor="1"/>
+      <section zOrder="1" zPosition="14.5" xOffset="0" yOffset="0" scalingFactor="1"/>
+    </xtru>
+    <xtru name="TGeoXtru0x2" lunit="cm">
+      <twoDimVertex x="0.0500" y="0.4851"/>
+      <twoDimVertex x="0.7200" y="0.0930"/>
+      <twoDimVertex x="0.7700" y="0.0190"/>
+      <twoDimVertex x="0.7700" y="0"/>
+      <twoDimVertex x="0.7849" y="0"/>
+      <twoDimVertex x="0.7849" y="0.01900"/>
+      <twoDimVertex x="0.7329037785163881" y="0.10045"/>
+      <twoDimVertex x="0.0500" y="0.5"/>
+      <twoDimVertex x="-0.0500" y="0.5"/>
+      <twoDimVertex x="-0.7329037785163881" y="0.10045"/>
+      <twoDimVertex x="-0.7849" y="0.0190"/>
+      <twoDimVertex x="-0.7849" y="0"/>
+      <twoDimVertex x="-0.7700" y="0"/>
+      <twoDimVertex x="-0.7700" y="0.0190"/>
+      <twoDimVertex x="-0.7200" y="0.0930"/>
+      <twoDimVertex x="-0.0500" y="0.4851"/>
+      <section zOrder="0" zPosition="-0.125" xOffset="0" yOffset="0" scalingFactor="1"/>
+      <section zOrder="1" zPosition="0.125" xOffset="0" yOffset="0" scalingFactor="1"/>
+    </xtru>
+    <box name="TGeoBBox0x21" x="1.0901824495064851" y="0.04" z="0.04" lunit="cm"/>
+    <box name="connBoxA" x="1" y="0.47" z="2.40" lunit="cm"/>
+    <tube name="tube2HoleA" rmin="0" rmax="0.06" z="1.4" startphi="0" deltaphi="360" aunit="deg" lunit="cm"/>
+    <subtraction name="TGeoCompositeShape0x6">
+      <first ref="connBoxA"/>
+      <second ref="tube2HoleA"/>
+      <position name="TGeoCompositeShape0x6tube2HoleApos" x="-0.25" y="-0.11" z="-1.04" unit="cm"/>
+    </subtraction>
+    <subtraction name="TGeoCompositeShape0x5">
+      <first ref="TGeoCompositeShape0x6"/>
+      <second ref="tube2HoleA"/>
+      <position name="TGeoCompositeShape0x5tube2HoleApos" x="0.25" y="-0.11" z="-1.04" unit="cm"/>
+    </subtraction>
+    <xtru name="connTailA" lunit="cm">
+      <twoDimVertex x="0.5" y="0.09"/>
+      <twoDimVertex x="0.5" y="0.25"/>
+      <twoDimVertex x="0.11894882233484683" y="0.47"/>
+      <twoDimVertex x="-0.11894882233484683" y="0.47"/>
+      <twoDimVertex x="-0.5" y="0.25"/>
+      <twoDimVertex x="-0.5" y="0.09"/>
+      <section zOrder="0" zPosition="0" xOffset="0" yOffset="0" scalingFactor="1"/>
+      <section zOrder="1" zPosition="0.25" xOffset="0" yOffset="0" scalingFactor="1"/>
+    </xtru>
+    <union name="TGeoCompositeShape0x4">
+      <first ref="TGeoCompositeShape0x5"/>
+      <second ref="connTailA"/>
+      <position name="TGeoCompositeShape0x4connTailApos" x="0" y="-0.2350" z="-1.450" unit="cm"/>
+    </union>
+    <tube name="tubeHollowA" rmin="0" rmax="0.08" z="0.3" startphi="0" deltaphi="360" aunit="deg" lunit="cm"/>
+    <subtraction name="TGeoCompositeShape0x3">
+      <first ref="TGeoCompositeShape0x4"/>
+      <second ref="tubeHollowA"/>
+      <position name="TGeoCompositeShape0x3tubeHollowApos" x="-0.25" y="-0.11" z="-1.3" unit="cm"/>
+    </subtraction>
+    <subtraction name="TGeoCompositeShape0x2">
+      <first ref="TGeoCompositeShape0x3"/>
+      <second ref="tubeHollowA"/>
+      <position name="TGeoCompositeShape0x2tubeHollowApos" x="0.25" y="-0.11" z="-1.3" unit="cm"/>
+    </subtraction>
+    <tube name="tube1HoleA" rmin="0" rmax="0.08" z="0.4" startphi="0" deltaphi="360" aunit="deg" lunit="cm"/>
+    <subtraction name="TGeoCompositeShape0x8">
+      <first ref="connTailA"/>
+      <second ref="tube1HoleA"/>
+      <position name="TGeoCompositeShape0x8tube1HoleApos" x="-0.25" y="0.125" z="0.125" unit="cm"/>
+    </subtraction>
+    <subtraction name="TGeoCompositeShape0x7">
+      <first ref="TGeoCompositeShape0x8"/>
+      <second ref="tube1HoleA"/>
+      <position name="TGeoCompositeShape0x7tube1HoleApos" x="0.25" y="0.125" z="0.125" unit="cm"/>
+    </subtraction>
+    <box name="connBodyA" x="1" y="0.25" z="1.4" lunit="cm"/>
+    <tube name="connRoundHoleA" rmin="0" rmax="0.1" z="0.33333333333333331" startphi="0" deltaphi="360" aunit="deg" lunit="cm"/>
+    <subtraction name="TGeoCompositeShape0x20">
+      <first ref="connBodyA"/>
+      <second ref="connRoundHoleA"/>
+      <position name="TGeoCompositeShape0x20connRoundHoleApos" x="0" y="0" z="-0.2" unit="cm"/>
+      <rotation name="TGeoCompositeShape0x20connRoundHoleArot" x="90" y="-0" z="0" unit="deg"/>
+    </subtraction>
+    <box name="connSquareHoleA" x="0.2" y="0.33333333333333331" z="0.28" lunit="cm"/>
+    <subtraction name="TGeoCompositeShape0x19">
+      <first ref="TGeoCompositeShape0x20"/>
+      <second ref="connSquareHoleA"/>
+      <position name="TGeoCompositeShape0x19connSquareHoleApos" x="0" y="0" z="0.2" unit="cm"/>
+    </subtraction>
+    <subtraction name="TGeoCompositeShape0x18">
+      <first ref="TGeoCompositeShape0x19"/>
+      <second ref="tube2HoleA"/>
+      <position name="TGeoCompositeShape0x18tube2HoleApos" x="-0.25" y="0" z="0" unit="cm"/>
+    </subtraction>
+    <subtraction name="TGeoCompositeShape0x17">
+      <first ref="TGeoCompositeShape0x18"/>
+      <second ref="tube2HoleA"/>
+      <position name="TGeoCompositeShape0x17tube2HoleApos" x="0.25" y="0" z="0" unit="cm"/>
+    </subtraction>
+    <tube name="fitHoleA" rmin="0" rmax="0.0825" z="0.54" startphi="0" deltaphi="360" aunit="deg" lunit="cm"/>
+    <subtraction name="TGeoCompositeShape0x16">
+      <first ref="TGeoCompositeShape0x17"/>
+      <second ref="fitHoleA"/>
+      <position name="TGeoCompositeShape0x16fitHoleApos" x="-0.25" y="0" z="0.7" unit="cm"/>
+    </subtraction>
+    <subtraction name="TGeoCompositeShape0x15">
+      <first ref="TGeoCompositeShape0x16"/>
+      <second ref="fitHoleA"/>
+      <position name="TGeoCompositeShape0x15fitHoleApos" x="0.25" y="0" z="0.7" unit="cm"/>
+    </subtraction>
+    <tube name="tube3HoleA" rmin="0" rmax="0.08" z="0.1" startphi="0" deltaphi="360" aunit="deg" lunit="cm"/>
+    <subtraction name="TGeoCompositeShape0x14">
+      <first ref="TGeoCompositeShape0x15"/>
+      <second ref="tube3HoleA"/>
+      <position name="TGeoCompositeShape0x14tube3HoleApos" x="-0.25" y="0" z="-0.7" unit="cm"/>
+    </subtraction>
+    <subtraction name="TGeoCompositeShape0x13">
+      <first ref="TGeoCompositeShape0x14"/>
+      <second ref="tube3HoleA"/>
+      <position name="TGeoCompositeShape0x13tube3HoleApos" x="0.25" y="0" z="-0.7" unit="cm"/>
+    </subtraction>
+    <tube name="sideHole1A" rmin="0" rmax="0.05" z="0.13333333333333333" startphi="0" deltaphi="360" aunit="deg" lunit="cm"/>
+    <subtraction name="TGeoCompositeShape0x12">
+      <first ref="TGeoCompositeShape0x13"/>
+      <second ref="sideHole1A"/>
+      <position name="TGeoCompositeShape0x12sideHole1Apos" x="0.46666666666666667" y="0" z="0.2" unit="cm"/>
+      <rotation name="TGeoCompositeShape0x12sideHole1Arot" x="90" y="-0" z="90" unit="deg"/>
+    </subtraction>
+    <box name="sideHole2AB" x="0.2" y="0.1" z="0.1" lunit="cm"/>
+    <subtraction name="TGeoCompositeShape0x11">
+      <first ref="TGeoCompositeShape0x12"/>
+      <second ref="sideHole2AB"/>
+      <position name="TGeoCompositeShape0x11sideHole2ABpos" x="-0.5" y="0" z="0.2" unit="cm"/>
+    </subtraction>
+    <tube name="sideHole2ATS" rmin="0" rmax="0.05" z="0.2" startphi="0" deltaphi="180" aunit="deg" lunit="cm"/>
+    <subtraction name="TGeoCompositeShape0x10">
+      <first ref="TGeoCompositeShape0x11"/>
+      <second ref="sideHole2ATS"/>
+      <position name="TGeoCompositeShape0x10sideHole2ATSpos" x="-0.5" y="0" z="0.15" unit="cm"/>
+      <rotation name="TGeoCompositeShape0x10sideHole2ATSrot" x="-90" y="0" z="90" unit="deg"/>
+    </subtraction>
+    <subtraction name="TGeoCompositeShape0x9">
+      <first ref="TGeoCompositeShape0x10"/>
+      <second ref="sideHole2ATS"/>
+      <position name="TGeoCompositeShape0x9sideHole2ATSpos" x="-0.5" y="0" z="0.25" unit="cm"/>
+      <rotation name="TGeoCompositeShape0x9sideHole2ATSrot" x="90" y="-0" z="90" unit="deg"/>
+    </subtraction>
+    <tube name="TGeoTube0x2" rmin="0.0595" rmax="0.0825" z="1.25" startphi="0" deltaphi="360" aunit="deg" lunit="cm"/>
+    <box name="connBoxC" x="1" y="0.47" z="1.40" lunit="cm"/>
+    <tube name="tube2HoleC" rmin="0" rmax="0.06" z="1.4" startphi="0" deltaphi="360" aunit="deg" lunit="cm"/>
+    <subtraction name="TGeoCompositeShape0x25">
+      <first ref="connBoxC"/>
+      <second ref="tube2HoleC"/>
+      <position name="TGeoCompositeShape0x25tube2HoleCpos" x="-0.25" y="-0.11" z="-0.5" unit="cm"/>
+    </subtraction>
+    <subtraction name="TGeoCompositeShape0x24">
+      <first ref="TGeoCompositeShape0x25"/>
+      <second ref="tube2HoleC"/>
+      <position name="TGeoCompositeShape0x24tube2HoleCpos" x="0.25" y="-0.11" z="-0.5" unit="cm"/>
+    </subtraction>
+    <xtru name="connTailC" lunit="cm">
+      <twoDimVertex x="0.5" y="0.09"/>
+      <twoDimVertex x="0.5" y="0.25"/>
+      <twoDimVertex x="0.11894882233484683" y="0.47"/>
+      <twoDimVertex x="-0.11894882233484683" y="0.47"/>
+      <twoDimVertex x="-0.5" y="0.25"/>
+      <twoDimVertex x="-0.5" y="0.09"/>
+      <section zOrder="0" zPosition="0" xOffset="0" yOffset="0" scalingFactor="1"/>
+      <section zOrder="1" zPosition="0.25" xOffset="0" yOffset="0" scalingFactor="1"/>
+    </xtru>
+    <union name="TGeoCompositeShape0x23">
+      <first ref="TGeoCompositeShape0x24"/>
+      <second ref="connTailC"/>
+      <position name="TGeoCompositeShape0x23connTailCpos" x="0" y="-0.235" z="-0.95" unit="cm"/>
+    </union>
+    <tube name="tubeHollowC" rmin="0" rmax="0.08" z="0.3" startphi="0" deltaphi="360" aunit="deg" lunit="cm"/>
+    <subtraction name="TGeoCompositeShape0x22">
+      <first ref="TGeoCompositeShape0x23"/>
+      <second ref="tubeHollowC"/>
+      <position name="TGeoCompositeShape0x22tubeHollowCpos" x="-0.25" y="-0.11" z="-0.8" unit="cm"/>
+    </subtraction>
+    <subtraction name="TGeoCompositeShape0x21">
+      <first ref="TGeoCompositeShape0x22"/>
+      <second ref="tubeHollowC"/>
+      <position name="TGeoCompositeShape0x21tubeHollowCpos" x="0.25" y="-0.11" z="-0.8" unit="cm"/>
+    </subtraction>
+    <tube name="tube1HoleC" rmin="0" rmax="0.08" z="0.4" startphi="0" deltaphi="360" aunit="deg" lunit="cm"/>
+    <subtraction name="TGeoCompositeShape0x27">
+      <first ref="connTailC"/>
+      <second ref="tube1HoleC"/>
+      <position name="TGeoCompositeShape0x27tube1HoleCpos" x="-0.25" y="0.125" z="0.125" unit="cm"/>
+    </subtraction>
+    <subtraction name="TGeoCompositeShape0x26">
+      <first ref="TGeoCompositeShape0x27"/>
+      <second ref="tube1HoleC"/>
+      <position name="TGeoCompositeShape0x26tube1HoleCpos" x="0.25" y="0.125" z="0.125" unit="cm"/>
+    </subtraction>
+    <box name="connBodyC" x="1" y="0.25" z="1.4" lunit="cm"/>
+    <subtraction name="TGeoCompositeShape0x38">
+      <first ref="connBodyC"/>
+      <second ref="tube2HoleC"/>
+      <position name="TGeoCompositeShape0x38tube2HoleCpos" x="-0.25" y="0" z="-0.2" unit="cm"/>
+    </subtraction>
+    <subtraction name="TGeoCompositeShape0x37">
+      <first ref="TGeoCompositeShape0x38"/>
+      <second ref="tube2HoleC"/>
+      <position name="TGeoCompositeShape0x37tube2HoleCpos" x="0.25" y="0" z="-0.2" unit="cm"/>
+    </subtraction>
+    <tube name="tube3HoleC" rmin="0" rmax="0.06" z="1" startphi="0" deltaphi="360" aunit="deg" lunit="cm"/>
+    <subtraction name="TGeoCompositeShape0x36">
+      <first ref="TGeoCompositeShape0x37"/>
+      <second ref="tube3HoleC"/>
+      <position name="TGeoCompositeShape0x36tube3HoleCpos" x="0.1" y="0" z="0.5" unit="cm"/>
+      <rotation name="TGeoCompositeShape0x36tube3HoleCrot" x="-180" y="90" z="0" unit="deg"/>
+    </subtraction>
+    <tube name="tube4HoleC" rmin="0" rmax="0.08" z="0.1" startphi="0" deltaphi="360" aunit="deg" lunit="cm"/>
+    <subtraction name="TGeoCompositeShape0x35">
+      <first ref="TGeoCompositeShape0x36"/>
+      <second ref="tube4HoleC"/>
+      <position name="TGeoCompositeShape0x35tube4HoleCpos" x="-0.25" y="0" z="-0.7" unit="cm"/>
+    </subtraction>
+    <subtraction name="TGeoCompositeShape0x34">
+      <first ref="TGeoCompositeShape0x35"/>
+      <second ref="tube4HoleC"/>
+      <position name="TGeoCompositeShape0x34tube4HoleCpos" x="0.25" y="0" z="-0.7" unit="cm"/>
+    </subtraction>
+    <tube name="sideHole1C" rmin="0" rmax="0.05" z="0.13333333333333333" startphi="0" deltaphi="360" aunit="deg" lunit="cm"/>
+    <subtraction name="TGeoCompositeShape0x33">
+      <first ref="TGeoCompositeShape0x34"/>
+      <second ref="sideHole1C"/>
+      <position name="TGeoCompositeShape0x33sideHole1Cpos" x="-0.46666666666666667" y="0" z="0.2" unit="cm"/>
+      <rotation name="TGeoCompositeShape0x33sideHole1Crot" x="90" y="-0" z="90" unit="deg"/>
+    </subtraction>
+    <tube name="sideHole2CTS" rmin="0" rmax="0.05" z="0.2" startphi="180" deltaphi="180" aunit="deg" lunit="cm"/>
+    <subtraction name="TGeoCompositeShape0x32">
+      <first ref="TGeoCompositeShape0x33"/>
+      <second ref="sideHole2CTS"/>
+      <position name="TGeoCompositeShape0x32sideHole2CTSpos" x="0.5" y="0" z="0.15" unit="cm"/>
+      <rotation name="TGeoCompositeShape0x32sideHole2CTSrot" x="90" y="-0" z="-90" unit="deg"/>
+    </subtraction>
+    <subtraction name="TGeoCompositeShape0x31">
+      <first ref="TGeoCompositeShape0x32"/>
+      <second ref="sideHole2CTS"/>
+      <position name="TGeoCompositeShape0x31sideHole2CTSpos" x="0.5" y="0" z="0.25" unit="cm"/>
+      <rotation name="TGeoCompositeShape0x31sideHole2CTSrot" x="-90" y="0" z="-90" unit="deg"/>
+    </subtraction>
+    <box name="sideHole2CB" x="0.2" y="0.1" z="0.1" lunit="cm"/>
+    <subtraction name="TGeoCompositeShape0x30">
+      <first ref="TGeoCompositeShape0x31"/>
+      <second ref="sideHole2CB"/>
+      <position name="TGeoCompositeShape0x30sideHole2CBpos" x="0.5" y="0" z="0.2" unit="cm"/>
+    </subtraction>
+    <tube name="connRoundHoleC" rmin="0" rmax="0.1" z="0.33333333333333331" startphi="0" deltaphi="360" aunit="deg" lunit="cm"/>
+    <subtraction name="TGeoCompositeShape0x29">
+      <first ref="TGeoCompositeShape0x30"/>
+      <second ref="connRoundHoleC"/>
+      <position name="TGeoCompositeShape0x29connRoundHoleCpos" x="0" y="0" z="-0.2" unit="cm"/>
+      <rotation name="TGeoCompositeShape0x29connRoundHoleCrot" x="90" y="-0" z="0" unit="deg"/>
+    </subtraction>
+    <tube name="connInsertHoleC" rmin="0" rmax="0.1" z="0.33333333333333331" startphi="0" deltaphi="360" aunit="deg" lunit="cm"/>
+    <subtraction name="TGeoCompositeShape0x28">
+      <first ref="TGeoCompositeShape0x29"/>
+      <second ref="connInsertHoleC"/>
+      <position name="TGeoCompositeShape0x28connInsertHoleCpos" x="0" y="0" z="0.2" unit="cm"/>
+      <rotation name="TGeoCompositeShape0x28connInsertHoleCrot" x="90" y="-0" z="0" unit="deg"/>
+    </subtraction>
+    <polycone name="TGeoPcon" startphi="0" deltaphi="360" aunit="deg" lunit="cm">
+      <zplane z="0" rmin="0" rmax="0.06"/>
+      <zplane z="0.07" rmin="0" rmax="0.06"/>
+      <zplane z="0.07" rmin="0.04" rmax="0.06"/>
+      <zplane z="0.17" rmin="0.04" rmax="0.06"/>
+    </polycone>
+  </solids>
+  <structure>
+    <volume name="MVTXSensor">
+      <materialref ref="ITS_SI"/>
+      <solidref ref="TGeoBBox0x3"/>
+    </volume>
+    <volume name="MVTXChip">
+      <materialref ref="ITS_SI"/>
+      <solidref ref="TGeoBBox0x2"/>
+      <physvol name="MVTXSensor_1">
+        <volumeref ref="MVTXSensor"/>
+        <positionref ref="MVTXSensor_1inMVTXChippos"/>
+      </physvol>
+    </volume>
+    <volume name="FPCAluminum">
+      <materialref ref="ITS_ALUMINUM"/>
+      <solidref ref="TGeoBBox0x4"/>
+    </volume>
+    <volume name="FPCKapton">
+      <materialref ref="ITS_KAPTONPOLYCH2"/>
+      <solidref ref="TGeoBBox0x5"/>
+    </volume>
+    <volume name="MVTXModule">
+      <materialref ref="ITS_AIR"/>
+      <solidref ref="TGeoBBox0x1"/>
+      <physvol name="MVTXChip_0">
+        <volumeref ref="MVTXChip"/>
+        <positionref ref="MVTXChip_0inMVTXModulepos"/>
+      </physvol>
+      <physvol name="MVTXChip_1">
+        <volumeref ref="MVTXChip"/>
+        <positionref ref="MVTXChip_1inMVTXModulepos"/>
+      </physvol>
+      <physvol name="MVTXChip_2">
+        <volumeref ref="MVTXChip"/>
+        <positionref ref="MVTXChip_2inMVTXModulepos"/>
+      </physvol>
+      <physvol name="MVTXChip_3">
+        <volumeref ref="MVTXChip"/>
+        <positionref ref="MVTXChip_3inMVTXModulepos"/>
+      </physvol>
+      <physvol name="MVTXChip_4">
+        <volumeref ref="MVTXChip"/>
+        <positionref ref="MVTXChip_4inMVTXModulepos"/>
+      </physvol>
+      <physvol name="MVTXChip_5">
+        <volumeref ref="MVTXChip"/>
+        <positionref ref="MVTXChip_5inMVTXModulepos"/>
+      </physvol>
+      <physvol name="MVTXChip_6">
+        <volumeref ref="MVTXChip"/>
+        <positionref ref="MVTXChip_6inMVTXModulepos"/>
+      </physvol>
+      <physvol name="MVTXChip_7">
+        <volumeref ref="MVTXChip"/>
+        <positionref ref="MVTXChip_7inMVTXModulepos"/>
+      </physvol>
+      <physvol name="MVTXChip_8">
+        <volumeref ref="MVTXChip"/>
+        <positionref ref="MVTXChip_8inMVTXModulepos"/>
+      </physvol>
+      <physvol name="FPCAluminum_1">
+        <volumeref ref="FPCAluminum"/>
+        <positionref ref="FPCAluminum_1inMVTXModulepos"/>
+      </physvol>
+      <physvol name="FPCKapton_1">
+        <volumeref ref="FPCKapton"/>
+        <positionref ref="FPCKapton_1inMVTXModulepos"/>
+      </physvol>
+    </volume>
+    <volume name="MVTXHalfStave">
+      <materialref ref="ITS_AIR"/>
+      <solidref ref="TGeoBBox"/>
+      <physvol name="MVTXModule_0">
+        <volumeref ref="MVTXModule"/>
+        <positionref ref="MVTXModule_0inMVTXHalfStavepos"/>
+      </physvol>
+    </volume>
+    <volume name="Glue">
+      <materialref ref="ITS_GLUE"/>
+      <solidref ref="TGeoBBox0x12"/>
+    </volume>
+    <volume name="CarbonFleeceBottom">
+      <materialref ref="ITS_CarbonFleece"/>
+      <solidref ref="TGeoBBox0x13"/>
+    </volume>
+    <volume name="CFPlate">
+      <materialref ref="ITS_K13D2U2k"/>
+      <solidref ref="TGeoBBox0x14"/>
+    </volume>
+    <volume name="PolyimidePipe">
+      <materialref ref="ITS_KAPTONPOLYCH2"/>
+      <solidref ref="TGeoTube"/>
+    </volume>
+    <volume name="Water">
+      <materialref ref="ITS_WATER"/>
+      <solidref ref="TGeoTube0x1"/>
+    </volume>
+    <volume name="ThermasolPipeCover">
+      <materialref ref="ITS_FGS003"/>
+      <solidref ref="TGeoTubeSeg"/>
+    </volume>
+    <volume name="CarbonFleecePipeCover">
+      <materialref ref="ITS_CarbonFleece"/>
+      <solidref ref="TGeoTubeSeg0x1"/>
+    </volume>
+    <volume name="ThermasolVertical">
+      <materialref ref="ITS_FGS003"/>
+      <solidref ref="TGeoBBox0x15"/>
+    </volume>
+    <volume name="ThermasolMiddle">
+      <materialref ref="ITS_FGS003"/>
+      <solidref ref="TGeoBBox0x16"/>
+    </volume>
+    <volume name="ThermasolLeftRight">
+      <materialref ref="ITS_FGS003"/>
+      <solidref ref="TGeoBBox0x17"/>
+    </volume>
+    <volume name="CarbonFleeceVertical">
+      <materialref ref="ITS_CarbonFleece"/>
+      <solidref ref="TGeoBBox0x18"/>
+    </volume>
+    <volume name="CarbonFleeceMiddle">
+      <materialref ref="ITS_CarbonFleece"/>
+      <solidref ref="TGeoBBox0x19"/>
+    </volume>
+    <volume name="CarbonFleeceLeftRight">
+      <materialref ref="ITS_CarbonFleece"/>
+      <solidref ref="TGeoBBox0x20"/>
+    </volume>
+    <volume name="TopVertex">
+      <materialref ref="ITS_M55J6K"/>
+      <solidref ref="TGeoTrd1"/>
+    </volume>
+    <volume name="SideVertex">
+      <materialref ref="ITS_M55J6K"/>
+      <solidref ref="TGeoXtru0x1"/>
+    </volume>
+    <volume name="EndSupport">
+      <materialref ref="ITS_M55J6K"/>
+      <solidref ref="TGeoXtru0x2"/>
+    </volume>
+    <volume name="TopFilament">
+      <materialref ref="ITS_M60J3K"/>
+      <solidref ref="TGeoBBox0x21"/>
+    </volume>
+    <volume name="IBConnectorBlockTailASide">
+      <materialref ref="ITS_PEEKCF30"/>
+      <solidref ref="TGeoCompositeShape0x7"/>
+    </volume>
+    <volume name="IBConnectorBlockBodyASide">
+      <materialref ref="ITS_PEEKCF30"/>
+      <solidref ref="TGeoCompositeShape0x9"/>
+    </volume>
+    <volume name="IBConnectorFitting">
+      <materialref ref="ITS_INOX304"/>
+      <solidref ref="TGeoTube0x2"/>
+    </volume>
+    <volume name="IBConnectorASide">
+      <materialref ref="ITS_AIR"/>
+      <solidref ref="connBoxA"/>
+      <physvol name="IBConnectorBlockTailASide_1" copynumber="1">
+        <volumeref ref="IBConnectorBlockTailASide"/>
+        <positionref ref="IBConnectorBlockTailASide_1inIBConnectorASidepos"/>
+      </physvol>
+      <physvol name="IBConnectorBlockBodyASide_1" copynumber="1">
+        <volumeref ref="IBConnectorBlockBodyASide"/>
+        <positionref ref="IBConnectorBlockBodyASide_1inIBConnectorASidepos"/>
+      </physvol>
+      <physvol name="IBConnectorFitting_1" copynumber="1">
+        <volumeref ref="IBConnectorFitting"/>
+        <positionref ref="IBConnectorFitting_1inIBConnectorASidepos"/>
+      </physvol>
+      <physvol name="IBConnectorFitting_2" copynumber="2">
+        <volumeref ref="IBConnectorFitting"/>
+        <positionref ref="IBConnectorFitting_2inIBConnectorASidepos"/>
+      </physvol>
+    </volume>
+    <volume name="IBConnectorBlockTailCSide">
+      <materialref ref="ITS_PEEKCF30"/>
+      <solidref ref="TGeoCompositeShape0x26"/>
+    </volume>
+    <volume name="IBConnectorBlockBodyCSide">
+      <materialref ref="ITS_PEEKCF30"/>
+      <solidref ref="TGeoCompositeShape0x28"/>
+    </volume>
+    <volume name="IBConnectorPlugC">
+      <materialref ref="ITS_PEEKCF30"/>
+      <solidref ref="TGeoPcon"/>
+    </volume>
+    <volume name="IBConnectorCSide">
+      <materialref ref="ITS_AIR"/>
+      <solidref ref="connBoxC"/>
+      <physvol name="IBConnectorBlockTailCSide_1" copynumber="1">
+        <volumeref ref="IBConnectorBlockTailCSide"/>
+        <positionref ref="IBConnectorBlockTailCSide_1inIBConnectorCSidepos"/>
+      </physvol>
+      <physvol name="IBConnectorBlockBodyCSide_1" copynumber="1">
+        <volumeref ref="IBConnectorBlockBodyCSide"/>
+        <positionref ref="IBConnectorBlockBodyCSide_1inIBConnectorCSidepos"/>
+      </physvol>
+      <physvol name="IBConnectorPlugC_1" copynumber="1">
+        <volumeref ref="IBConnectorPlugC"/>
+        <positionref ref="IBConnectorPlugC_1inIBConnectorCSidepos"/>
+        <rotationref ref="IBConnectorPlugC_1inIBConnectorCSiderot"/>
+      </physvol>
+    </volume>
+    <volume name="MVTXStave_StaveStruct">
+      <materialref ref="ITS_AIR"/>
+      <solidref ref="TGeoCompositeShape"/>
+      <physvol name="Glue_1" copynumber="1">
+        <volumeref ref="Glue"/>
+        <positionref ref="Glue_1inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="CarbonFleeceBottom_1" copynumber="1">
+        <volumeref ref="CarbonFleeceBottom"/>
+        <positionref ref="CarbonFleeceBottom_1inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="CFPlate_1" copynumber="1">
+        <volumeref ref="CFPlate"/>
+        <positionref ref="CFPlate_1inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="PolyimidePipe_1" copynumber="1">
+        <volumeref ref="PolyimidePipe"/>
+        <positionref ref="PolyimidePipe_1inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="PolyimidePipe_2" copynumber="2">
+        <volumeref ref="PolyimidePipe"/>
+        <positionref ref="PolyimidePipe_2inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="Water_1" copynumber="1">
+        <volumeref ref="Water"/>
+        <positionref ref="Water_1inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="Water_2" copynumber="2">
+        <volumeref ref="Water"/>
+        <positionref ref="Water_2inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="ThermasolPipeCover_1" copynumber="1">
+        <volumeref ref="ThermasolPipeCover"/>
+        <positionref ref="ThermasolPipeCover_1inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="ThermasolPipeCover_2" copynumber="2">
+        <volumeref ref="ThermasolPipeCover"/>
+        <positionref ref="ThermasolPipeCover_2inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="CarbonFleecePipeCover_1" copynumber="1">
+        <volumeref ref="CarbonFleecePipeCover"/>
+        <positionref ref="CarbonFleecePipeCover_1inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="CarbonFleecePipeCover_2" copynumber="2">
+        <volumeref ref="CarbonFleecePipeCover"/>
+        <positionref ref="CarbonFleecePipeCover_2inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="ThermasolVertical_1" copynumber="1">
+        <volumeref ref="ThermasolVertical"/>
+        <positionref ref="ThermasolVertical_1inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="ThermasolVertical_2" copynumber="2">
+        <volumeref ref="ThermasolVertical"/>
+        <positionref ref="ThermasolVertical_2inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="ThermasolVertical_3" copynumber="3">
+        <volumeref ref="ThermasolVertical"/>
+        <positionref ref="ThermasolVertical_3inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="ThermasolVertical_4" copynumber="4">
+        <volumeref ref="ThermasolVertical"/>
+        <positionref ref="ThermasolVertical_4inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="ThermasolMiddle_1" copynumber="1">
+        <volumeref ref="ThermasolMiddle"/>
+        <positionref ref="ThermasolMiddle_1inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="ThermasolLeftRight_1" copynumber="1">
+        <volumeref ref="ThermasolLeftRight"/>
+        <positionref ref="ThermasolLeftRight_1inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="ThermasolLeftRight_2" copynumber="2">
+        <volumeref ref="ThermasolLeftRight"/>
+        <positionref ref="ThermasolLeftRight_2inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="CarbonFleeceVertical_1" copynumber="1">
+        <volumeref ref="CarbonFleeceVertical"/>
+        <positionref ref="CarbonFleeceVertical_1inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="CarbonFleeceVertical_2" copynumber="2">
+        <volumeref ref="CarbonFleeceVertical"/>
+        <positionref ref="CarbonFleeceVertical_2inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="CarbonFleeceVertical_3" copynumber="3">
+        <volumeref ref="CarbonFleeceVertical"/>
+        <positionref ref="CarbonFleeceVertical_3inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="CarbonFleeceVertical_4" copynumber="4">
+        <volumeref ref="CarbonFleeceVertical"/>
+        <positionref ref="CarbonFleeceVertical_4inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="CarbonFleeceMiddle_1" copynumber="1">
+        <volumeref ref="CarbonFleeceMiddle"/>
+        <positionref ref="CarbonFleeceMiddle_1inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="CarbonFleeceLeftRight_1" copynumber="1">
+        <volumeref ref="CarbonFleeceLeftRight"/>
+        <positionref ref="CarbonFleeceLeftRight_1inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="CarbonFleeceLeftRight_2" copynumber="2">
+        <volumeref ref="CarbonFleeceLeftRight"/>
+        <positionref ref="CarbonFleeceLeftRight_2inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="TopVertex_1" copynumber="1">
+        <volumeref ref="TopVertex"/>
+        <positionref ref="TopVertex_1inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopVertex_1inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="SideVertex_1" copynumber="1">
+        <volumeref ref="SideVertex"/>
+        <positionref ref="SideVertex_1inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="SideVertex_2" copynumber="2">
+        <volumeref ref="SideVertex"/>
+        <positionref ref="SideVertex_2inMVTXStave_StaveStructpos"/>
+        <rotationref ref="SideVertex_2inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="EndSupport_1" copynumber="1">
+        <volumeref ref="EndSupport"/>
+        <positionref ref="EndSupport_1inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="EndSupport_2" copynumber="2">
+        <volumeref ref="EndSupport"/>
+        <positionref ref="EndSupport_2inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="TopFilament_1" copynumber="1">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_1inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_1inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_2" copynumber="2">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_2inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_2inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_3" copynumber="3">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_3inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_3inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_4" copynumber="4">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_4inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_4inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_5" copynumber="5">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_5inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_5inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_6" copynumber="6">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_6inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_6inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_7" copynumber="7">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_7inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_7inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_8" copynumber="8">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_8inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_8inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_9" copynumber="9">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_9inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_9inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_10" copynumber="10">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_10inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_10inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_11" copynumber="11">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_11inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_11inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_12" copynumber="12">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_12inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_12inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_13" copynumber="13">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_13inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_13inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_14" copynumber="14">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_14inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_14inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_15" copynumber="15">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_15inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_15inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_16" copynumber="16">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_16inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_16inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_17" copynumber="17">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_17inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_17inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_18" copynumber="18">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_18inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_18inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_19" copynumber="19">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_19inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_19inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_20" copynumber="20">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_20inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_20inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_21" copynumber="21">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_21inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_21inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_22" copynumber="22">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_22inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_22inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_23" copynumber="23">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_23inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_23inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_24" copynumber="24">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_24inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_24inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_25" copynumber="25">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_25inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_25inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_26" copynumber="26">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_26inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_26inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_27" copynumber="27">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_27inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_27inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_28" copynumber="28">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_28inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_28inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_29" copynumber="29">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_29inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_29inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_30" copynumber="30">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_30inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_30inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_31" copynumber="31">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_31inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_31inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_32" copynumber="32">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_32inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_32inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_33" copynumber="33">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_33inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_33inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_34" copynumber="34">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_34inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_34inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_35" copynumber="35">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_35inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_35inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_36" copynumber="36">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_36inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_36inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_37" copynumber="37">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_37inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_37inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_38" copynumber="38">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_38inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_38inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_39" copynumber="39">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_39inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_39inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_40" copynumber="40">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_40inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_40inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_41" copynumber="41">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_41inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_41inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_42" copynumber="42">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_42inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_42inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_43" copynumber="43">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_43inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_43inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_44" copynumber="44">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_44inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_44inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_45" copynumber="45">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_45inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_45inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_46" copynumber="46">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_46inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_46inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_47" copynumber="47">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_47inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_47inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_48" copynumber="48">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_48inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_48inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_49" copynumber="49">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_49inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_49inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_50" copynumber="50">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_50inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_50inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_51" copynumber="51">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_51inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_51inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_52" copynumber="52">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_52inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_52inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_53" copynumber="53">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_53inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_53inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_54" copynumber="54">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_54inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_54inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_55" copynumber="55">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_55inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_55inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_56" copynumber="56">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_56inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_56inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_57" copynumber="57">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_57inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_57inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_58" copynumber="58">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_58inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_58inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_59" copynumber="59">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_59inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_59inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_60" copynumber="60">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_60inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_60inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_61" copynumber="61">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_61inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_61inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_62" copynumber="62">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_62inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_62inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_63" copynumber="63">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_63inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_63inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_64" copynumber="64">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_64inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_64inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_65" copynumber="65">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_65inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_65inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_66" copynumber="66">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_66inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_66inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_67" copynumber="67">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_67inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_67inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_68" copynumber="68">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_68inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_68inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_69" copynumber="69">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_69inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_69inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_70" copynumber="70">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_70inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_70inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_71" copynumber="71">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_71inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_71inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_72" copynumber="72">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_72inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_72inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_73" copynumber="73">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_73inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_73inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_74" copynumber="74">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_74inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_74inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_75" copynumber="75">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_75inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_75inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="TopFilament_76" copynumber="76">
+        <volumeref ref="TopFilament"/>
+        <positionref ref="TopFilament_76inMVTXStave_StaveStructpos"/>
+        <rotationref ref="TopFilament_76inMVTXStave_StaveStructrot"/>
+      </physvol>
+      <physvol name="IBConnectorASide_1" copynumber="1">
+        <volumeref ref="IBConnectorASide"/>
+        <positionref ref="IBConnectorASide_1inMVTXStave_StaveStructpos"/>
+      </physvol>
+      <physvol name="IBConnectorCSide_1" copynumber="1">
+        <volumeref ref="IBConnectorCSide"/>
+        <positionref ref="IBConnectorCSide_1inMVTXStave_StaveStructpos"/>
+        <rotationref ref="IBConnectorCSide_1inMVTXStave_StaveStructrot"/>
+      </physvol>
+    </volume>
+    <assembly name="MVTXStave">
+      <physvol name="MVTXHalfStave_0">
+        <volumeref ref="MVTXHalfStave"/>
+        <positionref ref="MVTXHalfStave_0inMVTXStavepos"/>
+      </physvol>
+      <physvol name="MVTXStave_StaveStruct_1">
+        <volumeref ref="MVTXStave_StaveStruct"/>
+        <positionref ref="MVTXStave_StaveStruct_1inMVTXStavepos"/>
+        <rotationref ref="MVTXStave_StaveStruct_1inMVTXStaverot"/>
+      </physvol>
+    </assembly>
+  </structure>
+  <setup name="default" version="0.0">
+    <world ref="MVTXStave"/>
+  </setup>
+</gdml>
