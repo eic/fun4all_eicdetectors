@@ -186,7 +186,7 @@ bool PHG4ForwardDualReadoutSteppingAction::UserSteppingAction(const G4Step* aSte
       hit->set_index_k(idx_k);
       // hit->set_index_l(idx_l);
 
-      // cout << "\tidj: " << idx_j << "\tidk: "  << idx_k << endl;
+//       cout << "\tidj: " << idx_j << "\tidk: "  << idx_k << "\tz " << prePoint->GetPosition().z()/cm << endl;
       // TODO use these positions for an index conversion
       /* Set hit location (space point) */
       hit->set_x(0, prePoint->GetPosition().x() / cm);
@@ -307,23 +307,20 @@ bool PHG4ForwardDualReadoutSteppingAction::UserSteppingAction(const G4Step* aSte
     // {
     //   if(aTrack->GetCreatorProcess()->GetProcessName().find("enkov") != string::npos)cout << aTrack->GetCreatorProcess()->GetProcessName() << endl;
     // }
-      // if(fNscin>0 || ) cout << aTrack->GetCreatorProcess()->GetProcessName() <<  "\tfNscin: " << fNscin << "\tfNcerenkov: " << fNcerenkov << endl;
-      // if(fNscin>0 || fNcerenkov>0) cout << aTrack->GetCreatorProcess()->GetProcessName() <<  "\tfNscin: " << fNscin << "\tfNcerenkov: " << fNcerenkov << endl;
+//       if(fNscin>0 || fNcerenkov>0) cout << aTrack->GetCreatorProcess()->GetProcessName() <<  "\tfNscin: " << fNscin << "\tfNcerenkov: " << fNcerenkov << endl;
     }//secondary tracks loop
-    // cout << __LINE__ << endl;
-    //   cout << hit->get_property_float(PHG4Hit::PROPERTY::scint_gammas)<<  "\t" << hit->get_property_float(PHG4Hit::PROPERTY::scint_gammas) << endl;
-    // cout << __LINE__ << endl;
-    // G4Material* nextMaterial = aStep->GetPostStepPoint()->GetMaterial();
-    // string materialstr = nextMaterial->GetName();
-    // string materialstr2 = prevMaterial->GetName();
-    // if(materialstr.find("G4_AIR") == std::string::npos)cout << materialstr << endl;;
-    // if(materialstr2.find("G4_AIR") == std::string::npos)cout << "\t" << materialstr2 << endl;;
+//     cout << __LINE__ << endl;
+//       cout << hit->get_property_float(PHG4Hit::PROPERTY::scint_gammas) <<  "\tadd fNscin: " << fNscin <<  "\t" << hit->get_property_float(PHG4Hit::PROPERTY::cerenkov_gammas) << "\t add fNcerenkov: " << fNcerenkov<< endl;
+    G4Material* nextMaterial = aStep->GetPostStepPoint()->GetMaterial();
+    string materialstr = nextMaterial->GetName();
+//     string materialstr2 = prevMaterial->GetName();
+//     if(materialstr.find("G4_AIR") == std::string::npos)cout << materialstr << endl;;
+//     if(materialstr2.find("G4_AIR") == std::string::npos)cout << "\t" << materialstr2 << endl;;
       hit->set_property(PHG4Hit::PROPERTY::scint_gammas,hit->get_property_float(PHG4Hit::PROPERTY::scint_gammas)+ fNscin);
     // cout << __LINE__ << endl;
       hit->set_property(PHG4Hit::PROPERTY::cerenkov_gammas,hit->get_property_float(PHG4Hit::PROPERTY::cerenkov_gammas)+ fNcerenkov);
-    // cout << __LINE__ << endl;
-    //   cout << hit->get_property_float(PHG4Hit::PROPERTY::scint_gammas)<<  "\t" << hit->get_property_float(PHG4Hit::PROPERTY::scint_gammas) << endl;
-    // cout << __LINE__ << endl;
+//       cout << hit->get_property_float(PHG4Hit::PROPERTY::scint_gammas)<<  "\t" << hit->get_property_float(PHG4Hit::PROPERTY::cerenkov_gammas) << endl;
+//     cout << __LINE__ << endl;
 
     // //number of optical photons in the event from secondary tracks
     // const std::vector<const G4Track*> *sec = aStep->GetSecondaryInCurrentStep();
