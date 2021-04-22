@@ -378,7 +378,7 @@ PHG4ForwardDualReadoutDetector::ConstructTower(int type)
 
   // G4Material* material_cherenkov = G4Material::GetMaterial("PMMA");
 	G4double density;
-	G4int ncomponents, natoms;
+	G4int ncomponents;
   G4Material* material_cherenkov = new G4Material("PMMA", density = 1.18 * g / cm3, ncomponents = 3);
 		material_cherenkov->AddElement(G4Element::GetElement("C"), 3.6 / (3.6 + 5.7 + 1.4));
 		material_cherenkov->AddElement(G4Element::GetElement("H"), 5.7 / (3.6 + 5.7 + 1.4));
