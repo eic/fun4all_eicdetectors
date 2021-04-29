@@ -43,10 +43,8 @@ class PHG4ForwardDualReadoutSubsystem : public PHG4DetectorSubsystem
 
   /** Set mapping file for calorimeter towers
    */
-  void SetTowerMappingFile(const std::string &filename)
-  {
-    mappingfile_ = filename;
-  }
+  void SetTowerMappingFile(const std::string &filename);
+
 
   void SetActive(const int i = 1) { active = i; }
   void SetAbsorberActive(const int i = 1) { absorber_active = i; }

@@ -30,7 +30,14 @@ class PHG4ForwardDualReadoutSteppingAction : public PHG4SteppingAction
 
   //! reimplemented from base class
   virtual void SetInterfacePointers(PHCompositeNode*);
-
+  void SetTowerSize(G4double twrsze)
+    {
+      _tower_size = twrsze;
+    }
+  void SetDetectorSize(G4double detsze)
+    {
+      _detector_size = detsze;
+    }
  private:
   int FindTowerIndex(G4TouchableHandle touch, int& j, int& k);
   int FindTowerIndexFromPosition(G4StepPoint* prePoint, int& j, int& k);
@@ -47,6 +54,8 @@ class PHG4ForwardDualReadoutSteppingAction : public PHG4SteppingAction
   PHG4Hit* hit;
   PHG4Shower* saveshower;
 
+  G4double _tower_size;
+  G4double _detector_size;
   int absorbertruth;
   int light_scint_model;
 };
