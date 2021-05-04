@@ -129,7 +129,7 @@ void PHG4ForwardDualReadoutDetector::ConstructMe(G4LogicalVolume* logicWorld)
   G4VSolid* drcalo_envelope_solid;
   if(_quadratic_detector){
     // box with round cutout in the middle
-    G4VSolid* beampipe_cutout = new G4Cons("hdrcalo_envelope_solid",
+    G4VSolid* beampipe_cutout = new G4Cons("hdrcalo_beampipe_cutout",
                                         0, _rMin1,
                                         0, _rMin1,
                                         _dZ / 2.0,
@@ -139,7 +139,7 @@ void PHG4ForwardDualReadoutDetector::ConstructMe(G4LogicalVolume* logicWorld)
                                         _rMax1,
                                         _tower_dz / 2.0);
     drcalo_envelope_solid = new G4SubtractionSolid(G4String("hdrcalo_envelope_solid"), drcalo_envelope_solid, beampipe_cutout
-                                                            , 0 ,G4ThreeVector( 0 , 0 ,0.)); // top right
+                                                            , 0 ,G4ThreeVector( 0 , 0 ,0.));
   } else {
     drcalo_envelope_solid = new G4Cons("hdrcalo_envelope_solid",
                                         _rMin1, _rMax1,
