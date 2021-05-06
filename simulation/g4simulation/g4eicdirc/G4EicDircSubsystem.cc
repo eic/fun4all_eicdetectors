@@ -43,15 +43,16 @@ int G4EicDircSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
 {
   PHNodeIterator iter(topNode);
   PHCompositeNode *dstNode = dynamic_cast<PHCompositeNode *>(iter.findFirst("PHCompositeNode", "DST"));
-  G4EicDircDisplayAction *disp_action = new G4EicDircDisplayAction(Name(), GetParams());
-  if (isfinite(m_ColorArray[0]) &&
-      isfinite(m_ColorArray[1]) &&
-      isfinite(m_ColorArray[2]) &&
-      isfinite(m_ColorArray[3]))
-  {
-    disp_action->SetColor(m_ColorArray[0], m_ColorArray[1], m_ColorArray[2], m_ColorArray[3]);
-  }
-  m_DisplayAction = disp_action;
+  // G4EicDircDisplayAction *disp_action = new G4EicDircDisplayAction(Name(), GetParams());
+  // if (isfinite(m_ColorArray[0]) &&
+  //     isfinite(m_ColorArray[1]) &&
+  //     isfinite(m_ColorArray[2]) &&
+  //     isfinite(m_ColorArray[3]))
+  // {
+  //   disp_action->SetColor(m_ColorArray[0], m_ColorArray[1], m_ColorArray[2], m_ColorArray[3]);
+  // }
+  // m_DisplayAction = disp_action;
+
   PHNodeIterator dstIter(dstNode);
   if (GetParams()->get_int_param("active"))
   {
