@@ -55,6 +55,7 @@ int G4EicDircDetector::IsInDetector(G4VPhysicalVolume *volume) const
 
 void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
 {
+  DefineMaterials();
   double fBar[3];
   double  fPrizm[6];
   double fFd[3];
