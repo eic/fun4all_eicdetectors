@@ -9,8 +9,8 @@ case $CXX in
  clang++)
   CXXFLAGS="$CXXFLAGS -Wall -Werror -Wno-undefined-var-template"
  ;;
- g++)
-  CXXFLAGS="$CXXFLAGS -Wall -Werror"
+ *g++)
+  CXXFLAGS="$CXXFLAGS -Wall -Werror -Wno-unused-variable"
  ;;
 esac
 
