@@ -50,13 +50,6 @@ libg4lblvtx_la_SOURCES = \
   TrackFastSimEval.cc \
   PHG4ParticleGenerator_flat_pT.cc
 
-# Rule for generating table CINT dictionaries.
-%_Dict.cc: %.h %LinkDef.h
-	rootcint -f $@ @CINTDEFS@  -c $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
-
-#just to get the dependency
-%_Dict_rdict.pcm: %_Dict.cc ;
-
 ################################################
 # linking tests
 
@@ -81,4 +74,4 @@ testexternals.cc:
 ################################################
 
 clean-local:
-	rm -f *Dict* $(BUILT_SOURCES) *.pcm
+	rm -f $(BUILT_SOURCES)
