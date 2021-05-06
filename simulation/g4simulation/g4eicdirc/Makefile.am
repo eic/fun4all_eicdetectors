@@ -23,40 +23,12 @@ libg4eicdirc_la_LIBADD = \
 pkginclude_HEADERS = \
   G4EicDircSubsystem.h
 
-# I/O dictionaries have to exist for root5 and root6. For ROOT6 we need
-# pcm files in addition. If someone can figure out how to make a list
-# so this list of dictionaries is transformed into a list of pcm files
-# following a simple naming convention, please change this accordingly and
-# let me know
-ROOT_IO_DICTS = 
-# for root6 we need pcm and dictionaries but only for
-# i/o classes. For root5 we need only dictionaries but
-# those for i/o and classes available on the cmd line
-# MAKEROOT6 is set in the configure.ac, true for root6
-if MAKEROOT6
-# this is a tweak to install files in $(libdir), automake refuses
-# to install other files in libdir, this construct gets around this
-pcmdir = $(libdir)
-nobase_dist_pcm_DATA =
-else
-  ROOT5_DICTS = \
-  G4EicDircSubsystem_Dict.cc
-endif
-
 
 libg4eicdirc_la_SOURCES = \
-  $(ROOT5_DICTS) \
   G4EicDircDetector.cc \
   G4EicDircDisplayAction.cc \
   G4EicDircSubsystem.cc \
   G4EicDircSteppingAction.cc
-
-# Rule for generating table CINT dictionaries.
-%_Dict.cc: %.h %LinkDef.h
-	rootcint -f $@ @CINTDEFS@ -c $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
-
-#just to get the dependency
-%_Dict_rdict.pcm: %_Dict.cc ;
 
 ################################################
 # linking tests
@@ -79,4 +51,4 @@ testexternals.cc:
 	echo "}" >> $@
 
 clean-local:
-	rm -f *Dict* $(BUILT_SOURCES) *.pcm
+	rm -f $(BUILT_SOURCES)
