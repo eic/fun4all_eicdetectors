@@ -16,7 +16,7 @@
 #include <phool/PHObject.h>        // for PHObject
 #include <phool/getClass.h>
 
-#include <cmath>                                // for isfinite
+#include <cmath>  // for isfinite
 
 using namespace std;
 

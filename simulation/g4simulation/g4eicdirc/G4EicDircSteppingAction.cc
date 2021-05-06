@@ -72,7 +72,7 @@ G4EicDircSteppingAction::~G4EicDircSteppingAction()
 
 //____________________________________________________________________________..
 bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
-                                                   bool was_used)
+                                                 bool was_used)
 {
   G4TouchableHandle touch = aStep->GetPreStepPoint()->GetTouchableHandle();
   G4TouchableHandle touchpost = aStep->GetPostStepPoint()->GetTouchableHandle();
