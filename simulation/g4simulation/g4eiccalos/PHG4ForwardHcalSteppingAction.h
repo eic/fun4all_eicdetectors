@@ -26,14 +26,15 @@ class PHG4ForwardHcalSteppingAction : public PHG4SteppingAction
   virtual ~PHG4ForwardHcalSteppingAction();
 
   //! stepping action
-  bool UserSteppingAction(const G4Step*, bool) override;;
+  bool UserSteppingAction(const G4Step*, bool) override;
+  ;
 
   //! reimplemented from base class
   void SetInterfacePointers(PHCompositeNode*) override;
 
-  void SetHitNodeName(const std::string &nam) {m_HitNodeName = nam;}
-  void SetAbsorberNodeName(const std::string &nam) {m_AbsorberNodeName = nam;}
-  void SetSupportNodeName(const std::string &nam) {m_SupportNodeName = nam;}
+  void SetHitNodeName(const std::string& nam) { m_HitNodeName = nam; }
+  void SetAbsorberNodeName(const std::string& nam) { m_AbsorberNodeName = nam; }
+  void SetSupportNodeName(const std::string& nam) { m_SupportNodeName = nam; }
 
  private:
   //! pointer to the detector

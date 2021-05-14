@@ -36,7 +36,7 @@ class PHG4ForwardHcalSubsystem : public PHG4DetectorSubsystem
   int process_event(PHCompositeNode *) override;
 
   //! Print info (from SubsysReco)
-  void Print(const std::string& what = "ALL") const override;
+  void Print(const std::string &what = "ALL") const override;
 
   /** Accessors (reimplemented)
    */

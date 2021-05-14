@@ -95,11 +95,11 @@ int PHG4ForwardHcalSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
       }
     }
     // create stepping action
-   PHG4ForwardHcalSteppingAction *tmp = new PHG4ForwardHcalSteppingAction(m_Detector, GetParams());
-   tmp->SetHitNodeName(m_HitNodeName);
-   tmp->SetAbsorberNodeName(m_AbsorberNodeName);
-   tmp->SetSupportNodeName(m_SupportNodeName);
-   m_SteppingAction = tmp;
+    PHG4ForwardHcalSteppingAction* tmp = new PHG4ForwardHcalSteppingAction(m_Detector, GetParams());
+    tmp->SetHitNodeName(m_HitNodeName);
+    tmp->SetAbsorberNodeName(m_AbsorberNodeName);
+    tmp->SetSupportNodeName(m_SupportNodeName);
+    m_SteppingAction = tmp;
   }
 
   return 0;
@@ -172,7 +172,7 @@ void PHG4ForwardHcalSubsystem::SetTowerMappingFile(const std::string& filename)
   set_string_param("mapping_file_md5", PHG4Utils::md5sum(get_string_param("mapping_file")));
 }
 
-void PHG4ForwardHcalSubsystem::Print(const std::string &what) const
+void PHG4ForwardHcalSubsystem::Print(const std::string& what) const
 {
   std::cout << Name() << " Parameters: " << std::endl;
   if (!BeginRunExecuted())

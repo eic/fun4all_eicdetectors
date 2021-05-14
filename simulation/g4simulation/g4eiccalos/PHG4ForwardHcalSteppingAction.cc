@@ -149,15 +149,14 @@ bool PHG4ForwardHcalSteppingAction::UserSteppingAction(const G4Step* aStep, bool
       }
       else
       {
-	if (whichactive == -1)
-	{
-        m_SaveHitContainer = m_AbsorberHitContainer;
-	}
-	else
-	{
-	  m_SaveHitContainer = m_SupportHitContainer;
-	}
-
+        if (whichactive == -1)
+        {
+          m_SaveHitContainer = m_AbsorberHitContainer;
+        }
+        else
+        {
+          m_SaveHitContainer = m_SupportHitContainer;
+        }
       }
       if (G4VUserTrackInformation* p = aTrack->GetUserInformation())
       {
@@ -228,8 +227,8 @@ bool PHG4ForwardHcalSteppingAction::UserSteppingAction(const G4Step* aStep, bool
       }
     }
     if (edep > 0 && (whichactive > 0 ||
-        (whichactive == -1 && m_AbsorberTruthFlag > 0) ||
-        (whichactive < -1 && m_SupportTruthFlag > 0)))
+                     (whichactive == -1 && m_AbsorberTruthFlag > 0) ||
+                     (whichactive < -1 && m_SupportTruthFlag > 0)))
     {
       if (G4VUserTrackInformation* p = aTrack->GetUserInformation())
       {
@@ -285,7 +284,7 @@ void PHG4ForwardHcalSteppingAction::SetInterfacePointers(PHCompositeNode* topNod
   //now look for the map and grab a pointer to it.
   m_HitContainer = findNode::getClass<PHG4HitContainer>(topNode, m_HitNodeName);
   m_AbsorberHitContainer = findNode::getClass<PHG4HitContainer>(topNode, m_AbsorberNodeName);
-  m_SupportHitContainer  = findNode::getClass<PHG4HitContainer>(topNode, m_SupportNodeName);
+  m_SupportHitContainer = findNode::getClass<PHG4HitContainer>(topNode, m_SupportNodeName);
   // if we do not find the node it's messed up.
   if (!m_HitContainer)
   {

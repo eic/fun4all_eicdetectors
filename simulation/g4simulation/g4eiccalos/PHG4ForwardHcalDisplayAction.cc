@@ -9,7 +9,7 @@
 #include <TSystem.h>
 
 #include <iostream>
-#include <utility>                     // for pair
+#include <utility>  // for pair
 
 PHG4ForwardHcalDisplayAction::PHG4ForwardHcalDisplayAction(const std::string &name)
   : PHG4DisplayAction(name)
