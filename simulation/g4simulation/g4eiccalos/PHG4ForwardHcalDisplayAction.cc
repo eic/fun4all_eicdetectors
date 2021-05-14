@@ -9,9 +9,7 @@
 #include <TSystem.h>
 
 #include <iostream>
-#include <utility>                     // for pair
-
-using namespace std;
+#include <utility>  // for pair
 
 PHG4ForwardHcalDisplayAction::PHG4ForwardHcalDisplayAction(const std::string &name)
   : PHG4DisplayAction(name)
@@ -68,7 +66,7 @@ void PHG4ForwardHcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol
     }
     else
     {
-      cout << "unknown logical volume " << it.second << endl;
+      std::cout << "unknown logical volume " << it.second << std::endl;
       gSystem->Exit(1);
     }
     logvol->SetVisAttributes(visatt);

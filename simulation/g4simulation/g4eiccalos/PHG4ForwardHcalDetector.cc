@@ -33,8 +33,6 @@
 class G4VSolid;
 class PHCompositeNode;
 
-using namespace std;
-
 //_______________________________________________________________________
 PHG4ForwardHcalDetector::PHG4ForwardHcalDetector(PHG4Subsystem* subsys, PHCompositeNode* Node, PHParameters* parameters, const std::string& dnam)
   : PHG4Detector(subsys, Node, dnam)
@@ -42,6 +40,7 @@ PHG4ForwardHcalDetector::PHG4ForwardHcalDetector(PHG4Subsystem* subsys, PHCompos
   , m_Params(parameters)
   , m_ActiveFlag(m_Params->get_int_param("active"))
   , m_AbsorberActiveFlag(m_Params->get_int_param("absorberactive"))
+  , m_SupportActiveFlag(m_Params->get_int_param("supportactive"))
   , m_TowerLogicNamePrefix("hHcalTower")
   , m_SuperDetector("NONE")
 {
@@ -65,6 +64,14 @@ int PHG4ForwardHcalDetector::IsInForwardHcal(G4VPhysicalVolume* volume) const
       return -1;
     }
   }
+
+  if (m_SupportActiveFlag)
+  {
+    if (m_SupportLogicalVolSet.find(mylogvol) != m_SupportLogicalVolSet.end())
+    {
+      return -2;
+    }
+  }
   return 0;
 }
 
@@ -78,8 +85,8 @@ void PHG4ForwardHcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
 
   if (m_Params->get_string_param("mapping_file").empty())
   {
-    cout << "ERROR in PHG4ForwardHcalDetector: No mapping file specified. Abort detector construction." << endl;
-    cout << "Please run set_string_param(\"mapping_file\", std::string filename ) first." << endl;
+    std::cout << "ERROR in PHG4ForwardHcalDetector: No mapping file specified. Abort detector construction." << std::endl;
+    std::cout << "Please run set_string_param(\"mapping_file\", std::string filename ) first." << std::endl;
     gSystem->Exit(1);
   }
 
@@ -109,7 +116,7 @@ void PHG4ForwardHcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
   hcal_rotm.rotateZ(m_Params->get_double_param("rot_z") * deg);
 
   /* Place envelope cone in simulation */
-  string name_envelope = m_TowerLogicNamePrefix + "_envelope";
+  std::string name_envelope = m_TowerLogicNamePrefix + "_envelope";
 
   new G4PVPlacement(G4Transform3D(hcal_rotm, G4ThreeVector(m_Params->get_double_param("place_x") * cm,
                                                            m_Params->get_double_param("place_y") * cm,
@@ -202,13 +209,14 @@ PHG4ForwardHcalDetector::ConstructTower()
                                                    "hHcal_wls_plate_logic",
                                                    0, 0, 0);
 
-  m_AbsorberLogicalVolSet.insert(logic_wls);
+  m_SupportLogicalVolSet.insert(logic_wls);
   G4LogicalVolume* logic_support = new G4LogicalVolume(solid_support_plate,
                                                        material_support,
                                                        "hHcal_support_plate_logic",
                                                        0, 0, 0);
 
-  m_AbsorberLogicalVolSet.insert(logic_support);
+  m_SupportLogicalVolSet.insert(logic_support);
+
   m_DisplayAction->AddVolume(logic_absorber, "Absorber");
   m_DisplayAction->AddVolume(logic_scint, "Scintillator");
   m_DisplayAction->AddVolume(logic_wls, "WLSplate");
@@ -219,13 +227,13 @@ PHG4ForwardHcalDetector::ConstructTower()
   G4double ypos_i = -SupportDw / 2.0;
   G4double zpos_i = (-1 * TowerDz / 2.0) + thickness_absorber / 2.0;
 
-  string name_absorber = m_TowerLogicNamePrefix + "_single_plate_absorber";
+  std::string name_absorber = m_TowerLogicNamePrefix + "_single_plate_absorber";
 
-  string name_scintillator = m_TowerLogicNamePrefix + "_single_plate_scintillator";
+  std::string name_scintillator = m_TowerLogicNamePrefix + "_single_plate_scintillator";
 
-  string name_wls = m_TowerLogicNamePrefix + "_single_plate_wls";
+  std::string name_wls = m_TowerLogicNamePrefix + "_single_plate_wls";
 
-  string name_support = m_TowerLogicNamePrefix + "_single_plate_support";
+  std::string name_support = m_TowerLogicNamePrefix + "_single_plate_support";
 
   for (int i = 1; i <= nlayers; i++)
   {
@@ -292,7 +300,7 @@ int PHG4ForwardHcalDetector::PlaceTower(G4LogicalVolume* hcalenvelope, G4Logical
 int PHG4ForwardHcalDetector::ParseParametersFromTable()
 {
   /* Open the datafile, if it won't open return an error */
-  ifstream istream_mapping;
+  std::ifstream istream_mapping;
   istream_mapping.open(m_Params->get_string_param("mapping_file"));
   if (!istream_mapping.is_open())
   {
@@ -301,11 +309,11 @@ int PHG4ForwardHcalDetector::ParseParametersFromTable()
   }
 
   /* loop over lines in file */
-  string line_mapping;
+  std::string line_mapping;
   while (getline(istream_mapping, line_mapping))
   {
     /* Skip lines starting with / including a '#' */
-    if (line_mapping.find("#") != string::npos)
+    if (line_mapping.find("#") != std::string::npos)
     {
       if (Verbosity() > 0)
       {
@@ -314,28 +322,28 @@ int PHG4ForwardHcalDetector::ParseParametersFromTable()
       continue;
     }
 
-    istringstream iss(line_mapping);
+    std::istringstream iss(line_mapping);
 
     /* If line starts with keyword Tower, add to tower positions */
-    if (line_mapping.find("Tower ") != string::npos)
+    if (line_mapping.find("Tower ") != std::string::npos)
     {
       unsigned idx_j, idx_k, idx_l;
       G4double pos_x, pos_y, pos_z;
       G4double size_x, size_y, size_z;
       G4double rot_x, rot_y, rot_z;
       G4double dummy;
-      string dummys;
+      std::string dummys;
 
       /* read string- break if error */
       if (!(iss >> dummys >> dummy >> idx_j >> idx_k >> idx_l >> pos_x >> pos_y >> pos_z >> size_x >> size_y >> size_z >> rot_x >> rot_y >> rot_z))
       {
-        cout << "ERROR in PHG4ForwardHcalDetector: Failed to read line in mapping file " << m_Params->get_string_param("mapping_file") << std::endl;
+        std::cout << "ERROR in PHG4ForwardHcalDetector: Failed to read line in mapping file " << m_Params->get_string_param("mapping_file") << std::endl;
         gSystem->Exit(1);
       }
 
       /* Construct unique name for tower */
       /* Mapping file uses cm, this class uses mm for length */
-      ostringstream towername;
+      std::ostringstream towername;
       towername.str("");
       towername << m_TowerLogicNamePrefix << "_j_" << idx_j << "_k_" << idx_k;
 
@@ -356,13 +364,13 @@ int PHG4ForwardHcalDetector::ParseParametersFromTable()
     else
     {
       /* If this line is not a comment and not a tower, save parameter as string / value. */
-      string parname;
+      std::string parname;
       G4double parval;
 
       /* read string- break if error */
       if (!(iss >> parname >> parval))
       {
-        cout << "ERROR in PHG4ForwardHcalDetector: Failed to read line in mapping file " << m_Params->get_string_param("mapping_file") << std::endl;
+        std::cout << "ERROR in PHG4ForwardHcalDetector: Failed to read line in mapping file " << m_Params->get_string_param("mapping_file") << std::endl;
         gSystem->Exit(1);
       }
 
@@ -371,7 +379,7 @@ int PHG4ForwardHcalDetector::ParseParametersFromTable()
   }
 
   /* Update member variables for global parameters based on parsed parameter file */
-  std::map<string, G4double>::iterator parit;
+  std::map<std::string, G4double>::iterator parit;
 
   parit = m_GlobalParameterMap.find("Gtower_dx");
   if (parit != m_GlobalParameterMap.end())

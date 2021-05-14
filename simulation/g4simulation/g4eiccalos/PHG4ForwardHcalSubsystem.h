@@ -29,24 +29,27 @@ class PHG4ForwardHcalSubsystem : public PHG4DetectorSubsystem
      Creates the stepping action
      Creates relevant hit nodes that will be populated by the stepping action and stored in the output DST
   */
-  int InitRunSubsystem(PHCompositeNode *);
+  int InitRunSubsystem(PHCompositeNode *) override;
 
   /** Event processing
    */
-  int process_event(PHCompositeNode *);
+  int process_event(PHCompositeNode *) override;
+
+  //! Print info (from SubsysReco)
+  void Print(const std::string &what = "ALL") const override;
 
   /** Accessors (reimplemented)
    */
-  PHG4Detector *GetDetector() const;
-  PHG4SteppingAction *GetSteppingAction() const { return m_SteppingAction; }
-  PHG4DisplayAction *GetDisplayAction() const { return m_DisplayAction; }
+  PHG4Detector *GetDetector() const override;
+  PHG4SteppingAction *GetSteppingAction() const override { return m_SteppingAction; }
+  PHG4DisplayAction *GetDisplayAction() const override { return m_DisplayAction; }
 
   /** Set mapping file for calorimeter towers
    */
   void SetTowerMappingFile(const std::string &filename);
 
  private:
-  void SetDefaultParameters();
+  void SetDefaultParameters() override;
 
   /** Pointer to the Geant4 implementation of the detector
    */
@@ -58,6 +61,10 @@ class PHG4ForwardHcalSubsystem : public PHG4DetectorSubsystem
   //! display attribute setting
   /*! derives from PHG4DisplayAction */
   PHG4DisplayAction *m_DisplayAction = nullptr;
+
+  std::string m_HitNodeName;
+  std::string m_AbsorberNodeName;
+  std::string m_SupportNodeName;
 };
 
 #endif
