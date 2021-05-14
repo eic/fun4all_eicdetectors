@@ -67,28 +67,23 @@ int PHG4ForwardHcalSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
         dstNode->addNode(DetNode);
       }
     }
-    // create hit output node
-    std::string nodename;
-    if (SuperDetector() != "NONE")
+    // create hit output nodes
+    std::string detector_suffix = SuperDetector();
+    if (detector_suffix == "NONE")
     {
-      nodename = "G4HIT_" + SuperDetector();
+      detector_suffix = Name();
     }
-    else
-    {
-      nodename = "G4HIT_" + Name();
-    }
-    nodes.insert(nodename);
+    m_HitNodeName = "G4HIT_" + detector_suffix;
+    nodes.insert(m_HitNodeName);
+    m_AbsorberNodeName = "G4HIT_ABSORBER_" + detector_suffix;
     if (GetParams()->get_int_param("absorberactive"))
     {
-      if (SuperDetector() != "NONE")
-      {
-        nodename = "G4HIT_ABSORBER_" + SuperDetector();
-      }
-      else
-      {
-        nodename = "G4HIT_ABSORBER_" + Name();
-      }
-      nodes.insert(nodename);
+      nodes.insert(m_AbsorberNodeName);
+    }
+    m_SupportNodeName = "G4HIT_SUPPORT_" + detector_suffix;
+    if (GetParams()->get_int_param("supportactive"))
+    {
+      nodes.insert(m_SupportNodeName);
     }
     for (auto thisnode : nodes)
     {
@@ -100,7 +95,11 @@ int PHG4ForwardHcalSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
       }
     }
     // create stepping action
-    m_SteppingAction = new PHG4ForwardHcalSteppingAction(m_Detector, GetParams());
+   PHG4ForwardHcalSteppingAction *tmp = new PHG4ForwardHcalSteppingAction(m_Detector, GetParams());
+   tmp->SetHitNodeName(m_HitNodeName);
+   tmp->SetAbsorberNodeName(m_AbsorberNodeName);
+   tmp->SetSupportNodeName(m_SupportNodeName);
+   m_SteppingAction = tmp;
   }
 
   return 0;
@@ -171,4 +170,26 @@ void PHG4ForwardHcalSubsystem::SetTowerMappingFile(const std::string& filename)
 {
   set_string_param("mapping_file", filename);
   set_string_param("mapping_file_md5", PHG4Utils::md5sum(get_string_param("mapping_file")));
+}
+
+void PHG4ForwardHcalSubsystem::Print(const std::string &what) const
+{
+  std::cout << Name() << " Parameters: " << std::endl;
+  if (!BeginRunExecuted())
+  {
+    std::cout << "Need to execute BeginRun() before parameter printout is meaningful" << std::endl;
+    std::cout << "To do so either run one or more events or on the command line execute: " << std::endl;
+    std::cout << "Fun4AllServer *se = Fun4AllServer::instance();" << std::endl;
+    std::cout << "PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco(\"PHG4RECO\");" << std::endl;
+    std::cout << "g4->InitRun(se->topNode());" << std::endl;
+    std::cout << "PHG4ForwardHcalSubsystem *fhcal = (PHG4ForwardHcalSubsystem *) g4->getSubsystem(\"" << Name() << "\");" << std::endl;
+    std::cout << "fhcal->Print()" << std::endl;
+    return;
+  }
+  GetParams()->Print();
+  if (m_SteppingAction)
+  {
+    m_SteppingAction->Print(what);
+  }
+  return;
 }

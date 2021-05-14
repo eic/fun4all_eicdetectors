@@ -16,11 +16,11 @@ class G4VPhysicalVolume;
 class PHG4ForwardHcalDisplayAction : public PHG4DisplayAction
 {
  public:
-  PHG4ForwardHcalDisplayAction(const std::string &name);
+  explicit PHG4ForwardHcalDisplayAction(const std::string &name);
 
   virtual ~PHG4ForwardHcalDisplayAction();
 
-  void ApplyDisplayAction(G4VPhysicalVolume *physvol);
+  void ApplyDisplayAction(G4VPhysicalVolume *physvol) override;
   void AddVolume(G4LogicalVolume *logvol, const std::string &mat) { m_LogicalVolumeMap[logvol] = mat; }
 
  private:

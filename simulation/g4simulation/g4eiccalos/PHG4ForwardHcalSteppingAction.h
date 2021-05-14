@@ -26,10 +26,14 @@ class PHG4ForwardHcalSteppingAction : public PHG4SteppingAction
   virtual ~PHG4ForwardHcalSteppingAction();
 
   //! stepping action
-  virtual bool UserSteppingAction(const G4Step*, bool);
+  bool UserSteppingAction(const G4Step*, bool) override;;
 
   //! reimplemented from base class
-  virtual void SetInterfacePointers(PHCompositeNode*);
+  void SetInterfacePointers(PHCompositeNode*) override;
+
+  void SetHitNodeName(const std::string &nam) {m_HitNodeName = nam;}
+  void SetAbsorberNodeName(const std::string &nam) {m_AbsorberNodeName = nam;}
+  void SetSupportNodeName(const std::string &nam) {m_SupportNodeName = nam;}
 
  private:
   //! pointer to the detector
@@ -38,13 +42,19 @@ class PHG4ForwardHcalSteppingAction : public PHG4SteppingAction
   //! pointer to hit container
   PHG4HitContainer* m_HitContainer = nullptr;
   PHG4HitContainer* m_AbsorberHitContainer = nullptr;
+  PHG4HitContainer* m_SupportHitContainer = nullptr;
   PHG4HitContainer* m_SaveHitContainer = nullptr;
   PHG4Hit* m_Hit = nullptr;
   PHG4Shower* m_SaveShower = nullptr;
 
   int m_ActiveFlag = 0;
   int m_AbsorberTruthFlag = 0;
+  int m_SupportTruthFlag = 0;
   int m_BlackHoleFlag = 0;
+
+  std::string m_HitNodeName;
+  std::string m_AbsorberNodeName;
+  std::string m_SupportNodeName;
 };
 
 #endif  // G4DETECTORS_PHG4FORWARDHCALSTEPPINGACTION_H

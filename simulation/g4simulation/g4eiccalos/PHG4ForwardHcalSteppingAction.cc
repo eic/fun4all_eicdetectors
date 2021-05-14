@@ -43,6 +43,7 @@ PHG4ForwardHcalSteppingAction::PHG4ForwardHcalSteppingAction(PHG4ForwardHcalDete
   , m_Detector(detector)
   , m_ActiveFlag(parameters->get_int_param("active"))
   , m_AbsorberTruthFlag(parameters->get_int_param("absorberactive"))
+  , m_SupportTruthFlag(parameters->get_int_param("supportactive"))
   , m_BlackHoleFlag(parameters->get_int_param("blackhole"))
 {
 }
@@ -67,6 +68,7 @@ bool PHG4ForwardHcalSteppingAction::UserSteppingAction(const G4Step* aStep, bool
   //  0 is outside of Forward HCAL
   //  1 is inside scintillator
   // -1 is inside absorber (dead material)
+  // -2 is inside the support (or other volume)
 
   int whichactive = m_Detector->IsInForwardHcal(volume);
 
@@ -147,7 +149,15 @@ bool PHG4ForwardHcalSteppingAction::UserSteppingAction(const G4Step* aStep, bool
       }
       else
       {
+	if (whichactive == -1)
+	{
         m_SaveHitContainer = m_AbsorberHitContainer;
+	}
+	else
+	{
+	  m_SaveHitContainer = m_SupportHitContainer;
+	}
+
       }
       if (G4VUserTrackInformation* p = aTrack->GetUserInformation())
       {
@@ -217,7 +227,9 @@ bool PHG4ForwardHcalSteppingAction::UserSteppingAction(const G4Step* aStep, bool
         m_Hit->set_light_yield(-1);
       }
     }
-    if (edep > 0 && (whichactive > 0 || m_AbsorberTruthFlag > 0))
+    if (edep > 0 && (whichactive > 0 ||
+        (whichactive == -1 && m_AbsorberTruthFlag > 0) ||
+        (whichactive < -1 && m_SupportTruthFlag > 0)))
     {
       if (G4VUserTrackInformation* p = aTrack->GetUserInformation())
       {
@@ -270,34 +282,27 @@ bool PHG4ForwardHcalSteppingAction::UserSteppingAction(const G4Step* aStep, bool
 //____________________________________________________________________________..
 void PHG4ForwardHcalSteppingAction::SetInterfacePointers(PHCompositeNode* topNode)
 {
-  std::string hitnodename;
-  std::string absorbernodename;
-
-  if (m_Detector->SuperDetector() != "NONE")
-  {
-    hitnodename = "G4HIT_" + m_Detector->SuperDetector();
-    absorbernodename = "G4HIT_ABSORBER_" + m_Detector->SuperDetector();
-  }
-  else
-  {
-    hitnodename = "G4HIT_" + m_Detector->GetName();
-    absorbernodename = "G4HIT_ABSORBER_" + m_Detector->GetName();
-  }
-
   //now look for the map and grab a pointer to it.
-  m_HitContainer = findNode::getClass<PHG4HitContainer>(topNode, hitnodename);
-  m_AbsorberHitContainer = findNode::getClass<PHG4HitContainer>(topNode, absorbernodename);
-
+  m_HitContainer = findNode::getClass<PHG4HitContainer>(topNode, m_HitNodeName);
+  m_AbsorberHitContainer = findNode::getClass<PHG4HitContainer>(topNode, m_AbsorberNodeName);
+  m_SupportHitContainer  = findNode::getClass<PHG4HitContainer>(topNode, m_SupportNodeName);
   // if we do not find the node it's messed up.
   if (!m_HitContainer)
   {
-    std::cout << "PHG4ForwardHcalSteppingAction::SetTopNode - unable to find " << hitnodename << std::endl;
+    std::cout << "PHG4ForwardHcalSteppingAction::SetTopNode - unable to find " << m_HitNodeName << std::endl;
   }
   if (!m_AbsorberHitContainer)
   {
     if (Verbosity() > 0)
     {
-      std::cout << "PHG4ForwardHcalSteppingAction::SetTopNode - unable to find " << absorbernodename << std::endl;
+      std::cout << "PHG4ForwardHcalSteppingAction::SetTopNode - unable to find " << m_AbsorberNodeName << std::endl;
+    }
+  }
+  if (!m_SupportHitContainer)
+  {
+    if (Verbosity() > 0)
+    {
+      std::cout << "PHG4ForwardHcalSteppingAction::SetTopNode - unable to find " << m_SupportNodeName << std::endl;
     }
   }
 }

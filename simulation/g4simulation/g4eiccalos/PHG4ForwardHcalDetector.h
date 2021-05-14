@@ -63,6 +63,7 @@ class PHG4ForwardHcalDetector : public PHG4Detector
 
   int m_ActiveFlag = 1;
   int m_AbsorberActiveFlag = 0;
+  int m_SupportActiveFlag = 0;
   int m_Layer = 0;
 
   std::string m_TowerLogicNamePrefix;
@@ -73,6 +74,7 @@ class PHG4ForwardHcalDetector : public PHG4Detector
 
   std::set<G4LogicalVolume *> m_AbsorberLogicalVolSet;
   std::set<G4LogicalVolume *> m_ScintiLogicalVolSet;
+  std::set<G4LogicalVolume *> m_SupportLogicalVolSet;
 };
 
 #endif
