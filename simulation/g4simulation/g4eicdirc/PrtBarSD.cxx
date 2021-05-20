@@ -1,17 +1,18 @@
 #include "PrtBarSD.h"
-#include "G4HCofThisEvent.hh"
-#include "G4Step.hh"
-#include "G4ThreeVector.hh"
-#include "G4SDManager.hh"
-#include "G4ios.hh"
-#include "G4RunManager.hh"
-#include "G4TransportationManager.hh"
-#include <TVector3.h>
 
 #include "PrtEvent.h"
 
 #include "PrtRunAction.h"
 #include "PrtManager.h"
+
+#include <Geant4/G4HCofThisEvent.hh>
+#include <Geant4/G4Step.hh>
+#include <Geant4/G4ThreeVector.hh>
+#include <Geant4/G4SDManager.hh>
+#include <Geant4/G4ios.hh>
+#include <Geant4/G4RunManager.hh>
+#include <Geant4/G4TransportationManager.hh>
+#include <TVector3.h>
 
 G4Mutex PrtBarSD::fMutex = G4MUTEX_INITIALIZER;
 

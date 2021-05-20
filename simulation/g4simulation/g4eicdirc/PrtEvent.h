@@ -7,11 +7,12 @@
 #ifndef PrtEvent_h
 #define PrtEvent_h 1
 
+#include "PrtHit.h"
+
 #include "TObject.h"
 #include "TString.h"
 
 #include <vector>
-#include "PrtHit.h"
 
 class PrtEvent: public TObject  {
 
@@ -81,7 +82,7 @@ private:
   Double_t fTime;
 
 
-  Int_t fHitSize;
+  Int_t fHitSize = 0;
   std::vector<PrtHit> fHitArray;
 
   Int_t fPhysList;
@@ -102,6 +103,6 @@ private:
   Double_t fTimeRes;
   TString  fInfo;
   
-  ClassDef(PrtEvent, 5);
+  ClassDefOverride(PrtEvent, 5);
 };
 #endif

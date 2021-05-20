@@ -1,9 +1,10 @@
 // Make this appear first!
 #include "G4Timer.hh"
 #include "PrtRunAction.h"
-#include "G4Run.hh"
 #include "PrtManager.h"
-#include "G4UImanager.hh"
+
+#include <Geant4/G4Run.hh>
+#include <Geant4/G4UImanager.hh>
 
 PrtRunAction::PrtRunAction(G4String outfile)
  : G4UserRunAction(),

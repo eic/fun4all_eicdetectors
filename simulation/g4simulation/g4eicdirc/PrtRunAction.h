@@ -1,8 +1,8 @@
 #ifndef PrtRunAction_h
 #define PrtRunAction_h 1
 
-#include "globals.hh"
-#include "G4UserRunAction.hh"
+#include <Geant4/globals.hh>
+#include <Geant4/G4UserRunAction.hh>
 
 class G4Timer;
 class G4Run;

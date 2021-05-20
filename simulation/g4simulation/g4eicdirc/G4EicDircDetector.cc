@@ -1110,30 +1110,30 @@ void G4EicDircDetector::ConstructSDandField(){
   // Sensitive detectors
   PrtPixelSD* pixelSD = new PrtPixelSD("PixelSD", "PixelHitsCollection", 0);
   G4SDManager::GetSDMpointer()->AddNewDetector(pixelSD);
-  SetSensitiveDetector("lPixel",pixelSD);
+  //SetSensitiveDetector("lPixel",pixelSD);
   PrtPrizmSD* prizmSD = new PrtPrizmSD("PrizmSD", "PrizmHitsCollection", 0);
   G4SDManager::GetSDMpointer()->AddNewDetector(prizmSD);
 
   if(fEvType == 0){
-    SetSensitiveDetector("lPrizm",prizmSD);
+    //SetSensitiveDetector("lPrizm",prizmSD);
     if(fLensId==2 || fLensId==3 || fLensId==6 ){
-      SetSensitiveDetector("lLens1",prizmSD);
-      SetSensitiveDetector("lLens2",prizmSD);
-      SetSensitiveDetector("lLens3",prizmSD);
+      // SetSensitiveDetector("lLens1",prizmSD);
+      // SetSensitiveDetector("lLens2",prizmSD);
+      // SetSensitiveDetector("lLens3",prizmSD);
     }
   }
   else if(fEvType == 1){
-    SetSensitiveDetector("lWedge",prizmSD);
-    SetSensitiveDetector("lSWedge",prizmSD);
-    SetSensitiveDetector("lBlock",prizmSD);
+    // SetSensitiveDetector("lWedge",prizmSD);
+    // SetSensitiveDetector("lSWedge",prizmSD);
+    // SetSensitiveDetector("lBlock",prizmSD);
   }
   else if(fEvType == 4){
-    SetSensitiveDetector("lPrizmT1",prizmSD);
+//    SetSensitiveDetector("lPrizmT1",prizmSD);
   }
   
   PrtBarSD* barSD = new PrtBarSD("BarSD", "BarHitsCollection", 0);
   G4SDManager::GetSDMpointer()->AddNewDetector(barSD);
-  SetSensitiveDetector("lBar",barSD);
+//  SetSensitiveDetector("lBar",barSD);
   
   // Magnetic field
 }
