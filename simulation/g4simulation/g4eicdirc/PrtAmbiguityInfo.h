@@ -43,7 +43,7 @@ protected:
   Double_t    fBarTime;
   Double_t    fEvTime;
     
-  ClassDef(PrtAmbiguityInfo,1)
+  ClassDefOverride(PrtAmbiguityInfo,1)
 };
 
 #endif

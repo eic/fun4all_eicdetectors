@@ -1,10 +1,11 @@
-#include "TInterpreter.h"
-#include "G4String.hh"
-#include "G4SystemOfUnits.hh"
-
 #include "PrtManager.h"
 #include "PrtHit.h"
 #include "PrtLutNode.h"
+
+#include <TInterpreter.h>
+#include <Geant4/G4String.hh>
+#include <Geant4/G4SystemOfUnits.hh>
+
 
 PrtManager * PrtManager::fInstance= NULL;
 

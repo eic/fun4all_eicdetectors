@@ -62,7 +62,7 @@ protected:
   TVector3 fMcPrimeMomentumInBar;
   Double_t fMcCherenkovInBar;
  
-  ClassDef(PrtPhotonInfo,1)
+  ClassDefOverride(PrtPhotonInfo,1)
 };
 
 #endif

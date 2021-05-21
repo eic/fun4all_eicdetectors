@@ -1,11 +1,4 @@
 #include "PrtPixelSD.h"
-#include "G4HCofThisEvent.hh"
-#include "G4Step.hh"
-#include "G4ThreeVector.hh"
-#include "G4SDManager.hh"
-#include "G4ios.hh"
-#include "G4RunManager.hh"
-#include <TVector3.h>
 
 #include "PrtEvent.h"
 #include "PrtPrizmHit.h"
@@ -13,6 +6,15 @@
 
 #include "PrtRunAction.h"
 #include "PrtManager.h"
+
+#include <Geant4/G4HCofThisEvent.hh>
+#include <Geant4/G4Step.hh>
+#include <Geant4/G4ThreeVector.hh>
+#include <Geant4/G4SDManager.hh>
+#include <Geant4/G4ios.hh>
+#include <Geant4/G4RunManager.hh>
+#include <TVector3.h>
+
 
 PrtPixelSD::PrtPixelSD( const G4String& name, 
 			const G4String& hitsCollectionName,
@@ -103,7 +105,7 @@ G4bool PrtPixelSD::ProcessHits(G4Step* step, G4TouchableHistory* hist){
   Int_t refl=0;
   Int_t prizmId=-1;
   
-  for (G4int i=0;i<prizmCol->entries();i++){
+  for (unsigned int i=0;i<prizmCol->entries();i++){
     PrtPrizmHit* phit = (*prizmCol)[i];    
     if(phit->GetTrackID()==track->GetTrackID()) {
       if(PrtManager::Instance()->GetRunType()==5 && phit->GetNormalId()==-5){

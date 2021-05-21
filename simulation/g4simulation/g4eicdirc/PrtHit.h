@@ -89,7 +89,7 @@ protected:
   Double_t fLeadTime;    
   Double_t fTotTime;  
 
-  ClassDef(PrtHit,2)
+  ClassDefOverride(PrtHit,2)
 };
 
 #endif

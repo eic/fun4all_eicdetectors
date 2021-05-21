@@ -78,7 +78,7 @@ protected:
   Double_t fAngle;
   TString  fInfo;
     
-  ClassDef(PrtTrackInfo,1)
+  ClassDefOverride(PrtTrackInfo,1)
 };
 
 #endif

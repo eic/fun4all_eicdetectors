@@ -55,7 +55,7 @@ private:
   std::vector<Int_t> fNRefl;
   std::vector<Double_t> fTimeArray;
 
-  ClassDef(PrtLutNode, 1);
+  ClassDefOverride(PrtLutNode, 1);
   
 };
 

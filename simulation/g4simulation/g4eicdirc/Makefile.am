@@ -23,12 +23,53 @@ libg4eicdirc_la_LIBADD = \
 pkginclude_HEADERS = \
   G4EicDircSubsystem.h
 
+ROOT_IO_DICTS = \
+  PrtEvent_Dict.cc \
+  PrtHit_Dict.cc \
+  PrtLutNode_Dict.cc \
+  PrtTrackInfo_Dict.cc \
+  PrtPhotonInfo_Dict.cc \
+  PrtAmbiguityInfo_Dict.cc
+
+pcmdir = $(libdir)
+nobase_dist_pcm_DATA = \
+  PrtEvent_Dict_rdict.pcm \
+  PrtHit_Dict_rdict.pcm \
+  PrtLutNode_Dict_rdict.pcm \
+  PrtTrackInfo_Dict_rdict.pcm \
+  PrtPhotonInfo_Dict_rdict.pcm \
+  PrtAmbiguityInfo_Dict_rdict.pcm
 
 libg4eicdirc_la_SOURCES = \
   G4EicDircDetector.cc \
   G4EicDircDisplayAction.cc \
   G4EicDircSubsystem.cc \
-  G4EicDircSteppingAction.cc
+  G4EicDircSteppingAction.cc \
+  PrtEvent.cxx \
+  PrtEvent_Dict.cc \
+  PrtHit.cxx \
+  PrtHit_Dict.cc \
+  PrtManager.cxx \
+  PrtLutNode.cxx \
+  PrtLutNode_Dict.cc \
+  PrtTrackInfo.cxx \
+  PrtTrackInfo_Dict.cc \
+  PrtPhotonInfo.cxx \
+  PrtPhotonInfo_Dict.cc \
+  PrtAmbiguityInfo.cxx \
+  PrtAmbiguityInfo_Dict.cc \
+  PrtBarSD.cxx \
+  PrtBarHit.cxx \
+  PrtPixelSD.cxx \
+  PrtPrizmSD.cxx \
+  PrtPrizmHit.cxx
+
+# Rule for generating table CINT dictionaries.
+%_Dict.cc: %.h %LinkDef.h
+	rootcint -f $@ @CINTDEFS@ $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
+
+#just to get the dependency
+%_Dict_rdict.pcm: %_Dict.cc ;
 
 ################################################
 # linking tests
