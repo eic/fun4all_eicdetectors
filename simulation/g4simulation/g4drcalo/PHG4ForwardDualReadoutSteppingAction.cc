@@ -64,6 +64,8 @@ PHG4ForwardDualReadoutSteppingAction::PHG4ForwardDualReadoutSteppingAction(PHG4F
   , hitcontainer(nullptr)
   , hit(nullptr)
   , saveshower(nullptr)
+  , _tower_size(1.0)
+  , _detector_size(100)
   , absorbertruth(absorberactive)
   , light_scint_model(1)
 {
@@ -300,9 +302,9 @@ bool PHG4ForwardDualReadoutSteppingAction::UserSteppingAction(const G4Step* aSte
       // cout << aTrack->GetCreatorProcess()->GetProcessName() << endl;
       //scintillation photons
       G4Material* prevMaterial = aStep->GetPreStepPoint()->GetMaterial();
-      if(ptype == fScinType && pstype == fScinSubType && (prevMaterial->GetName().find("G4_POLYSTYRENE") != std::string::npos)){ fNscin++;}
+      if((ptype == fScinType) && (pstype == fScinSubType) && (prevMaterial->GetName().find("G4_POLYSTYRENE") != std::string::npos)){ fNscin++;}
       //Cerenkov photons
-      if(ptype == fCerenkovType && pstype == fCerenkovSubType && (prevMaterial->GetName().find("PMMA") != std::string::npos)){ fNcerenkov++;}
+      if( (ptype == fCerenkovType) && (pstype == fCerenkovSubType) && ((prevMaterial->GetName().find("PMMA") != std::string::npos) || (prevMaterial->GetName().find("Quartz") != std::string::npos))){ fNcerenkov++;}
     //   if(aTrack->GetParentID() > 0)
     // {
     //   if(aTrack->GetCreatorProcess()->GetProcessName().find("enkov") != string::npos)cout << aTrack->GetCreatorProcess()->GetProcessName() << endl;
@@ -462,13 +464,10 @@ int PHG4ForwardDualReadoutSteppingAction::FindTowerIndexFromPosition(G4StepPoint
   int j_0 = 0;  //The j and k indices for the scintillator / tower
   int k_0 = 0;  //The j and k indices for the scintillator / tower
 
-  float twrsize = 1.2;//1.2; // was 0.3
-  // float twrsize = 1.2;//1.2; // was 0.3
-  float drsize = 220.;
   // G4VPhysicalVolume* tower = touch->GetVolume(1);  //Get the tower solid
   // ParseG4VolumeName(tower, j_0, k_0);
-  j_0 = (int) ( ( drsize + ( prePoint->GetPosition().x() / cm ) ) / twrsize ); //TODO DRCALO TOWER SIZE
-  k_0 = (int) ( ( drsize + ( prePoint->GetPosition().y() / cm ) ) / twrsize ); //TODO DRCALO TOWER SIZE
+  j_0 = (int) ( ( _detector_size + ( prePoint->GetPosition().x() / cm ) ) / _tower_size ); //TODO DRCALO TOWER SIZE
+  k_0 = (int) ( ( _detector_size + ( prePoint->GetPosition().y() / cm ) ) / _tower_size ); //TODO DRCALO TOWER SIZE
   // if(prePoint->GetPosition().x()>290) cout << prePoint->GetPosition().x() << "\t" << k_0 << endl;
   j = (j_0 * 1);
   k = (k_0 * 1);
