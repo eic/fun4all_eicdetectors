@@ -523,10 +523,10 @@ PHG4ForwardDualReadoutDetector::ConstructTowerType1()
                                             1.03 * _tower_dz / 1.0, //make it 1.03 times longer to ensure full cutout
                                             0.,2*M_PI*rad);
   // notch cutout
-  G4VSolid* single_cutout_box = new G4Box(G4String("single_cutout_box"),
-                                          ( diameter_fiber + airgap ) / 2.0,
-                                          1.03 * ( diameter_fiber + airgap ) / 4.0, //make it 1.03 times longer to ensure full cutout
-                                          1.03 * _tower_dz / 1.0);
+  // G4VSolid* single_cutout_box = new G4Box(G4String("single_cutout_box"),
+  //                                         ( diameter_fiber + airgap ) / 2.0,
+  //                                         1.03 * ( diameter_fiber + airgap ) / 4.0, //make it 1.03 times longer to ensure full cutout
+  //                                         1.03 * _tower_dz / 1.0);
   // absorber base object
   G4VSolid* solid_absorber_temp = new G4Box(G4String("solid_absorber_temp"),
                                           distancing*_tower_dx / 2.0,
