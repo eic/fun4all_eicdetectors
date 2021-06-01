@@ -200,7 +200,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
       G4RotationMatrix *tRot = new G4RotationMatrix();
       tRot->rotateZ(-tphi);     
       //phy = new G4PVPlacement(tRot,G4ThreeVector(dx,dy,0),lDirc,"wDirc",lExpHall,false,i);
-      phy = new G4PVPlacement(tRot,G4ThreeVector(dx,dy,0),lDirc,"wDirc",logicWorld,false,i);
+      phy = new G4PVPlacement(tRot,G4ThreeVector(dx,dy,-1200),lDirc,"wDirc",logicWorld,false,i);
       m_PhysicalVolumesSet.insert(phy);
     }
     //}
@@ -254,7 +254,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   // The Mirror
   G4Box* gMirror = new G4Box("gMirror",fMirror[0]/2.,fMirror[1]/2.,fMirror[2]/2.);
   lMirror = new G4LogicalVolume(gMirror,MirrorMaterial,"lMirror",0,0,0);
-  wMirror =new G4PVPlacement(0,G4ThreeVector(0,0,-0.5*dirclength-fMirror[2]/2.),lMirror,"wMirror", lDirc,false,0);
+  wMirror =new G4PVPlacement(0,G4ThreeVector(0,0,0.5*dirclength+fMirror[2]/2.),lMirror,"wMirror", lDirc,false,0);
   m_PhysicalVolumesSet.insert(wMirror);
 
   // The Lenses
@@ -377,7 +377,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   }
       
   if(fLensId != 0 && fLensId != 10){
-    double shifth = 0.5*(dirclength+fLens[2]);
+    double shifth = -0.5*(dirclength+fLens[2]);
     if(fLensId==100){
       phy = new G4PVPlacement(0,G4ThreeVector(0,0,shifth),lLens3,"wLens3", lDirc,false,0);
       m_PhysicalVolumesSet.insert(phy);
@@ -427,7 +427,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   lPrizmT2 = new G4LogicalVolume(gPrizmT2, BarMaterial,"lPrizmT2",0,0,0);
 
   G4RotationMatrix* xRot = new G4RotationMatrix();
-  xRot->rotateX(M_PI/2.*rad);
+  xRot->rotateX(-M_PI/2.*rad);
 
   G4RotationMatrix* fdRot = new G4RotationMatrix();
   G4RotationMatrix *fdrot = new G4RotationMatrix();
@@ -541,10 +541,10 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
     m_PhysicalVolumesSet.insert(phy);
   }
   else{ // normal prism
-    fPrismShift = G4ThreeVector((fPrizm[2]+fPrizm[3])/4.-0.5*fPrizm[3],0,0.5*(dirclength+fPrizm[1])+fLens[2]);
+    fPrismShift = G4ThreeVector((fPrizm[2]+fPrizm[3])/4.-0.5*fPrizm[3],0,-(0.5*(dirclength+fPrizm[1])+fLens[2]));
     phy = new G4PVPlacement(xRot,fPrismShift,lPrizm,"wPrizm", lDirc,false,0);
     m_PhysicalVolumesSet.insert(phy);
-    phy = new G4PVPlacement(fdrot,G4ThreeVector(0.5*fFd[1]-0.5*fPrizm[3]-evshiftx,0,evshiftz),lFd,"wFd", lDirc,false,0);
+    phy = new G4PVPlacement(fdrot,G4ThreeVector(0.5*fFd[1]-0.5*fPrizm[3]-evshiftx,0,-evshiftz),lFd,"wFd", lDirc,false,0);
     m_PhysicalVolumesSet.insert(phy);
   }
 
