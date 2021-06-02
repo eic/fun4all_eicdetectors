@@ -20,32 +20,42 @@ class G4EicDircSteppingAction : public PHG4SteppingAction
   G4EicDircSteppingAction(G4EicDircDetector*, const PHParameters* parameters);
 
   //! destructor
-  virtual ~G4EicDircSteppingAction();
+  ~G4EicDircSteppingAction() override;
 
   //! stepping action
-  virtual bool UserSteppingAction(const G4Step*, bool);
+  bool UserSteppingAction(const G4Step*, bool) override;
 
   //! reimplemented from base class
-  virtual void SetInterfacePointers(PHCompositeNode*);
+  void SetInterfacePointers(PHCompositeNode*) override;
+
+  void SetHitNodeName(const std::string& nam) { m_HitNodeName = nam; }
+  void SetAbsorberNodeName(const std::string& nam) { m_AbsorberNodeName = nam; }
+  void SetSupportNodeName(const std::string& nam) { m_SupportNodeName = nam; }
 
  private:
   //! pointer to the detector
-  G4EicDircDetector* m_Detector;
+  G4EicDircDetector* m_Detector = nullptr;
   const PHParameters* m_Params;
   //! pointer to hit container
-  PHG4HitContainer* m_HitContainer;
-  PHG4Hit* m_Hit;
-  PHG4HitContainer* m_SaveHitContainer;
+  PHG4HitContainer* m_HitContainer = nullptr;
+  PHG4HitContainer* m_AbsorberHitContainer = nullptr;
+  PHG4HitContainer* m_SupportHitContainer = nullptr;
+  PHG4Hit* m_Hit = nullptr;
+  PHG4HitContainer* m_SaveHitContainer = nullptr;
 
-  G4VPhysicalVolume* m_SaveVolPre;
-  G4VPhysicalVolume* m_SaveVolPost;
-  int m_SaveTrackId;
-  int m_SavePreStepStatus;
-  int m_SavePostStepStatus;
-  int m_ActiveFlag;
-  int m_BlackHoleFlag;
-  double m_EdepSum;
-  double m_EionSum;
+  G4VPhysicalVolume* m_SaveVolPre = nullptr;
+  G4VPhysicalVolume* m_SaveVolPost = nullptr;
+  int m_SaveTrackId = -1;
+  int m_SavePreStepStatus = -1;
+  int m_SavePostStepStatus = -1;
+  int m_ActiveFlag = 0;
+  int m_BlackHoleFlag = 0;
+  double m_EdepSum = 0.;
+  double m_EionSum = 0.;
+
+  std::string m_HitNodeName;
+  std::string m_AbsorberNodeName;
+  std::string m_SupportNodeName;
 };
 
 #endif  // G4EICDIRCSTEPPINGACTION_H
