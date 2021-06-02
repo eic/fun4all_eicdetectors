@@ -74,17 +74,25 @@ int G4EicDircDetector::IsInDetector(G4VPhysicalVolume *volume) const
 
 void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
 {
-  fGeomType = PrtManager::Instance()->GetGeometry();  
+  /* fGeomType = PrtManager::Instance()->GetGeometry();  
   fEvType = PrtManager::Instance()->GetEvType();  
   fMcpLayout = PrtManager::Instance()->GetMcpLayout();
   fLensId = PrtManager::Instance()->GetLens();
   fNBar = PrtManager::Instance()->GetRadiator();
-  
+  */
+
+  fGeomType = 0;
+  fEvType = 0;
+  fMcpLayout = 4;
+  fLensId = 3;
+  fNBar = 11;
+  std::cout << "Nbars =" << fNBar << std::endl;
+
   fNRow = 6;
   fNCol = 4;
   if(fNBar<0) fNBar=1;
 
-  fHall[0] = 1500; fHall[1] = 1500; fHall[2] = 3000;
+  //fHall[0] = 1500; fHall[1] = 1500; fHall[2] = 3000;
   //fBar[0] = 17; fBar[1] = 32; fBar[2] = 1050*4; //4200;
   //fPrizm[0] = 170; fPrizm[1] = 300; fPrizm[2] = 30+300*tan(37*deg); fPrizm[3] = 30;
   //fPrizm[0] = 390; fPrizm[1] = 300; fPrizm[3] = 50; fPrizm[2]= fPrizm[3]+300*tan(32*deg);
@@ -161,12 +169,12 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   // ------------- Volumes --------------
 
   // The experimental Hall
-  G4Box* gExpHall = new G4Box("gExpHall",fHall[0],fHall[1],fHall[2]);
+  /*G4Box* gExpHall = new G4Box("gExpHall",fHall[0],fHall[1],fHall[2]);
   lExpHall = new G4LogicalVolume(gExpHall,defaultMaterial,"lExpHall",0,0,0);
   //G4VPhysicalVolume* wExpHall  = new G4PVPlacement(0,G4ThreeVector(),lExpHall,"gExpHall",0,false,0);
   G4VPhysicalVolume* phy  = new G4PVPlacement(0,G4ThreeVector(),lExpHall,"gExpHall",0,false,0); 
   m_PhysicalVolumesSet.insert(phy);
-
+  */
   double gluethickness=0.05;
   double dirclength=fBar[2]*4+gluethickness*4;
   PrtManager::Instance()->SetRadiatorL(dirclength);
@@ -177,12 +185,13 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   lFd = new G4LogicalVolume(gFd,defaultMaterial,"lFd",0,0,0);
   
   double tphi, dphi = 360*deg/(double)fNBoxes;  
+  G4VPhysicalVolume* phy;
 
-  if(PrtManager::Instance()->GetRunType()==1){ 
+  /*if(PrtManager::Instance()->GetRunType()==1){ 
     // LUT
     phy = new G4PVPlacement(0,G4ThreeVector(0,0,0),lDirc,"wDirc",lExpHall,false,0);
     m_PhysicalVolumesSet.insert(phy);
-  }else{ 
+    }else{*/ 
     for(int i=0; i<fNBoxes; i++){
       tphi = dphi*i; 
       double dx = fRadius * cos(tphi);
@@ -190,10 +199,11 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
 
       G4RotationMatrix *tRot = new G4RotationMatrix();
       tRot->rotateZ(-tphi);     
-      phy = new G4PVPlacement(tRot,G4ThreeVector(dx,dy,0),lDirc,"wDirc",lExpHall,false,i);
+      //phy = new G4PVPlacement(tRot,G4ThreeVector(dx,dy,0),lDirc,"wDirc",lExpHall,false,i);
+      phy = new G4PVPlacement(tRot,G4ThreeVector(dx,dy,-1200),lDirc,"wDirc",logicWorld,false,i);
       m_PhysicalVolumesSet.insert(phy);
     }
-  }
+    //}
   
   // The Bar
   G4Box *gBar = new G4Box("gBar",fBar[0]/2.,fBar[1]/2.,fBar[2]/2.);
@@ -244,7 +254,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   // The Mirror
   G4Box* gMirror = new G4Box("gMirror",fMirror[0]/2.,fMirror[1]/2.,fMirror[2]/2.);
   lMirror = new G4LogicalVolume(gMirror,MirrorMaterial,"lMirror",0,0,0);
-  wMirror =new G4PVPlacement(0,G4ThreeVector(0,0,-0.5*dirclength-fMirror[2]/2.),lMirror,"wMirror", lDirc,false,0);
+  wMirror =new G4PVPlacement(0,G4ThreeVector(0,0,0.5*dirclength+fMirror[2]/2.),lMirror,"wMirror", lDirc,false,0);
   m_PhysicalVolumesSet.insert(wMirror);
 
   // The Lenses
@@ -303,10 +313,11 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
     G4SubtractionSolid*  gLens3 = new G4SubtractionSolid("Lens3", gLenst, gsphere2,new G4RotationMatrix(),zTrans2);
     
     lLens1 = new G4LogicalVolume(gLens1,BarMaterial,"lLens1",0,0,0);
-    int tt = PrtManager::Instance()->GetVerbose();
-    if(tt==0) lLens2 = new G4LogicalVolume(gLens2,Nlak33aMaterial,"lLens2",0,0,0); //Nlak33aMaterial //PbF2Material //SapphireMaterial
-    if(tt==1) lLens2 = new G4LogicalVolume(gLens2,PbF2Material,"lLens2",0,0,0);
-    if(tt==2) lLens2 = new G4LogicalVolume(gLens2,SapphireMaterial,"lLens2",0,0,0);
+    //int tt = PrtManager::Instance()->GetVerbose();
+    //if(tt==0) 
+    lLens2 = new G4LogicalVolume(gLens2,Nlak33aMaterial,"lLens2",0,0,0); //Nlak33aMaterial //PbF2Material //SapphireMaterial
+    //if(tt==1) lLens2 = new G4LogicalVolume(gLens2,PbF2Material,"lLens2",0,0,0);
+    //if(tt==2) lLens2 = new G4LogicalVolume(gLens2,SapphireMaterial,"lLens2",0,0,0);
     lLens3 = new G4LogicalVolume(gLens3,BarMaterial,"lLens3",0,0,0);
   }
 
@@ -366,7 +377,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   }
       
   if(fLensId != 0 && fLensId != 10){
-    double shifth = 0.5*(dirclength+fLens[2]);
+    double shifth = -0.5*(dirclength+fLens[2]);
     if(fLensId==100){
       phy = new G4PVPlacement(0,G4ThreeVector(0,0,shifth),lLens3,"wLens3", lDirc,false,0);
       m_PhysicalVolumesSet.insert(phy);
@@ -416,7 +427,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   lPrizmT2 = new G4LogicalVolume(gPrizmT2, BarMaterial,"lPrizmT2",0,0,0);
 
   G4RotationMatrix* xRot = new G4RotationMatrix();
-  xRot->rotateX(M_PI/2.*rad);
+  xRot->rotateX(-M_PI/2.*rad);
 
   G4RotationMatrix* fdRot = new G4RotationMatrix();
   G4RotationMatrix *fdrot = new G4RotationMatrix();
@@ -530,10 +541,10 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
     m_PhysicalVolumesSet.insert(phy);
   }
   else{ // normal prism
-    fPrismShift = G4ThreeVector((fPrizm[2]+fPrizm[3])/4.-0.5*fPrizm[3],0,0.5*(dirclength+fPrizm[1])+fLens[2]);
+    fPrismShift = G4ThreeVector((fPrizm[2]+fPrizm[3])/4.-0.5*fPrizm[3],0,-(0.5*(dirclength+fPrizm[1])+fLens[2]));
     phy = new G4PVPlacement(xRot,fPrismShift,lPrizm,"wPrizm", lDirc,false,0);
     m_PhysicalVolumesSet.insert(phy);
-    phy = new G4PVPlacement(fdrot,G4ThreeVector(0.5*fFd[1]-0.5*fPrizm[3]-evshiftx,0,evshiftz),lFd,"wFd", lDirc,false,0);
+    phy = new G4PVPlacement(fdrot,G4ThreeVector(0.5*fFd[1]-0.5*fPrizm[3]-evshiftx,0,-evshiftz),lFd,"wFd", lDirc,false,0);
     m_PhysicalVolumesSet.insert(phy);
   }
 
@@ -1031,9 +1042,9 @@ void G4EicDircDetector::SetVisualization(){
 
   G4Colour DircColour = G4Colour(1.,1.0,0.);
 
-  G4VisAttributes *waExpHall = new G4VisAttributes(DircColour);
-  waExpHall->SetVisibility(false);
-  lExpHall->SetVisAttributes(waExpHall);
+  //G4VisAttributes *waExpHall = new G4VisAttributes(DircColour);
+  //waExpHall->SetVisibility(false);
+  //lExpHall->SetVisAttributes(waExpHall);
 
   G4VisAttributes *waDirc = new G4VisAttributes(DircColour);
   waDirc->SetForceWireframe(true);
@@ -1146,9 +1157,10 @@ void G4EicDircDetector::SetRotation(double angle){
   G4RunManager::GetRunManager()->GeometryHasBeenModified();
 }
 
-void G4EicDircDetector::DrawHitBox(int id){
 
-  Int_t dispopt = PrtManager::Instance()->GetDisplayOpt(); 
+/*void G4EicDircDetector::DrawHitBox(int id){
+
+  Int_t dispopt = 0; //PrtManager::Instance()->GetDisplayOpt(); 
   if(dispopt!=1 && dispopt!=2 ) return;
 
   PrtEvent *event = new PrtEvent();
@@ -1212,10 +1224,11 @@ void G4EicDircDetector::DrawHitBox(int id){
 
     G4RotationMatrix *tRot = new G4RotationMatrix();
     tRot->rotateZ(-tphi);     
-    G4VPhysicalVolume *phy = new G4PVPlacement(tRot,dirc,lDircHit[i],"wDircHit",lExpHall,false,i);
+    //G4VPhysicalVolume *phy = new G4PVPlacement(tRot,dirc,lDircHit[i],"wDircHit",lExpHall,false,i);
+    G4VPhysicalVolume *phy = new G4PVPlacement(tRot,dirc,lDircHit[i],"wDircHit",logicWorld,false,i);
     m_PhysicalVolumesSet.insert(phy);
     
-  }
+    }
 
   G4LogicalVolume * lHit;
   G4VisAttributes *waHit;
@@ -1259,7 +1272,7 @@ void G4EicDircDetector::DrawHitBox(int id){
   
   G4RunManager::GetRunManager()->GeometryHasBeenModified();
   G4UImanager::GetUIpointer()->ApplyCommand("/vis/scene/notifyHandlers");
-}
+  }*/
 
 void PrtDetectorConstruction::SetLens(int id){
  
