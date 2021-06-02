@@ -5,10 +5,6 @@
 
 #include <g4detectors/PHG4DetectorSubsystem.h>
 
-#if !defined(__CINT__) || defined(__CLING__)
-#include <array>  // for array
-#endif
-
 #include <string>
 
 class G4EicDircDetector;
@@ -59,14 +55,6 @@ class G4EicDircSubsystem : public PHG4DetectorSubsystem
 
   PHG4DisplayAction* GetDisplayAction() const { return m_DisplayAction; }
 
-  void set_color(const double red, const double green, const double blue, const double alpha = 1.)
-  {
-    m_ColorArray[0] = red;
-    m_ColorArray[1] = green;
-    m_ColorArray[2] = blue;
-    m_ColorArray[3] = alpha;
-  }
-
  private:
   // \brief Set default parameter values
   void SetDefaultParameters();
@@ -83,11 +71,11 @@ class G4EicDircSubsystem : public PHG4DetectorSubsystem
   /*! derives from PHG4DisplayAction */
   PHG4DisplayAction* m_DisplayAction;
   //! Color setting if we want to override the default
-#if !defined(__CINT__) || defined(__CLING__)
-  std::array<double, 4> m_ColorArray;
-#else
-  double m_ColorArray[4];
-#endif
+
+  std::string m_HitNodeName;
+  std::string m_AbsorberNodeName;
+  std::string m_SupportNodeName;
+
 };
 
 #endif  // G4EICDIRCSUBSYSTEM_H
