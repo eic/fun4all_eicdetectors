@@ -21,7 +21,9 @@ libg4eicdirc_la_LIBADD = \
   -lg4testbench 
 
 pkginclude_HEADERS = \
-  G4EicDircSubsystem.h
+  G4EicDircSubsystem.h \
+  PrtCherenkovProcess.h \
+  PrtOpBoundaryProcess.h
 
 ROOT_IO_DICTS = \
   PrtEvent_Dict.cc \
@@ -45,24 +47,26 @@ libg4eicdirc_la_SOURCES = \
   G4EicDircDisplayAction.cc \
   G4EicDircSubsystem.cc \
   G4EicDircSteppingAction.cc \
-  PrtEvent.cxx \
-  PrtEvent_Dict.cc \
-  PrtHit.cxx \
-  PrtHit_Dict.cc \
-  PrtManager.cxx \
-  PrtLutNode.cxx \
-  PrtLutNode_Dict.cc \
-  PrtTrackInfo.cxx \
-  PrtTrackInfo_Dict.cc \
-  PrtPhotonInfo.cxx \
-  PrtPhotonInfo_Dict.cc \
   PrtAmbiguityInfo.cxx \
   PrtAmbiguityInfo_Dict.cc \
   PrtBarSD.cxx \
   PrtBarHit.cxx \
+  PrtCherenkovProcess.cxx \
+  PrtEvent.cxx \
+  PrtEvent_Dict.cc \
+  PrtHit.cxx \
+  PrtHit_Dict.cc \
+  PrtLutNode.cxx \
+  PrtLutNode_Dict.cc \
+  PrtManager.cxx \
+  PrtOpBoundaryProcess.cxx \
+  PrtPhotonInfo.cxx \
+  PrtPhotonInfo_Dict.cc \
   PrtPixelSD.cxx \
   PrtPrizmSD.cxx \
-  PrtPrizmHit.cxx
+  PrtPrizmHit.cxx \
+  PrtTrackInfo.cxx \
+  PrtTrackInfo_Dict.cc
 
 # Rule for generating table CINT dictionaries.
 %_Dict.cc: %.h %LinkDef.h

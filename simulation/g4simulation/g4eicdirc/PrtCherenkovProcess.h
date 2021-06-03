@@ -1,8 +1,8 @@
 #ifndef PrtCherenkovProcess_h
 #define PrtCherenkovProcess_h
 
-#include "globals.hh"
-#include "G4Cerenkov.hh"
+#include <Geant4/globals.hh>
+#include <Geant4/G4Cerenkov.hh>
 
 class PrtCherenkovProcess : public G4Cerenkov
 {
