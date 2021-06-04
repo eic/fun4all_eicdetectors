@@ -2,9 +2,9 @@
 
 #include "PrtManager.h"
 
-#include "G4Poisson.hh"
-#include "G4SystemOfUnits.hh"
-#include "G4PhysicalConstants.hh"
+#include <Geant4/G4Poisson.hh>
+#include <Geant4/G4SystemOfUnits.hh>
+#include <Geant4/G4PhysicalConstants.hh>
 
 PrtCherenkovProcess::PrtCherenkovProcess(const G4String& processName, G4ProcessType type)
   : G4Cerenkov(processName, type)
