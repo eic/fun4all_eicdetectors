@@ -46,19 +46,20 @@ class EICG4ZDCHitTree : public SubsysReco
  private:
 
   int Nhit;
-  std::vector<int> *layerType;
-  std::vector<int> *layerID;
-  std::vector<int> *xID;
-  std::vector<int> *yID;
-  std::vector<float> *x0;
-  std::vector<float> *y0;
-  std::vector<float> *z0;
-  std::vector<float> *x1;
-  std::vector<float> *y1;
-  std::vector<float> *z1;
-  std::vector<float> *time0;
-  std::vector<float> *time1;
-  std::vector<float> *edep;
+
+  std::vector<int> layerType;
+  std::vector<int> layerID;
+  std::vector<int> xID;
+  std::vector<int> yID;
+  std::vector<float> x0;
+  std::vector<float> y0;
+  std::vector<float> z0;
+  std::vector<float> x1;
+  std::vector<float> y1;
+  std::vector<float> z1;
+  std::vector<float> time0;
+  std::vector<float> time1;
+  std::vector<float> edep;
 
   
 
