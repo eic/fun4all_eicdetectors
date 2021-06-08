@@ -10,6 +10,7 @@
 #include "PrtDetectorConstructionMessenger.h"
 
 #include <set>
+#include <map>
 #include <string>  // for string
 
 class G4EicDircDisplayAction;
@@ -127,8 +128,8 @@ class G4EicDircDetector : public PHG4Detector
   G4EicDircDisplayAction *m_DisplayAction;
 
   // active volumes
-  std::set<G4VPhysicalVolume *> m_PhysicalVolumesSet;
-
+  //std::set<G4VPhysicalVolume *> m_PhysicalVolumesSet;
+  std::map<G4VPhysicalVolume *, int> m_PhysicalVolumes_active;
   std::string m_SuperDetector;
 };
 
