@@ -2,11 +2,13 @@
 
 #include "G4EicDircDetector.h"
 #include "G4EicDircDisplayAction.h"
+#include "G4EicDircStackingAction.h"
 #include "G4EicDircSteppingAction.h"
 
 #include <phparameter/PHParameters.h>
 
 #include <g4main/PHG4HitContainer.h>
+#include <g4main/PHG4StackingAction.h>  // for PHG4StackingAction
 #include <g4main/PHG4SteppingAction.h>  // for PHG4SteppingAction
 
 #include <phool/PHCompositeNode.h>
@@ -23,9 +25,6 @@ using namespace std;
 //_______________________________________________________________________
 G4EicDircSubsystem::G4EicDircSubsystem(const std::string &name)
   : PHG4DetectorSubsystem(name)
-  , m_Detector(nullptr)
-  , m_SteppingAction(nullptr)
-  , m_DisplayAction(nullptr)
 {
   // call base class method which will set up parameter infrastructure
   // and call our SetDefaultParameters() method
@@ -104,6 +103,7 @@ int G4EicDircSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
     tmp->SetSupportNodeName(m_SupportNodeName);
     m_SteppingAction = tmp;
   }
+  m_StackingAction = new G4EicDircStackingAction(m_Detector);
   return 0;
 }
 

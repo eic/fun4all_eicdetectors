@@ -46,6 +46,7 @@ libg4eicdirc_la_SOURCES = \
   G4EicDircDetector.cc \
   G4EicDircDisplayAction.cc \
   G4EicDircSubsystem.cc \
+  G4EicDircStackingAction.cc \
   G4EicDircSteppingAction.cc \
   PrtAmbiguityInfo.cxx \
   PrtAmbiguityInfo_Dict.cc \
