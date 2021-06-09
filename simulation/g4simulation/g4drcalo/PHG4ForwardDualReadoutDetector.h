@@ -83,9 +83,9 @@ class PHG4ForwardDualReadoutDetector : public PHG4Detector
 
  private:
   G4LogicalVolume *ConstructTower(int type);
-  G4LogicalVolume *ConstructTowerType1();
-  G4LogicalVolume *ConstructTowerType2();
-  G4LogicalVolume *ConstructTowerType3();
+  // G4LogicalVolume *ConstructTowerType1();
+  // G4LogicalVolume *ConstructTowerType2();
+  // G4LogicalVolume *ConstructTowerType3();
   G4Material *GetScintillatorMaterial();
   G4Material *GetQuartzMaterial();
   G4Material *GetPMMAMaterial();
@@ -131,6 +131,12 @@ class PHG4ForwardDualReadoutDetector : public PHG4Detector
   G4double _tower_dx;
   G4double _tower_dy;
   G4double _tower_dz;
+
+  G4double _scintFiber_diam;
+  G4double _cerenkovFiber_diam;
+  int _cerenkovFiber_material;
+  int _tower_makeNotched;
+  int _absorber_Material;
 
   G4double _wls_dw;
   G4double _support_dw;

@@ -65,6 +65,11 @@ PHG4ForwardDualReadoutDetector::PHG4ForwardDualReadoutDetector(PHG4Subsystem* su
   , _tower_dx(100 * mm)
   , _tower_dy(100 * mm)
   , _tower_dz(1000.0 * mm)
+  , _scintFiber_diam(1.0 * mm)
+  , _cerenkovFiber_diam(1.0 * mm)
+  , _cerenkovFiber_material(0)
+  , _tower_makeNotched(0)
+  , _absorber_Material(0)
   , _materialScintillator("G4_POLYSTYRENE")
   , _materialAbsorber("G4_Fe")
   , _active(1)
@@ -202,30 +207,30 @@ void PHG4ForwardDualReadoutDetector::ConstructMe(G4LogicalVolume* logicWorld)
         }
 
         // create mother volume with space for currRowNtow towers along x-axis
-        auto HadCalRowLeftSolid    = new G4Box("HadCalRowLeftBox", ((currRowNtowMod - currRowNtowInner) / 2 + offsetrows) * _tower_dx / 2.0,_tower_dy / 2.0,_tower_dz / 2.0);
-        auto HadCalRowLeftLogical  = new G4LogicalVolume(HadCalRowLeftSolid,material_air,"HadCalRowLeftLogical");
+        auto DRCalRowLeftSolid    = new G4Box("DRCalRowLeftBox", ((currRowNtowMod - currRowNtowInner) / 2 + offsetrows) * _tower_dx / 2.0,_tower_dy / 2.0,_tower_dz / 2.0);
+        auto DRCalRowLeftLogical  = new G4LogicalVolume(DRCalRowLeftSolid,material_air,"DRCalRowLeftLogical");
         // replicate singletower tower design currRowNtow times along x-axis
-        new G4PVReplica("HadCalRowLeftPhysical",singletower,HadCalRowLeftLogical,
+        new G4PVReplica("DRCalRowLeftPhysical",singletower,DRCalRowLeftLogical,
                         kXAxis,((currRowNtowMod - currRowNtowInner) / 2 + offsetrows),_tower_dx);
 
         ostringstream name_row_twr_left;
         name_row_twr_left.str("");
         name_row_twr_left << _towerlogicnameprefix << "_row_" << row << "_left" << endl;
         new G4PVPlacement(0, G4ThreeVector( - ( ( currRowNtowInner / 2.0 ) * _tower_dx ) - ( ((currRowNtowMod - currRowNtowInner) / 2 - offsetrows) * _tower_dx / 2.0 ), (row*_tower_dy), 0),
-                      HadCalRowLeftLogical, name_row_twr_left.str().c_str(), drcalo_envelope_log, 0, false, OverlapCheck());
+                      DRCalRowLeftLogical, name_row_twr_left.str().c_str(), drcalo_envelope_log, 0, false, OverlapCheck());
 
         // create mother volume with space for currRowNtow towers along x-axis
-        auto HadCalRowRightSolid    = new G4Box("HadCalRowRightBox", ((currRowNtowMod - currRowNtowInner) / 2 - offsetrows ) * _tower_dx / 2.0,_tower_dy / 2.0,_tower_dz / 2.0);
-        auto HadCalRowRightLogical  = new G4LogicalVolume(HadCalRowRightSolid,material_air,"HadCalRowRightLogical");
+        auto DRCalRowRightSolid    = new G4Box("DRCalRowRightBox", ((currRowNtowMod - currRowNtowInner) / 2 - offsetrows ) * _tower_dx / 2.0,_tower_dy / 2.0,_tower_dz / 2.0);
+        auto DRCalRowRightLogical  = new G4LogicalVolume(DRCalRowRightSolid,material_air,"DRCalRowRightLogical");
         // replicate singletower tower design currRowNtow times along x-axis
-        new G4PVReplica("HadCalRowRightPhysical",singletower,HadCalRowRightLogical,
+        new G4PVReplica("DRCalRowRightPhysical",singletower,DRCalRowRightLogical,
                         kXAxis,((currRowNtowMod - currRowNtowInner) / 2 - offsetrows ),_tower_dx);
 
         ostringstream name_row_twr_right;
         name_row_twr_right.str("");
         name_row_twr_right << _towerlogicnameprefix << "_row_" << row << "_right" << endl;
         new G4PVPlacement(0, G4ThreeVector( ( ( currRowNtowInner / 2.0 ) * _tower_dx ) + ( ((currRowNtowMod - currRowNtowInner) / 2 + offsetrows) * _tower_dx / 2.0 ), (row*_tower_dy), 0),
-                      HadCalRowRightLogical, name_row_twr_right.str().c_str(), drcalo_envelope_log, 0, false, OverlapCheck());
+                      DRCalRowRightLogical, name_row_twr_right.str().c_str(), drcalo_envelope_log, 0, false, OverlapCheck());
       } else {
         // pythagoras -> get available length in circular mother volume for towers
         // divide given length by tower width -> get number of towers that can be placed
@@ -238,53 +243,54 @@ void PHG4ForwardDualReadoutDetector::ConstructMe(G4LogicalVolume* logicWorld)
           currRowNtowMod = rowNtow;
         }
         // create mother volume with space for currRowNtow towers along x-axis
-        auto HadCalRowSolid    = new G4Box("HadCalRowBox", (currRowNtowMod - currRowNtowInner) / 2 * _tower_dx / 2.0,_tower_dy / 2.0,_tower_dz / 2.0);
-        auto HadCalRowLogical  = new G4LogicalVolume(HadCalRowSolid,material_air,"HadCalRowLogical");
+        auto DRCalRowSolid    = new G4Box("DRCalRowBox", (currRowNtowMod - currRowNtowInner) / 2 * _tower_dx / 2.0,_tower_dy / 2.0,_tower_dz / 2.0);
+        auto DRCalRowLogical  = new G4LogicalVolume(DRCalRowSolid,material_air,"DRCalRowLogical");
         // replicate singletower tower design currRowNtow times along x-axis
-        new G4PVReplica("HadCalRowPhysical",singletower,HadCalRowLogical,
+        new G4PVReplica("DRCalRowPhysical",singletower,DRCalRowLogical,
                         kXAxis,(currRowNtowMod - currRowNtowInner) / 2,_tower_dx);
 
         ostringstream name_row_twr;
         name_row_twr.str("");
         name_row_twr << _towerlogicnameprefix << "_row_" << row << "_left" << endl;
         new G4PVPlacement(0, G4ThreeVector( - ( ( currRowNtowInner / 2.0 ) * _tower_dx ) - ( (currRowNtowMod - currRowNtowInner) / 2 * _tower_dx / 2.0 ), (row*_tower_dy), 0),
-                      HadCalRowLogical, name_row_twr.str().c_str(), drcalo_envelope_log, 0, false, OverlapCheck());
+                      DRCalRowLogical, name_row_twr.str().c_str(), drcalo_envelope_log, 0, false, OverlapCheck());
 
         ostringstream name_row_twr2;
         name_row_twr2.str("");
         name_row_twr2 << _towerlogicnameprefix << "_row_" << row << "_left" << endl;
         new G4PVPlacement(0, G4ThreeVector( ( ( currRowNtowInner / 2.0 ) * _tower_dx ) + ( (currRowNtowMod - currRowNtowInner) / 2 * _tower_dx / 2.0 ), (row*_tower_dy), 0),
-                      HadCalRowLogical, name_row_twr2.str().c_str(), drcalo_envelope_log, 0, false, OverlapCheck());
+                      DRCalRowLogical, name_row_twr2.str().c_str(), drcalo_envelope_log, 0, false, OverlapCheck());
       }
 
     } else {
       if(_quadratic_detector){
+        // cout << currRowNtow << endl;
         // create mother volume with space for currRowNtow towers along x-axis
-        auto HadCalRowSolid    = new G4Box("HadCalRowBox", 2 * rowNtow * _tower_dx / 2.0,_tower_dy / 2.0,_tower_dz / 2.0);
-        auto HadCalRowLogical  = new G4LogicalVolume(HadCalRowSolid,material_air,"HadCalRowLogical");
+        auto DRCalRowSolid    = new G4Box("DRCalRowBox", 2 * rowNtow * _tower_dx / 2.0,_tower_dy / 2.0,_tower_dz / 2.0);
+        auto DRCalRowLogical  = new G4LogicalVolume(DRCalRowSolid,material_air,"DRCalRowLogical");
         // replicate singletower tower design currRowNtow times along x-axis
-        new G4PVReplica("HadCalRowPhysical",singletower,HadCalRowLogical,
+        new G4PVReplica("DRCalRowPhysical",singletower,DRCalRowLogical,
                         kXAxis,2 * rowNtow,_tower_dx);
 
         ostringstream name_row_twr;
         name_row_twr.str("");
         name_row_twr << _towerlogicnameprefix << "_row_" << row << endl;
         new G4PVPlacement(0, G4ThreeVector(0, (row*_tower_dy), 0),
-                      HadCalRowLogical, name_row_twr.str().c_str(), drcalo_envelope_log, 0, false, OverlapCheck());
+                      DRCalRowLogical, name_row_twr.str().c_str(), drcalo_envelope_log, 0, false, OverlapCheck());
       } else {
         // create mother volume with space for currRowNtow towers along x-axis
-        cout << currRowNtow << endl;
-        auto HadCalRowSolid    = new G4Box("HadCalRowBox", currRowNtow * _tower_dx / 2.0,_tower_dy / 2.0,_tower_dz / 2.0);
-        auto HadCalRowLogical  = new G4LogicalVolume(HadCalRowSolid,material_air,"HadCalRowLogical");
+        // cout << currRowNtow << endl;
+        auto DRCalRowSolid    = new G4Box("DRCalRowBox", currRowNtow * _tower_dx / 2.0,_tower_dy / 2.0,_tower_dz / 2.0);
+        auto DRCalRowLogical  = new G4LogicalVolume(DRCalRowSolid,material_air,"DRCalRowLogical");
         // replicate singletower tower design currRowNtow times along x-axis
-        new G4PVReplica("HadCalRowPhysical",singletower,HadCalRowLogical,
+        new G4PVReplica("DRCalRowPhysical",singletower,DRCalRowLogical,
                         kXAxis,currRowNtow,_tower_dx);
 
         ostringstream name_row_twr;
         name_row_twr.str("");
         name_row_twr << _towerlogicnameprefix << "_row_" << row << endl;
         new G4PVPlacement(0, G4ThreeVector(0, (row*_tower_dy), 0),
-                      HadCalRowLogical, name_row_twr.str().c_str(), drcalo_envelope_log, 0, false, OverlapCheck());
+                      DRCalRowLogical, name_row_twr.str().c_str(), drcalo_envelope_log, 0, false, OverlapCheck());
       }
     }
   }
@@ -301,10 +307,6 @@ PHG4ForwardDualReadoutDetector::ConstructTower(int type)
     cout << "PHG4ForwardDualReadoutDetector: Build logical volume for single tower..." << endl;
   }
 
-  if (_tower_type == 1) return ConstructTowerType1();
-  else if (_tower_type == 2) return ConstructTowerType2();
-  else if (_tower_type == 3) return ConstructTowerType3();
-
   //create logical volume for single tower
   G4Material* material_air = G4Material::GetMaterial("G4_AIR");
   float distancing = 1.0;
@@ -321,13 +323,19 @@ PHG4ForwardDualReadoutDetector::ConstructTower(int type)
 
   //create geometry volumes to place inside single_tower
 
-  G4double diameter_fiber = 1 * mm;
+  G4double diameter_fiber = _scintFiber_diam;
+  G4double diameter_fiber_cherenkov = _cerenkovFiber_diam;
   G4double airgap = 0.1 * mm;
 
   // fibre cutout
   G4VSolid* single_cutout_tube  = new G4Tubs(G4String("single_cutout_tube"),
                                             0,
                                             ( diameter_fiber + airgap ) / 2.0,
+                                            1.03 * _tower_dz / 1.0, //make it 1.03 times longer to ensure full cutout
+                                            0.,2*M_PI*rad);
+  G4VSolid* single_cutout_tube_cherenkov  = new G4Tubs(G4String("single_cutout_tube_cherenkov"),
+                                            0,
+                                            ( diameter_fiber_cherenkov + airgap ) / 2.0,
                                             1.03 * _tower_dz / 1.0, //make it 1.03 times longer to ensure full cutout
                                             0.,2*M_PI*rad);
   // notch cutout
@@ -335,536 +343,46 @@ PHG4ForwardDualReadoutDetector::ConstructTower(int type)
                                           ( diameter_fiber + airgap ) / 2.0,
                                           1.03 * ( diameter_fiber + airgap ) / 4.0, //make it 1.03 times longer to ensure full cutout
                                           1.03 * _tower_dz / 1.0);
-  // absorber base object
-  G4VSolid* solid_absorber_temp = new G4Box(G4String("solid_absorber_temp"),
-                                          distancing*_tower_dx / 2.0,
-                                          distancing*_tower_dy / 2.0,
-                                          _tower_dz / 2.0);
-  // cut out four fiber holes
-  G4VSolid* solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_f1"), solid_absorber_temp, single_cutout_tube
-                                                            , 0 ,G4ThreeVector( _tower_dx / 4.0 , ( _tower_dy / 2.0 ) - ( ( diameter_fiber + airgap ) / 2.0 ) ,0.)); // top right
-  solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_f2"), solid_absorber, single_cutout_tube
-                                                            , 0 ,G4ThreeVector( _tower_dx / 4.0 , - ( ( diameter_fiber + airgap ) / 2.0 ) ,0.)); // bottom right
-  solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_f3"), solid_absorber, single_cutout_tube
-                                                            , 0 ,G4ThreeVector(- _tower_dx / 4.0, ( _tower_dy / 2.0 ) - ( ( diameter_fiber + airgap ) / 2.0 ) ,0.)); // top left
-  solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_f4"), solid_absorber, single_cutout_tube
-                                                            , 0 ,G4ThreeVector(- _tower_dx / 4.0, - ( ( diameter_fiber + airgap ) / 2.0 ) ,0.)); // bottom left
-  // G4VSolid* solid_absorber = solid_absorber_fiber->Clone();
-  // cut out four notches
-  solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_box1"), solid_absorber, single_cutout_box
-                                                            , 0 ,G4ThreeVector( _tower_dx / 4.0  , ( _tower_dy / 2.0 ) - ( ( diameter_fiber + airgap ) / 4.0 ) ,0.));
-  solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_box2"), solid_absorber, single_cutout_box
-                                                            , 0 ,G4ThreeVector( _tower_dx / 4.0  , - ( ( diameter_fiber + airgap ) / 4.0 ) ,0.));
-  solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_box3"), solid_absorber, single_cutout_box
-                                                            , 0 ,G4ThreeVector( - _tower_dx / 4.0, ( _tower_dy / 2.0 ) - ( ( diameter_fiber + airgap ) / 4.0 ) ,0.));
-  solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_box4"), solid_absorber, single_cutout_box
-                                                            , 0 ,G4ThreeVector( - _tower_dx / 4.0, - ( ( diameter_fiber + airgap ) / 4.0 ) ,0.));
-
-
-
-  G4VSolid* solid_scintillator  = new G4Tubs(G4String("single_scintillator_fiber"),
-                                            0,
-                                            diameter_fiber / 2.0,
-                                            _tower_dz / 2.0,
-                                            0.,2*M_PI*rad);
-
-
-  G4VSolid* solid_cherenkov  = new G4Tubs(G4String("single_cherenkov_fiber"),
-                                            0,
-                                            diameter_fiber / 2.0,
-                                            _tower_dz / 2.0,
-                                            0.,2*M_PI*rad);
-
-
-
-  G4Material* material_scintillator = GetScintillatorMaterial();
-
-  // G4Material* material_absorber = G4Material::GetMaterial(_materialAbsorber.c_str());
-  G4NistManager* man = G4NistManager::Instance();
-  G4Material* material_absorber = man->FindOrBuildMaterial(_materialAbsorber.c_str());
-
-
-  G4LogicalVolume* logic_absorber = new G4LogicalVolume(solid_absorber,
-                                                        material_absorber,
-                                                        "absorber_solid_logic",
-                                                        0, 0, 0);
-
-  G4LogicalVolume* logic_scint = new G4LogicalVolume(solid_scintillator,
-                                                    material_scintillator,
-                                                    "hdrcalo_single_scintillator_fiber_logic",
-                                                    0, 0, 0);
-
-
-
-  // G4OpticalSurface *surface = new G4OpticalSurface("CrystalSurface", unified, polished, dielectric_metal);
-  // if(1){
-  //   //G4LogicalSkinSurface *csurf =
-  //   new G4LogicalSkinSurface("CrystalSurfaceL", logic_scint, surface);
-
-  //   //surface material
-  //   const G4int ntab = 2;
-  //   G4double opt_en[] = {1.551*eV, 3.545*eV}; // 350 - 800 nm
-  //   G4double reflectivity[] = {0.8, 0.8};
-  //   G4double efficiency[] = {0.9, 0.9};
-  //   G4MaterialPropertiesTable *surfmat = new G4MaterialPropertiesTable();
-  //   surfmat->AddProperty("REFLECTIVITY", opt_en, reflectivity, ntab);
-  //   surfmat->AddProperty("EFFICIENCY", opt_en, efficiency, ntab);
-  //   surface->SetMaterialPropertiesTable(surfmat);
-  // }
-
-  G4Material* material_cherenkov = GetQuartzMaterial();
-  // G4Material* material_cherenkov = GetPMMAMaterial();
-
-  G4LogicalVolume* logic_cherenk = new G4LogicalVolume(solid_cherenkov,
-                                                    material_cherenkov,
-                                                    "hdrcalo_single_cherenkov_fiber_logic",
-                                                    0, 0, 0);
-
-  m_DisplayAction->AddVolume(logic_absorber, "Absorber");
-  m_DisplayAction->AddVolume(logic_scint, "Scintillator");
-  m_DisplayAction->AddVolume(logic_cherenk, "Cherenkov");
-
-  //place physical volumes for absorber and scintillator fiber
-
-  // ostringstream towername;
-  // towername.str("");
-  // towername ;
-
-  ostringstream name_absorber;
-  name_absorber.str("");
-  name_absorber << _towerlogicnameprefix << "absorbersolid" << endl;
-
-  ostringstream name_scintillator;
-  name_scintillator.str("");
-  name_scintillator << _towerlogicnameprefix << "singlescintillatorfiber" << endl;
-
-  ostringstream name_cherenkov;
-  name_cherenkov.str("");
-  name_cherenkov << _towerlogicnameprefix << "_single_cherenkov_fiber"  << endl;
-
-
-  new G4PVPlacement(0, G4ThreeVector( 0,  0 , 0),
-                    logic_absorber,
-                    name_absorber.str().c_str(),
-                    single_tower_logic,
-                    0, 0, OverlapCheck());
-  // place scintillator fibers (top left, bottom right)
-  new G4PVPlacement(0, G4ThreeVector( -_tower_dx / 4,  ( _tower_dy / 2.0 ) - ( ( diameter_fiber + airgap ) / 2.0 ) , 0),
-                    logic_scint,
-                    name_scintillator.str().c_str(),
-                    single_tower_logic,
-                    0, 0, OverlapCheck());
-  new G4PVPlacement(0, G4ThreeVector( _tower_dx / 4,  - ( ( diameter_fiber + airgap ) / 2.0 ) , 0),
-                    logic_scint,
-                    name_scintillator.str().c_str(),
-                    single_tower_logic,
-                    0, 0, OverlapCheck());
-
-  // place cherenkov fibers (top right, bottom left)
-  new G4PVPlacement(0, G4ThreeVector( _tower_dx / 4 ,  ( _tower_dy / 2.0 ) - ( ( diameter_fiber + airgap ) / 2.0 ) , 0),
-                    logic_cherenk,
-                    name_cherenkov.str().c_str(),
-                    single_tower_logic,
-                    0, 0, OverlapCheck());
-  new G4PVPlacement(0, G4ThreeVector( -_tower_dx / 4 ,  - ( ( diameter_fiber + airgap ) / 2.0 ) , 0),
-                    logic_cherenk,
-                    name_cherenkov.str().c_str(),
-                    single_tower_logic,
-                    0, 0, OverlapCheck());
-
-
-
-  if (Verbosity() > 0)
-  {
-    cout << "PHG4ForwardDualReadoutDetector: Building logical volume for single tower done." << endl;
-  }
-
-  return single_tower_logic;
-}
-
-//_______________________________________________________________________
-G4LogicalVolume*
-PHG4ForwardDualReadoutDetector::ConstructTowerType1()
-{
-  if (Verbosity() > 0)
-  {
-    cout << "PHG4ForwardDualReadoutDetector: Build logical volume for single tower..." << endl;
-  }
-
-  //create logical volume for single tower
-  G4Material* material_air = G4Material::GetMaterial("G4_AIR");
-  float distancing = 1.0;
-  // 2x2 tower base element
-  G4VSolid* single_tower_solid = new G4Box(G4String("single_tower_solid"),
-                                          _tower_dx / 2.0,
-                                          _tower_dy / 2.0,
-                                          _tower_dz / 2.0);
-
-  G4LogicalVolume* single_tower_logic = new G4LogicalVolume(single_tower_solid,
-                                                            material_air,
-                                                            "single_tower_logic",
-                                                            0, 0, 0);
-
-  //create geometry volumes to place inside single_tower
-
-  G4double diameter_fiber = 1 * mm;
-  G4double diameter_fiber_cherenkov = 0.22 * mm;
-  G4double airgap = 0.1 * mm;
-
-  // fibre cutout
-  G4VSolid* single_cutout_tube  = new G4Tubs(G4String("single_cutout_tube"),
-                                            0,
-                                            ( diameter_fiber + airgap ) / 2.0,
-                                            1.03 * _tower_dz / 1.0, //make it 1.03 times longer to ensure full cutout
-                                            0.,2*M_PI*rad);
-  G4VSolid* single_cutout_tube_cherenkov  = new G4Tubs(G4String("single_cutout_tube_cherenkov"),
-                                            0,
-                                            ( diameter_fiber_cherenkov + airgap ) / 2.0,
-                                            1.03 * _tower_dz / 1.0, //make it 1.03 times longer to ensure full cutout
-                                            0.,2*M_PI*rad);
-  // notch cutout
-  // G4VSolid* single_cutout_box = new G4Box(G4String("single_cutout_box"),
-  //                                         ( diameter_fiber + airgap ) / 2.0,
-  //                                         1.03 * ( diameter_fiber + airgap ) / 4.0, //make it 1.03 times longer to ensure full cutout
-  //                                         1.03 * _tower_dz / 1.0);
-  // absorber base object
-  G4VSolid* solid_absorber_temp = new G4Box(G4String("solid_absorber_temp"),
-                                          distancing*_tower_dx / 2.0,
-                                          distancing*_tower_dy / 2.0,
-                                          _tower_dz / 2.0);
-  // cut out four fiber holes
-  G4VSolid* solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_f1"), solid_absorber_temp, single_cutout_tube_cherenkov
-                                                            , 0 ,G4ThreeVector( _tower_dx / 4.0 , ( _tower_dy / 2.0 ) - ( ( diameter_fiber + airgap ) / 2.0 ) ,0.)); // top right
-  solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_f2"), solid_absorber, single_cutout_tube
-                                                            , 0 ,G4ThreeVector( _tower_dx / 4.0 , - ( ( diameter_fiber + airgap ) / 2.0 ) ,0.)); // bottom right
-  solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_f3"), solid_absorber, single_cutout_tube
-                                                            , 0 ,G4ThreeVector(- _tower_dx / 4.0, ( _tower_dy / 2.0 ) - ( ( diameter_fiber + airgap ) / 2.0 ) ,0.)); // top left
-  solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_f4"), solid_absorber, single_cutout_tube_cherenkov
-                                                            , 0 ,G4ThreeVector(- _tower_dx / 4.0, - ( ( diameter_fiber + airgap ) / 2.0 ) ,0.)); // bottom left
-
-
-  G4VSolid* solid_scintillator  = new G4Tubs(G4String("single_scintillator_fiber"),
-                                            0,
-                                            diameter_fiber / 2.0,
-                                            _tower_dz / 2.0,
-                                            0.,2*M_PI*rad);
-
-
-  G4VSolid* solid_cherenkov  = new G4Tubs(G4String("single_cherenkov_fiber"),
-                                            0,
-                                            diameter_fiber_cherenkov / 2.0,
-                                            _tower_dz / 2.0,
-                                            0.,2*M_PI*rad);
-
-
-  G4Material* material_scintillator = GetScintillatorMaterial();
-
-
-  G4NistManager* man = G4NistManager::Instance();
-  G4Material* material_absorber = man->FindOrBuildMaterial(_materialAbsorber.c_str());
-
-
-  G4LogicalVolume* logic_absorber = new G4LogicalVolume(solid_absorber,
-                                                        material_absorber,
-                                                        "absorber_solid_logic",
-                                                        0, 0, 0);
-
-  G4LogicalVolume* logic_scint = new G4LogicalVolume(solid_scintillator,
-                                                    material_scintillator,
-                                                    "hdrcalo_single_scintillator_fiber_logic",
-                                                    0, 0, 0);
-
-  G4Material *material_cherenkov = GetQuartzMaterial();
-
-  G4LogicalVolume* logic_cherenk = new G4LogicalVolume(solid_cherenkov,
-                                                    material_cherenkov,
-                                                    "hdrcalo_single_cherenkov_fiber_logic",
-                                                    0, 0, 0);
-
-  m_DisplayAction->AddVolume(logic_absorber, "Absorber");
-  m_DisplayAction->AddVolume(logic_scint, "Scintillator");
-  m_DisplayAction->AddVolume(logic_cherenk, "Cherenkov");
-
-  //place physical volumes for absorber and scintillator fiber
-
-  ostringstream name_absorber;
-  name_absorber.str("");
-  name_absorber << _towerlogicnameprefix << "absorbersolid" << endl;
-
-  ostringstream name_scintillator;
-  name_scintillator.str("");
-  name_scintillator << _towerlogicnameprefix << "singlescintillatorfiber" << endl;
-
-  ostringstream name_cherenkov;
-  name_cherenkov.str("");
-  name_cherenkov << _towerlogicnameprefix << "_single_cherenkov_fiber"  << endl;
-
-
-  new G4PVPlacement(0, G4ThreeVector( 0,  0 , 0),
-                    logic_absorber,
-                    name_absorber.str().c_str(),
-                    single_tower_logic,
-                    0, 0, OverlapCheck());
-  // place scintillator fibers (top left, bottom right)
-  new G4PVPlacement(0, G4ThreeVector( -_tower_dx / 4,  ( _tower_dy / 2.0 ) - ( ( diameter_fiber + airgap ) / 2.0 ) , 0),
-                    logic_scint,
-                    name_scintillator.str().c_str(),
-                    single_tower_logic,
-                    0, 0, OverlapCheck());
-  new G4PVPlacement(0, G4ThreeVector( _tower_dx / 4,  - ( ( diameter_fiber + airgap ) / 2.0 ) , 0),
-                    logic_scint,
-                    name_scintillator.str().c_str(),
-                    single_tower_logic,
-                    0, 0, OverlapCheck());
-
-  // place cherenkov fibers (top right, bottom left)
-  new G4PVPlacement(0, G4ThreeVector( _tower_dx / 4 ,  ( _tower_dy / 2.0 ) - ( ( diameter_fiber + airgap ) / 2.0 ) , 0),
-                    logic_cherenk,
-                    name_cherenkov.str().c_str(),
-                    single_tower_logic,
-                    0, 0, OverlapCheck());
-  new G4PVPlacement(0, G4ThreeVector( -_tower_dx / 4 ,  - ( ( diameter_fiber + airgap ) / 2.0 ) , 0),
-                    logic_cherenk,
-                    name_cherenkov.str().c_str(),
-                    single_tower_logic,
-                    0, 0, OverlapCheck());
-
-
-
-  if (Verbosity() > 0)
-  {
-    cout << "PHG4ForwardDualReadoutDetector: Building logical volume for single tower done." << endl;
-  }
-
-  return single_tower_logic;
-}
-
-
-//_______________________________________________________________________
-G4LogicalVolume*
-PHG4ForwardDualReadoutDetector::ConstructTowerType2()
-{
-  if (Verbosity() > 0)
-  {
-    cout << "PHG4ForwardDualReadoutDetector: Build logical volume for single tower..." << endl;
-  }
-
-  //create logical volume for single tower
-  G4Material* material_air = G4Material::GetMaterial("G4_AIR");
-  float distancing = 1.0;
-  // 2x2 tower base element
-  G4VSolid* single_tower_solid = new G4Box(G4String("single_tower_solid"),
-                                          _tower_dx / 2.0,
-                                          _tower_dy / 2.0,
-                                          _tower_dz / 2.0);
-
-  G4LogicalVolume* single_tower_logic = new G4LogicalVolume(single_tower_solid,
-                                                            material_air,
-                                                            "single_tower_logic",
-                                                            0, 0, 0);
-
-  //create geometry volumes to place inside single_tower
-
-  G4double diameter_fiber = 0.5 * mm;
-  G4double diameter_fiber_cherenkov = 1.0 * mm;
-  G4double airgap = 0.1 * mm;
-
-  // fibre cutout
-  G4VSolid* single_cutout_tube  = new G4Tubs(G4String("single_cutout_tube"),
-                                            0,
-                                            ( diameter_fiber + airgap ) / 2.0,
-                                            1.03 * _tower_dz / 1.0, //make it 1.03 times longer to ensure full cutout
-                                            0.,2*M_PI*rad);
-  G4VSolid* single_cutout_tube_cherenkov  = new G4Tubs(G4String("single_cutout_tube_cherenkov"),
-                                            0,
-                                            ( diameter_fiber_cherenkov + airgap ) / 2.0,
-                                            1.03 * _tower_dz / 1.0, //make it 1.03 times longer to ensure full cutout
-                                            0.,2*M_PI*rad);
-  // absorber base object
-  G4VSolid* solid_absorber_temp = new G4Box(G4String("solid_absorber_temp"),
-                                          distancing*_tower_dx / 2.0,
-                                          distancing*_tower_dy / 2.0,
-                                          _tower_dz / 2.0);
-  // cut out four fiber holes
-  G4VSolid* solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_f1"), solid_absorber_temp, single_cutout_tube_cherenkov
-                                                            , 0 ,G4ThreeVector( _tower_dx / 4.0 , _tower_dy / 4.0 ,0.)); // top right
-  solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_f2"), solid_absorber, single_cutout_tube
-                                                            , 0 ,G4ThreeVector( _tower_dx / 4.0 , - _tower_dy / 4.0 ,0.)); // bottom right
-  solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_f3"), solid_absorber, single_cutout_tube
-                                                            , 0 ,G4ThreeVector(- _tower_dx / 4.0, _tower_dy / 4.0 ,0.)); // top left
-  solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_f4"), solid_absorber, single_cutout_tube_cherenkov
-                                                            , 0 ,G4ThreeVector(- _tower_dx / 4.0, - _tower_dy / 4.0 ,0.)); // bottom left
-
-
-  G4VSolid* solid_scintillator  = new G4Tubs(G4String("single_scintillator_fiber"),
-                                            0,
-                                            diameter_fiber / 2.0,
-                                            _tower_dz / 2.0,
-                                            0.,2*M_PI*rad);
-
-
-  G4VSolid* solid_cherenkov  = new G4Tubs(G4String("single_cherenkov_fiber"),
-                                            0,
-                                            diameter_fiber_cherenkov / 2.0,
-                                            _tower_dz / 2.0,
-                                            0.,2*M_PI*rad);
-
-
-  G4Material* material_scintillator = GetScintillatorMaterial();
-
-  // G4Material* material_absorber = G4Material::GetMaterial(_materialAbsorber.c_str());
-  G4NistManager* man = G4NistManager::Instance();
-  G4Material* material_absorber = man->FindOrBuildMaterial(_materialAbsorber.c_str());
-
-
-  G4LogicalVolume* logic_absorber = new G4LogicalVolume(solid_absorber,
-                                                        material_absorber,
-                                                        "absorber_solid_logic",
-                                                        0, 0, 0);
-
-  G4LogicalVolume* logic_scint = new G4LogicalVolume(solid_scintillator,
-                                                    material_scintillator,
-                                                    "hdrcalo_single_scintillator_fiber_logic",
-                                                    0, 0, 0);
-
-
-  G4Material *material_cherenkov = GetQuartzMaterial();
-
-  G4LogicalVolume* logic_cherenk = new G4LogicalVolume(solid_cherenkov,
-                                                    material_cherenkov,
-                                                    "hdrcalo_single_cherenkov_fiber_logic",
-                                                    0, 0, 0);
-
-  m_DisplayAction->AddVolume(logic_absorber, "Absorber");
-  m_DisplayAction->AddVolume(logic_scint, "Scintillator");
-  m_DisplayAction->AddVolume(logic_cherenk, "Cherenkov");
-
-  //place physical volumes for absorber and scintillator fiber
-
-  // ostringstream towername;
-  // towername.str("");
-  // towername ;
-
-  ostringstream name_absorber;
-  name_absorber.str("");
-  name_absorber << _towerlogicnameprefix << "absorbersolid" << endl;
-
-  ostringstream name_scintillator;
-  name_scintillator.str("");
-  name_scintillator << _towerlogicnameprefix << "singlescintillatorfiber" << endl;
-
-  ostringstream name_cherenkov;
-  name_cherenkov.str("");
-  name_cherenkov << _towerlogicnameprefix << "_single_cherenkov_fiber"  << endl;
-
-
-  new G4PVPlacement(0, G4ThreeVector( 0,  0 , 0),
-                    logic_absorber,
-                    name_absorber.str().c_str(),
-                    single_tower_logic,
-                    0, 0, OverlapCheck());
-  // place scintillator fibers (top left, bottom right)
-  new G4PVPlacement(0, G4ThreeVector( -_tower_dx / 4,  _tower_dy / 4.0 , 0),
-                    logic_scint,
-                    name_scintillator.str().c_str(),
-                    single_tower_logic,
-                    0, 0, OverlapCheck());
-  new G4PVPlacement(0, G4ThreeVector( _tower_dx / 4,  - _tower_dy / 4.0 , 0),
-                    logic_scint,
-                    name_scintillator.str().c_str(),
-                    single_tower_logic,
-                    0, 0, OverlapCheck());
-
-  // place cherenkov fibers (top right, bottom left)
-  new G4PVPlacement(0, G4ThreeVector( _tower_dx / 4 ,  _tower_dy / 4.0 , 0),
-                    logic_cherenk,
-                    name_cherenkov.str().c_str(),
-                    single_tower_logic,
-                    0, 0, OverlapCheck());
-  new G4PVPlacement(0, G4ThreeVector( -_tower_dx / 4 ,  - _tower_dy / 4.0 , 0),
-                    logic_cherenk,
-                    name_cherenkov.str().c_str(),
-                    single_tower_logic,
-                    0, 0, OverlapCheck());
-
-
-
-  if (Verbosity() > 0)
-  {
-    cout << "PHG4ForwardDualReadoutDetector: Building logical volume for single tower done." << endl;
-  }
-
-  return single_tower_logic;
-}
-
-
-//_______________________________________________________________________
-G4LogicalVolume*
-PHG4ForwardDualReadoutDetector::ConstructTowerType3()
-{
-  if (Verbosity() > 0)
-  {
-    cout << "PHG4ForwardDualReadoutDetector: Build logical volume for single tower..." << endl;
-  }
-
-  //create logical volume for single tower
-  G4Material* material_air = G4Material::GetMaterial("G4_AIR");
-  float distancing = 1.0;
-  // 2x2 tower base element
-  G4VSolid* single_tower_solid = new G4Box(G4String("single_tower_solid"),
-                                          _tower_dx / 2.0,
-                                          _tower_dy / 2.0,
-                                          _tower_dz / 2.0);
-
-  G4LogicalVolume* single_tower_logic = new G4LogicalVolume(single_tower_solid,
-                                                            material_air,
-                                                            "single_tower_logic",
-                                                            0, 0, 0);
-
-  //create geometry volumes to place inside single_tower
-
-  G4double diameter_fiber = 1.0 * mm;
-  G4double diameter_fiber_cherenkov = 1.0 * mm;
-  G4double airgap = 0.1 * mm;
-
-  // fibre cutout
-  G4VSolid* single_cutout_tube  = new G4Tubs(G4String("single_cutout_tube"),
-                                            0,
-                                            ( diameter_fiber + airgap ) / 2.0,
-                                            1.03 * _tower_dz / 1.0, //make it 1.03 times longer to ensure full cutout
-                                            0.,2*M_PI*rad);
-  G4VSolid* single_cutout_tube_cherenkov  = new G4Tubs(G4String("single_cutout_tube_cherenkov"),
-                                            0,
-                                            ( diameter_fiber_cherenkov + airgap ) / 2.0,
-                                            1.03 * _tower_dz / 1.0, //make it 1.03 times longer to ensure full cutout
-                                            0.,2*M_PI*rad);
-  // notch cutout
-  G4VSolid* single_cutout_box = new G4Box(G4String("single_cutout_box"),
-                                          _tower_dx / 2.0 / 2.0,
-                                          _tower_dy / 2.0 / 2.0, //make it 1.03 times longer to ensure full cutout
+  G4VSolid* single_cutout_box_cherenkov = new G4Box(G4String("single_cutout_box_cherenkov"),
+                                          ( diameter_fiber_cherenkov + airgap ) / 2.0,
+                                          1.03 * ( diameter_fiber_cherenkov + airgap ) / 4.0, //make it 1.03 times longer to ensure full cutout
                                           1.03 * _tower_dz / 1.0);
   // absorber base object
   G4VSolid* solid_absorber_temp = new G4Box(G4String("solid_absorber_temp"),
                                           distancing*_tower_dx / 2.0,
                                           distancing*_tower_dy / 2.0,
                                           _tower_dz / 2.0);
-  // cut out four fiber holes
-  G4VSolid* solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_f1"), solid_absorber_temp, single_cutout_tube_cherenkov
-                                                            , 0 ,G4ThreeVector( _tower_dx / 4.0 , _tower_dy / 4.0 ,0.)); // top right
-  solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_f2"), solid_absorber, single_cutout_tube
-                                                            , 0 ,G4ThreeVector( _tower_dx / 4.0 , - _tower_dy / 4.0 ,0.)); // bottom right
-  solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_f3"), solid_absorber, single_cutout_tube
-                                                            , 0 ,G4ThreeVector(- _tower_dx / 4.0, _tower_dy / 4.0 ,0.)); // top left
-  solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_f4"), solid_absorber, single_cutout_tube_cherenkov
-                                                            , 0 ,G4ThreeVector(- _tower_dx / 4.0, - _tower_dy / 4.0 ,0.)); // bottom left
-  // cut out four notches
-  solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_box1"), solid_absorber, single_cutout_box
-                                                            , 0 ,G4ThreeVector( _tower_dx / 4.0  ,  _tower_dy  / 4.0 ,0.));
-  solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_box4"), solid_absorber, single_cutout_box
-                                                            , 0 ,G4ThreeVector( - _tower_dx / 4.0, - _tower_dy  / 4.0 ,0.));
 
-
-
+  G4VSolid* solid_absorber;
+  if(_tower_makeNotched){
+    // cut out four fiber holes
+    solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_f1"), solid_absorber_temp, single_cutout_tube_cherenkov
+                                                              , 0 ,G4ThreeVector( _tower_dx / 4.0 , ( _tower_dy / 2.0 ) - ( ( diameter_fiber_cherenkov + airgap ) / 2.0 ) ,0.)); // top right
+    solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_f2"), solid_absorber, single_cutout_tube
+                                                              , 0 ,G4ThreeVector( _tower_dx / 4.0 , - ( ( diameter_fiber + airgap ) / 2.0 ) ,0.)); // bottom right
+    solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_f3"), solid_absorber, single_cutout_tube
+                                                              , 0 ,G4ThreeVector(- _tower_dx / 4.0, ( _tower_dy / 2.0 ) - ( ( diameter_fiber + airgap ) / 2.0 ) ,0.)); // top left
+    solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_f4"), solid_absorber, single_cutout_tube_cherenkov
+                                                              , 0 ,G4ThreeVector(- _tower_dx / 4.0, - ( ( diameter_fiber_cherenkov + airgap ) / 2.0 ) ,0.)); // bottom left
+    // cut out four notches
+    solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_box1"), solid_absorber, single_cutout_box_cherenkov
+                                                              , 0 ,G4ThreeVector( _tower_dx / 4.0  , ( _tower_dy / 2.0 ) - ( ( diameter_fiber_cherenkov + airgap ) / 4.0 ) ,0.));
+    solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_box2"), solid_absorber, single_cutout_box
+                                                              , 0 ,G4ThreeVector( _tower_dx / 4.0  , - ( ( diameter_fiber + airgap ) / 4.0 ) ,0.));
+    solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_box3"), solid_absorber, single_cutout_box
+                                                              , 0 ,G4ThreeVector( - _tower_dx / 4.0, ( _tower_dy / 2.0 ) - ( ( diameter_fiber + airgap ) / 4.0 ) ,0.));
+    solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_box4"), solid_absorber, single_cutout_box_cherenkov
+                                                            , 0 ,G4ThreeVector( - _tower_dx / 4.0, - ( ( diameter_fiber_cherenkov + airgap ) / 4.0 ) ,0.));
+  } else {
+    solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_f1"), solid_absorber_temp, single_cutout_tube_cherenkov
+                                                              , 0 ,G4ThreeVector( _tower_dx / 4.0 , _tower_dy / 4.0 ,0.)); // top right
+    solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_f2"), solid_absorber, single_cutout_tube
+                                                              , 0 ,G4ThreeVector( _tower_dx / 4.0 , - _tower_dy / 4.0 ,0.)); // bottom right
+    solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_f3"), solid_absorber, single_cutout_tube
+                                                              , 0 ,G4ThreeVector(- _tower_dx / 4.0, _tower_dy / 4.0 ,0.)); // top left
+    solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_temp_f4"), solid_absorber, single_cutout_tube_cherenkov
+                                                              , 0 ,G4ThreeVector(- _tower_dx / 4.0, - _tower_dy / 4.0 ,0.)); // bottom left
+  }
   G4VSolid* solid_scintillator  = new G4Tubs(G4String("single_scintillator_fiber"),
                                             0,
                                             diameter_fiber / 2.0,
@@ -881,9 +399,13 @@ PHG4ForwardDualReadoutDetector::ConstructTowerType3()
 
   G4Material* material_scintillator = GetScintillatorMaterial();
 
-  // G4Material* material_absorber = G4Material::GetMaterial(_materialAbsorber.c_str());
+
   G4NistManager* man = G4NistManager::Instance();
-  G4Material* material_absorber = man->FindOrBuildMaterial(_materialAbsorber.c_str());
+  G4Material* material_absorber;
+  if(_absorber_Material==0)material_absorber = man->FindOrBuildMaterial(_materialAbsorber.c_str());
+  if(_absorber_Material==1)material_absorber = man->FindOrBuildMaterial("G4_W");
+  if(_absorber_Material==2)material_absorber = man->FindOrBuildMaterial("G4_Cu");
+  if(_absorber_Material==3)material_absorber = man->FindOrBuildMaterial("G4_Pb");
 
 
   G4LogicalVolume* logic_absorber = new G4LogicalVolume(solid_absorber,
@@ -896,7 +418,10 @@ PHG4ForwardDualReadoutDetector::ConstructTowerType3()
                                                     "hdrcalo_single_scintillator_fiber_logic",
                                                     0, 0, 0);
 
-  G4Material *material_cherenkov = GetQuartzMaterial();
+  G4Material *material_cherenkov;
+  if(_cerenkovFiber_material==0) material_cherenkov = GetPMMAMaterial();
+  else if(_cerenkovFiber_material==1) material_cherenkov = GetQuartzMaterial();
+  else material_cherenkov = GetPMMAMaterial();
 
   G4LogicalVolume* logic_cherenk = new G4LogicalVolume(solid_cherenkov,
                                                     material_cherenkov,
@@ -908,6 +433,7 @@ PHG4ForwardDualReadoutDetector::ConstructTowerType3()
   m_DisplayAction->AddVolume(logic_cherenk, "Cherenkov");
 
   //place physical volumes for absorber and scintillator fiber
+
   ostringstream name_absorber;
   name_absorber.str("");
   name_absorber << _towerlogicnameprefix << "absorbersolid" << endl;
@@ -926,31 +452,55 @@ PHG4ForwardDualReadoutDetector::ConstructTowerType3()
                     name_absorber.str().c_str(),
                     single_tower_logic,
                     0, 0, OverlapCheck());
-  // place scintillator fibers (top left, bottom right)
-  new G4PVPlacement(0, G4ThreeVector( -_tower_dx / 4,  _tower_dy / 4.0 , 0),
-                    logic_scint,
-                    name_scintillator.str().c_str(),
-                    single_tower_logic,
-                    0, 0, OverlapCheck());
-  new G4PVPlacement(0, G4ThreeVector( _tower_dx / 4,  - _tower_dy / 4.0 , 0),
-                    logic_scint,
-                    name_scintillator.str().c_str(),
-                    single_tower_logic,
-                    0, 0, OverlapCheck());
+  if(_tower_makeNotched){
+    // place scintillator fibers (top left, bottom right)
+    new G4PVPlacement(0, G4ThreeVector( -_tower_dx / 4,  ( _tower_dy / 2.0 ) - ( ( diameter_fiber + airgap ) / 2.0 ) , 0),
+                      logic_scint,
+                      name_scintillator.str().c_str(),
+                      single_tower_logic,
+                      0, 0, OverlapCheck());
+    new G4PVPlacement(0, G4ThreeVector( _tower_dx / 4,  - ( ( diameter_fiber + airgap ) / 2.0 ) , 0),
+                      logic_scint,
+                      name_scintillator.str().c_str(),
+                      single_tower_logic,
+                      0, 0, OverlapCheck());
 
-  // place cherenkov fibers (top right, bottom left)
-  new G4PVPlacement(0, G4ThreeVector( _tower_dx / 4 ,  _tower_dy / 4.0 , 0),
-                    logic_cherenk,
-                    name_cherenkov.str().c_str(),
-                    single_tower_logic,
-                    0, 0, OverlapCheck());
-  new G4PVPlacement(0, G4ThreeVector( -_tower_dx / 4 ,  - _tower_dy / 4.0 , 0),
-                    logic_cherenk,
-                    name_cherenkov.str().c_str(),
-                    single_tower_logic,
-                    0, 0, OverlapCheck());
+    // place cherenkov fibers (top right, bottom left)
+    new G4PVPlacement(0, G4ThreeVector( _tower_dx / 4 ,  ( _tower_dy / 2.0 ) - ( ( diameter_fiber_cherenkov + airgap ) / 2.0 ) , 0),
+                      logic_cherenk,
+                      name_cherenkov.str().c_str(),
+                      single_tower_logic,
+                      0, 0, OverlapCheck());
+    new G4PVPlacement(0, G4ThreeVector( -_tower_dx / 4 ,  - ( ( diameter_fiber_cherenkov + airgap ) / 2.0 ) , 0),
+                      logic_cherenk,
+                      name_cherenkov.str().c_str(),
+                      single_tower_logic,
+                      0, 0, OverlapCheck());
+  } else {
+    // place scintillator fibers (top left, bottom right)
+    new G4PVPlacement(0, G4ThreeVector( -_tower_dx / 4,  _tower_dy / 4.0 , 0),
+                      logic_scint,
+                      name_scintillator.str().c_str(),
+                      single_tower_logic,
+                      0, 0, OverlapCheck());
+    new G4PVPlacement(0, G4ThreeVector( _tower_dx / 4,  - _tower_dy / 4.0 , 0),
+                      logic_scint,
+                      name_scintillator.str().c_str(),
+                      single_tower_logic,
+                      0, 0, OverlapCheck());
 
-
+    // place cherenkov fibers (top right, bottom left)
+    new G4PVPlacement(0, G4ThreeVector( _tower_dx / 4 ,  _tower_dy / 4.0 , 0),
+                      logic_cherenk,
+                      name_cherenkov.str().c_str(),
+                      single_tower_logic,
+                      0, 0, OverlapCheck());
+    new G4PVPlacement(0, G4ThreeVector( -_tower_dx / 4 ,  - _tower_dy / 4.0 , 0),
+                      logic_cherenk,
+                      name_cherenkov.str().c_str(),
+                      single_tower_logic,
+                      0, 0, OverlapCheck());
+  }
 
   if (Verbosity() > 0)
   {
@@ -1244,6 +794,37 @@ int PHG4ForwardDualReadoutDetector::ParseParametersFromTable()
     _tower_dz = parit->second * cm;
   }
 
+  // new start
+  parit = m_GlobalParameterMap.find("Scint_Diam");
+  if (parit != m_GlobalParameterMap.end())
+  {
+    _scintFiber_diam = parit->second * cm;
+  }
+
+  parit = m_GlobalParameterMap.find("Cerenkov_Diam");
+  if (parit != m_GlobalParameterMap.end())
+  {
+    _cerenkovFiber_diam = parit->second * cm;
+  }
+
+  parit = m_GlobalParameterMap.find("Cerenkov_Material");
+  if (parit != m_GlobalParameterMap.end())
+  {
+    _cerenkovFiber_material = parit->second;
+  }
+
+  parit = m_GlobalParameterMap.find("NotchCutout");
+  if (parit != m_GlobalParameterMap.end())
+  {
+    _tower_makeNotched = parit->second;
+  }
+
+  parit = m_GlobalParameterMap.find("Absorber_Material");
+  if (parit != m_GlobalParameterMap.end())
+  {
+    _absorber_Material = parit->second;
+  }
+  // new end
 
   parit = m_GlobalParameterMap.find("Gr1_inner");
   if (parit != m_GlobalParameterMap.end())
