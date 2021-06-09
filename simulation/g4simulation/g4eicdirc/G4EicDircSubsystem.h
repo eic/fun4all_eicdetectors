@@ -56,11 +56,11 @@ class G4EicDircSubsystem : public PHG4DetectorSubsystem
   //! Print info (from SubsysReco)
   void Print(const std::string& what = "ALL") const override;
 
-  PHG4DisplayAction* GetDisplayAction() const { return m_DisplayAction; }
+  PHG4DisplayAction* GetDisplayAction() const override { return m_DisplayAction; }
 
  private:
   // \brief Set default parameter values
-  void SetDefaultParameters();
+  void SetDefaultParameters() override;
 
   //! detector geometry
   /*! derives from PHG4Detector */
