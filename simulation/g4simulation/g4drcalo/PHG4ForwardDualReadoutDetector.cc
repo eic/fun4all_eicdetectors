@@ -403,9 +403,10 @@ PHG4ForwardDualReadoutDetector::ConstructTower(int type)
   G4NistManager* man = G4NistManager::Instance();
   G4Material* material_absorber;
   if(_absorber_Material==0)material_absorber = man->FindOrBuildMaterial(_materialAbsorber.c_str());
-  if(_absorber_Material==1)material_absorber = man->FindOrBuildMaterial("G4_W");
-  if(_absorber_Material==2)material_absorber = man->FindOrBuildMaterial("G4_Cu");
-  if(_absorber_Material==3)material_absorber = man->FindOrBuildMaterial("G4_Pb");
+  else if(_absorber_Material==1)material_absorber = man->FindOrBuildMaterial("G4_W");
+  else if(_absorber_Material==2)material_absorber = man->FindOrBuildMaterial("G4_Cu");
+  else if(_absorber_Material==3)material_absorber = man->FindOrBuildMaterial("G4_Pb");
+  else material_absorber = man->FindOrBuildMaterial(_materialAbsorber.c_str());
 
 
   G4LogicalVolume* logic_absorber = new G4LogicalVolume(solid_absorber,
