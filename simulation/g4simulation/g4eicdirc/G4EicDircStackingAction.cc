@@ -11,6 +11,9 @@
 #include <gsl/gsl_rng.h>
 
 #include <Geant4/G4Track.hh>
+#include <Geant4/G4VProcess.hh>
+#include <Geant4/G4ParticleTypes.hh>
+#include <Geant4/G4ios.hh>
 
 #include <iostream>
 #include <string>
@@ -61,11 +64,15 @@ G4EicDircStackingAction::~G4EicDircStackingAction()
 G4ClassificationOfNewTrack G4EicDircStackingAction::ClassifyNewTrack(const G4Track* aTrack)
 {
   G4VPhysicalVolume* volume = aTrack->GetVolume();
-  int whichactive = m_Detector->IsInDetector(volume);
-  if (!whichactive)
+  int whichactive_int = m_Detector->IsInDetector(volume);
+  bool whichactive = (whichactive_int > 0 && whichactive_int < 12);
+  //int whichactive = m_Detector->IsInDetector(volume); 
+  if (!whichactive)  
   {
     return fUrgent;
   }
+
+
   std::string particlename = aTrack->GetDefinition()->GetParticleName();
   if (particlename == "opticalphoton")
   {
@@ -80,5 +87,8 @@ G4ClassificationOfNewTrack G4EicDircStackingAction::ClassifyNewTrack(const G4Tra
       return fKill;
     }
   }
+
   return fUrgent;
+
 }
+

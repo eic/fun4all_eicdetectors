@@ -83,6 +83,37 @@ int G4EicDircDetector::IsInDetector(G4VPhysicalVolume *volume) const
   return 0;
 }
 
+/*int G4EicDircDetector::IsInDetector(G4VPhysicalVolume *volume) const
+{
+  int status = 0;
+  G4String name = volume->GetName();
+  if(name == "wDirc" || 
+     name == "wBar" || 
+     name == "wFd" || 
+     name == "wMcp" ||
+     name == "wPixel" || 
+     name == "wGlue" ||
+     name == "wLens1" ||
+     name == "wLens2" ||
+     name == "wLens3" ||
+     name == "wMirror" ||
+     name == "wPrizm")
+    {
+      status = 1;
+    }
+
+  return status;
+  }*/
+
+/*G4LogicalVolume *lv = volume->GetLogicalVolume(); 
+  map<G4LogicalVolume *, int>::const_iterator iter = m_logVol_active.find(lv);
+  if (iter != m_logVol_active.end())
+    {
+      return iter->second;
+    }
+
+    return 0;*/
+
 void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
 {
   /* fGeomType = PrtManager::Instance()->GetGeometry();  
@@ -172,8 +203,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   fPrtRot = new G4RotationMatrix();
   //create a messenger for this class
   //fGeomMessenger = new PrtDetectorConstructionMessenger(this);
-
-
+  
   //-------------------------
   DefineMaterials();
 
@@ -192,9 +222,11 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   // The DIRC
   G4Box* gDirc = new G4Box("gDirc",500,300,0.5*dirclength+550);
   lDirc = new G4LogicalVolume(gDirc,defaultMaterial,"lDirc",0,0,0);
+  //m_logVol_active[lDirc] = 1; 
   G4Box* gFd = new G4Box("gFd",0.5*fFd[1],0.5*fFd[0],0.5*fFd[2]);
   lFd = new G4LogicalVolume(gFd,defaultMaterial,"lFd",0,0,0);
-  
+  //m_logVol_active[lFd] = 2;
+
   double tphi, dphi = 360*deg/(double)fNBoxes;  
   G4VPhysicalVolume* phy;
 
@@ -212,14 +244,15 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
       tRot->rotateZ(-tphi);     
       //phy = new G4PVPlacement(tRot,G4ThreeVector(dx,dy,0),lDirc,"wDirc",lExpHall,false,i);
       phy = new G4PVPlacement(tRot,G4ThreeVector(dx,dy,0),lDirc,"wDirc",logicWorld,false,i);
-      //m_PhysicalVolumesSet.insert(phy);
-      m_PhysicalVolumes_active[phy] = 1+i;
+      m_PhysicalVolumesSet.insert(phy);
+      m_PhysicalVolumes_active[phy] = 1;
     }
     //}
   
   // The Bar
   G4Box *gBar = new G4Box("gBar",fBar[0]/2.,fBar[1]/2.,fBar[2]/2.);
   lBar = new G4LogicalVolume(gBar,BarMaterial,"lBar",0,0,0);
+  //m_logVol_active[lBar] = 3;
   //wBar =  new G4PVPlacement(0,G4ThreeVector(0,0,0),lBar,"wBar", lDirc,false,0);
   G4Box *gExpVol = new G4Box("gExpVol",fBar[0]/2.,0.5*fBoxWidth,fBar[2]/2.);
   lExpVol = new G4LogicalVolume(gExpVol,BarMaterial,"lExpVol",0,0,0);
@@ -227,6 +260,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   // Glue
   G4Box *gGlue = new G4Box("gGlue",fBar[0]/2.,fBar[1]/2.,0.5*gluethickness);
   lGlue = new G4LogicalVolume(gGlue,epotekMaterial,"lGlue",0,0,0);
+  //m_logVol_active[lGlue] = 4;
   G4Box *gGlueE = new G4Box("gGlueE",fBar[0]/2.,0.5*fBoxWidth,0.5*gluethickness);
   lGlueE = new G4LogicalVolume(gGlueE,epotekMaterial,"lGlueE",0,0,0);
 
@@ -235,10 +269,10 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
       double z = -0.5*dirclength+0.5*fBar[2]+(fBar[2]+gluethickness)*j;
       wBar =  new G4PVPlacement(0,G4ThreeVector(0,0,z),lBar,"wBar", lDirc,false,0);
       //m_PhysicalVolumesSet.insert(wBar);
-      m_PhysicalVolumes_active[wBar] = 1000+j;
+      m_PhysicalVolumes_active[wBar] = 3;
       wGlue =  new G4PVPlacement(0,G4ThreeVector(0,0,z+0.5*(fBar[2]+gluethickness)),lGlue,"wGlue", lDirc,false,0);
       //m_PhysicalVolumesSet.insert(wGlue);
-      m_PhysicalVolumes_active[wGlue] = 2000+j;
+      m_PhysicalVolumes_active[wGlue] = 4;
     }
   }else{
     int id=0, nparts=4;
@@ -247,11 +281,9 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
       if(fLensId == 6) sh = fLens[2];
       nparts=3;
       double z = -0.5*dirclength+0.5*fBar[2]+(fBar[2]+gluethickness)*3;
-      phy = new G4PVPlacement(0,G4ThreeVector(0,0,z+sh),lExpVol,"wExpVol",lDirc,false,id);      
-      //m_PhysicalVolumesSet.insert(phy);
-      m_PhysicalVolumes_active[phy] = 400+id; 
+      phy = new G4PVPlacement(0,G4ThreeVector(0,0,z+sh),lExpVol,"wExpVol",lDirc,false,id);           
       phy = new G4PVPlacement(0,G4ThreeVector(0,0,z+0.5*(fBar[2]+gluethickness)+sh),lGlueE,"wGlue", lDirc,false,id);
-      m_PhysicalVolumes_active[phy] = 2000+id;
+  
     }
     for(int i=0; i<fNBar; i++){
       double shifty = i*(fBar[1]+fBarsGap)- 0.5*fBoxWidth + fBar[1]/2.; 
@@ -259,10 +291,10 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
 	double z = -0.5*dirclength+0.5*fBar[2]+(fBar[2]+gluethickness)*j;
 	pDirc[i] = new G4PVPlacement(0,G4ThreeVector(0,shifty,z),lBar,"wBar",lDirc,false,id);
 	//m_PhysicalVolumesSet.insert(pDirc[i]);
-	m_PhysicalVolumes_active[pDirc[i]] = 1000+id;
+	m_PhysicalVolumes_active[pDirc[i]] = 3;
 	wGlue = new G4PVPlacement(0,G4ThreeVector(0,shifty,z+0.5*(fBar[2]+gluethickness)),lGlue,"wGlue", lDirc,false,id);
 	//m_PhysicalVolumesSet.insert(wGlue);
-	m_PhysicalVolumes_active[wGlue] = 2000+id;
+	m_PhysicalVolumes_active[wGlue] = 4;
 	id++;
       }
     }
@@ -271,10 +303,11 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   // The Mirror
   G4Box* gMirror = new G4Box("gMirror",fMirror[0]/2.,fMirror[1]/2.,fMirror[2]/2.);
   lMirror = new G4LogicalVolume(gMirror,MirrorMaterial,"lMirror",0,0,0);
+  //m_logVol_active[lMirror] = 5;
   //wMirror =new G4PVPlacement(0,G4ThreeVector(0,0,0.5*dirclength+fMirror[2]/2.),lMirror,"wMirror", lDirc,false,0);
   wMirror =new G4PVPlacement(0,G4ThreeVector(0,0,-0.5*dirclength-fMirror[2]/2.),lMirror,"wMirror", lDirc,false,0);
   //m_PhysicalVolumesSet.insert(wMirror);
-  m_PhysicalVolumes_active[wMirror] = 200;  
+  m_PhysicalVolumes_active[wMirror] = 5;  
 
   // The Lenses
   if(fLensId == 2){ // 2-layer lens
@@ -335,12 +368,15 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
     G4SubtractionSolid*  gLens3 = new G4SubtractionSolid("Lens3", gLenst, gsphere2,new G4RotationMatrix(),zTrans2);
     
     lLens1 = new G4LogicalVolume(gLens1,BarMaterial,"lLens1",0,0,0);
+    //m_logVol_active[lLens1] = 6;
     //int tt = PrtManager::Instance()->GetVerbose();
     //if(tt==0) 
     lLens2 = new G4LogicalVolume(gLens2,Nlak33aMaterial,"lLens2",0,0,0); //Nlak33aMaterial //PbF2Material //SapphireMaterial
+    //m_logVol_active[lLens2] = 7;
     //if(tt==1) lLens2 = new G4LogicalVolume(gLens2,PbF2Material,"lLens2",0,0,0);
     //if(tt==2) lLens2 = new G4LogicalVolume(gLens2,SapphireMaterial,"lLens2",0,0,0);
     lLens3 = new G4LogicalVolume(gLens3,BarMaterial,"lLens3",0,0,0);
+    //m_logVol_active[lLens3] = 8;
   }
 
   if(fLensId == 6){ // 3-component cylindrical lens
@@ -420,12 +456,13 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
 	if(fLensId!=6){
 	  phy = new G4PVPlacement(0,G4ThreeVector(0,shifty,shifth),lLens1,"wLens1", lDirc,false,i);
 	  //m_PhysicalVolumesSet.insert(phy);
-	  m_PhysicalVolumes_active[phy] = 3000+i;
+	  m_PhysicalVolumes_active[phy] = 6;
 	  phy = new G4PVPlacement(0,G4ThreeVector(0,shifty,shifth),lLens2,"wLens2", lDirc,false,i);
 	  //m_PhysicalVolumesSet.insert(phy);
-	  m_PhysicalVolumes_active[phy] = 4000+i;
+	  m_PhysicalVolumes_active[phy] = 7;
 	  if(fLensId == 3)  phy = new G4PVPlacement(0,G4ThreeVector(0,shifty,shifth),lLens3,"wLens3", lDirc,false,i);
-	  m_PhysicalVolumes_active[phy] = 5000+i; 
+	  //m_PhysicalVolumesSet.insert(phy);
+	  m_PhysicalVolumes_active[phy] = 8; 
 	}
       }
       if(fLensId==6){
@@ -444,6 +481,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   // The Prizm
   G4Trap* gPrizm = new G4Trap("gPrizm",fPrizm[0],fPrizm[1],fPrizm[2],fPrizm[3]);
   lPrizm = new G4LogicalVolume(gPrizm, BarMaterial,"lPrizm",0,0,0);
+  //m_logVol_active[lPrizm] = 9;
 
   G4Trap* gPrizmT1 = new G4Trap("gPrizmT1",fPrizmT[0],fPrizmT[1],fPrizmT[2],fPrizmT[3]);
   lPrizmT1 = new G4LogicalVolume(gPrizmT1, BarMaterial,"lPrizmT1",0,0,0);
@@ -571,11 +609,11 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
     fPrismShift = G4ThreeVector((fPrizm[2]+fPrizm[3])/4.-0.5*fPrizm[3],0,0.5*(dirclength+fPrizm[1])+fLens[2]);
     phy = new G4PVPlacement(xRot,fPrismShift,lPrizm,"wPrizm", lDirc,false,0);
     //m_PhysicalVolumesSet.insert(phy);
-    m_PhysicalVolumes_active[phy] = 300;
+    m_PhysicalVolumes_active[phy] = 9;
     //phy = new G4PVPlacement(fdrot,G4ThreeVector(0.5*fFd[1]-0.5*fPrizm[3]-evshiftx,0,-evshiftz),lFd,"wFd", lDirc,false,0);
     phy = new G4PVPlacement(fdrot,G4ThreeVector(0.5*fFd[1]-0.5*fPrizm[3]-evshiftx,0,evshiftz),lFd,"wFd", lDirc,false,0);
     //m_PhysicalVolumesSet.insert(phy);
-    m_PhysicalVolumes_active[phy] = 100;
+    m_PhysicalVolumes_active[phy] = 2;
   }
 
   if(fMcpLayout==1){
@@ -673,7 +711,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
     
     G4Box* gMcp = new G4Box("gMcp",fMcpTotal[0]/2.,fMcpTotal[1]/2.,fMcpTotal[2]/2.);
     lMcp = new G4LogicalVolume(gMcp,BarMaterial,"lMcp",0,0,0);
-
+    //m_logVol_active[lMcp] = 10;
 
     //double pixSize = 6*mm;    
     fNpix1 = 32;//fMcpActive[1]/pixSize-1;
@@ -687,14 +725,15 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
     // The MCP Pixel
     G4Box* gPixel = new G4Box("gPixel",0.5*fMcpActive[0]/fNpix1,0.5*fMcpActive[1]/fNpix2,fMcpActive[2]/16.);
     lPixel = new G4LogicalVolume(gPixel,BarMaterial,"lPixel",0,0,0);
-    
+    //m_logVol_active[lPixel] = 11;
+
     for(int i=0; i<fNpix2; i++){
       for(int j=0; j<fNpix1; j++){
 	double shiftx = i*(fMcpActive[0]/fNpix1)-fMcpActive[0]/2.+0.5*fMcpActive[0]/fNpix1;
 	double shifty = j*(fMcpActive[1]/fNpix2)-fMcpActive[1]/2.+0.5*fMcpActive[1]/fNpix2;
 	phy = new G4PVPlacement(0,G4ThreeVector(shiftx,shifty,0),lPixel,"wPixel", lMcp,false,fNpix2*i+j);      
 	//m_PhysicalVolumesSet.insert(phy);
-	m_PhysicalVolumes_active[phy] = 10000 + (fNpix2*i+j);
+	m_PhysicalVolumes_active[phy] = 11;
       }
     }
  
@@ -712,7 +751,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
 	//phy = new G4PVPlacement(0,G4ThreeVector(shiftx,shifty,0),lMcp,"wMcp", lFd,false,mcpId++);
 	phy = new G4PVPlacement(0,G4ThreeVector(shiftx,shifty,0),lMcp,"wMcp", lFd,false,mcpId); 
 	//m_PhysicalVolumesSet.insert(phy);
-	m_PhysicalVolumes_active[phy] = 6000 + mcpId;
+	m_PhysicalVolumes_active[phy] = 10;
 	mcpId++;
       }
     }

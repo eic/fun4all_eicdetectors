@@ -24,6 +24,7 @@ class G4EicDircSteppingAction : public PHG4SteppingAction
 
   //! stepping action
   bool UserSteppingAction(const G4Step*, bool) override;
+  //bool UserSteppingAction(const G4Step*, int) override; 
 
   //! reimplemented from base class
   void SetInterfacePointers(PHCompositeNode*) override;

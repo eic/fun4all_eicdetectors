@@ -45,11 +45,10 @@ class G4EicDircDetector : public PHG4Detector
   //@{
   int IsInDetector(G4VPhysicalVolume *) const;
   //@}
-
+ 
   void SuperDetector(const std::string &name) { m_SuperDetector = name; }
   const std::string SuperDetector() const { return m_SuperDetector; }
-
-
+ 
  private:
   G4LogicalVolume* lExpHall;
   G4LogicalVolume* lFront;
@@ -128,8 +127,9 @@ class G4EicDircDetector : public PHG4Detector
   G4EicDircDisplayAction *m_DisplayAction;
 
   // active volumes
-  //std::set<G4VPhysicalVolume *> m_PhysicalVolumesSet;
+  std::set<G4VPhysicalVolume *> m_PhysicalVolumesSet;
   std::map<G4VPhysicalVolume *, int> m_PhysicalVolumes_active;
+  //std::map<G4LogicalVolume*, int> m_logVol_active;
   std::string m_SuperDetector;
 };
 

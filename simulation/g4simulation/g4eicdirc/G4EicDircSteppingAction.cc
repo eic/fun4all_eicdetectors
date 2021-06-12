@@ -68,11 +68,15 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
   G4TouchableHandle touchpost = aStep->GetPostStepPoint()->GetTouchableHandle();
   // get volume of the current step
   G4VPhysicalVolume *volume = touch->GetVolume();
+  G4VPhysicalVolume *volume_post = touchpost->GetVolume();
   // IsInDetector(volume) returns
   //  == 0 outside of detector
   //   > 0 for hits in active volume
   //  < 0 for hits in passive material
-  int whichactive = m_Detector->IsInDetector(volume);
+  int whichactive_int = m_Detector->IsInDetector(volume);
+  int whichactive_int_post = m_Detector->IsInDetector(volume_post);
+  bool whichactive = (whichactive_int > 0 && whichactive_int < 12);
+  //int whichactive = m_Detector->IsInDetector(volume);
   if (!whichactive)
   {
     return false;
@@ -84,6 +88,12 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
       (aStep->GetTotalEnergyDeposit() - aStep->GetNonIonizingEnergyDeposit()) /
       GeV;
   const G4Track *aTrack = aStep->GetTrack();
+
+  if((whichactive_int == 10 && whichactive_int_post == 1) || (whichactive_int == 2 && whichactive_int_post == 1))
+    {
+      G4Track *killtrack = const_cast<G4Track *>(aTrack);
+      killtrack->SetTrackStatus(fStopAndKill);
+    }
 
   // if this block stops everything, just put all kinetic energy into edep
   if (m_BlackHoleFlag)
@@ -291,6 +301,7 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
   }
   // return true to indicate the hit was used
   return true;
+
 }
 
 //____________________________________________________________________________..

@@ -4,6 +4,7 @@
 #include <g4main/PHG4StackingAction.h>
 
 #include <Geant4/G4UserStackingAction.hh>
+#include <Geant4/globals.hh>
 
 #include <gsl/gsl_rng.h>
 
@@ -17,6 +18,7 @@ class G4EicDircStackingAction : public PHG4StackingAction
   ~G4EicDircStackingAction() override;
 
   G4ClassificationOfNewTrack ClassifyNewTrack(const G4Track* aTrack) override;
+
 
  private:
   gsl_rng* RandomGenerator;
