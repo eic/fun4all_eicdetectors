@@ -71,7 +71,10 @@ class PHG4mRICHDetector : public PHG4Detector
     kHSector = 1,
     kEWall = 2,
     kHWall = 3,
-    kHWall_EWall = 4
+    kHWall_EWall = 4,
+    kHWall_Barrel = 5,
+    kEWall_proj = 6,
+    kESph = 7
   };
 
  private:
@@ -96,6 +99,8 @@ class PHG4mRICHDetector : public PHG4Detector
   void build_mRICH_wall_hside(G4LogicalVolume* space);
   void build_mRICH_wall_eside(G4LogicalVolume* space);
   void build_mRICH_sector(G4LogicalVolume* logicWorld, int numSector);
+  void build_mRICH_sector2(G4LogicalVolume* logicWorld, int numSector);
+  void build_mRICH_wall_eside_proj(G4LogicalVolume* space);
 
   int layer;
   int active;
