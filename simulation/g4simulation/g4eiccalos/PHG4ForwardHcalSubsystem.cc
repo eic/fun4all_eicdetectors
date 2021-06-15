@@ -143,6 +143,7 @@ void PHG4ForwardHcalSubsystem::SetDefaultParameters()
   set_default_double_param("rot_z", 0.);
   set_default_double_param("thickness_absorber", 2.);
   set_default_double_param("thickness_scintillator", 0.231);
+  set_default_int_param("absorber_FeTungsten", 0);
 
   std::ostringstream mappingfilename;
   const char* calibroot = getenv("CALIBRATIONROOT");

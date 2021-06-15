@@ -527,7 +527,7 @@ PHG4ForwardDualReadoutDetector::GetScintillatorMaterial()
   tab->AddConstProperty("FASTTIMECONSTANT", 2.8*ns); // was 6
   // tab->AddConstProperty("SCINTILLATIONYIELD", 13.9/keV); // was 200/MEV nominal  10
   tab->AddConstProperty("SCINTILLATIONYIELD", 200/MeV); // was 200/MEV nominal, should maybe be 13.9/keV
-  tab->AddConstProperty("RESOLUTIONSCALE", 1.);
+  tab->AddConstProperty("RESOLUTIONSCALE", 1.0);
 
   G4double opt_en[] =
     { 1.37760*eV, 1.45864*eV, 1.54980*eV, 1.65312*eV, 1.71013*eV, 1.77120*eV, 1.83680*eV, 1.90745*eV, 1.98375*eV, 2.06640*eV,
@@ -558,9 +558,9 @@ PHG4ForwardDualReadoutDetector::GetScintillatorMaterial()
 	G4double density;
 	G4int ncomponents;
   // G4Material* material_G4_POLYSTYRENE = G4Material::GetMaterial(_materialScintillator.c_str());
-  G4Material* material_G4_POLYSTYRENE = new G4Material("G4_POLYSTYRENE", density = 1.032 * g / cm3, ncomponents = 2);
-  material_G4_POLYSTYRENE->AddElement(G4Element::GetElement("C"), 19);
-  material_G4_POLYSTYRENE->AddElement(G4Element::GetElement("H"), 21);
+  G4Material* material_G4_POLYSTYRENE = new G4Material("G4_POLYSTYRENE", density = 1.05 * g / cm3, ncomponents = 2);
+  material_G4_POLYSTYRENE->AddElement(G4Element::GetElement("C"), 8);
+  material_G4_POLYSTYRENE->AddElement(G4Element::GetElement("H"), 8);
   material_G4_POLYSTYRENE->GetIonisation()->SetBirksConstant(0.126*mm/MeV);
   material_G4_POLYSTYRENE->SetMaterialPropertiesTable(tab);
 
@@ -585,9 +585,9 @@ PHG4ForwardDualReadoutDetector::GetPMMAMaterial()
 	G4int ncomponents;
 
   G4Material* material_PMMA = new G4Material("PMMA", density = 1.18 * g / cm3, ncomponents = 3);
-  material_PMMA->AddElement(G4Element::GetElement("C"), 3.6 / (3.6 + 5.7 + 1.4));
-  material_PMMA->AddElement(G4Element::GetElement("H"), 5.7 / (3.6 + 5.7 + 1.4));
-  material_PMMA->AddElement(G4Element::GetElement("O"), 1.4 / (3.6 + 5.7 + 1.4));
+  material_PMMA->AddElement(G4Element::GetElement("C"), 5);
+  material_PMMA->AddElement(G4Element::GetElement("H"), 8);
+  material_PMMA->AddElement(G4Element::GetElement("O"), 2);
 
   const G4int nEntries = 31;
 
