@@ -48,6 +48,8 @@ class PHG4ForwardHcalSubsystem : public PHG4DetectorSubsystem
    */
   void SetTowerMappingFile(const std::string &filename);
 
+  void SetUseFeTungstenAbsorber(int useTungsten) {set_int_param("absorber_FeTungsten", 1); };
+
  private:
   void SetDefaultParameters() override;
 
