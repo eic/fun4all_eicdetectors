@@ -40,6 +40,7 @@
 #include <Geant4/G4Types.hh>                    // for G4double, G4int
 #include <Geant4/G4VPhysicalVolume.hh>
 #include <Geant4/G4VisAttributes.hh>
+#include <Geant4/G4ios.hh>  // for G4cout, G4endl
 
 #include <algorithm>  // for fill, max
 #include <cmath>      // for floor, sqrt, acos, asin
@@ -90,6 +91,8 @@ void PHG4mRICHDetector::ConstructMe(G4LogicalVolume* logicWorld)
   //  2: e-side wall
   //  3: h-side wall
   //  4: h-side wall and e-side wall
+  //  5: barrel projective sectors
+  //  6: e-side projective
 
   if (subsystemSetup == DetectorSetUp::kSingle_Modular) Construct_a_mRICH(logicWorld);
   if (subsystemSetup == DetectorSetUp::kHSector_EWall)
@@ -99,11 +102,16 @@ void PHG4mRICHDetector::ConstructMe(G4LogicalVolume* logicWorld)
   }
   if (subsystemSetup == DetectorSetUp::kHSector) build_mRICH_sector(logicWorld, 8);
   if (subsystemSetup == DetectorSetUp::kEWall) build_mRICH_wall_eside(logicWorld);
+  if (subsystemSetup == DetectorSetUp::kEWall_proj) build_mRICH_wall_eside_proj(logicWorld);
   if (subsystemSetup == DetectorSetUp::kHWall) build_mRICH_wall_hside(logicWorld);
   if (subsystemSetup == DetectorSetUp::kHWall_EWall)
   {
     build_mRICH_wall_hside(logicWorld);
     build_mRICH_wall_eside(logicWorld);
+  }
+  if (subsystemSetup == DetectorSetUp::kHWall_Barrel)
+  {
+    build_mRICH_sector2(logicWorld, 21);
   }
 }
 //_______________________________________________________________
@@ -116,6 +124,7 @@ G4LogicalVolume* PHG4mRICHDetector::Construct_a_mRICH(G4LogicalVolume* logicWorl
   //--------------------------- skeleton setup ---------------------------//
   /*holder box and hollow volume*/ G4VPhysicalVolume* hollowVol = build_holderBox(parameters, logicWorld);
   /*aerogel                     */ build_aerogel(parameters, hollowVol);
+
   /*sensor plane                */ build_sensor(parameters, hollowVol->GetLogicalVolume());
 
   //-------------------------- for full set up ---------------------------//
@@ -253,7 +262,7 @@ G4double PHG4mRICHDetector::LensPar::GetSagita(G4double r)
 
   if (ArgSqrt < 0.0)
   {
-    std::cout << "UltraFresnelLensParameterisation::Sagita: Square Root of <0 !" << std::endl;
+    G4cout << "UltraFresnelLensParameterisation::Sagita: Square Root of <0 !" << G4endl;
   }
 
   G4double Sagita_value = Curvature * std::pow(r, 2) / (1.0 + std::sqrt(ArgSqrt)) + TotAspher;
@@ -282,11 +291,11 @@ PHG4mRICHDetector::mRichParameter::mRichParameter()
 
   //--------------------Holder box key parameters-----------------------------//
   const G4double BoxDelz = 2.0 * mm;  // extract space between components
-  const G4double box_thicknessXYZ[4] = {(1. / 4.) * 2.54 * cm, (1. / 4.) * 2.54 * cm, (1. / 16.) * 2.54 * cm, (1. / 4.) * 2.54 * cm};
+  const G4double box_thicknessXYZ[4] = {0.1 * cm, 0.1 * cm, 0.1 * cm, 0.1 * cm};
 
   //------------------------- Aerogel gel key parameters---------------------//
-  const G4double foamHolderThicknessXYZ[3] = {1.0 * cm, 1.0 * cm, 1.0 * cm};
-  const G4double agel_halfXYZ[3] = {5.525 * cm, 5.525 * cm, 1.65 * cm};
+  const G4double foamHolderThicknessXYZ[3] = {0.2 * cm, 0.2 * cm, 0.2 * cm};
+  const G4double agel_halfXYZ[3] = {6.325 * cm, 6.325 * cm, 1.50 * cm};
 
   //------------------------Fresnel lens key parameters----------------------//
   const G4double lens_gap = (2.54 / 8.0) * cm;  //gap between agel and lens, and between lens and mirror
@@ -295,19 +304,18 @@ PHG4mRICHDetector::mRichParameter::mRichParameter()
   const G4double grooveDensity = 125.0 / (2.54 * cm);
 
   fresnelLens->n = 1.49;
-  // fresnelLens->f=6.0*2.54*cm;
-  fresnelLens->f = 5.0 * 2.54 * cm;
+  fresnelLens->f=6.0*2.54*cm;
   fresnelLens->eff_diameter = 15.24 * cm;
   fresnelLens->diameter = 2.0 * sqrt(2.0) * lensHalfx;
-  fresnelLens->centerThickness = 0.06 * 2.54 * cm;
+  fresnelLens->centerThickness = 0.068 * 2.54 * cm;
   fresnelLens->grooveWidth = (G4double) 1.0 / grooveDensity;
   fresnelLens->Set_halfXYZ(lensHalfx, grooveDensity);
   //rest of lens parameters are set below
 
   //---------------------------Photodetector key parameters-------------------//
-  const G4double sensorGap = 0.05 * cm;  //half width of the gap
-  const G4double glassWindow_halfXYZ[3] = {5.2 / 2.0 * cm, 5.2 / 2.0 * cm, 0.075 * cm};
-  const G4double phodet_halfXYZ[3] = {2.4 * cm, 2.4 * cm, 0.075 * cm};
+  const G4double sensorGap = 0.2 * cm;  //half width of the gap
+  const G4double glassWindow_halfXYZ[3] = {5.18 / 2.0 * cm, 5.18 / 2.0 * cm, 0.075 * cm};
+  const G4double phodet_halfXYZ[3] = {2.425 * cm, 2.425 * cm, 0.075 * cm};
 
   //--------------------------- mirror key parameters ------------------------//
   const G4double mirrorThickness = 0.2 * cm;
@@ -329,7 +337,9 @@ PHG4mRICHDetector::mRichParameter::mRichParameter()
   G4double acrylicBox_halfXYZ[3];
   acrylicBox_halfXYZ[0] = max(max(foamHolder_halfXYZ[0], sensor_total_halfx + readoutThickness), fresnelLens->halfXYZ[0]) + 0.1 * cm + box_thicknessXYZ[0];
   acrylicBox_halfXYZ[1] = acrylicBox_halfXYZ[0];
-  acrylicBox_halfXYZ[2] = (BoxDelz + 2 * foamHolder_halfXYZ[2] + 2 * agel_halfXYZ[2] + lens_gap + 2 * fresnelLens->halfXYZ[2] + fresnelLens->f + 2 * glassWindow_halfXYZ[2] + 2 * phodet_halfXYZ[2] + (2 * readout_halfz + BoxDelz) + box_thicknessXYZ[2] + box_thicknessXYZ[3]) / 2.0;
+  acrylicBox_halfXYZ[2] = (BoxDelz + 2 * foamHolder_halfXYZ[2] + 2 * agel_halfXYZ[2] + 
+			   lens_gap + 2 * fresnelLens->halfXYZ[2] + fresnelLens->f + 2 * glassWindow_halfXYZ[2] + 
+			   2 * phodet_halfXYZ[2] + (2 * readout_halfz + BoxDelz) + box_thicknessXYZ[2] + box_thicknessXYZ[3]) / 2.0;
 
   G4double hollow_halfXYZ[3];
   hollow_halfXYZ[0] = acrylicBox_halfXYZ[0] - box_thicknessXYZ[0];
@@ -340,9 +350,10 @@ PHG4mRICHDetector::mRichParameter::mRichParameter()
 
   G4double foamHolder_posz = -hollow_halfXYZ[2] + BoxDelz + foamHolder_halfXYZ[2];
   G4double agel_posz = foamHolder_posz + foamHolder_halfXYZ[2] + agel_halfXYZ[2];
+
   G4double lens_z = agel_posz + agel_halfXYZ[2] + fresnelLens->halfXYZ[2] + lens_gap;
 
-  G4double glassWindow_z = lens_z - fresnelLens->halfXYZ[2] + fresnelLens->f + glassWindow_halfXYZ[2];  //out of focus. But this makes sense.
+  G4double glassWindow_z = lens_z - fresnelLens->halfXYZ[2] + fresnelLens->f + glassWindow_halfXYZ[2]-16.; //out of focus. 16 mm closer to the lens is the optimal position of the censor
   G4double phodet_z = glassWindow_z + glassWindow_halfXYZ[2] + phodet_halfXYZ[2];
 
   //redendunt:
@@ -358,7 +369,7 @@ PHG4mRICHDetector::mRichParameter::mRichParameter()
   for (i = 0; i < 3; i++) holderBox->halfXYZ[i] = acrylicBox_halfXYZ[i];
   holderBox->pos = G4ThreeVector(0 * cm, 0 * cm, 0 * cm);
   //holderBox->material=G4Material::GetMaterial("G4_Al");
-  holderBox->material = G4Material::GetMaterial("G4_AIR");  //testing
+  holderBox->material=G4Material::GetMaterial("CFRP_INTT"); // carbon fiber
   holderBox->sensitivity = 0;
 
   holderBox->color = G4Colour(0.0, 0.0, 0.0);
@@ -373,6 +384,7 @@ PHG4mRICHDetector::mRichParameter::mRichParameter()
   for (i = 0; i < 3; i++) hollowVolume->halfXYZ[i] = hollow_halfXYZ[i];
   hollowVolume->pos = hollow_pos;
   hollowVolume->material = G4Material::GetMaterial("mRICH_Air_Opt");
+
   hollowVolume->sensitivity = 0;
 
   hollowVolume->color = G4Colour(0.0, 0.0, 0.0);
@@ -421,6 +433,7 @@ PHG4mRICHDetector::mRichParameter::mRichParameter()
   foamHolderPoly->wireframe = true;
   foamHolderPoly->surface = false;
 
+  // /*
   //----------
   // set aerogel
   //----------
@@ -428,14 +441,13 @@ PHG4mRICHDetector::mRichParameter::mRichParameter()
   for (i = 0; i < 3; i++) aerogel->halfXYZ[i] = agel_halfXYZ[i];
   aerogel->pos = G4ThreeVector(0, 0, agel_posz);
   aerogel->material = G4Material::GetMaterial("mRICH_Aerogel2");
-  //aerogel->material=Air_Opt;
   aerogel->sensitivity = 0;
-
   aerogel->color = G4Colour(1.0, 0.65, 0.0);
   aerogel->visibility = true;
   aerogel->wireframe = true;
   aerogel->surface = false;
 
+  //*/
   //----------
   // set Fresnel lens
   //----------
@@ -649,16 +661,15 @@ void PHG4mRICHDetector::build_aerogel(mRichParameter* detectorParameter, G4VPhys
   G4VPhysicalVolume* aerogel = build_box(detectorParameter->GetBoxPar("aerogel"), motherPV->GetLogicalVolume());
   aerogel_vol[aerogel] = 0;
 
-  const G4int num = 2;
-  G4double Ephoton[num] = {2.034 * eV, 4.136 * eV};
-
   G4OpticalSurface* OpWaterSurface = new G4OpticalSurface("WaterSurface");
   OpWaterSurface->SetType(dielectric_dielectric);
   OpWaterSurface->SetFinish(ground);
   OpWaterSurface->SetModel(unified);
   new G4LogicalBorderSurface("WaterSurface", aerogel, motherPV, OpWaterSurface);
 
-  G4double RefractiveIndex[num] = {1.35, 1.40};
+  const G4int num = 2;
+  G4double Ephoton[num] = {2.034*eV, 4.136*eV};
+  G4double RefractiveIndex[num] = {1.03, 1.03};
   G4double SpecularLobe[num] = {0.3, 0.3};
   G4double SpecularSpike[num] = {0.2, 0.2};
   G4double Backscatter[num] = {0.2, 0.2};
@@ -670,6 +681,7 @@ void PHG4mRICHDetector::build_aerogel(mRichParameter* detectorParameter, G4VPhys
   myST1->AddProperty("BACKSCATTERCONSTANT", Ephoton, Backscatter, num);
 
   OpWaterSurface->SetMaterialPropertiesTable(myST1);
+
 }
 //________________________________________________________________________//
 void PHG4mRICHDetector::build_mirror(mRichParameter* detectorParameter, G4VPhysicalVolume* motherPV)
@@ -727,7 +739,7 @@ void PHG4mRICHDetector::build_sensor(mRichParameter* detectorParameter, G4Logica
     sensor_PV[i] = build_box(detectorParameter->GetBoxPar("sensor"), motherLV);
 
     sensor_vol[sensor_PV[i]] = i;
-    // cout << "in build_sensor: sensor_vol = " << sensor_vol[sensor_PV[i]] << endl;
+    //cout << "in build_sensor: sensor_vol = " << sensor_vol[sensor_PV[i]] << endl;
 
     last_x = x;
     last_y = y;
@@ -858,7 +870,7 @@ void PHG4mRICHDetector::build_mRICH_wall_hside(G4LogicalVolume* logicWorld)
     key_rotation_phi << "mRICH_wall_hside_" << i_mRICH << "_rotation_phi";
     G4double phi = params->get_double_param(key_rotation_phi.str());
 
-    // cout << "module_id = " << module_id << ", x = " << x << ", y = " << y << ", z = " << z << ", theta = " << theta << ", phi = " << phi << endl;
+    //cout << "module_id = " << module_id << ", x = " << x << ", y = " << y << ", z = " << z << ", theta = " << theta << ", phi = " << phi << endl;
 
     G4ThreeVector pos(x, y, z);
     G4RotationMatrix* rot = new G4RotationMatrix();
@@ -891,6 +903,8 @@ void PHG4mRICHDetector::build_mRICH_wall_eside(G4LogicalVolume* logicWorld)
 
   int NumOfModule = params->get_int_param("NumOfModule_wall_eside");
 
+  //cout<<" NumOfModule: "<<NumOfModule<<endl;
+
   for (int i_mRICH = 0; i_mRICH < NumOfModule; ++i_mRICH)
   {
     // get moduleID
@@ -911,7 +925,7 @@ void PHG4mRICHDetector::build_mRICH_wall_eside(G4LogicalVolume* logicWorld)
     key_position_z << "mRICH_wall_eside_" << i_mRICH << "_position_z";
     G4double z = params->get_double_param(key_position_z.str());
 
-    // cout << "module_id = " << module_id << ", x = " << x << ", y = " << y << ", z = " << z << endl;
+    //cout << "module_id = " << i_mRICH << ", x = " << x << ", y = " << y << ", z = " << z << endl;
 
     G4ThreeVector pos(x, y, z);
     G4RotationMatrix* rot = new G4RotationMatrix();
@@ -959,8 +973,9 @@ void PHG4mRICHDetector::build_mRICH_sector(G4LogicalVolume* logicWorld, int numS
     std::stringstream key_position_z;
     key_position_z << "mRICH_sector_hside_" << i_mRICH << "_position_z";
     G4double z = params->get_double_param(key_position_z.str());
+    if(i_mRICH==10) z -=10.;
 
-    // cout << "module_id = " << module_id << ", x = " << x << ", y = " << y << ", z = " << z << ", theta = " << theta << endl;
+       //cout << "module_id = " << module_id << ", x = " << x << ", y = " << y << ", z = " << z << ", theta = " << theta << endl;
 
     G4ThreeVector pos(x, y, z);
     G4RotationMatrix* rot = new G4RotationMatrix();
@@ -981,3 +996,123 @@ void PHG4mRICHDetector::build_mRICH_sector(G4LogicalVolume* logicWorld, int numS
 }
 
 //________________________________________________________________________//
+//________________________________________________________________________//
+void PHG4mRICHDetector::build_mRICH_sector2(G4LogicalVolume* logicWorld, int numSector)
+{
+  G4AssemblyVolume* sector = new G4AssemblyVolume();  //"mother volume"
+
+  G4LogicalVolume* a_mRICH = Construct_a_mRICH(0);  // build a single mRICH
+
+  int NumOfModule = params->get_int_param("NumOfModule_sector_bside");
+
+  G4double yy[8]={61.92,   61.92,   63.09,   63.09,   63.34,   63.34,   63.00,   63.00};
+  G4double zz[8]={8.94,   -8.94,   27.78,  -27.78,   48.26,  -48.26,   71.41,  -71.41};
+  G4double rotAng[8]={-81.78,  -98.22,  -66.23, -113.77,  -52.69, -127.31,  -41.42, -138.58};
+
+  for (int i_mRICH = 0; i_mRICH < NumOfModule; ++i_mRICH)
+  {
+    // get moduleID
+    //std::stringstream key_moduleID;
+    // key_moduleID << "mRICH_sector_bside_" << i_mRICH << "_moduleID";
+    //int module_id = params->get_int_param(key_moduleID.str());
+
+    // get position
+    std::stringstream key_position_x;
+    key_position_x << "mRICH_sector_bside_" << i_mRICH << "_position_x";
+    G4double x = 0.;//params->get_double_param(key_position_x.str());
+
+    std::stringstream key_position_y;
+    key_position_y << "mRICH_sector_bside_" << i_mRICH << "_position_y";
+    G4double y = yy[i_mRICH]*10.;//params->get_double_param(key_position_y.str()); //500
+
+    std::stringstream key_position_z;
+    key_position_z << "mRICH_sector_bside_" << i_mRICH << "_position_z";
+    G4double z = zz[i_mRICH]*10.;//params->get_double_param(key_position_z.str());
+
+    //G4double rotAng = -90 + pow(-1,i_mRICH)*(rotAng0*2*i_mRICH+rotAng0);
+
+    G4ThreeVector pos(x, y, z);
+    G4RotationMatrix* rot = new G4RotationMatrix();
+    rot->rotateX(rotAng[i_mRICH] * deg);
+    //rot->rotateX(-91 * deg);
+    //rot->rotateX(-90 * deg);
+
+    sector->AddPlacedVolume(a_mRICH, pos, rot);
+  }
+
+  G4double nSecs = 21;
+  G4double Ang = 360./nSecs;
+
+  for (int i = 0; i < numSector; i++)
+    //for (int i = 0; i < 1; i++)
+    {
+    //G4ThreeVector pos(0, 0, shift);
+    G4ThreeVector pos(0, 0, 0);
+    G4RotationMatrix* rot = new G4RotationMatrix();
+    //rot->rotateX(-theta * 180 * deg / pi);
+    rot->rotateZ(i * Ang * deg);
+    sector->MakeImprint(logicWorld, pos, rot, 0, OverlapCheck());
+  }
+}
+
+//________________________________________________________________________//
+
+//________________________________________________________________________//
+void PHG4mRICHDetector::build_mRICH_wall_eside_proj(G4LogicalVolume* logicWorld)
+{
+  G4AssemblyVolume* mRICHwall = new G4AssemblyVolume();  //"mother volume"
+
+  G4LogicalVolume* a_mRICH = Construct_a_mRICH(0);  // build a single mRICH
+
+  G4double shift = params->get_double_param("mRICH_wall_eside_proj_shift");
+
+  int NumOfModule = params->get_int_param("NumOfModule_wall_eside_proj");
+
+  cout<<"NumOfModule: "<<NumOfModule<<endl;
+
+    G4double scale = 1.;
+   for (int i_mRICH = 0; i_mRICH < NumOfModule; ++i_mRICH)
+  {
+    // get moduleID
+    // std::stringstream key_moduleID;
+    // key_moduleID << "mRICH_wall_eside_" << i_mRICH << "_moduleID";
+    // int module_id = params->get_int_param(key_moduleID.str());
+
+    if(i_mRICH<8) scale = 1.064;
+    else if(i_mRICH>=8 && i_mRICH<24) scale = 1.068;
+    else if(i_mRICH>=24 && i_mRICH<48) scale = 1.081;
+    else scale = 1.085;
+    // get position
+    std::stringstream key_position_x;
+    key_position_x << "mRICH_wall_eside_proj_" << i_mRICH << "_position_x";
+    G4double x = params->get_double_param(key_position_x.str())*scale;
+
+    std::stringstream key_position_y;
+    key_position_y << "mRICH_wall_eside_proj_" << i_mRICH << "_position_y";
+    G4double y = params->get_double_param(key_position_y.str())*scale;
+
+    std::stringstream key_position_z;
+    key_position_z << "mRICH_wall_eside_proj_" << i_mRICH << "_position_z";
+    G4double z = params->get_double_param(key_position_z.str());
+
+    //cout << "module_id = " << i_mRICH << ", x = " << x << ", y = " << y << ", z = " << z << endl;
+    G4double rotAngX = atan(y/shift);
+    G4double rotAngY = atan(x/abs(shift));
+    G4ThreeVector pos(x, y, z);
+    G4RotationMatrix* rot = new G4RotationMatrix();
+    rot->rotateX(rotAngX * rad);
+    rot->rotateY(rotAngY * rad);
+
+    mRICHwall->AddPlacedVolume(a_mRICH, pos, rot);
+  }
+
+  G4ThreeVector pos(0, 0, shift);
+  G4RotationMatrix* rot = new G4RotationMatrix();
+  rot->rotateX(180 * deg);
+  mRICHwall->MakeImprint(logicWorld, pos, rot, 0, OverlapCheck());
+
+  printf("-----------------------------------------------------------------------------\n");
+  printf("%d detectors are built\n", NumOfModule);
+  printf("-----------------------------------------------------------------------------\n");
+}
+
