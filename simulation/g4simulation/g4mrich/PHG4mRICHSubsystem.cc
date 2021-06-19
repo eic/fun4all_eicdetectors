@@ -3,12 +3,12 @@
  *         mRICH Subsystem created by Cheuk-Ping Wong @GSU       *
  *===============================================================*/
 #include "PHG4mRICHSubsystem.h"
-#include "PHG4EventActionClearZeroEdep.h"
 #include "PHG4mRICHDetector.h"
 #include "PHG4mRICHSteppingAction.h"
 
 #include <phparameter/PHParameters.h>
 
+#include <g4detectors/PHG4EventActionClearZeroEdep.h>
 #include <g4main/PHG4EventAction.h>  // for PHG4EventAction
 #include <g4main/PHG4HitContainer.h>
 #include <g4main/PHG4SteppingAction.h>  // for PHG4SteppingAction
@@ -26,8 +26,6 @@
 #include <sstream>
 
 class PHG4Detector;
-
-using namespace std;
 
 //_______________________________________________________________________
 PHG4mRICHSubsystem::PHG4mRICHSubsystem(const std::string& name, const int lyr)
@@ -73,10 +71,10 @@ int PHG4mRICHSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
   //---------------------------------
   if (GetParams()->get_int_param("active"))
   {
-    set<string> nodes;
+    std::set<std::string> nodes;
 
     // create hit output node
-    ostringstream nodename;
+    std::ostringstream nodename;
     nodename << "G4HIT_" << GetParams()->get_string_param("detectorname");
 
     PHG4HitContainer* mRICH_hits = findNode::getClass<PHG4HitContainer>(topNode, nodename.str().c_str());
@@ -88,7 +86,7 @@ int PHG4mRICHSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
       nodes.insert(nodename.str());
     }
 
-    ostringstream absnodename;
+    std::ostringstream absnodename;
     absnodename << "G4HIT_ABSORBER_" << GetParams()->get_string_param("detectorname");
 
     PHG4HitContainer* absorber_hits = findNode::getClass<PHG4HitContainer>(topNode, absnodename.str().c_str());
@@ -104,7 +102,7 @@ int PHG4mRICHSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
     _steppingAction = new PHG4mRICHSteppingAction(_detector, GetParams());
 
     // event actions
-    BOOST_FOREACH (string node, nodes)
+    BOOST_FOREACH (std::string node, nodes)
     {
       if (!_eventAction)
         _eventAction = new PHG4EventActionClearZeroEdep(topNode, node);
