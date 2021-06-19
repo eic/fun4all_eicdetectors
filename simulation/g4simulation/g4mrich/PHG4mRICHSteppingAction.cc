@@ -8,6 +8,8 @@
 
 #include <phparameter/PHParameters.h>
 
+#include <fun4all/Fun4AllBase.h>
+
 #include <g4main/PHG4HitContainer.h>
 #include <g4main/PHG4Hit.h>
 #include <g4main/PHG4Hitv1.h>
@@ -55,7 +57,6 @@
 
 class PHCompositeNode;
 
-using namespace std;
 using namespace CLHEP;
 
 //____________________________________________________________________________..
@@ -98,7 +99,7 @@ bool PHG4mRICHSteppingAction::UserSteppingAction( const G4Step* aStep, bool )
 
     /* Check if particle is 'geantino' */
     bool geantino = false;
-    if (aTrack->GetParticleDefinition()->GetPDGEncoding() == 0 && aTrack->GetParticleDefinition()->GetParticleName().find("geantino") != string::npos) 
+    if (aTrack->GetParticleDefinition()->GetPDGEncoding() == 0 && aTrack->GetParticleDefinition()->GetParticleName().find("geantino") != std::string::npos) 
     {
       geantino = true;
     }
@@ -113,7 +114,7 @@ bool PHG4mRICHSteppingAction::UserSteppingAction( const G4Step* aStep, bool )
     // int module_id=GetModuleID(touch->GetVolume(2)); // use mother volume to determine module_id
     int module_id = touch->GetReplicaNumber(2)-1; // use copy number of mother volume to determine module_id
     int PID=aTrack->GetDefinition()->GetPDGEncoding();
-    string PName = aTrack->GetDefinition()->GetParticleName();
+    std::string PName = aTrack->GetDefinition()->GetParticleName();
 
     //-----------------------------------------------------------------------------------//
     // if this block stops everything, just put all kinetic energy into edep
@@ -186,9 +187,9 @@ bool PHG4mRICHSteppingAction::UserSteppingAction( const G4Step* aStep, bool )
     // check if this hit was created, if not print out last post step status
     if (!hit || !isfinite(hit->get_x(0)))
     {
-      cout << GetName() << ": hit was not created" << endl;
-      cout << "prestep status: " << prePoint->GetStepStatus()
-	<< ", last post step status: " << savepoststepstatus << endl;
+      std::cout << __FILE__ << "::" << __func__ << "::" <<  GetName() << ": hit was not created" << std::endl;
+      std::cout << "prestep status: " << prePoint->GetStepStatus()
+  	<< ", last post step status: " << savepoststepstatus << std::endl;
       gSystem->Exit(1);
     }
     savepoststepstatus = postPoint->GetStepStatus();
@@ -196,10 +197,10 @@ bool PHG4mRICHSteppingAction::UserSteppingAction( const G4Step* aStep, bool )
     // check if track id matches the initial one when the hit was created
     if (aTrack->GetTrackID() != savetrackid)
     {
-      cout << GetName() << ": hits do not belong to the same track" << endl;
-      cout << "saved track: " << savetrackid
+      std::cout << __FILE__ << "::" << __func__ << "::" << GetName() << ": hits do not belong to the same track" << std::endl;
+      std::cout << "saved track: " << savetrackid
 	<< ", current trackid: " << aTrack->GetTrackID()
-	<< endl;
+	<< std::endl;
       gSystem->Exit(1);
     }
 
@@ -273,8 +274,8 @@ bool PHG4mRICHSteppingAction::UserSteppingAction( const G4Step* aStep, bool )
 void PHG4mRICHSteppingAction::SetInterfacePointers( PHCompositeNode* topNode )
 {
 
-  string hitnodename;
-  string absorbernodename;
+  std::string hitnodename;
+  std::string absorbernodename;
 
   if (superdetector !="NONE") {
     hitnodename = "G4HIT_" + superdetector;
@@ -291,12 +292,10 @@ void PHG4mRICHSteppingAction::SetInterfacePointers( PHCompositeNode* topNode )
   
   // if we do not find the node it's messed up.
   if ( ! hits_ ) {
-    std::cout << "PHG4mRICHSteppingAction::SetTopNode - unable to find " << hitnodename << std::endl;
+    if (Verbosity() >= Fun4AllBase::VERBOSITY_SOME) std::cout << __FILE__ << "::" << __func__ << " - unable to find " << hitnodename << std::endl;
   }
   if ( ! absorberhits_) {
-    if (Verbosity() > 0) {
-      cout << "PHG4mRICHSteppingAction::SetTopNode - unable to find " << absorbernodename << endl;
-    }
+    if (Verbosity() >= Fun4AllBase::VERBOSITY_SOME) std::cout << __FILE__ << "::" << __func__ << " - unable to find " << absorbernodename << std::endl;
   }
 }
 //____________________________________________________________________________..
@@ -331,8 +330,8 @@ int PHG4mRICHSteppingAction::GetModuleID(G4VPhysicalVolume* volume)
 	sector_id = boost::lexical_cast<int>(*tokeniter);
       }
       else {
-	cout << PHWHERE << " Error parsing " << volume->GetName()
-	     << " for mRICH sector id " << endl;
+	std::cout << PHWHERE << " Error parsing " << volume->GetName()
+	     << " for mRICH sector id " << std::endl;
 	gSystem->Exit(1);
       }
     }
@@ -345,8 +344,8 @@ int PHG4mRICHSteppingAction::GetModuleID(G4VPhysicalVolume* volume)
       }
       else
       {
-	cout << PHWHERE << " Error parsing " << volume->GetName()
-	  << " for mRICH id " << endl;
+	std::cout << PHWHERE << " Error parsing " << volume->GetName()
+	  << " for mRICH id " << std::endl;
 	gSystem->Exit(1);
       }
     }
@@ -354,7 +353,7 @@ int PHG4mRICHSteppingAction::GetModuleID(G4VPhysicalVolume* volume)
 
   module_id = (sector_id-1)*100+mRICH_id;
 
-  cout << "name of volume: " << volume->GetName() << ", sector_id = " << sector_id << ", mRICH_id = " << mRICH_id << ", module_id = " << module_id << endl;
+    if (Verbosity() >= Fun4AllBase::VERBOSITY_SOME) std::cout << "name of volume: " << volume->GetName() << ", sector_id = " << sector_id << ", mRICH_id = " << mRICH_id << ", module_id = " << module_id << std::endl;
   //cout << endl;
 
   return module_id;
