@@ -103,7 +103,7 @@ bool PHG4mRICHSteppingAction::UserSteppingAction( const G4Step* aStep, bool )
       geantino = true;
     }
 
-    // cout << "Name of volume: " << volume->GetName() << ", isactive = " << isactive << endl;
+    //cout << "Name of volume: " << volume->GetName() << ", isactive = " << isactive << endl;
     // G4VPhysicalVolume* v1 = touch->GetVolume(1);
     // cout << "Name of mother volume: " << v1->GetName() << endl;
     // G4VPhysicalVolume* v2 = touch->GetVolume(2);
@@ -113,7 +113,7 @@ bool PHG4mRICHSteppingAction::UserSteppingAction( const G4Step* aStep, bool )
     // int module_id=GetModuleID(touch->GetVolume(2)); // use mother volume to determine module_id
     int module_id = touch->GetReplicaNumber(2)-1; // use copy number of mother volume to determine module_id
     int PID=aTrack->GetDefinition()->GetPDGEncoding();
-//    string PName = aTrack->GetDefinition()->GetParticleName();
+    string PName = aTrack->GetDefinition()->GetParticleName();
 
     //-----------------------------------------------------------------------------------//
     // if this block stops everything, just put all kinetic energy into edep
@@ -206,11 +206,11 @@ bool PHG4mRICHSteppingAction::UserSteppingAction( const G4Step* aStep, bool )
     //-----------------------------------------------------------------------------------//
     /* Update exit values- will be overwritten with every step until
      * we leave the volume or the particle ceases to exist */
-    hit->set_x( 1, postPoint->GetPosition().x() / cm );
-    hit->set_y( 1, postPoint->GetPosition().y() / cm );
-    hit->set_z( 1, postPoint->GetPosition().z() / cm );
+    //-m/s- hit->set_x( 1, postPoint->GetPosition().x() / cm );
+    //-m/s- hit->set_y( 1, postPoint->GetPosition().y() / cm );
+    //-m/s- hit->set_z( 1, postPoint->GetPosition().z() / cm );
 
-    hit->set_t( 1, postPoint->GetGlobalTime() / nanosecond );
+    //-m/s- hit->set_t( 1, postPoint->GetGlobalTime() / nanosecond );
 
     /* sum up the energy to get total deposited */
     hit->set_edep(hit->get_edep() + edep);
@@ -354,8 +354,8 @@ int PHG4mRICHSteppingAction::GetModuleID(G4VPhysicalVolume* volume)
 
   module_id = (sector_id-1)*100+mRICH_id;
 
-  // cout << "name of volume: " << volume->GetName() << ", sector_id = " << sector_id << ", mRICH_id = " << mRICH_id << ", module_id = " << module_id << endl;
-  // cout << endl;
+  cout << "name of volume: " << volume->GetName() << ", sector_id = " << sector_id << ", mRICH_id = " << mRICH_id << ", module_id = " << module_id << endl;
+  //cout << endl;
 
   return module_id;
 }

@@ -3,7 +3,7 @@
  *         mRICH Subsystem created by Cheuk-Ping Wong @GSU       *
  *===============================================================*/
 #include "PHG4mRICHSubsystem.h"
-#include <g4detectors/PHG4EventActionClearZeroEdep.h>
+#include "PHG4EventActionClearZeroEdep.h"
 #include "PHG4mRICHDetector.h"
 #include "PHG4mRICHSteppingAction.h"
 
