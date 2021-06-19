@@ -20,6 +20,8 @@
 
 #include <phparameter/PHParameters.h>
 
+#include <fun4all/Fun4AllBase.h>
+
 #include <g4main/PHG4Detector.h>  // for PHG4Detector
 
 #include <Geant4/G4AssemblyVolume.hh>
@@ -51,7 +53,6 @@
 
 class PHCompositeNode;
 
-using namespace std;
 using namespace CLHEP;
 
 //_______________________________________________________________
@@ -122,7 +123,7 @@ G4LogicalVolume* PHG4mRICHDetector::Construct_a_mRICH(G4LogicalVolume* logicWorl
   //--------------------------- skeleton setup ---------------------------//
   /*holder box and hollow volume*/ G4VPhysicalVolume* hollowVol = build_holderBox(parameters, logicWorld);
   /*aerogel                     */ build_aerogel(parameters, hollowVol);
-  cout<<"......... build_aerogel ............"<<endl;
+  if (Verbosity() >= Fun4AllBase::VERBOSITY_MORE) std::cout << __FILE__ << "::" << __func__ << ": build_aerogel" << std::endl;
 
   /*sensor plane                */ build_sensor(parameters, hollowVol->GetLogicalVolume());
 
@@ -135,7 +136,7 @@ G4LogicalVolume* PHG4mRICHDetector::Construct_a_mRICH(G4LogicalVolume* logicWorl
     /*readout electronics         */ G4VPhysicalVolume* pol = build_polyhedra(parameters->GetPolyPar("readout"), hollowVol->GetLogicalVolume());
     if (!pol)
     {
-      cout << "readout electronics not placed" << endl;
+      if (Verbosity() >= Fun4AllBase::VERBOSITY_MORE) std::cout << __FILE__ << "::" << __func__ << ": readout electronics not placed" << std::endl;
     }
   }
 
@@ -147,7 +148,7 @@ G4LogicalVolume* PHG4mRICHDetector::Construct_a_mRICH(G4LogicalVolume* logicWorl
 //________________________________________________________________________//
 PHG4mRICHDetector::BoxPar::BoxPar()
 {
-  fill(begin(halfXYZ), end(halfXYZ), (G4double) 0 * mm);
+  std::fill(std::begin(halfXYZ), std::end(halfXYZ), (G4double) 0 * mm);
   pos = G4ThreeVector(0 * mm, 0 * mm, 0 * mm);
   material = G4Material::GetMaterial("G4_AIR");
   sensitivity = 0;
@@ -174,9 +175,9 @@ PHG4mRICHDetector::PolyPar::PolyPar()
   , wireframe(false)
   , surface(false)
 {
-  fill(begin(z), end(z), (G4double) 0 * mm);
-  fill(begin(rinner), end(rinner), (G4double) 0 * mm);
-  fill(begin(router), end(router), (G4double) 0 * mm);
+  std::fill(std::begin(z), std::end(z), (G4double) 0 * mm);
+  std::fill(std::begin(rinner), std::end(rinner), (G4double) 0 * mm);
+  std::fill(std::begin(router), std::end(router), (G4double) 0 * mm);
 }
 //________________________________________________________________________//
 PHG4mRICHDetector::LensPar::LensPar()
@@ -196,7 +197,7 @@ PHG4mRICHDetector::LensPar::LensPar()
   , surface(false)
 
 {
-  fill(begin(halfXYZ), end(halfXYZ), (G4double) 0 * mm);
+  std::fill(std::begin(halfXYZ), std::end(halfXYZ), (G4double) 0 * mm);
 }
 //________________________________________________________________________//
 void PHG4mRICHDetector::LensPar::Set_halfXYZ(G4double halfX, G4double grooveDensity)
@@ -258,12 +259,12 @@ G4double PHG4mRICHDetector::LensPar::GetSagita(G4double r)
   }
 
   G4double ArgSqrt = 1.0 - (1.0 + Conic) * std::pow(Curvature, 2) * std::pow(r, 2);  // note conic=-1, so ArgSqrt = 1.0
-
+  /*
   if (ArgSqrt < 0.0)
   {
-    G4cout << "UltraFresnelLensParameterisation::Sagita: Square Root of <0 !" << G4endl;
+    if (Verbosity() >= Fun4AllBase::VERBOSITY_MORE) std::cout << __FILE__ << "::" << __func__ << "UltraFresnelLensParameterisation::Sagita: Square Root of <0 !" << std::endl;
   }
-
+  */
   G4double Sagita_value = Curvature * std::pow(r, 2) / (1.0 + std::sqrt(ArgSqrt)) + TotAspher;
   return Sagita_value;
 }
@@ -275,7 +276,7 @@ PHG4mRICHDetector::mRichParameter::mRichParameter()
   //----------
   // Constant
   //----------
-  cout<<"******************** Using the local code ********************"<<endl;
+  //if (Verbosity() >= Fun4AllBase::VERBOSITY_A_LOT) std::cout << __FILE__ << "::" << __func__ << " Using the local code " << std::endl;
 
   const double myPI = 4 * atan(1);
   fresnelLens = new LensPar();
@@ -335,7 +336,7 @@ PHG4mRICHDetector::mRichParameter::mRichParameter()
   foamHolder_halfXYZ[2] = foamHolderThicknessXYZ[2] / 2.0;
 
   G4double acrylicBox_halfXYZ[3];
-  acrylicBox_halfXYZ[0] = max(max(foamHolder_halfXYZ[0], sensor_total_halfx + readoutThickness), fresnelLens->halfXYZ[0]) + 0.1 * cm + box_thicknessXYZ[0];
+  acrylicBox_halfXYZ[0] = std::max(std::max(foamHolder_halfXYZ[0], sensor_total_halfx + readoutThickness), fresnelLens->halfXYZ[0]) + 0.1 * cm + box_thicknessXYZ[0];
   acrylicBox_halfXYZ[1] = acrylicBox_halfXYZ[0];
   acrylicBox_halfXYZ[2] = (BoxDelz + 2 * foamHolder_halfXYZ[2] + 2 * agel_halfXYZ[2] + 
 			   lens_gap + 2 * fresnelLens->halfXYZ[2] + fresnelLens->f + 2 * glassWindow_halfXYZ[2] + 
@@ -448,7 +449,7 @@ PHG4mRICHDetector::mRichParameter::mRichParameter()
   aerogel->wireframe = true;
   aerogel->surface = false;
 
-  cout<<agel_posz<<"\t......55555.....\t"<<agel_halfXYZ[2]<<endl;
+  //if (Verbosity() >= Fun4AllBase::VERBOSITY_A_LOT) std::cout << __FILE__ << "::" << __func__ << agel_posz<< "\t......55555.....\t" <<agel_halfXYZ[2] << std::endl;
 
   //*/
   //----------
@@ -479,7 +480,7 @@ PHG4mRICHDetector::mRichParameter::mRichParameter()
   mirror->rinner[0] = agel_halfXYZ[0];
   mirror->rinner[1] = sensor_total_halfx;
 
-  mirror->router[0] = mirror->rinner[0] + mirrorThickness;
+mirror->router[0] = mirror->rinner[0] + mirrorThickness;
   mirror->router[1] = mirror->rinner[1] + mirrorThickness;
 
   mirror->material = G4Material::GetMaterial("G4_Al");
@@ -565,7 +566,7 @@ void PHG4mRICHDetector::mRichParameter::SetPar_sensor(int i, G4double x, G4doubl
   sensor->pos.setY(y);
 }
 //________________________________________________________________________//
-PHG4mRICHDetector::BoxPar* PHG4mRICHDetector::mRichParameter::GetBoxPar(string componentName)
+PHG4mRICHDetector::BoxPar* PHG4mRICHDetector::mRichParameter::GetBoxPar(std::string componentName)
 {
   if (componentName.compare("holderBox") == 0)
     return holderBox;
@@ -580,21 +581,21 @@ PHG4mRICHDetector::BoxPar* PHG4mRICHDetector::mRichParameter::GetBoxPar(string c
   else if (componentName.compare("sensor") == 0)
     return sensor;
   else
-    printf("mRichParameter::GetBoxPar() ----- ERROR: cannot find parameter=%s\n", componentName.c_str());
+    std::cout << __FILE__ << "::" << __func__ << ":: ERROR: cannot find parameter "<< componentName << std::endl;
 
   return 0;
 }
 //________________________________________________________________________//
-PHG4mRICHDetector::LensPar* PHG4mRICHDetector::mRichParameter::GetLensPar(string componentName)
+PHG4mRICHDetector::LensPar* PHG4mRICHDetector::mRichParameter::GetLensPar(std::string componentName)
 {
   if (componentName.compare("fresnelLens") == 0)
     return fresnelLens;
   else
-    printf("mRichParameter::GetLensPar() ----- ERROR: cannot find parameter=%s\n", componentName.c_str());
+    std::cout << __FILE__ << "::" << __func__ << "::ERROR: cannot find parameter " << componentName << std::endl;
   return 0;
 }
 //________________________________________________________________________//
-PHG4mRICHDetector::PolyPar* PHG4mRICHDetector::mRichParameter::GetPolyPar(string componentName)
+PHG4mRICHDetector::PolyPar* PHG4mRICHDetector::mRichParameter::GetPolyPar(std::string componentName)
 {
   if (componentName.compare("foamHolderPoly") == 0)
     return foamHolderPoly;
@@ -603,7 +604,7 @@ PHG4mRICHDetector::PolyPar* PHG4mRICHDetector::mRichParameter::GetPolyPar(string
   else if (componentName.compare("readout") == 0)
     return readout;
   else
-    printf("mRichParameter::GetPolyPar() ----- ERROR: cannot find parameter=%s\n", componentName.c_str());
+    std::cout << __FILE__ << "::" << __func__ << "::ERROR: cannot find parameter " << componentName << std::endl;
 
   return 0;
 }
@@ -650,12 +651,12 @@ void PHG4mRICHDetector::build_foamHolder(mRichParameter* detectorParameter, G4Lo
   G4VPhysicalVolume* box = build_box(detectorParameter->GetBoxPar("foamHolderBox"), motherLV);
   if (!box)
   {
-    cout << "placement of foamholderbox failed" << endl;
+    if (Verbosity() >= Fun4AllBase::VERBOSITY_MORE) std::cout << __FILE__ << "::" << __func__ << ": placement of foamholderbox failed" << std::endl;
   }
   box = build_polyhedra(detectorParameter->GetPolyPar("foamHolderPoly"), motherLV);
   if (!box)
   {
-    cout << "placement of foamholderpoly failed" << endl;
+    if (Verbosity() >= Fun4AllBase::VERBOSITY_MORE) std::cout << __FILE__ << "::" << __func__ << ": placement of foamholderpoly failed" << std::endl;
   }
 }
 //________________________________________________________________________//
@@ -888,10 +889,6 @@ void PHG4mRICHDetector::build_mRICH_wall_hside(G4LogicalVolume* logicWorld)
 
   G4ThreeVector pos(0, 0, 0);
   mRICHwall->MakeImprint(logicWorld, pos, nullptr, 0, OverlapCheck());
-
-  printf("-----------------------------------------------------------------------------\n");
-  printf("%d detectors are built\n", NumOfModule);
-  printf("-----------------------------------------------------------------------------\n");
 }
 //________________________________________________________________________//
 
@@ -906,7 +903,7 @@ void PHG4mRICHDetector::build_mRICH_wall_eside(G4LogicalVolume* logicWorld)
 
   int NumOfModule = params->get_int_param("NumOfModule_wall_eside");
 
-  cout<<" NumOfModule: "<<NumOfModule<<endl;
+  if (Verbosity() >= Fun4AllBase::VERBOSITY_MORE) std::cout << __FILE__ << "::" << __func__ << "::NumOfModule: " << NumOfModule << std::endl;
 
   for (int i_mRICH = 0; i_mRICH < NumOfModule; ++i_mRICH)
   {
@@ -939,10 +936,6 @@ void PHG4mRICHDetector::build_mRICH_wall_eside(G4LogicalVolume* logicWorld)
   G4RotationMatrix* rot = new G4RotationMatrix();
   rot->rotateX(180 * deg);
   mRICHwall->MakeImprint(logicWorld, pos, rot, 0, OverlapCheck());
-
-  printf("-----------------------------------------------------------------------------\n");
-  printf("%d detectors are built\n", NumOfModule);
-  printf("-----------------------------------------------------------------------------\n");
 }
 //________________________________________________________________________//
 void PHG4mRICHDetector::build_mRICH_sector(G4LogicalVolume* logicWorld, int numSector)
@@ -1052,7 +1045,7 @@ void PHG4mRICHDetector::build_mRICH_sector2(G4LogicalVolume* logicWorld, int num
     sector->AddPlacedVolume(a_mRICH, pos, rot);
   }
 
-  cout<<"........222x1x222......."<<NumOfModule<<"\t"<<numSector<<endl;
+  if (Verbosity() >= Fun4AllBase::VERBOSITY_A_LOT) std::cout << __FILE__ << "::" << __func__ << "::222x1x222" << NumOfModule << "\t" << numSector << std::endl;
 
   G4double nSecs = 21;
   G4double Ang = 360./nSecs;
@@ -1083,7 +1076,7 @@ void PHG4mRICHDetector::build_mRICH_wall_eside_proj(G4LogicalVolume* logicWorld)
 
   int NumOfModule = params->get_int_param("NumOfModule_wall_eside_proj");
 
-  cout<<"NumOfModule: "<<NumOfModule<<endl;
+  if (Verbosity() >= Fun4AllBase::VERBOSITY_MORE) std::cout << __FILE__ << "::" << __func__ << "::NumOfModule: " << NumOfModule << std::endl;
 
     G4double scale = 1.0;
     for (int i_mRICH = 0; i_mRICH < NumOfModule; ++i_mRICH)
@@ -1118,7 +1111,7 @@ void PHG4mRICHDetector::build_mRICH_wall_eside_proj(G4LogicalVolume* logicWorld)
 
     //cout << "module_id = " << i_mRICH << ", x = " << x << ", y = " << y << ", z = " << z << endl;
     G4double rotAngX = atan(y/shift);
-    G4double rotAngY = atan(x/abs(shift));
+    G4double rotAngY = atan(x/std::abs(shift));
     G4ThreeVector pos(x, y, z);
     G4RotationMatrix* rot = new G4RotationMatrix();
     rot->rotateX(rotAngX * rad);
@@ -1131,9 +1124,5 @@ void PHG4mRICHDetector::build_mRICH_wall_eside_proj(G4LogicalVolume* logicWorld)
   G4RotationMatrix* rot = new G4RotationMatrix();
   rot->rotateX(180 * deg);
   mRICHwall->MakeImprint(logicWorld, pos, rot, 0, OverlapCheck());
-
-  printf("-----------------------------------------------------------------------------\n");
-  printf("%d detectors are built\n", NumOfModule);
-  printf("-----------------------------------------------------------------------------\n");
 }
 
