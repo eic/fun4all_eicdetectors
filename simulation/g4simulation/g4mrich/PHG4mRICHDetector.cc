@@ -91,8 +91,6 @@ void PHG4mRICHDetector::ConstructMe(G4LogicalVolume* logicWorld)
   //  2: e-side wall
   //  3: h-side wall
   //  4: h-side wall and e-side wall
-  //  5: barrel projective sectors
-  //  6: e-side projective
 
   if (subsystemSetup == DetectorSetUp::kSingle_Modular) Construct_a_mRICH(logicWorld);
   if (subsystemSetup == DetectorSetUp::kHSector_EWall)
@@ -111,7 +109,7 @@ void PHG4mRICHDetector::ConstructMe(G4LogicalVolume* logicWorld)
   }
   if (subsystemSetup == DetectorSetUp::kHWall_Barrel)
   {
-    build_mRICH_sector2(logicWorld, 21);
+    build_mRICH_sector2(logicWorld, 8);
   }
 }
 //_______________________________________________________________
@@ -124,6 +122,7 @@ G4LogicalVolume* PHG4mRICHDetector::Construct_a_mRICH(G4LogicalVolume* logicWorl
   //--------------------------- skeleton setup ---------------------------//
   /*holder box and hollow volume*/ G4VPhysicalVolume* hollowVol = build_holderBox(parameters, logicWorld);
   /*aerogel                     */ build_aerogel(parameters, hollowVol);
+  cout<<"......... build_aerogel ............"<<endl;
 
   /*sensor plane                */ build_sensor(parameters, hollowVol->GetLogicalVolume());
 
@@ -276,6 +275,7 @@ PHG4mRICHDetector::mRichParameter::mRichParameter()
   //----------
   // Constant
   //----------
+  cout<<"******************** Using the local code ********************"<<endl;
 
   const double myPI = 4 * atan(1);
   fresnelLens = new LensPar();
@@ -369,6 +369,7 @@ PHG4mRICHDetector::mRichParameter::mRichParameter()
   for (i = 0; i < 3; i++) holderBox->halfXYZ[i] = acrylicBox_halfXYZ[i];
   holderBox->pos = G4ThreeVector(0 * cm, 0 * cm, 0 * cm);
   //holderBox->material=G4Material::GetMaterial("G4_Al");
+  //holderBox->material=G4Material::GetMaterial("CFRP_INTTxxxxx"); // carbon fiber
   holderBox->material=G4Material::GetMaterial("CFRP_INTT"); // carbon fiber
   holderBox->sensitivity = 0;
 
@@ -446,6 +447,8 @@ PHG4mRICHDetector::mRichParameter::mRichParameter()
   aerogel->visibility = true;
   aerogel->wireframe = true;
   aerogel->surface = false;
+
+  cout<<agel_posz<<"\t......55555.....\t"<<agel_halfXYZ[2]<<endl;
 
   //*/
   //----------
@@ -903,7 +906,7 @@ void PHG4mRICHDetector::build_mRICH_wall_eside(G4LogicalVolume* logicWorld)
 
   int NumOfModule = params->get_int_param("NumOfModule_wall_eside");
 
-  //cout<<" NumOfModule: "<<NumOfModule<<endl;
+  cout<<" NumOfModule: "<<NumOfModule<<endl;
 
   for (int i_mRICH = 0; i_mRICH < NumOfModule; ++i_mRICH)
   {
@@ -1003,13 +1006,20 @@ void PHG4mRICHDetector::build_mRICH_sector2(G4LogicalVolume* logicWorld, int num
 
   G4LogicalVolume* a_mRICH = Construct_a_mRICH(0);  // build a single mRICH
 
+  //-m/s-G4double theta = params->get_double_param("mRICH_sector_bside_rotation_theta");
+
+  //G4double shift = 70;//params->get_double_param("mRICH_sector_bside_shift");
+
   int NumOfModule = params->get_int_param("NumOfModule_sector_bside");
 
+  //--G4double delta = 2.15833;
   G4double yy[8]={61.92,   61.92,   63.09,   63.09,   63.34,   63.34,   63.00,   63.00};
   G4double zz[8]={8.94,   -8.94,   27.78,  -27.78,   48.26,  -48.26,   71.41,  -71.41};
   G4double rotAng[8]={-81.78,  -98.22,  -66.23, -113.77,  -52.69, -127.31,  -41.42, -138.58};
 
-  for (int i_mRICH = 0; i_mRICH < NumOfModule; ++i_mRICH)
+  //for (int i_mRICH = 0; i_mRICH < NumOfModule; ++i_mRICH)
+  //for (int i_mRICH = 0; i_mRICH < 10; ++i_mRICH)
+  for (int i_mRICH = 0; i_mRICH < 8; ++i_mRICH)
   {
     // get moduleID
     //std::stringstream key_moduleID;
@@ -1029,6 +1039,8 @@ void PHG4mRICHDetector::build_mRICH_sector2(G4LogicalVolume* logicWorld, int num
     key_position_z << "mRICH_sector_bside_" << i_mRICH << "_position_z";
     G4double z = zz[i_mRICH]*10.;//params->get_double_param(key_position_z.str());
 
+    //cout << "222: module_id = " <<i_mRICH  << ", x = " << x << ", y = " << y << ", z = " << z << endl;
+
     //G4double rotAng = -90 + pow(-1,i_mRICH)*(rotAng0*2*i_mRICH+rotAng0);
 
     G4ThreeVector pos(x, y, z);
@@ -1040,11 +1052,14 @@ void PHG4mRICHDetector::build_mRICH_sector2(G4LogicalVolume* logicWorld, int num
     sector->AddPlacedVolume(a_mRICH, pos, rot);
   }
 
+  cout<<"........222x1x222......."<<NumOfModule<<"\t"<<numSector<<endl;
+
   G4double nSecs = 21;
   G4double Ang = 360./nSecs;
 
-  for (int i = 0; i < numSector; i++)
-    //for (int i = 0; i < 1; i++)
+  //for (int i = 0; i < numSector; i++)
+  for (int i = 0; i < nSecs; i++)
+  //for (int i = 0; i < 1; i++)
     {
     //G4ThreeVector pos(0, 0, shift);
     G4ThreeVector pos(0, 0, 0);
@@ -1070,18 +1085,24 @@ void PHG4mRICHDetector::build_mRICH_wall_eside_proj(G4LogicalVolume* logicWorld)
 
   cout<<"NumOfModule: "<<NumOfModule<<endl;
 
-    G4double scale = 1.;
-   for (int i_mRICH = 0; i_mRICH < NumOfModule; ++i_mRICH)
+    G4double scale = 1.0;
+    for (int i_mRICH = 0; i_mRICH < NumOfModule; ++i_mRICH)
   {
     // get moduleID
     // std::stringstream key_moduleID;
     // key_moduleID << "mRICH_wall_eside_" << i_mRICH << "_moduleID";
     // int module_id = params->get_int_param(key_moduleID.str());
-
-    if(i_mRICH<8) scale = 1.064;
+    if(i_mRICH<12) scale = 1.065;
+    else if(i_mRICH>=12 && i_mRICH<24) scale = 1.067;
+    else if(i_mRICH>=24 && i_mRICH<44) scale = 1.071;
+    else if(i_mRICH>=44 && i_mRICH<48) scale = 1.076;
+    else scale = 1.078;
+    //
+    /*
     else if(i_mRICH>=8 && i_mRICH<24) scale = 1.068;
     else if(i_mRICH>=24 && i_mRICH<48) scale = 1.081;
     else scale = 1.085;
+    */
     // get position
     std::stringstream key_position_x;
     key_position_x << "mRICH_wall_eside_proj_" << i_mRICH << "_position_x";
