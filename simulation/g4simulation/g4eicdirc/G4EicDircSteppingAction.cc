@@ -1,6 +1,8 @@
 #include "G4EicDircSteppingAction.h"
 
 #include "G4EicDircDetector.h"
+#include "PrtHit.h"
+#include "PrtManager.h"
 
 #include <phparameter/PHParameters.h>
 
@@ -16,6 +18,7 @@
 #include <phool/getClass.h>
 
 #include <TSystem.h>
+#include <TVector3.h>
 
 #include <Geant4/G4ParticleDefinition.hh>      // for G4ParticleDefinition
 #include <Geant4/G4ReferenceCountedHandle.hh>  // for G4ReferenceCountedHandle
@@ -102,6 +105,56 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
     G4Track *killtrack = const_cast<G4Track *>(aTrack);
     killtrack->SetTrackStatus(fStopAndKill);
   }
+
+  // For PrtPixelSD ---------------
+
+  if(whichactive_int_post == 11)
+    {
+      // Get cell id 
+      G4int layerNumber = touchpost->GetReplicaNumber(0);
+      const G4DynamicParticle* dynParticle = aTrack->GetDynamicParticle();
+      G4ParticleDefinition* particle = dynParticle->GetDefinition();  
+      G4String ParticleName = particle->GetParticleName();
+  
+      G4ThreeVector globalpos = aStep->GetPostStepPoint()->GetPosition();
+      G4ThreeVector localpos = touchpost->GetHistory()->GetTopTransform().TransformPoint(globalpos);
+      G4ThreeVector translation = touchpost->GetHistory()->GetTopTransform().Inverse().TransformPoint(G4ThreeVector(0,0,0));
+      G4ThreeVector inPrismpos = touchpost->GetHistory()->GetTransform( 1 ).TransformPoint(globalpos);
+      G4ThreeVector g4mom = aTrack->GetVertexMomentumDirection();//GetMomentum();
+      G4ThreeVector g4pos = aTrack->GetVertexPosition();
+ 
+      TVector3 globalPos(inPrismpos.x(),inPrismpos.y(),inPrismpos.z());
+      TVector3 localPos(localpos.x(),localpos.y(),localpos.z());
+      TVector3 digiPos(translation.x(),translation.y(),translation.z());
+      TVector3 momentum(g4mom.x(),g4mom.y(),g4mom.z());
+      TVector3 position(g4pos.x(),g4pos.y(),g4pos.z());
+
+      // information from prizm
+      double time = aStep->GetPreStepPoint()->GetLocalTime();
+
+      PrtHit hit;
+      int mcp = touchpost->GetReplicaNumber(1);
+      int pix = touchpost->GetReplicaNumber(0);
+      hit.SetMcpId(mcp);
+      hit.SetPixelId(pix);
+      //hit.SetChannel(300*mcp+pix);
+      hit.SetGlobalPos(globalPos);
+      hit.SetLocalPos(localPos);
+      hit.SetDigiPos(digiPos);
+      hit.SetPosition(position);
+      hit.SetMomentum(momentum);
+      hit.SetParticleId(aTrack->GetTrackID());
+      hit.SetParentParticleId(aTrack->GetParentID());
+      //hit.SetNreflectionsInPrizm(refl);
+      //hit.SetPathInPrizm(pathId);
+      hit.SetCherenkovMC(PrtManager::Instance()->GetCurrentCherenkov());
+      // time since track created
+      hit.SetLeadTime(time);
+      Double_t wavelength = 1.2398/(aTrack->GetMomentum().mag()*1E6)*1000;
+      hit.SetTotTime(wavelength); //set photon wavelength
+
+    }
+
 
   int detector_id = 0;  // we use here only one detector in this simple example
   bool geantino = false;

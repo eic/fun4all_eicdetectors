@@ -9,6 +9,7 @@
 #include <Geant4/G4OpticalPhoton.hh>
 #include <Geant4/G4Track.hh>
 #include <Geant4/G4VProcess.hh>
+#include <Geant4/G4ios.hh>
 
 #include <gsl/gsl_const.h>
 #include <gsl/gsl_randist.h>
@@ -74,7 +75,7 @@ G4ClassificationOfNewTrack G4EicDircStackingAction::ClassifyNewTrack(const G4Tra
       if(aTrack->GetCreatorProcess()->GetProcessName() == "Scintillation")
         fScintillationCounter++;
       if(aTrack->GetCreatorProcess()->GetProcessName() == "Cerenkov")
-        fCerenkovCounter++;
+      fCerenkovCounter++;
     }
   }
 
@@ -95,7 +96,7 @@ G4ClassificationOfNewTrack G4EicDircStackingAction::ClassifyNewTrack(const G4Tra
     Double_t lambda = 197.0 * 2.0 * M_PI / (aTrack->GetMomentum().mag() * 1.0E6);
     Double_t ra = gsl_rng_uniform(m_RandomGenerator);
     if (ra > fDetEff[1]->Eval(lambda))
-    {
+    {      
       return fKill;
     }
   }
@@ -107,6 +108,7 @@ G4ClassificationOfNewTrack G4EicDircStackingAction::ClassifyNewTrack(const G4Tra
 
 void G4EicDircStackingAction::PrepareNewEvent()
 {
+  G4cout << "Number of Cerenkov photons produced in this event : " << fCerenkovCounter << G4endl;
 //  std::cout << "calling prepare new event" << std::endl;
   fCerenkovCounter = 0;
   fScintillationCounter = 0;
