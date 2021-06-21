@@ -20,6 +20,7 @@
 #include <TSystem.h>
 #include <TVector3.h>
 
+#include <Geant4/G4NavigationHistory.hh>
 #include <Geant4/G4ParticleDefinition.hh>      // for G4ParticleDefinition
 #include <Geant4/G4ReferenceCountedHandle.hh>  // for G4ReferenceCountedHandle
 #include <Geant4/G4Step.hh>
