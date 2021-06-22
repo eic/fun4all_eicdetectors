@@ -1087,8 +1087,8 @@ void PHG4mRICHDetector::build_mRICH_wall_eside_proj(G4LogicalVolume* logicWorld)
     // int module_id = params->get_int_param(key_moduleID.str());
     if(i_mRICH<12) scale = 1.067;
     else if(i_mRICH>=12 && i_mRICH<24) scale = 1.070;
-    else if(i_mRICH>=24 && i_mRICH<44) scale = 1.073;
-    else if(i_mRICH>=44 && i_mRICH<48) scale = 1.076;
+    else if(i_mRICH>=24 && i_mRICH<44) scale = 1.074;
+    else if(i_mRICH>=44 && i_mRICH<48) scale = 1.077;
     else scale = 1.078;
     //
     /*
