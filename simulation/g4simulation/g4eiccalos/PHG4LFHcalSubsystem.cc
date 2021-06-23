@@ -1,8 +1,8 @@
-#include "PHG4BackwardHcalSubsystem.h"
+#include "PHG4LFHcalSubsystem.h"
 
-#include "PHG4BackwardHcalDetector.h"
-#include "PHG4BackwardHcalDisplayAction.h"
-#include "PHG4BackwardHcalSteppingAction.h"
+#include "PHG4LFHcalDetector.h"
+#include "PHG4LFHcalDisplayAction.h"
+#include "PHG4LFHcalSteppingAction.h"
 
 #include <phparameter/PHParameters.h>
 
@@ -27,28 +27,28 @@
 class PHG4Detector;
 
 //_______________________________________________________________________
-PHG4BackwardHcalSubsystem::PHG4BackwardHcalSubsystem(const std::string& name, const int lyr)
+PHG4LFHcalSubsystem::PHG4LFHcalSubsystem(const std::string& name, const int lyr)
   : PHG4DetectorSubsystem(name, lyr)
 {
   InitializeParameters();
 }
 
 //_______________________________________________________________________
-PHG4BackwardHcalSubsystem::~PHG4BackwardHcalSubsystem()
+PHG4LFHcalSubsystem::~PHG4LFHcalSubsystem()
 {
   delete m_DisplayAction;
 }
 
 //_______________________________________________________________________
-int PHG4BackwardHcalSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
+int PHG4LFHcalSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
 {
   PHNodeIterator iter(topNode);
   PHCompositeNode* dstNode = dynamic_cast<PHCompositeNode*>(iter.findFirst("PHCompositeNode", "DST"));
 
   // create display settings before detector
-  m_DisplayAction = new PHG4BackwardHcalDisplayAction(Name());
+  m_DisplayAction = new PHG4LFHcalDisplayAction(Name());
   // create detector
-  m_Detector = new PHG4BackwardHcalDetector(this, topNode, GetParams(), Name());
+  m_Detector = new PHG4LFHcalDetector(this, topNode, GetParams(), Name());
   m_Detector->SuperDetector(SuperDetector());
   m_Detector->OverlapCheck(CheckOverlap());
   m_Detector->Verbosity(Verbosity());
@@ -100,17 +100,17 @@ int PHG4BackwardHcalSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
       }
     }
     // create stepping action
-    m_SteppingAction = new PHG4BackwardHcalSteppingAction(m_Detector, GetParams());
+    m_SteppingAction = new PHG4LFHcalSteppingAction(m_Detector, GetParams());
   }
 
   return 0;
 }
 
 //_______________________________________________________________________
-int PHG4BackwardHcalSubsystem::process_event(PHCompositeNode* topNode)
+int PHG4LFHcalSubsystem::process_event(PHCompositeNode* topNode)
 {
   // pass top node to stepping action so that it gets
-  // relevant nodes needed internally
+  // relevant nodes needed internally  
   if (m_SteppingAction)
   {
     m_SteppingAction->SetInterfacePointers(topNode);
@@ -119,31 +119,31 @@ int PHG4BackwardHcalSubsystem::process_event(PHCompositeNode* topNode)
 }
 
 //_______________________________________________________________________
-PHG4Detector* PHG4BackwardHcalSubsystem::GetDetector() const
+PHG4Detector* PHG4LFHcalSubsystem::GetDetector() const
 {
   return m_Detector;
 }
 
-void PHG4BackwardHcalSubsystem::SetDefaultParameters()
+void PHG4LFHcalSubsystem::SetDefaultParameters()
 {
   set_default_double_param("place_x", 0.);
   set_default_double_param("place_y", 0.);
   set_default_double_param("place_z", 400.);
-  set_default_double_param("tower_dx", 10.);
-  set_default_double_param("tower_dy", 10.);
+  set_default_double_param("tower_dx", 5.);
+  set_default_double_param("tower_dy", 5.);
   set_default_double_param("tower_dz", 100.);
   set_default_double_param("dz", 100.);
   set_default_double_param("rMin1", 5.);
   set_default_double_param("rMax1", 262.);
   set_default_double_param("rMin2", 5.);
   set_default_double_param("rMax2", 336.9);
-  set_default_double_param("wls_dw", 0.3);
-  set_default_double_param("support_dw", 0.2);
+  set_default_double_param("wls_dw", 0.1);
   set_default_double_param("rot_x", 0.);
   set_default_double_param("rot_y", 0.);
   set_default_double_param("rot_z", 0.);
-  set_default_double_param("thickness_absorber", 2.);
-  set_default_double_param("thickness_scintillator", 0.231);
+  set_default_double_param("thickness_absorber", 1.6);
+  set_default_double_param("thickness_scintillator", 0.4);
+  set_default_int_param("nlayerspertowerseg", 10);
 
   std::ostringstream mappingfilename;
   const char* calibroot = getenv("CALIBRATIONROOT");
@@ -157,17 +157,16 @@ void PHG4BackwardHcalSubsystem::SetDefaultParameters()
     gSystem->Exit(1);
   }
 
-  mappingfilename << "/BackwardHcal/mapping/towerMap_EHCAL_default.txt";
+  mappingfilename << "/LFHcal/mapping/towerMap_LFHCAL_2x.txt";
   set_default_string_param("mapping_file", mappingfilename.str());
   set_default_string_param("mapping_file_md5", PHG4Utils::md5sum(mappingfilename.str()));
   set_default_string_param("scintillator", "G4_POLYSTYRENE");
   set_default_string_param("absorber", "G4_Fe");
-  set_default_string_param("support", "G4_Fe");
 
   return;
 }
 
-void PHG4BackwardHcalSubsystem::SetTowerMappingFile(const std::string& filename)
+void PHG4LFHcalSubsystem::SetTowerMappingFile(const std::string& filename)
 {
   set_string_param("mapping_file", filename);
   set_string_param("mapping_file_md5", PHG4Utils::md5sum(get_string_param("mapping_file")));
