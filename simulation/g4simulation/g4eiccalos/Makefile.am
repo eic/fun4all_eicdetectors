@@ -24,6 +24,7 @@ libg4eiccalos_la_LIBADD = \
 pkginclude_HEADERS = \
   PHG4BackwardHcalSubsystem.h \
   PHG4CrystalCalorimeterSubsystem.h \
+  PHG4HybridHomogeneousCalorimeterSubsystem.h \
   PHG4ForwardCalCellReco.h \
   PHG4ForwardEcalSubsystem.h \
   PHG4ForwardHcalSubsystem.h
@@ -37,6 +38,10 @@ libg4eiccalos_la_SOURCES = \
   PHG4CrystalCalorimeterDisplayAction.cc \
   PHG4CrystalCalorimeterSteppingAction.cc \
   PHG4CrystalCalorimeterSubsystem.cc \
+  PHG4HybridHomogeneousCalorimeterDetector.cc \
+  PHG4HybridHomogeneousCalorimeterDisplayAction.cc \
+  PHG4HybridHomogeneousCalorimeterSteppingAction.cc \
+  PHG4HybridHomogeneousCalorimeterSubsystem.cc \
   PHG4FCalDetector.cc \
   PHG4FCalSteppingAction.cc \
   PHG4FCalSubsystem.cc \
