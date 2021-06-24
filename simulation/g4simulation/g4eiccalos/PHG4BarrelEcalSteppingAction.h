@@ -20,18 +20,23 @@ class PHG4BarrelEcalSteppingAction : public PHG4SteppingAction
   //! constructor
   PHG4BarrelEcalSteppingAction(PHG4BarrelEcalDetector*, const PHParameters* parameters);
 
-  //! destroctor
+  //! destructor 
   virtual ~PHG4BarrelEcalSteppingAction();
 
   //! stepping action
-  virtual bool UserSteppingAction(const G4Step*, bool);
+  bool UserSteppingAction(const G4Step*, bool) override;
+  ;
 
   //! reimplemented from base class
-  virtual void SetInterfacePointers(PHCompositeNode*);
+  void SetInterfacePointers(PHCompositeNode*) override;
+
+  void SetHitNodeName(const std::string& nam) { m_HitNodeName = nam; }
+  void SetAbsorberNodeName(const std::string& nam) { m_AbsorberNodeName = nam; }
+  void SetSupportNodeName(const std::string& nam) { m_SupportNodeName = nam; }
 
  private:
-
-PHG4BarrelEcalDetector* m_Detector = nullptr;
+  //! pointer to the detector
+  PHG4BarrelEcalDetector* m_Detector = nullptr;
 
   //! pointer to hit container
   PHG4HitContainer* m_HitContainer = nullptr;
@@ -49,7 +54,6 @@ PHG4BarrelEcalDetector* m_Detector = nullptr;
   std::string m_HitNodeName;
   std::string m_AbsorberNodeName;
   std::string m_SupportNodeName;
-  
 };
 
-#endif  // G4DETECTORS_PHG4BarrelEcalSTEPPINGACTION_H
+#endif  

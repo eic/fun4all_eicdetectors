@@ -458,29 +458,19 @@ int PHG4BarrelEcalDetector::ParseParametersFromTable()
   while (getline(istream_mapping, line_mapping))
   {
 
-    /* Skip lines starting with / including a '#' */
-    if (line_mapping.find("#") != std::string::npos)
-    {
-      if (Verbosity() > 0)
-      {
-        std::cout << "PHG4BarrelEcalDetector: SKIPPING line in mapping file: " << line_mapping << std::endl;
-      }
-      continue;
-    }
-
     std::istringstream iss(line_mapping);
 
-      unsigned idphi_j, ideta_k;
-      G4double cx, cy, aa;
-      G4double tcx, tcy, tcz;
-      G4double rot_x, rott;
-      std::string dummys;
+    unsigned idphi_j, ideta_k;
+    G4double cx, cy, aa;
+    G4double tcx, tcy, tcz;
+    G4double rot_x, rott;
+    std::string dummys;
  
-       if (!(iss >> dummys >> idphi_j >> ideta_k >> cx >> cy >> aa >> tcx >> tcy >> tcz >>  rot_x >>  rott))
-      {
-        std::cout << "ERROR in PHG4BarrelEcalDetector: Failed to read line in mapping file " << m_Params->get_string_param("mapping_file") << std::endl;
-        gSystem->Exit(1);
-      }
+    if (!(iss >> dummys >> idphi_j >> ideta_k >> cx >> cy >> aa >> tcx >> tcy >> tcz >>  rot_x >>  rott))
+    {
+      std::cout << "ERROR in PHG4BarrelEcalDetector: Failed to read line in mapping file " << m_Params->get_string_param("mapping_file") << std::endl;
+      gSystem->Exit(1);
+    }
 
     /* Construct unique name for tower */
       /* Mapping file uses cm, this class uses mm for length */

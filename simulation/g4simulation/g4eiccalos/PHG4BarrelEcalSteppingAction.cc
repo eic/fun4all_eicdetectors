@@ -82,7 +82,7 @@ bool PHG4BarrelEcalSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
   int idx_k = icopy & 0xFFFF;
   int layer_id = m_Detector->get_Layer();
 
- /* Get energy deposited by this step */
+  /* Get energy deposited by this step */
   G4double edep = aStep->GetTotalEnergyDeposit() / GeV;
   G4double eion = (aStep->GetTotalEnergyDeposit() - aStep->GetNonIonizingEnergyDeposit()) / GeV;
   //  G4double light_yield = 0;
@@ -239,6 +239,7 @@ bool PHG4BarrelEcalSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
     return false;
   }
 }
+
 
 //____________________________________________________________________________..
 void PHG4BarrelEcalSteppingAction::SetInterfacePointers(PHCompositeNode* topNode)

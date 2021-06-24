@@ -45,45 +45,47 @@ int PHG4BarrelEcalSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
   PHNodeIterator iter(topNode);
   PHCompositeNode* dstNode = dynamic_cast<PHCompositeNode*>(iter.findFirst("PHCompositeNode", "DST"));
 
+  // create display settings before detector
+  m_DisplayAction = new PHG4BarrelEcalDisplayAction(Name());
+  // create detector
   m_Detector = new PHG4BarrelEcalDetector(this, topNode, GetParams(), Name());
   m_Detector->SuperDetector(SuperDetector());
   m_Detector->OverlapCheck(CheckOverlap());
   m_Detector->Verbosity(Verbosity());
+  
   std::set<std::string> nodes;
 
   if (GetParams()->get_int_param("active"))
   {
     PHNodeIterator dstIter(dstNode);
-    PHCompositeNode* DetNode = dynamic_cast<PHCompositeNode*>(dstIter.findFirst("PHCompositeNode", SuperDetector()));
-    if (!DetNode)
-    {
-      DetNode = new PHCompositeNode(SuperDetector());
-      dstNode->addNode(DetNode);
-    }
-    std::string nodename;
+    PHCompositeNode* DetNode = dstNode;
     if (SuperDetector() != "NONE")
     {
-      nodename = "G4HIT_" + SuperDetector();
+      DetNode = dynamic_cast<PHCompositeNode*>(dstIter.findFirst("PHCompositeNode", SuperDetector()));
+      if (!DetNode)
+      {
+        DetNode = new PHCompositeNode(SuperDetector());
+        dstNode->addNode(DetNode);
+      }
     }
-    else
+    // create hit output nodes
+    std::string detector_suffix = SuperDetector();
+    if (detector_suffix == "NONE")
     {
-      nodename = "G4HIT_" + Name();
+      detector_suffix = Name();
     }
-    nodes.insert(nodename);
-
+    m_HitNodeName = "G4HIT_" + detector_suffix;
+    nodes.insert(m_HitNodeName);
+    m_AbsorberNodeName = "G4HIT_ABSORBER_" + detector_suffix;
     if (GetParams()->get_int_param("absorberactive"))
     {
-      if (SuperDetector() != "NONE")
-      {
-        nodename = "G4HIT_ABSORBER_" + SuperDetector();
-      }
-      else
-      {
-        nodename = "G4HIT_ABSORBER_" + Name();
-      }
-      nodes.insert(nodename);
+      nodes.insert(m_AbsorberNodeName);
     }
-
+    m_SupportNodeName = "G4HIT_SUPPORT_" + detector_suffix;
+    if (GetParams()->get_int_param("supportactive"))
+    {
+      nodes.insert(m_SupportNodeName);
+    }
     for (auto thisnode : nodes)
     {
       PHG4HitContainer* g4_hits = findNode::getClass<PHG4HitContainer>(topNode, thisnode);
@@ -94,9 +96,12 @@ int PHG4BarrelEcalSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
       }
     }
     // create stepping action
-    m_SteppingAction = new PHG4BarrelEcalSteppingAction(m_Detector, GetParams());
+    PHG4BarrelEcalSteppingAction* tmp = new PHG4BarrelEcalSteppingAction(m_Detector, GetParams());
+    tmp->SetHitNodeName(m_HitNodeName);
+    tmp->SetAbsorberNodeName(m_AbsorberNodeName);
+    tmp->SetSupportNodeName(m_SupportNodeName);
+    m_SteppingAction = tmp;
   }
-
   return 0;
 }
 
