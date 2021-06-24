@@ -28,7 +28,8 @@ pkginclude_HEADERS = \
   PHG4ForwardCalCellReco.h \
   PHG4ForwardEcalSubsystem.h \
   PHG4ForwardHcalSubsystem.h \
-  PHG4LFHcalSubsystem.h
+  PHG4LFHcalSubsystem.h \
+  PHG4BarrelEcalSubsystem.h
 
 libg4eiccalos_la_SOURCES = \
   PHG4BackwardHcalDetector.cc \
@@ -64,7 +65,12 @@ libg4eiccalos_la_SOURCES = \
   PHG4FPbScSteppingAction.cc \
   PHG4FPbScRegionSteppingAction.cc \
   PHG4FPbScSubsystem.cc \
-  PHG4ProjCrystalCalorimeterDetector.cc
+  PHG4ProjCrystalCalorimeterDetector.cc \
+  PHG4BarrelEcalDetector.cc \
+  PHG4BarrelEcalDisplayAction.cc \
+  PHG4BarrelEcalSteppingAction.cc \
+  PHG4BarrelEcalSubsystem.cc 
+
 
 # Rule for generating table CINT dictionaries.
 %_Dict.cc: %.h %LinkDef.h
