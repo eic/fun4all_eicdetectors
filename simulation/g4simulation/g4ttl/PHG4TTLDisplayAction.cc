@@ -50,10 +50,10 @@ void PHG4TTLDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
     }
     else if (it.second == "DetectorBox")
     {
-      visatt->SetVisibility(false);
-      // visatt->SetColour(G4Colour::White());
-      // visatt->SetForceWireframe(true);
-      // visatt->SetForceLineSegmentsPerCircle(50);
+      // visatt->SetVisibility(false);
+      visatt->SetColour(G4Colour::Black());
+      visatt->SetForceWireframe(true);
+      visatt->SetForceLineSegmentsPerCircle(50);
     }
     else
     {
