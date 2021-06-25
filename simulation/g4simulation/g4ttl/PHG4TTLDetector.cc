@@ -81,7 +81,7 @@ void PHG4TTLDetector::ConstructMe(G4LogicalVolume *logicWorld)
 
   G4double thicknessDet = 0;
   for(int ilay=0; ilay<nLayers; ilay++){
-    thicknessDet += thicknessLayer[ilay]/10;
+    thicknessDet += thicknessLayer[ilay];
   }
 
   //Create the envelope = 'world volume' for the calorimeter
@@ -125,7 +125,7 @@ void PHG4TTLDetector::ConstructMe(G4LogicalVolume *logicWorld)
     G4VSolid *Sol_Raw = new G4Tubs(layer_name_Solid + "_Raw",     //const G4String& pName,
                                   0,                 //      G4double pRMin,
                                   rMax,  //      G4double pRMax,
-                                  thicknessLayer[ilay] / 10 / 2,     //      G4double pDz,
+                                  thicknessLayer[ilay] / 2,     //      G4double pDz,
                                   0,                 //      G4double pSPhi,
                                   2 * pi             //      G4double pDPhi
     );
@@ -136,10 +136,10 @@ void PHG4TTLDetector::ConstructMe(G4LogicalVolume *logicWorld)
                                                         materialLayer[ilay], layer_name + "_Log");
     RegisterLogicalVolume(LayerLog_Det);
     RegisterPhysicalVolume(
-        new G4PVPlacement(0, G4ThreeVector(0, 0, z_start + thicknessLayer[ilay] / 10 / 2), LayerLog_Det,
+        new G4PVPlacement(0, G4ThreeVector(0, 0, z_start + thicknessLayer[ilay] / 2), LayerLog_Det,
                           layer_name + "_Physical", DetectorLog_Det, false, 0, overlapcheck_sector),
         layerActive[ilay]);
-    z_start += thicknessLayer[ilay]/10;
+    z_start += thicknessLayer[ilay];
   }
 
   m_DisplayAction->AddVolume(DetectorLog_Det, "DetectorBox");
