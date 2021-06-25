@@ -9,10 +9,11 @@
 
 #include <vector>
 
-#include "TObject.h"
+//#include "TObject.h"
+#include <g4main/PHG4Hit.h>
 #include "TVector3.h"
 
-class PrtHit : public TObject {
+class PrtHit : public PHG4Hit {
 
 public:   
  
@@ -20,7 +21,7 @@ public:
   PrtHit();
 
   ~PrtHit(){};
- 
+
   // Accessors 
   Int_t GetType()        { return fType; }
   Int_t GetParticleId()  { return fParticleId; }   

@@ -1,13 +1,13 @@
 #include "G4EicDircSteppingAction.h"
 
 #include "G4EicDircDetector.h"
-#include "PrtHit.h"
 #include "PrtManager.h"
 
 #include <phparameter/PHParameters.h>
 
 #include <g4detectors/PHG4StepStatusDecode.h>
 
+#include "PrtHit.h"
 #include <g4main/PHG4Hit.h>
 #include <g4main/PHG4HitContainer.h>
 #include <g4main/PHG4Hitv1.h>
@@ -107,55 +107,6 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
     killtrack->SetTrackStatus(fStopAndKill);
   }
 
-  // For PrtPixelSD ---------------
-
-  if(whichactive_int_post == 11)
-    {
-      // Get cell id 
-      G4int layerNumber = touchpost->GetReplicaNumber(0);
-      const G4DynamicParticle* dynParticle = aTrack->GetDynamicParticle();
-      G4ParticleDefinition* particle = dynParticle->GetDefinition();  
-      G4String ParticleName = particle->GetParticleName();
-  
-      G4ThreeVector globalpos = aStep->GetPostStepPoint()->GetPosition();
-      G4ThreeVector localpos = touchpost->GetHistory()->GetTopTransform().TransformPoint(globalpos);
-      G4ThreeVector translation = touchpost->GetHistory()->GetTopTransform().Inverse().TransformPoint(G4ThreeVector(0,0,0));
-      G4ThreeVector inPrismpos = touchpost->GetHistory()->GetTransform( 1 ).TransformPoint(globalpos);
-      G4ThreeVector g4mom = aTrack->GetVertexMomentumDirection();//GetMomentum();
-      G4ThreeVector g4pos = aTrack->GetVertexPosition();
- 
-      TVector3 globalPos(inPrismpos.x(),inPrismpos.y(),inPrismpos.z());
-      TVector3 localPos(localpos.x(),localpos.y(),localpos.z());
-      TVector3 digiPos(translation.x(),translation.y(),translation.z());
-      TVector3 momentum(g4mom.x(),g4mom.y(),g4mom.z());
-      TVector3 position(g4pos.x(),g4pos.y(),g4pos.z());
-
-      // information from prizm
-      double time = aStep->GetPreStepPoint()->GetLocalTime();
-
-      PrtHit hit;
-      int mcp = touchpost->GetReplicaNumber(1);
-      int pix = touchpost->GetReplicaNumber(0);
-      hit.SetMcpId(mcp);
-      hit.SetPixelId(pix);
-      //hit.SetChannel(300*mcp+pix);
-      hit.SetGlobalPos(globalPos);
-      hit.SetLocalPos(localPos);
-      hit.SetDigiPos(digiPos);
-      hit.SetPosition(position);
-      hit.SetMomentum(momentum);
-      hit.SetParticleId(aTrack->GetTrackID());
-      hit.SetParentParticleId(aTrack->GetParentID());
-      //hit.SetNreflectionsInPrizm(refl);
-      //hit.SetPathInPrizm(pathId);
-      hit.SetCherenkovMC(PrtManager::Instance()->GetCurrentCherenkov());
-      // time since track created
-      hit.SetLeadTime(time);
-      Double_t wavelength = 1.2398/(aTrack->GetMomentum().mag()*1E6)*1000;
-      hit.SetTotTime(wavelength); //set photon wavelength
-
-    }
-
 
   int detector_id = 0;  // we use here only one detector in this simple example
   bool geantino = false;
@@ -205,7 +156,8 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
   case fUndefined:
     if (!m_Hit)
     {
-      m_Hit = new PHG4Hitv1();
+      //m_Hit = new PHG4Hitv1();
+      m_Hit = new PrtHit();
     }
     m_Hit->set_layer(detector_id);
     // here we set the entrance values in cm
@@ -217,6 +169,7 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
     // set the track ID
     m_Hit->set_trkid(aTrack->GetTrackID());
     m_SaveTrackId = aTrack->GetTrackID();
+
     // set the initial energy deposit
     m_EdepSum = 0;
     if (whichactive > 0)
@@ -316,6 +269,53 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
       m_Hit->set_z(1, postPoint->GetPosition().z() / cm);
 
       m_Hit->set_t(1, postPoint->GetGlobalTime() / nanosecond);
+      
+      if(whichactive_int_post == 11) // post step in Pixel ---------------
+	{
+      // Get cell id 
+      G4int layerNumber = touchpost->GetReplicaNumber(0);
+      const G4DynamicParticle* dynParticle = aTrack->GetDynamicParticle();
+      G4ParticleDefinition* particle = dynParticle->GetDefinition();  
+      G4String ParticleName = particle->GetParticleName();
+  
+      G4ThreeVector globalpos = aStep->GetPostStepPoint()->GetPosition();
+      G4ThreeVector localpos = touchpost->GetHistory()->GetTopTransform().TransformPoint(globalpos);
+      G4ThreeVector translation = touchpost->GetHistory()->GetTopTransform().Inverse().TransformPoint(G4ThreeVector(0,0,0));
+      G4ThreeVector inPrismpos = touchpost->GetHistory()->GetTransform( 1 ).TransformPoint(globalpos);
+      G4ThreeVector g4mom = aTrack->GetVertexMomentumDirection();//GetMomentum();
+      G4ThreeVector g4pos = aTrack->GetVertexPosition();
+ 
+      TVector3 globalPos(inPrismpos.x(),inPrismpos.y(),inPrismpos.z());
+      TVector3 localPos(localpos.x(),localpos.y(),localpos.z());
+      TVector3 digiPos(translation.x(),translation.y(),translation.z());
+      TVector3 momentum(g4mom.x(),g4mom.y(),g4mom.z());
+      TVector3 position(g4pos.x(),g4pos.y(),g4pos.z());
+
+      // information from prizm
+      double time = aStep->GetPreStepPoint()->GetLocalTime();
+
+      int mcp = touchpost->GetReplicaNumber(1);
+      int pix = touchpost->GetReplicaNumber(0);     
+     
+      m_Hit->SetMcpId(mcp);
+      m_Hit->SetPixelId(pix);
+      //hit.SetChannel(300*mcp+pix);
+      m_Hit->SetGlobalPos(globalPos);
+      m_Hit->SetLocalPos(localPos);
+      m_Hit->SetDigiPos(digiPos);
+      m_Hit->SetPosition(position);
+      m_Hit->SetMomentum(momentum);
+      //m_Hit->SetParticleId(aTrack->GetTrackID());
+      //hit.SetParentParticleId(aTrack->GetParentID());
+      //hit.SetNreflectionsInPrizm(refl);
+      //hit.SetPathInPrizm(pathId);
+      m_Hit->SetCherenkovMC(PrtManager::Instance()->GetCurrentCherenkov());
+      // time since track created
+      m_Hit->SetLeadTime(time);
+      Double_t wavelength = 1.2398/(aTrack->GetMomentum().mag()*1E6)*1000;
+      m_Hit->SetTotTime(wavelength); //set photon wavelength
+       
+      
       if (G4VUserTrackInformation *p = aTrack->GetUserInformation())
       {
         if (PHG4TrackUserInfoV1 *pp = dynamic_cast<PHG4TrackUserInfoV1 *>(p))
@@ -341,9 +341,11 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
         m_Hit->set_eion(m_EionSum);
       }
       m_SaveHitContainer->AddHit(detector_id, m_Hit);
+    	
       // ownership has been transferred to container, set to null
       // so we will create a new hit for the next track
       m_Hit = nullptr;
+	}
     }
     else
     {
