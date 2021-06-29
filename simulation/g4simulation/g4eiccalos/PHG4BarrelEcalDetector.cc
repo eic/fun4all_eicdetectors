@@ -97,11 +97,12 @@ void PHG4BarrelEcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
   ParseParametersFromTable();
 
  const double radius = 85*cm;
- const double Length = 298.94*cm;
+ const double Length = 380*cm;
  const double max_radius = 138*cm;
  const double pos_x1 = 0*cm;
  const double pos_y1 = 0*cm;
- const double pos_z1 = 0*cm;
+ const double pos_z1 = -50*cm;
+ //const double pos_z1 = 0;
 
   G4Tubs *cylinder_solid = new G4Tubs("BCAL_SOLID",
                                        radius, max_radius,
@@ -124,8 +125,8 @@ void PHG4BarrelEcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
   new G4PVPlacement(0, G4ThreeVector(pos_x1, pos_y1, pos_z1), cylinder_logic, name_envelope,
                                      logicWorld, false, 0, OverlapCheck());
 
-  
-  std::pair<G4LogicalVolume *, G4Transform3D> psec = Construct_AzimuthalSeg();
+ 
+  /*std::pair<G4LogicalVolume *, G4Transform3D> psec = Construct_AzimuthalSeg();
   G4LogicalVolume *sec_logic = psec.first;
   const G4Transform3D &sec_trans = psec.second;
   double Rot[32] = {0, 0.19635, 0.392699, 0.589049,0.785398, 0.981748, 1.1781, 1.37445, 1.5708, 1.76715, 1.9635, 2.15984, 2.35619, 2.55254, 2.74889, 2.94524, 3.14159, 3.33794, 3.53429, 3.73064, 3.92699, 4.12334, 4.31969, 4.51604, 4.71239, 4.90874, 5.10509, 5.30144, 5.49779, 5.69414, 5.89049, 6.08684};
@@ -144,7 +145,7 @@ void PHG4BarrelEcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
     new G4PVPlacement(sec_place, sec_logic,
                       "enclosure", cylinder_logic, false, sec,
                       OverlapCheck());
-   }
+   }*/
 
   /* Construct single calorimeter tower */
   G4LogicalVolume* singletower = ConstructTower();
@@ -168,7 +169,7 @@ PHG4BarrelEcalDetector::Construct_AzimuthalSeg()
   const double sidewall_outer_torr = 0.15875;
   const double assembly_spacing = 0.01905;
   const double divider_width = 0;
-  const double length = 298.94*cm;
+  const double length = 3880;
 
   const int  Azimuthal_n_Sec = 256; 
   if (!(Azimuthal_n_Sec > 4))
@@ -387,7 +388,7 @@ PHG4BarrelEcalDetector::ConstructTower()
       0,  0,                                                    // G4double pTheta, G4double pPhi,
       2.0*cm, 2.0*cm,2.0*cm,                                    // G4double pDy1, G4double pDx1, G4double pDx2,
       0,                                                       // G4double pAlp1,
-      2.5*cm, 2.5*cm,2.5*cm,                                    // G4double pDy2, G4double pDx3, G4double pDx4,
+      3*cm, 2.*cm,2.*cm,                                    // G4double pDy2, G4double pDx3, G4double pDx4,
       0                                                         // G4double pAlp2 //
   );
 
@@ -417,27 +418,20 @@ int PHG4BarrelEcalDetector::PlaceTower(G4LogicalVolume* sec, G4LogicalVolume* si
     }
      int copyno = (iterator->second.idx_j << 16) + iterator->second.idx_k;
 
-    G4Transform3D block_trans =
-        G4TranslateX3D(iterator->second.centerx) *
-        G4TranslateY3D(iterator->second.centery) *
-        G4RotateZ3D(iterator->second.azangle) *
-        G4TranslateX3D(iterator->second.towercenterx) *
-        G4TranslateY3D(iterator->second.towercentery) *
-        G4TranslateZ3D(iterator->second.towercenterz) *
-        G4RotateX3D(iterator->second.rotx);
 
-    G4Transform3D sec_place = G4RotateZ3D(iterator->second.rot) * block_trans;   
+     G4RotationMatrix becal_rotm;
+     becal_rotm.rotateY(iterator->second.roty);
+     becal_rotm.rotateZ(iterator->second.rotz);
 
-    
-    
-    new G4PVPlacement(sec_place,
+      new G4PVPlacement(G4Transform3D(becal_rotm, G4ThreeVector(iterator->second.centerx, iterator->second.centery, iterator->second.centerz)),
                       singletower,
                       iterator->first,
                       sec,
                       0, copyno, OverlapCheck());
+
+
     
   }
-
   return 0;
 }
 
@@ -461,12 +455,11 @@ int PHG4BarrelEcalDetector::ParseParametersFromTable()
     std::istringstream iss(line_mapping);
 
     unsigned idphi_j, ideta_k;
-    G4double cx, cy, aa;
-    G4double tcx, tcy, tcz;
-    G4double rot_x, rott;
+    G4double cx, cy, cz;
+    G4double rot_z, rot_y;
     std::string dummys;
  
-    if (!(iss >> dummys >> idphi_j >> ideta_k >> cx >> cy >> aa >> tcx >> tcy >> tcz >>  rot_x >>  rott))
+    if (!(iss >> dummys >> idphi_j >> ideta_k >> cx >> cy >> cz >> rot_y >> rot_z))
     {
       std::cout << "ERROR in PHG4BarrelEcalDetector: Failed to read line in mapping file " << m_Params->get_string_param("mapping_file") << std::endl;
       gSystem->Exit(1);
@@ -482,12 +475,9 @@ int PHG4BarrelEcalDetector::ParseParametersFromTable()
       towerposition tower_new;
       tower_new.centerx = cx;
       tower_new.centery = cy;
-      tower_new.azangle = aa;
-      tower_new.towercenterx = tcx;
-      tower_new.towercentery = tcy;
-      tower_new.towercenterz = tcz;
-      tower_new.rotx = rot_x;
-      tower_new.rot = rott;
+      tower_new.centerz = cz;
+      tower_new.roty = rot_y;
+      tower_new.rotz = rot_z;
       tower_new.idx_j = idphi_j;
       tower_new.idx_k = ideta_k;
       m_TowerPostionMap.insert(make_pair(towername.str(), tower_new));

@@ -57,20 +57,12 @@ class PHG4BarrelEcalDetector : public PHG4Detector
 
   struct towerposition
   {
-    G4double x;
-    G4double y;
-    G4double z;
-    G4double roty;
-    G4double rotz;
 
     G4double centerx;
     G4double centery;
-    G4double azangle;
-    G4double towercenterx;
-    G4double towercentery;
-    G4double towercenterz;
-    G4double rotx;
-    G4double rot;
+    G4double centerz;
+    G4double roty;
+    G4double rotz;
     int idx_j;
     int idx_k;
   };
