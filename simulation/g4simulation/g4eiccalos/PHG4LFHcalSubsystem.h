@@ -46,7 +46,12 @@ class PHG4LFHcalSubsystem : public PHG4DetectorSubsystem
   void SetTowerMappingFile(const std::string &filename);
   /** Set layers per tower segment by hand, has to be set in addition to mapping file
    */
-  void SetLayerPerTowerSegment(int layerPerTowerSeg) {set_int_param("nlayerspertowerseg", layerPerTowerSeg); };
+  void SetLayerPerTowerSegment(int layerPerTowerSeg) {set_int_param("nlayerspertowerseg", layerPerTowerSeg); }
+  
+  /** Set level of detail for display
+   */
+  void SetDetailed(bool b){showdetailed = b;}
+
   
  private:
   void SetDefaultParameters();
@@ -61,6 +66,7 @@ class PHG4LFHcalSubsystem : public PHG4DetectorSubsystem
   //! display attribute setting
   /*! derives from PHG4DisplayAction */
   PHG4DisplayAction *m_DisplayAction = nullptr;
+  bool showdetailed = false;
 };
 
 #endif

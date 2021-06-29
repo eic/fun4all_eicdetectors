@@ -268,7 +268,7 @@ PHG4LFHcalDetector::ConstructTower()
                   0, 0, OverlapCheck());
 
   
-  m_DisplayAction->AddVolume(single_tower_logic, "SingleScintillator");
+  m_DisplayAction->AddVolume(single_tower_logicRep, "SingleTower");
 
   if (Verbosity() > 0)
   {

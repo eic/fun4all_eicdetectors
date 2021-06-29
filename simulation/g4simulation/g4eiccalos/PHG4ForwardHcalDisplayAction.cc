@@ -16,6 +16,13 @@ PHG4ForwardHcalDisplayAction::PHG4ForwardHcalDisplayAction(const std::string &na
 {
 }
 
+PHG4ForwardHcalDisplayAction::PHG4ForwardHcalDisplayAction(const std::string &name, bool detailed)
+  : PHG4DisplayAction(name)
+{
+  showdetails = detailed;
+  if (!detailed) std::cout << "PHG4ForwardHcalDisplayAction::disabled detailed view of towers" << std::endl;
+}
+
 PHG4ForwardHcalDisplayAction::~PHG4ForwardHcalDisplayAction()
 {
   for (auto &it : m_VisAttVec)
@@ -42,6 +49,11 @@ void PHG4ForwardHcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol
     if (it.second == "Absorber")
     {
       visatt->SetColour(G4Colour::Gray());
+      if (showdetails)
+        visatt->SetVisibility(true);
+      else 
+        visatt->SetVisibility(false);
+
     }
     else if (it.second == "FHcalEnvelope")
     {
@@ -50,19 +62,34 @@ void PHG4ForwardHcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol
     else if (it.second == "Scintillator")
     {
       visatt->SetColour(G4Colour::White());
+      if (showdetails)
+        visatt->SetVisibility(true);
+      else 
+        visatt->SetVisibility(false);
     }
     else if (it.second == "WLSplate")
     {
       visatt->SetColour(G4Colour::Yellow());
+      if (showdetails)
+        visatt->SetVisibility(true);
+      else 
+        visatt->SetVisibility(false);
     }
     else if (it.second == "SupportPlate")
     {
       visatt->SetColour(G4Colour::Gray());
+      if (showdetails)
+        visatt->SetVisibility(true);
+      else 
+        visatt->SetVisibility(false);
     }
-    else if (it.second == "SingleScintillator")
+    else if (it.second == "SingleTower")
     {
-      visatt->SetColour(G4Colour::Cyan());
-      visatt->SetVisibility(false);
+      visatt->SetColour(G4Colour::Gray());
+      if (showdetails)
+        visatt->SetVisibility(false);
+      else 
+        visatt->SetVisibility(true);
     }
     else
     {

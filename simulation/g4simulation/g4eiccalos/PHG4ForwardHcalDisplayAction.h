@@ -17,7 +17,8 @@ class PHG4ForwardHcalDisplayAction : public PHG4DisplayAction
 {
  public:
   explicit PHG4ForwardHcalDisplayAction(const std::string &name);
-
+  explicit PHG4ForwardHcalDisplayAction(const std::string &name, bool detailed);
+  
   virtual ~PHG4ForwardHcalDisplayAction();
 
   void ApplyDisplayAction(G4VPhysicalVolume *physvol) override;
@@ -26,6 +27,8 @@ class PHG4ForwardHcalDisplayAction : public PHG4DisplayAction
  private:
   std::map<G4LogicalVolume *, std::string> m_LogicalVolumeMap;
   std::vector<G4VisAttributes *> m_VisAttVec;
+  bool showdetails = false;
+
 };
 
 #endif  // G4DETECTORS_PHG4FORWARDHCALDISPLAYACTION_H

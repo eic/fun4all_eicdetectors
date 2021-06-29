@@ -21,6 +21,15 @@ PHG4TTLDisplayAction::PHG4TTLDisplayAction(const std::string &name)
 {
 }
 
+PHG4TTLDisplayAction::PHG4TTLDisplayAction(const std::string &name, bool detailed)
+  : PHG4DisplayAction(name)
+{
+  showdetails = detailed;
+  if (!detailed) std::cout << "PHG4TTLDisplayAction::disabled detailed view of towers" << std::endl;
+}
+
+
+
 PHG4TTLDisplayAction::~PHG4TTLDisplayAction()
 {
   for (auto &it : m_VisAttVec)
@@ -47,13 +56,20 @@ void PHG4TTLDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
     if (it.second == "TTLDetector")
     {
       PHG4Utils::SetColour(visatt, it.first->GetMaterial()->GetName());
+      if (!showdetails) visatt->SetVisibility(false);
     }
     else if (it.second == "DetectorBox")
     {
       // visatt->SetVisibility(false);
-      visatt->SetColour(G4Colour::Black());
-      visatt->SetForceWireframe(true);
+      
+      if (!showdetails){
+        visatt->SetColour(G4Colour::Black());
+        visatt->SetForceWireframe(true);
+      } else {
+        visatt->SetColour(34./255, 139./255, 34./255, 1. );
+      }
       visatt->SetForceLineSegmentsPerCircle(50);
+      
     }
     else
     {

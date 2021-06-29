@@ -17,7 +17,8 @@ class PHG4TTLDisplayAction : public PHG4DisplayAction
 {
  public:
   PHG4TTLDisplayAction(const std::string &name);
-
+  PHG4TTLDisplayAction(const std::string &name, bool detailed);
+  
   ~PHG4TTLDisplayAction() override;
 
   void ApplyDisplayAction(G4VPhysicalVolume *physvol) override;
@@ -26,6 +27,7 @@ class PHG4TTLDisplayAction : public PHG4DisplayAction
  private:
   std::map<G4LogicalVolume *, std::string> m_LogicalVolumeMap;
   std::vector<G4VisAttributes *> m_VisAttVec;
+  bool showdetails = false;
 };
 
 #endif  // G4DETECTORS_PHG4TTLDISPLAYACTION_H

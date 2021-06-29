@@ -66,6 +66,11 @@ class PHG4TTLSubsystem : public PHG4DetectorSubsystem
   //   geom = g;
   // }
 
+  /** Set level of detail for display
+   */
+  void SetDetailed(bool b){showdetailed = b;}
+
+  
  private:
   void SetDefaultParameters() override;
   //! detector geometry
@@ -81,6 +86,7 @@ class PHG4TTLSubsystem : public PHG4DetectorSubsystem
   PHG4DisplayAction* m_DisplayAction;
 
   std::string superdetector;
+  bool showdetailed = false;
 
   // PHG4TTL::Sector_Geometry geom;
 };

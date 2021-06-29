@@ -256,7 +256,7 @@ PHG4BackwardHcalDetector::ConstructTower()
                     name_wls,
                     single_tower_logic,
                     0, 0, OverlapCheck());
-  m_DisplayAction->AddVolume(single_tower_logic, "SingleScintillator");
+  m_DisplayAction->AddVolume(single_tower_logic, "SingleTower");
 
   if (Verbosity() > 0)
   {
