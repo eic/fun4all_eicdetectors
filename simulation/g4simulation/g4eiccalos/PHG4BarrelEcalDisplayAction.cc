@@ -43,13 +43,13 @@ void PHG4BarrelEcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
     {
       visatt->SetColour(G4Colour::Black());
       visatt->SetForceWireframe(true);
-      visatt->SetVisibility(true);
+      visatt->SetVisibility(false);
     }
      else if (it.second == "BCalCylinder") 
     {
       visatt->SetColour(G4Colour::Black());
-      visatt->SetColor(0, 1, 0);
       visatt->SetForceWireframe(true);
+      visatt->SetVisibility(true);
     }
     else if (it.second == "Block")
     {

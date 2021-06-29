@@ -97,7 +97,7 @@ void PHG4BarrelEcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
   ParseParametersFromTable();
 
  const double radius = 85*cm;
- const double Length = 380*cm;
+ const double Length = 390*cm;
  const double max_radius = 138*cm;
  const double pos_x1 = 0*cm;
  const double pos_y1 = 0*cm;
