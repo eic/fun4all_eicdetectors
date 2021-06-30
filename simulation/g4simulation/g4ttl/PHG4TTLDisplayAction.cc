@@ -62,14 +62,15 @@ void PHG4TTLDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
     {
       // visatt->SetVisibility(false);
       
-      if (!showdetails){
+      if (showdetails){
         visatt->SetColour(G4Colour::Black());
         visatt->SetForceWireframe(true);
+        visatt->SetForceLineSegmentsPerCircle(50);
       } else {
         visatt->SetColour(34./255, 139./255, 34./255, 1. );
+        visatt->SetForceSolid(true);
+        visatt->SetVisibility(true);
       }
-      visatt->SetForceLineSegmentsPerCircle(50);
-      
     }
     else
     {
