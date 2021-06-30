@@ -97,11 +97,11 @@ void PHG4BarrelEcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
   ParseParametersFromTable();
 
  const double radius = 85*cm;
- const double Length = 390*cm;
+ const double Length = 412*cm;
  const double max_radius = 138*cm;
  const double pos_x1 = 0*cm;
  const double pos_y1 = 0*cm;
- const double pos_z1 = -50*cm;
+ const double pos_z1 = -41*cm;
  //const double pos_z1 = 0;
 
   G4Tubs *cylinder_solid = new G4Tubs("BCAL_SOLID",
@@ -126,7 +126,7 @@ void PHG4BarrelEcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
                                      logicWorld, false, 0, OverlapCheck());
 
  
-  /*std::pair<G4LogicalVolume *, G4Transform3D> psec = Construct_AzimuthalSeg();
+  std::pair<G4LogicalVolume *, G4Transform3D> psec = Construct_AzimuthalSeg();
   G4LogicalVolume *sec_logic = psec.first;
   const G4Transform3D &sec_trans = psec.second;
   double Rot[32] = {0, 0.19635, 0.392699, 0.589049,0.785398, 0.981748, 1.1781, 1.37445, 1.5708, 1.76715, 1.9635, 2.15984, 2.35619, 2.55254, 2.74889, 2.94524, 3.14159, 3.33794, 3.53429, 3.73064, 3.92699, 4.12334, 4.31969, 4.51604, 4.71239, 4.90874, 5.10509, 5.30144, 5.49779, 5.69414, 5.89049, 6.08684};
@@ -145,7 +145,7 @@ void PHG4BarrelEcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
     new G4PVPlacement(sec_place, sec_logic,
                       "enclosure", cylinder_logic, false, sec,
                       OverlapCheck());
-   }*/
+   }
 
   /* Construct single calorimeter tower */
   G4LogicalVolume* singletower = ConstructTower();
