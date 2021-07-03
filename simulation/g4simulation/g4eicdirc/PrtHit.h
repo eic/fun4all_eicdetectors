@@ -9,11 +9,11 @@
 
 #include <vector>
 
-//#include "TObject.h"
 #include <g4main/PHG4Hit.h>
+#include <g4main/PHG4Hitv1.h>
 #include "TVector3.h"
 
-class PrtHit : public PHG4Hit {
+class PrtHit : public PHG4Hitv1 {
 
 public:   
  
@@ -90,7 +90,7 @@ protected:
   Double_t fLeadTime;    
   Double_t fTotTime;  
 
-  ClassDefOverride(PrtHit,2)
+  ClassDef(PrtHit,2)
 };
 
 #endif

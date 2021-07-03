@@ -260,6 +260,7 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
       aTrack->GetTrackStatus() == fStopAndKill)
   {
     // save only hits with energy deposit (or geantino)
+
     if (m_EdepSum > 0 || geantino)
     {
       // update values at exit coordinates and set keep flag
@@ -314,7 +315,7 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
       m_Hit->SetLeadTime(time);
       Double_t wavelength = 1.2398/(aTrack->GetMomentum().mag()*1E6)*1000;
       m_Hit->SetTotTime(wavelength); //set photon wavelength
-       
+      
       
       if (G4VUserTrackInformation *p = aTrack->GetUserInformation())
       {
@@ -355,6 +356,7 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
       m_Hit->Reset();
     }
   }
+
   // return true to indicate the hit was used
   return true;
 

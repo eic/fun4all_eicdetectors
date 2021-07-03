@@ -109,7 +109,7 @@ G4ClassificationOfNewTrack G4EicDircStackingAction::ClassifyNewTrack(const G4Tra
 void G4EicDircStackingAction::PrepareNewEvent()
 {
   G4cout << "Number of Cerenkov photons produced in this event : " << fCerenkovCounter << G4endl;
-//  std::cout << "calling prepare new event" << std::endl;
+  //  std::cout << "calling prepare new event" << std::endl;
   fCerenkovCounter = 0;
   fScintillationCounter = 0;
   return;

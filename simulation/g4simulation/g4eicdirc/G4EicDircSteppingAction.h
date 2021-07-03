@@ -10,6 +10,7 @@ class G4VPhysicalVolume;
 class PHCompositeNode;
 class G4EicDircDetector;
 class PHG4Hit;
+class PHG4Hitv1;
 class PHG4HitContainer;
 class PHParameters;
 class PrtHit;

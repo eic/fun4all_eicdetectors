@@ -22,8 +22,8 @@ libg4eicdirc_la_LIBADD = \
 
 pkginclude_HEADERS = \
   G4EicDircSubsystem.h \
-  PrtCherenkovProcess.h \
-  PrtOpBoundaryProcess.h
+  PrtOpBoundaryProcess.h \
+  PrtHit.h
 
 ROOT_IO_DICTS = \
   PrtEvent_Dict.cc \
