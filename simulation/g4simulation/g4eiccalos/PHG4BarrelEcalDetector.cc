@@ -22,6 +22,9 @@
 #include <Geant4/G4VPhysicalVolume.hh>  // for G4VPhysicalVolume
 #include <Geant4/G4DisplacedSolid.hh>
 #include <Geant4/G4Tubs.hh>
+#include <Geant4/G4Material.hh>
+#include <Geant4/G4MaterialPropertiesTable.hh>  // for G4MaterialProperties...
+#include <Geant4/G4MaterialPropertyVector.hh>   // for G4MaterialPropertyVector
 
 #include <TSystem.h>
 
@@ -392,8 +395,16 @@ PHG4BarrelEcalDetector::ConstructTower()
       0                                                         // G4double pAlp2 //
   );
 
+  
+  G4double density;
+  G4int ncomponents;
+  G4Material *sciglass1 = new G4Material("sciglass1", density = 4.22 * g / cm3, ncomponents = 4,  kStateSolid);
+  sciglass1->AddElement(G4Element::GetElement("Ba"), 0.3875);
+  sciglass1->AddElement(G4Element::GetElement("Gd"), 0.2146);
+  sciglass1->AddElement(G4Element::GetElement("Si"), 0.1369);
+  sciglass1->AddElement(G4Element::GetElement("O"),  0.2610);
 
-  G4Material* cylinder_mat = G4Material::GetMaterial("sciglass");
+  G4Material* cylinder_mat = G4Material::GetMaterial("sciglass1");
   assert(cylinder_mat);
 
   G4LogicalVolume* block_logic = new G4LogicalVolume(block_solid, cylinder_mat,
