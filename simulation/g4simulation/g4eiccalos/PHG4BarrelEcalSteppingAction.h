@@ -48,7 +48,7 @@ class PHG4BarrelEcalSteppingAction : public PHG4SteppingAction
 
   int m_ActiveFlag = 0;
   int m_AbsorberTruthFlag = 0;
-  int m_SupportTruthFlag = 0;
+  //int m_SupportTruthFlag = 0;
   int m_BlackHoleFlag = 0;
 
   std::string m_HitNodeName;

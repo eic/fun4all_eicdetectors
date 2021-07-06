@@ -76,7 +76,7 @@ class PHG4BarrelEcalDetector : public PHG4Detector
   int m_Layer = 0;
 
  
-   G4LogicalVolume* singletower; 
+  //G4LogicalVolume* singletower; 
   std::string m_TowerLogicNamePrefix;
   std::string m_SuperDetector;
 
