@@ -230,7 +230,7 @@ PHG4ForwardEcalDetector::ConstructTower(int type)
                     single_tower_logic,
                     0, 0, OverlapCheck());
 
-  GetDisplayAction()->AddVolume(single_tower_logic, "ScintillatorSingleTower");
+  GetDisplayAction()->AddVolume(single_tower_logic, "SingleTower");
 
   if (Verbosity() > 0)
   {
@@ -324,7 +324,7 @@ PHG4ForwardEcalDetector::ConstructTowerType2()
     zpos_i += (thickness_absorber / 2. + thickness_scintillator / 2.);
   }
 
-  GetDisplayAction()->AddVolume(single_tower_logic, "ScintillatorSingleTower");
+  GetDisplayAction()->AddVolume(single_tower_logic, "SingleTower");
 
   if (Verbosity() > 0)
   {
@@ -455,7 +455,7 @@ PHG4ForwardEcalDetector::ConstructTowerType3_4_5_6(int type)
                     name_absorber,
                     single_tower_logic,
                     0, 0, OverlapCheck());
-  GetDisplayAction()->AddVolume(single_tower_logic, "ScintillatorSingleTower");
+  GetDisplayAction()->AddVolume(single_tower_logic, "SingleTower");
 
   if (Verbosity() > 0)
   {

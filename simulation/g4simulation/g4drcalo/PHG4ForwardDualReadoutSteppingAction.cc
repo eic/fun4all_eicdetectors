@@ -313,8 +313,8 @@ bool PHG4ForwardDualReadoutSteppingAction::UserSteppingAction(const G4Step* aSte
     }//secondary tracks loop
 //     cout << __LINE__ << endl;
 //       cout << hit->get_property_float(PHG4Hit::PROPERTY::scint_gammas) <<  "\tadd fNscin: " << fNscin <<  "\t" << hit->get_property_float(PHG4Hit::PROPERTY::cerenkov_gammas) << "\t add fNcerenkov: " << fNcerenkov<< endl;
-    G4Material* nextMaterial = aStep->GetPostStepPoint()->GetMaterial();
-    string materialstr = nextMaterial->GetName();
+    //G4Material* nextMaterial = aStep->GetPostStepPoint()->GetMaterial();
+    //string materialstr = nextMaterial->GetName();
 //     string materialstr2 = prevMaterial->GetName();
 //     if(materialstr.find("G4_AIR") == std::string::npos)cout << materialstr << endl;;
 //     if(materialstr2.find("G4_AIR") == std::string::npos)cout << "\t" << materialstr2 << endl;;

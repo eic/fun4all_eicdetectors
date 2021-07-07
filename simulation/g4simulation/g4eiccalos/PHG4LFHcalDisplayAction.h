@@ -17,15 +17,17 @@ class PHG4LFHcalDisplayAction : public PHG4DisplayAction
 {
  public:
   PHG4LFHcalDisplayAction(const std::string &name);
+  PHG4LFHcalDisplayAction(const std::string &name, bool detailed);
 
   virtual ~PHG4LFHcalDisplayAction();
 
   void ApplyDisplayAction(G4VPhysicalVolume *physvol);
   void AddVolume(G4LogicalVolume *logvol, const std::string &mat) { m_LogicalVolumeMap[logvol] = mat; }
-
+  
  private:
   std::map<G4LogicalVolume *, std::string> m_LogicalVolumeMap;
   std::vector<G4VisAttributes *> m_VisAttVec;
+  bool showdetails = false;
 };
 
 #endif  // G4DETECTORS_PHG4LFHCALDISPLAYACTION_H

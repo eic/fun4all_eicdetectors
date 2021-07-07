@@ -16,11 +16,19 @@ AM_LDFLAGS = \
   -L$(ROOTSYS)/lib
 
 libg4eiccalos_la_LIBADD = \
+  -lphool \
+  -lSubsysReco \
   -lfun4all \
   -lphg4hit \
+  -lg4testbench \
   -lg4detectors \
-  -ltrackbase_historic_io
-
+  -lg4detectors_io \
+  -ltrackbase_historic_io \
+  -lphparameter \
+  -lgsl \
+  -lgslcblas \
+  -lcalo_io
+  
 pkginclude_HEADERS = \
   PHG4BackwardHcalSubsystem.h \
   PHG4CrystalCalorimeterSubsystem.h \
@@ -28,7 +36,11 @@ pkginclude_HEADERS = \
   PHG4ForwardCalCellReco.h \
   PHG4ForwardEcalSubsystem.h \
   PHG4ForwardHcalSubsystem.h \
-  PHG4LFHcalSubsystem.h
+  PHG4LFHcalSubsystem.h \
+  PHG4BarrelEcalSubsystem.h \
+  RawTowerBuilderByHitIndexBECAL.h \
+  RawTowerBuilderByHitIndexLHCal.h
+
 
 libg4eiccalos_la_SOURCES = \
   PHG4BackwardHcalDetector.cc \
@@ -64,7 +76,14 @@ libg4eiccalos_la_SOURCES = \
   PHG4FPbScSteppingAction.cc \
   PHG4FPbScRegionSteppingAction.cc \
   PHG4FPbScSubsystem.cc \
-  PHG4ProjCrystalCalorimeterDetector.cc
+  PHG4ProjCrystalCalorimeterDetector.cc \
+  PHG4BarrelEcalDetector.cc \
+  PHG4BarrelEcalDisplayAction.cc \
+  PHG4BarrelEcalSteppingAction.cc \
+  PHG4BarrelEcalSubsystem.cc \
+  RawTowerBuilderByHitIndexBECAL.cc \
+  RawTowerBuilderByHitIndexLHCal.cc
+
 
 # Rule for generating table CINT dictionaries.
 %_Dict.cc: %.h %LinkDef.h

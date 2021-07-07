@@ -18,6 +18,13 @@ PHG4LFHcalDisplayAction::PHG4LFHcalDisplayAction(const std::string &name)
 {
 }
 
+PHG4LFHcalDisplayAction::PHG4LFHcalDisplayAction(const std::string &name, bool detailed)
+  : PHG4DisplayAction(name)
+{
+  showdetails = detailed;
+  if (!detailed) std::cout << "PHG4LFHcalDisplayAction::disabled detailed view of towers" << std::endl;
+}
+
 PHG4LFHcalDisplayAction::~PHG4LFHcalDisplayAction()
 {
   for (auto &it : m_VisAttVec)
@@ -37,13 +44,18 @@ void PHG4LFHcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
     {
       continue;
     }
+    std::cout << showdetails << "\t" << it.second ;
     G4VisAttributes *visatt = new G4VisAttributes();
-    visatt->SetVisibility(true);
     visatt->SetForceSolid(true);
     m_VisAttVec.push_back(visatt);  // for later deletion
     if (it.second == "Absorber")
     {
-      visatt->SetColour(G4Colour::Blue());
+      if (showdetails){
+        visatt->SetColour(G4Colour::Blue());
+        visatt->SetVisibility(true);
+        std::cout << " is visible" ;
+      } else 
+        visatt->SetVisibility(false);
     }
     else if (it.second == "LFHcalEnvelope")
     {
@@ -51,22 +63,38 @@ void PHG4LFHcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
     }
     else if (it.second == "Scintillator")
     {
-      visatt->SetColour(G4Colour::White());
+      if (showdetails){
+        visatt->SetColour(G4Colour::White());
+        visatt->SetVisibility(true);
+        std::cout << " is visible" ;
+      } else 
+        visatt->SetVisibility(false);
     }
     else if (it.second == "WLSplate" || it.second == "WLSfiber")
     {
-      visatt->SetColour(G4Colour::Yellow());
+      if (showdetails){
+        visatt->SetColour(G4Colour::Yellow());
+        visatt->SetVisibility(true);
+        std::cout << " is visible" ;
+      } else 
+        visatt->SetVisibility(false);
     }
-    else if (it.second == "SingleScintillator")
+    else if (it.second == "SingleTower")
     {
-      visatt->SetColour(G4Colour::Cyan());
-      visatt->SetVisibility(false);
+      if (showdetails)
+        visatt->SetVisibility(false);
+      else {
+        visatt->SetColour(G4Colour::Blue());
+        visatt->SetVisibility(true);
+        std::cout << " is visible" ;
+      }
     }
     else
     {
       cout << "unknown logical volume " << it.second << endl;
       gSystem->Exit(1);
     }
+    std::cout << std::endl ;
     logvol->SetVisAttributes(visatt);
   }
   return;

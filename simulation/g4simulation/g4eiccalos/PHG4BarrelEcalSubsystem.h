@@ -1,7 +1,7 @@
 // Tell emacs that this is a C++ source
 //  -*- C++ -*-.
-#ifndef G4DETECTORS_PHG4FORWARDHCALSUBSYSTEM_H
-#define G4DETECTORS_PHG4FORWARDHCALSUBSYSTEM_H
+#ifndef G4DETECTORS_PHG4BARRELECALSUBSYSTEM_H
+#define G4DETECTORS_PHG4BARRELECALSUBSYSTEM_H
 
 #include <g4detectors/PHG4DetectorSubsystem.h>
 
@@ -10,19 +10,19 @@
 class PHCompositeNode;
 class PHG4Detector;
 class PHG4DisplayAction;
-class PHG4ForwardHcalDetector;
+class PHG4BarrelEcalDetector;
 class PHG4SteppingAction;
 
-class PHG4ForwardHcalSubsystem : public PHG4DetectorSubsystem
+class PHG4BarrelEcalSubsystem : public PHG4DetectorSubsystem
 {
  public:
   /** Constructor
    */
-  PHG4ForwardHcalSubsystem(const std::string &name = "FORWARD_HCAL_DEFAULT", const int layer = 0);
+  PHG4BarrelEcalSubsystem(const std::string &name = "FORWARD_HCAL_DEFAULT", const int layer = 0);
 
   /** Destructor
    */
-  virtual ~PHG4ForwardHcalSubsystem();
+  virtual ~PHG4BarrelEcalSubsystem();
 
   /**
      Creates the m_Detector object
@@ -50,16 +50,12 @@ class PHG4ForwardHcalSubsystem : public PHG4DetectorSubsystem
 
   void SetUseFeTungstenAbsorber(int useTungsten) {set_int_param("absorber_FeTungsten", 1); };
 
-  /** Set level of detail for display
-   */
-  void SetDetailed(bool b){showdetailed = b;}
-
  private:
   void SetDefaultParameters() override;
 
   /** Pointer to the Geant4 implementation of the detector
    */
-  PHG4ForwardHcalDetector *m_Detector = nullptr;
+  PHG4BarrelEcalDetector *m_Detector = nullptr;
 
   /** Stepping action
    */
@@ -67,9 +63,7 @@ class PHG4ForwardHcalSubsystem : public PHG4DetectorSubsystem
   //! display attribute setting
   /*! derives from PHG4DisplayAction */
   PHG4DisplayAction *m_DisplayAction = nullptr;
-  
-  bool showdetailed = false;
-  
+
   std::string m_HitNodeName;
   std::string m_AbsorberNodeName;
   std::string m_SupportNodeName;

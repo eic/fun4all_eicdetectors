@@ -50,7 +50,7 @@ int PHG4TTLSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
       "PHCompositeNode", "DST"));
 
   // create display settings before detector
-  m_DisplayAction = new PHG4TTLDisplayAction(Name());
+  m_DisplayAction = new PHG4TTLDisplayAction(Name(),showdetailed);
   // create detector
   m_Detector = new PHG4TTLDetector(this, topNode, GetParams(), Name());
   // m_Detector->geom = geom;

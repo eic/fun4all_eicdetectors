@@ -46,7 +46,7 @@ int PHG4BackwardHcalSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
   PHCompositeNode* dstNode = dynamic_cast<PHCompositeNode*>(iter.findFirst("PHCompositeNode", "DST"));
 
   // create display settings before detector
-  m_DisplayAction = new PHG4BackwardHcalDisplayAction(Name());
+  m_DisplayAction = new PHG4BackwardHcalDisplayAction(Name(), showdetailed);
   // create detector
   m_Detector = new PHG4BackwardHcalDetector(this, topNode, GetParams(), Name());
   m_Detector->SuperDetector(SuperDetector());

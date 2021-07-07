@@ -1,7 +1,7 @@
-// Tell emacs that this is a C++ source
+ // Tell emacs that this is a C++ source
 //  -*- C++ -*-.
-#ifndef G4DETECTORS_PHG4TTLDISPLAYACTION_H
-#define G4DETECTORS_PHG4TTLDISPLAYACTION_H
+#ifndef G4DETECTORS_PHG4BARRELECALDISPLAYACTION_H
+#define G4DETECTORS_PHG4BARRELECALDISPLAYACTION_H
 
 #include <g4main/PHG4DisplayAction.h>
 
@@ -13,13 +13,12 @@ class G4VisAttributes;
 class G4LogicalVolume;
 class G4VPhysicalVolume;
 
-class PHG4TTLDisplayAction : public PHG4DisplayAction
+class PHG4BarrelEcalDisplayAction : public PHG4DisplayAction
 {
  public:
-  PHG4TTLDisplayAction(const std::string &name);
-  PHG4TTLDisplayAction(const std::string &name, bool detailed);
-  
-  ~PHG4TTLDisplayAction() override;
+  explicit PHG4BarrelEcalDisplayAction(const std::string &name);
+
+  virtual ~PHG4BarrelEcalDisplayAction();
 
   void ApplyDisplayAction(G4VPhysicalVolume *physvol) override;
   void AddVolume(G4LogicalVolume *logvol, const std::string &mat) { m_LogicalVolumeMap[logvol] = mat; }
@@ -27,7 +26,6 @@ class PHG4TTLDisplayAction : public PHG4DisplayAction
  private:
   std::map<G4LogicalVolume *, std::string> m_LogicalVolumeMap;
   std::vector<G4VisAttributes *> m_VisAttVec;
-  bool showdetails = false;
 };
 
-#endif  // G4DETECTORS_PHG4TTLDISPLAYACTION_H
+#endif  // G4DETECTORS_PHG4BarrelEcalDisplayAction_H

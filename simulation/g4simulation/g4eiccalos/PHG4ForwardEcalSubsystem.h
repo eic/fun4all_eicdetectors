@@ -46,6 +46,11 @@ class PHG4ForwardEcalSubsystem : public PHG4DetectorSubsystem
   void SetfsPHENIXDetector() { m_EICDetectorFlag = 0; }
   void SetTowerMappingFile(const std::string& filename);
 
+  /** Set level of detail for display
+   */
+  void SetDetailed(bool b){showdetailed = b;}
+
+  
  private:
   void SetDefaultParameters();
 
@@ -62,6 +67,7 @@ class PHG4ForwardEcalSubsystem : public PHG4DetectorSubsystem
   PHG4DisplayAction* m_DisplayAction = nullptr;
 
   int m_EICDetectorFlag = 0;
+  bool showdetailed = false;
 };
 
 #endif

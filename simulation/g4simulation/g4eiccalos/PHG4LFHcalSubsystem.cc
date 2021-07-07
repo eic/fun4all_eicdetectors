@@ -46,7 +46,8 @@ int PHG4LFHcalSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
   PHCompositeNode* dstNode = dynamic_cast<PHCompositeNode*>(iter.findFirst("PHCompositeNode", "DST"));
 
   // create display settings before detector
-  m_DisplayAction = new PHG4LFHcalDisplayAction(Name());
+  m_DisplayAction = new PHG4LFHcalDisplayAction(Name(), showdetailed);
+
   // create detector
   m_Detector = new PHG4LFHcalDetector(this, topNode, GetParams(), Name());
   m_Detector->SuperDetector(SuperDetector());
