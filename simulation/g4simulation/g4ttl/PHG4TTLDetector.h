@@ -63,12 +63,16 @@ class PHG4TTLDetector : public PHG4Detector
   const std::string SuperDetector() const { return superdetector; }
 
 
-  void OverlapCheck(const bool chk = true) override
+  // void OverlapCheck(const bool chk = true) override
+  // {
+  //   PHG4Detector::OverlapCheck(chk);
+  //   // PHG4SectorConstructor::OverlapCheck(chk);
+  // }
+ void
+  OverlapCheck(bool check)
   {
-    PHG4Detector::OverlapCheck(chk);
-    // PHG4SectorConstructor::OverlapCheck(chk);
+    overlapcheck_sector = check;
   }
-
   // void Verbosity(int v) override {m_Verbosity = v;}
   // int Verbosity() const {return m_Verbosity;}
 
