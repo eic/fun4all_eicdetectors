@@ -60,10 +60,12 @@ void PHG4ForwardDualReadoutDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *
     else if (it.second == "Scintillator")
     {
       visatt->SetColour(G4Colour::White());
+      visatt->SetVisibility(false);
     }
     else if (it.second == "Cherenkov")
     {
       visatt->SetColour(G4Colour::Yellow());
+      visatt->SetVisibility(false);
     }
     else if (it.second == "SingleTowerAbsorber")
     {
