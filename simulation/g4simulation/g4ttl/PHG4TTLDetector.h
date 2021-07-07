@@ -69,7 +69,7 @@ class PHG4TTLDetector : public PHG4Detector
   //   // PHG4SectorConstructor::OverlapCheck(chk);
   // }
  void
-  OverlapCheck(bool check)
+  OverlapCheck(bool check = true) override
   {
     overlapcheck_sector = check;
   }
