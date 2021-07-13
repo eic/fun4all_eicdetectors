@@ -36,6 +36,7 @@
 #include <Geant4/G4VPhysicalVolume.hh>        // for G4VPhysicalVolume
 #include <Geant4/G4VTouchable.hh>             // for G4VTouchable
 #include <Geant4/G4VUserTrackInformation.hh>  // for G4VUserTrackInformation
+#include <Geant4/G4TransportationManager.hh>
 
 #include <cmath>  // for isfinite
 #include <iostream>
@@ -86,6 +87,7 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
     return false;
   }
 
+
   // collect energy and track length step by step
   G4double edep = aStep->GetTotalEnergyDeposit() / GeV;
   G4double eion =
@@ -99,6 +101,7 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
       killtrack->SetTrackStatus(fStopAndKill);
     }
 
+ 
   // if this block stops everything, just put all kinetic energy into edep
   if (m_BlackHoleFlag)
   {
@@ -246,6 +249,9 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
   {
     m_EionSum += eion;
   }
+
+  
+  	    	        
   // if any of these conditions is true this is the last step in
   // this volume and we need to save the hit
   // postPoint->GetStepStatus() == fGeomBoundary: track leaves this volume
@@ -259,8 +265,55 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
       postPoint->GetStepStatus() == fAtRestDoItProc ||
       aTrack->GetTrackStatus() == fStopAndKill)
   {
-    // save only hits with energy deposit (or geantino)
+    
+    if(whichactive_int == 9 || whichactive_int == 7 || whichactive_int == 8) // for prizm information
+      	{	 
+	  G4String vname = touch->GetVolume()->GetName();
+	     
+	  // normal to the closest boundary
+	  G4Navigator* theNavigator = G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking();
 
+	  Int_t nid = 0;	
+	  G4bool valid;
+	  G4ThreeVector normal = theNavigator->GetLocalExitNormal(&valid);
+	  G4ThreeVector gnormal = theNavigator->GetLocalToGlobalTransform().TransformAxis(-normal);
+	  normal = touch->GetHistory()->GetTransform(1).TransformAxis(gnormal); // in lDirc
+
+	  Int_t prizm_hit_trackid = aTrack->GetTrackID();
+
+  
+	  if (valid)
+	    {
+	      if(vname=="wPrizm")
+		{
+		  if(normal.y()> 0.99) nid = 1; // right
+		  if(normal.y()<-0.99) nid = 2; // left
+		  if(normal.x()>0.99) nid = 3; // bottom
+		  if(fabs(normal.x()+0.866025)<0.1 ) nid = 4;
+		}
+	      else if(vname=="wLens3")
+		{
+		  if(normal.y()> 0.99) nid = 5; // right
+		  if(normal.y()<-0.99) nid = 6; // left
+		  if(normal.x()>0.99) nid = 7; // bottom
+		  if(normal.x()<-0.99) nid = 8; // top
+		}
+	      else if(vname=="wLens2")
+		{
+		  nid = 9;
+		}
+	     
+	      if(nid > 0)
+		{		 
+		  vector_trackid.push_back(prizm_hit_trackid);
+		  vector_nid.push_back(nid);
+		}
+	     
+	    }
+	}
+
+   // save only hits with energy deposit (or geantino)
+    
     if (m_EdepSum > 0 || geantino)
     {
       // update values at exit coordinates and set keep flag
@@ -270,7 +323,8 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
       m_Hit->set_z(1, postPoint->GetPosition().z() / cm);
 
       m_Hit->set_t(1, postPoint->GetGlobalTime() / nanosecond);
-      
+            	
+
       if(whichactive_int_post == 11) // post step in Pixel ---------------
 	{
       // Get cell id 
@@ -306,10 +360,31 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
       m_Hit->SetDigiPos(digiPos);
       m_Hit->SetPosition(position);
       m_Hit->SetMomentum(momentum);
+                  
+      int refl = 0;
+      Int_t normal_id = 0;
+      Long64_t pathId = 0;
+
+      {
+	for(std::vector<Int_t>::size_type i = 0; i < vector_trackid.size(); i++)
+	    {
+	      if(aTrack->GetTrackID() == vector_trackid[i]) 
+		{
+		  ++refl;
+		  normal_id = vector_nid[i];
+		  //std::cout << "nid = " << normal_id << std::endl;
+		  pathId = (pathId * 10L) + normal_id;
+		}
+	    }
+      }
+	    
+      //std::cout << "nrefl = " << refl << std::endl;
+      //std::cout << "path id = " << pathId << std::endl;		  
+
+      m_Hit->SetPathInPrizm(pathId);
+
       //m_Hit->SetParticleId(aTrack->GetTrackID());
       //hit.SetParentParticleId(aTrack->GetParentID());
-      //hit.SetNreflectionsInPrizm(refl);
-      //hit.SetPathInPrizm(pathId);
       m_Hit->SetCherenkovMC(PrtManager::Instance()->GetCurrentCherenkov());
       // time since track created
       m_Hit->SetLeadTime(time);

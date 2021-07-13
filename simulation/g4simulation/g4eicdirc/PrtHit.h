@@ -7,7 +7,7 @@
 #ifndef PrtHit_h
 #define PrtHit_h 1
 
-#include <vector>
+#include <Rtypes.h>
 
 #include <g4main/PHG4Hit.h>
 #include <g4main/PHG4Hitv1.h>
@@ -22,12 +22,15 @@ public:
 
   ~PrtHit(){};
 
+
   // Accessors 
   Int_t GetType()        { return fType; }
   Int_t GetParticleId()  { return fParticleId; }   
   Int_t GetParentParticleId()  { return fParentParticleId; }  
+
   Int_t GetNreflectionsInPrizm()  { return fNreflectionsInPrizm; }
-  Long_t GetPathInPrizm()  { return fPathInPrizm; }
+  Long64_t GetPathInPrizm()  { return fPathInPrizm; }
+
   TVector3 GetLocalPos()     { return fLocalPos; }
   TVector3 GetGlobalPos()     { return fGlobalPos; }
   TVector3 GetDigiPos()     { return fDigiPos; }
@@ -48,8 +51,10 @@ public:
   void SetType(Int_t val)    { fType = val; }
   void SetParticleId(Int_t val)  { fParticleId = val; }   
   void SetParentParticleId(Int_t val)  { fParentParticleId = val; }  
+  
   void SetNreflectionsInPrizm(Int_t val)  { fNreflectionsInPrizm = val; }
-  void SetPathInPrizm(Long_t val) { fPathInPrizm = val; }
+  void SetPathInPrizm(Long64_t val) { fPathInPrizm = val; } 
+
   void SetLocalPos(TVector3 val)   { fLocalPos = val; }
   void SetGlobalPos(TVector3 val)  { fGlobalPos = val; }
   void SetDigiPos(TVector3 val)    { fDigiPos = val; }
@@ -73,7 +78,7 @@ protected:
   Int_t fParticleId; 
   Int_t fParentParticleId;
   Int_t fNreflectionsInPrizm;
-  Long_t fPathInPrizm;
+  Long64_t fPathInPrizm;
   TVector3 fLocalPos;
   TVector3 fGlobalPos;
   TVector3 fDigiPos;
