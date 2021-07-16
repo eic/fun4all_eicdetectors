@@ -128,6 +128,9 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
   //       cout << "time prepoint: " << prePoint->GetGlobalTime() << endl;
   //       cout << "time postpoint: " << postPoint->GetGlobalTime() << endl;
 
+  G4String prePointVolName = prePoint->GetPhysicalVolume()->GetName();
+  G4String postPointVolName = postPoint->GetPhysicalVolume()->GetName();    
+
   switch (prePoint->GetStepStatus())
   {
   case fPostStepDoItProc:
@@ -155,13 +158,39 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
       cout << " previous phys pre vol: " << m_SaveVolPre->GetName()
            << " previous phys post vol: " << m_SaveVolPost->GetName() << endl;
     }
+ 
   case fGeomBoundary:
   case fUndefined:
     if (!m_Hit)
-    {
+      {
       //m_Hit = new PHG4Hitv1();
       m_Hit = new PrtHit();
-    }
+      }
+
+    if((whichactive_int == 3) && (aStep->IsFirstStepInVolume())) // for momentum direction at bar
+      //if(prePointVolName.contains("World") && postPointVolName.contains("wBar"))
+      {
+	G4ThreeVector momentum_at_bar = aTrack->GetMomentum();
+	G4ThreeVector position_at_bar = prePoint->GetPosition();
+
+	TVector3 p_bar(momentum_at_bar.x(), momentum_at_bar.y(), momentum_at_bar.z());
+	TVector3 hit_pos_bar(position_at_bar.x(), position_at_bar.y(), position_at_bar.z());
+	
+	Int_t bar_hit_trackid = aTrack->GetTrackID();
+	detector_id = 1;
+	
+	//vector_bar_hit_trackid.push_back(bar_hit_trackid);
+	//vector_p_bar.push_back(p_bar);
+	//vector_hit_pos_bar.push_back(hit_pos_bar);
+	TVector3 mom_bar;                                                                                                                            
+	TVector3 pos_bar;
+
+	m_Hit->SetMomentumAtBar(mom_bar);                                                                                                            
+    	m_Hit->SetPositionAtBar(pos_bar);
+      }	 
+  
+
+
     m_Hit->set_layer(detector_id);
     // here we set the entrance values in cm
     m_Hit->set_x(0, prePoint->GetPosition().x() / cm);
@@ -364,28 +393,41 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
       int refl = 0;
       Int_t normal_id = 0;
       Long64_t pathId = 0;
+      //TVector3 mom_bar;
+      //TVector3 pos_bar;
 
-      {
-	for(std::vector<Int_t>::size_type i = 0; i < vector_trackid.size(); i++)
-	    {
-	      if(aTrack->GetTrackID() == vector_trackid[i]) 
+      for(std::vector<Int_t>::size_type i = 0; i < vector_trackid.size(); i++)
+	{
+	  if(aTrack->GetTrackID() == vector_trackid[i]) 
 		{
 		  ++refl;
 		  normal_id = vector_nid[i];
 		  //std::cout << "nid = " << normal_id << std::endl;
 		  pathId = (pathId * 10L) + normal_id;
 		}
-	    }
-      }
+	}
 	    
       //std::cout << "nrefl = " << refl << std::endl;
       //std::cout << "path id = " << pathId << std::endl;		  
 
       m_Hit->SetPathInPrizm(pathId);
 
+      /*for(std::vector<Int_t>::size_type i = 0; i < vector_bar_hit_trackid.size(); i++)
+	{
+	  if(aTrack->GetParentID() == vector_bar_hit_trackid[i])
+	    {
+	      mom_bar = vector_p_bar[i];
+	      pos_bar = vector_hit_pos_bar[i];
+	    }
+	}
+      
+      m_Hit->SetMomentumAtBar(mom_bar);
+      m_Hit->SetPositionAtBar(pos_bar);
+      */
+
       //m_Hit->SetParticleId(aTrack->GetTrackID());
       //hit.SetParentParticleId(aTrack->GetParentID());
-      m_Hit->SetCherenkovMC(PrtManager::Instance()->GetCurrentCherenkov());
+      //m_Hit->SetCherenkovMC(PrtManager::Instance()->GetCurrentCherenkov());
       // time since track created
       m_Hit->SetLeadTime(time);
       Double_t wavelength = 1.2398/(aTrack->GetMomentum().mag()*1E6)*1000;
@@ -416,12 +458,14 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
       {
         m_Hit->set_eion(m_EionSum);
       }
+	} // pixel volume ends
+
       m_SaveHitContainer->AddHit(detector_id, m_Hit);
     	
       // ownership has been transferred to container, set to null
       // so we will create a new hit for the next track
       m_Hit = nullptr;
-	}
+	
     }
     else
     {

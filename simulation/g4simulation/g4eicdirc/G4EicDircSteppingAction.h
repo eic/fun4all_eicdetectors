@@ -6,6 +6,7 @@
 #include <g4main/PHG4SteppingAction.h>
 #include <vector>
 #include <Rtypes.h>
+#include <TVector3.h>
 
 class G4Step;
 class G4VPhysicalVolume;
@@ -40,6 +41,9 @@ class G4EicDircSteppingAction : public PHG4SteppingAction
   std::vector<Int_t> vector_nid;
   std::vector<Int_t> vector_trackid;
 
+  //std::vector<Int_t> vector_bar_hit_trackid;
+  std::vector<TVector3> vector_p_bar;
+  std::vector<TVector3> vector_hit_pos_bar;
 
  private:
   //! pointer to the detector

@@ -46,10 +46,10 @@ class PrtBarHit : public G4VHit
 
   private:
 
-      G4int         fTrackID;
-      G4double      fEdep;
-      G4ThreeVector fPos;
-      G4ThreeVector fMom;
+    G4int         fTrackID;
+    G4double      fEdep;
+    G4ThreeVector fPos;
+    G4ThreeVector fMom;
 };
 
 

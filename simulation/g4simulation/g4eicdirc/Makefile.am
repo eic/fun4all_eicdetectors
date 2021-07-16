@@ -23,7 +23,9 @@ libg4eicdirc_la_LIBADD = \
 pkginclude_HEADERS = \
   G4EicDircSubsystem.h \
   PrtOpBoundaryProcess.h \
-  PrtHit.h
+  PrtHit.h \
+  G4EventTree.h \
+  G4DIRCTree.h 
 
 ROOT_IO_DICTS = \
   PrtEvent_Dict.cc \
@@ -67,7 +69,8 @@ libg4eicdirc_la_SOURCES = \
   PrtPrizmSD.cxx \
   PrtPrizmHit.cxx \
   PrtTrackInfo.cxx \
-  PrtTrackInfo_Dict.cc
+  PrtTrackInfo_Dict.cc \
+  G4DIRCTree.cc
 
 # Rule for generating table CINT dictionaries.
 %_Dict.cc: %.h %LinkDef.h
