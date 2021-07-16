@@ -103,7 +103,7 @@ void EICG4dRICHTree::getHits(PHCompositeNode *topNode)
 {
 
   // get hits container
-  PHG4HitContainer *hitCont = findNode::getClass<PHG4HitContainer>(topNode, "G4HIT_EICG4dRICH_0"); // TODO: do not hard code name
+  PHG4HitContainer *hitCont = findNode::getClass<PHG4HitContainer>(topNode, "G4HIT_dRICH_0"); // TODO: do not hard code name
 
   if (!hitCont) 
   {
