@@ -18,6 +18,7 @@ class PHG4HitContainer;
 class PHParameters;
 class PrtHit;
 
+
 class G4EicDircSteppingAction : public PHG4SteppingAction
 {
  public:
@@ -42,8 +43,8 @@ class G4EicDircSteppingAction : public PHG4SteppingAction
   std::vector<Int_t> vector_trackid;
 
   //std::vector<Int_t> vector_bar_hit_trackid;
-  std::vector<TVector3> vector_p_bar;
-  std::vector<TVector3> vector_hit_pos_bar;
+  //std::vector<TVector3> vector_p_bar;
+  //std::vector<TVector3> vector_hit_pos_bar;
 
  private:
   //! pointer to the detector

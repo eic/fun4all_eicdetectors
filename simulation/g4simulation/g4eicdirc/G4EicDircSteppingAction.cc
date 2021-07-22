@@ -8,6 +8,7 @@
 #include <g4detectors/PHG4StepStatusDecode.h>
 
 #include "PrtHit.h"
+#include "PrtOpBoundaryProcess.h"
 #include <g4main/PHG4Hit.h>
 #include <g4main/PHG4HitContainer.h>
 #include <g4main/PHG4Hitv1.h>
@@ -37,6 +38,9 @@
 #include <Geant4/G4VTouchable.hh>             // for G4VTouchable
 #include <Geant4/G4VUserTrackInformation.hh>  // for G4VUserTrackInformation
 #include <Geant4/G4TransportationManager.hh>
+#include <Geant4/G4ProcessManager.hh>
+#include <Geant4/G4ParticleTable.hh>
+#include <Geant4/Randomize.hh>
 
 #include <cmath>  // for isfinite
 #include <iostream>
@@ -87,6 +91,24 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
     return false;
   }
 
+  PrtOpBoundaryProcess *fBoundaryProcess = new PrtOpBoundaryProcess();
+
+  G4ParticleTable *theParticleTable = G4ParticleTable::GetParticleTable();
+  G4ParticleTable::G4PTblDicIterator *_theParticleIterator;
+  _theParticleIterator = theParticleTable->GetIterator();
+  _theParticleIterator->reset();
+  while ((*_theParticleIterator)())
+    {
+      G4ParticleDefinition *particle = _theParticleIterator->value();
+      G4String particleName = particle->GetParticleName();
+      G4ProcessManager *pmanager = particle->GetProcessManager();
+
+      if (particleName == "opticalphoton")
+	{
+	  pmanager->AddDiscreteProcess(fBoundaryProcess);
+	}
+    }
+
 
   // collect energy and track length step by step
   G4double edep = aStep->GetTotalEnergyDeposit() / GeV;
@@ -94,6 +116,14 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
       (aStep->GetTotalEnergyDeposit() - aStep->GetNonIonizingEnergyDeposit()) /
       GeV;
   const G4Track *aTrack = aStep->GetTrack();
+
+  /*if(aTrack->GetCurrentStepNumber()>50000 || aTrack->GetTrackLength() > 30000) 
+    {
+      G4Track *killtrack0 = const_cast<G4Track *>(aTrack);
+      killtrack0->SetTrackStatus(fStopAndKill);
+      //return false;
+      }*/
+
 
   if((whichactive_int == 10 && whichactive_int_post == 1) || (whichactive_int == 2 && whichactive_int_post == 1))
     {
@@ -124,7 +154,7 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
   }
   G4StepPoint *prePoint = aStep->GetPreStepPoint();
   G4StepPoint *postPoint = aStep->GetPostStepPoint();
-  //       cout << "track id " << aTrack->GetTrackID() << endl;
+  // cout << "track id " << aTrack->GetTrackID() << endl;
   //       cout << "time prepoint: " << prePoint->GetGlobalTime() << endl;
   //       cout << "time postpoint: " << postPoint->GetGlobalTime() << endl;
 
@@ -166,31 +196,14 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
       //m_Hit = new PHG4Hitv1();
       m_Hit = new PrtHit();
       }
-
-    if((whichactive_int == 3) && (aStep->IsFirstStepInVolume())) // for momentum direction at bar
-      //if(prePointVolName.contains("World") && postPointVolName.contains("wBar"))
-      {
-	G4ThreeVector momentum_at_bar = aTrack->GetMomentum();
-	G4ThreeVector position_at_bar = prePoint->GetPosition();
-
-	TVector3 p_bar(momentum_at_bar.x(), momentum_at_bar.y(), momentum_at_bar.z());
-	TVector3 hit_pos_bar(position_at_bar.x(), position_at_bar.y(), position_at_bar.z());
-	
-	Int_t bar_hit_trackid = aTrack->GetTrackID();
-	detector_id = 1;
-	
-	//vector_bar_hit_trackid.push_back(bar_hit_trackid);
-	//vector_p_bar.push_back(p_bar);
-	//vector_hit_pos_bar.push_back(hit_pos_bar);
-	TVector3 mom_bar;                                                                                                                            
-	TVector3 pos_bar;
-
-	m_Hit->SetMomentumAtBar(mom_bar);                                                                                                            
-    	m_Hit->SetPositionAtBar(pos_bar);
-      }	 
   
-
-
+    // for momentum direction at bar
+    //if((prePointVolName.contains("wBar")) && (aStep->IsFirstStepInVolume()) && (aTrack->GetParentID() == 0))
+    
+	//m_SaveHitContainer->AddHit(detector_id, m_Hit);
+	// ownership has been transferred to container, set to null                                                                                  
+    	// so we will create a new hit for the next track                                                                                            
+     
     m_Hit->set_layer(detector_id);
     // here we set the entrance values in cm
     m_Hit->set_x(0, prePoint->GetPosition().x() / cm);
@@ -231,6 +244,7 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
   default:
     break;
   }
+  //cout << "detector id = " << detector_id << endl;
 
   // some sanity checks for inconsistencies (aka bugs)
   // check if this hit was created, if not print out last post step status
@@ -279,8 +293,7 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
     m_EionSum += eion;
   }
 
-  
-  	    	        
+	    	        
   // if any of these conditions is true this is the last step in
   // this volume and we need to save the hit
   // postPoint->GetStepStatus() == fGeomBoundary: track leaves this volume
@@ -293,9 +306,9 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
       postPoint->GetStepStatus() == fWorldBoundary ||
       postPoint->GetStepStatus() == fAtRestDoItProc ||
       aTrack->GetTrackStatus() == fStopAndKill)
-  {
-    
-    if(whichactive_int == 9 || whichactive_int == 7 || whichactive_int == 8) // for prizm information
+  {       
+    //if((prePoint->GetStepStatus() == fGeomBoundary) && 
+    if(whichactive_int == 9 || whichactive_int == 7 || whichactive_int == 8) // for relection information (7-wLens2, 8-wLens3, 9-wPrizm) 
       	{	 
 	  G4String vname = touch->GetVolume()->GetName();
 	     
@@ -308,8 +321,8 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
 	  G4ThreeVector gnormal = theNavigator->GetLocalToGlobalTransform().TransformAxis(-normal);
 	  normal = touch->GetHistory()->GetTransform(1).TransformAxis(gnormal); // in lDirc
 
-	  Int_t prizm_hit_trackid = aTrack->GetTrackID();
-
+	  //Int_t prizm_hit_trackid = aTrack->GetTrackID();
+	  Int_t prizm_hit_trackid = m_SaveTrackId;
   
 	  if (valid)
 	    {
@@ -339,7 +352,8 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
 		}
 	     
 	    }
-	}
+	}    
+  
 
    // save only hits with energy deposit (or geantino)
     
@@ -352,8 +366,7 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
       m_Hit->set_z(1, postPoint->GetPosition().z() / cm);
 
       m_Hit->set_t(1, postPoint->GetGlobalTime() / nanosecond);
-            	
-
+            	      
       if(whichactive_int_post == 11) // post step in Pixel ---------------
 	{
       // Get cell id 
@@ -369,6 +382,8 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
       G4ThreeVector g4mom = aTrack->GetVertexMomentumDirection();//GetMomentum();
       G4ThreeVector g4pos = aTrack->GetVertexPosition();
  
+      G4ThreeVector localvec = touchpost->GetHistory()->GetTopTransform().TransformAxis(g4mom);
+
       TVector3 globalPos(inPrismpos.x(),inPrismpos.y(),inPrismpos.z());
       TVector3 localPos(localpos.x(),localpos.y(),localpos.z());
       TVector3 digiPos(translation.x(),translation.y(),translation.z());
@@ -381,6 +396,37 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
       int mcp = touchpost->GetReplicaNumber(1);
       int pix = touchpost->GetReplicaNumber(0);     
      
+      Double_t wavelength = 1.2398/(aTrack->GetMomentum().mag()*1E6)*1000;
+      
+      // transport efficiency ----
+
+      /*double pi(4 * atan(1));
+      double roughness(0.5); // nm
+      double angleX = localvec.angle(G4ThreeVector(1, 0, 0));
+      double angleY = localvec.angle(G4ThreeVector(0, 1, 0));
+      if (angleX > 0.5 * pi) angleX = pi - angleX;
+      if (angleY > 0.5 * pi) angleY = pi - angleY;
+      double length = aTrack->GetTrackLength() - 400; // 400 - average path in EV
+      double lengthx = fabs(length * localvec.x());  // along the bar
+      double lengthy = fabs(length * localvec.y());
+
+      //cout << "track length = " << aTrack->GetTrackLength() << endl;
+
+      int nBouncesX = (int)(lengthx) / 17;
+      int nBouncesY = (int)(lengthy) / (358.5/11);
+
+      double ll = wavelength * wavelength;
+      double n_quartz = sqrt(1. + (0.696 * ll / (ll - pow(0.068, 2))) +
+			     (0.407 * ll / (ll - pow(0.116, 2))) + 0.897 * ll / (ll - pow(9.896, 2)));
+      double bounce_probX = 1 - pow(4 * pi * cos(angleX) * roughness * n_quartz / wavelength, 2);
+      double bounce_probY = 1 - pow(4 * pi * cos(angleY) * roughness * n_quartz / wavelength, 2);
+
+      double totalProb = pow(bounce_probX, nBouncesX) * pow(bounce_probY, nBouncesY);
+
+      if (G4UniformRand() < totalProb) //{
+      */     
+      m_Hit->SetLeadTime(time);
+      m_Hit->SetTotTime(wavelength); //set photon wavelength
       m_Hit->SetMcpId(mcp);
       m_Hit->SetPixelId(pix);
       //hit.SetChannel(300*mcp+pix);
@@ -398,20 +444,22 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
 
       for(std::vector<Int_t>::size_type i = 0; i < vector_trackid.size(); i++)
 	{
-	  if(aTrack->GetTrackID() == vector_trackid[i]) 
-		{
-		  ++refl;
-		  normal_id = vector_nid[i];
+	  //if(aTrack->GetTrackID() == vector_trackid[i]) 
+	  if(m_SaveTrackId == vector_trackid[i])
+	    {
+	      ++refl;
+	      normal_id = vector_nid[i];
 		  //std::cout << "nid = " << normal_id << std::endl;
-		  pathId = (pathId * 10L) + normal_id;
-		}
+	      pathId = (pathId * 10L) + normal_id;
+	    }
 	}
 	    
       //std::cout << "nrefl = " << refl << std::endl;
       //std::cout << "path id = " << pathId << std::endl;		  
 
+      m_Hit->SetNreflectionsInPrizm(refl);
       m_Hit->SetPathInPrizm(pathId);
-
+  
       /*for(std::vector<Int_t>::size_type i = 0; i < vector_bar_hit_trackid.size(); i++)
 	{
 	  if(aTrack->GetParentID() == vector_bar_hit_trackid[i])
@@ -429,11 +477,37 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
       //hit.SetParentParticleId(aTrack->GetParentID());
       //m_Hit->SetCherenkovMC(PrtManager::Instance()->GetCurrentCherenkov());
       // time since track created
-      m_Hit->SetLeadTime(time);
-      Double_t wavelength = 1.2398/(aTrack->GetMomentum().mag()*1E6)*1000;
-      m_Hit->SetTotTime(wavelength); //set photon wavelength
       
+
       
+      //if((prePointVolName.contains("World")) && (postPointVolName.contains("wBar")) && (aTrack->GetParentID() == 0))
+      //{
+	/*if (!m_Hit)
+	  {
+	    m_Hit = new PrtHit();
+	    }*/
+	  
+	/*G4ThreeVector momentum_at_bar = aTrack->GetMomentum();
+	G4ThreeVector position_at_bar = prePoint->GetPosition();
+
+	TVector3 p_bar(momentum_at_bar.x(), momentum_at_bar.y(), momentum_at_bar.z());
+	TVector3 hit_pos_bar(position_at_bar.x(), position_at_bar.y(), position_at_bar.z());
+	
+	Int_t bar_hit_trackid = aTrack->GetTrackID();
+	//detector_id = 1;
+	
+	//vector_bar_hit_trackid.push_back(bar_hit_trackid);
+	//vector_p_bar.push_back(p_bar);
+	//vector_hit_pos_bar.push_back(hit_pos_bar);
+
+	//bar_vectors::vector_p_bar.push_back(p_bar); 
+	//bar_vectors::vector_hit_pos_bar.push_back(hit_pos_bar);
+
+	TVector3 mom_bar = p_bar;                                                                                                                  
+	TVector3 pos_bar = hit_pos_bar;
+	m_Hit->SetMomentumAtBar(mom_bar);                                                                                                          
+      	m_Hit->SetPositionAtBar(pos_bar);
+	*/
       if (G4VUserTrackInformation *p = aTrack->GetUserInformation())
       {
         if (PHG4TrackUserInfoV1 *pp = dynamic_cast<PHG4TrackUserInfoV1 *>(p))
@@ -458,15 +532,17 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
       {
         m_Hit->set_eion(m_EionSum);
       }
-	} // pixel volume ends
+      //} // pixel volume ends
 
       m_SaveHitContainer->AddHit(detector_id, m_Hit);
-    	
+	    	
       // ownership has been transferred to container, set to null
       // so we will create a new hit for the next track
+      //m_Hit = nullptr;
       m_Hit = nullptr;
-	
+	}
     }
+    
     else
     {
       // if this hit has no energy deposit, just reset it for reuse

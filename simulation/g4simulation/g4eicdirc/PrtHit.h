@@ -13,6 +13,16 @@
 #include <g4main/PHG4Hitv1.h>
 #include "TVector3.h"
 
+/*namespace bar_vectors
+{
+  std::vector<TVector3> vector_p_bar;
+  std::vector<TVector3> vector_hit_pos_bar;
+
+  std::vector<TVector3> get_p_bar() { return vector_p_bar; }
+  std::vector<TVector3> get_pos_bar() { return vector_hit_pos_bar;}  
+
+  }*/
+
 class PrtHit : public PHG4Hitv1 {
 
 public:   

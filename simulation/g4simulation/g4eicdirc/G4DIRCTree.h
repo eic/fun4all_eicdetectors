@@ -38,6 +38,7 @@ class G4DIRCTree : public SubsysReco
   int End(PHCompositeNode *) override;
 
   void AddNode(const std::string &name, const int detid = 0);
+  int evt_num = 0;
 
  protected:
   int nblocks;
