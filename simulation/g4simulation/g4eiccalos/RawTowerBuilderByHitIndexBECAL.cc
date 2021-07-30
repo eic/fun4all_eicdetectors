@@ -245,30 +245,53 @@ bool RawTowerBuilderByHitIndexBECAL::ReadGeometryFromTable()
       continue;
     }
 
-    unsigned idphi_j, ideta_k;
-    double cx, cy, cz;
-    double rot_y, rot_z;
-    std::string dummys;
-    istringstream iss(line_mapping);
- 
-    if (!(iss >> dummys >> idphi_j >> ideta_k >> cx >> cy >> cz >> rot_y >> rot_z))
+    std::istringstream iss(line_mapping);
+
+    if (line_mapping.find("BECALtower ") != string::npos)
     {
-      std::cout << "ERROR in PHG4ForwardHcalDetector: Failed to read line in mapping file " <<  m_MappingTowerFile << std::endl;
-      exit(1);
+      unsigned idphi_j, ideta_k;
+      double cx, cy, cz;
+      double rot_z, rot_y, rot_x;
+      double size_z, size_y1, size_x1, size_y2, size_x2, p_Theta;
+      std::string dummys;
+ 
+ 
+      if (!(iss >> dummys >> ideta_k >> idphi_j >>  size_x1 >>  size_x2 >> size_y1 >> size_y2 >> size_z >> p_Theta >> cx >> cy >> cz >> rot_x >> rot_y >> rot_z))
+      {
+        std::cout << "ERROR in PHG4ForwardHcalDetector: Failed to read line in mapping file " <<  m_MappingTowerFile << std::endl;
+        exit(1);
+      }
+
+      /* Construct unique Tower ID */
+      unsigned int temp_id = RawTowerDefs::encode_towerid(m_CaloId, idphi_j, ideta_k);
+
+      /* Create tower geometry object */
+      RawTowerGeom *temp_geo = new RawTowerGeomv4(temp_id);
+      temp_geo->set_center_x(cx);
+      temp_geo->set_center_y(cy);
+      temp_geo->set_center_z(cz);
+
+      m_Geoms->add_tower_geometry(temp_geo);
+
+    }else{
+      
+      string parname;
+      double parval;
+
+      m_GlobalParameterMap.insert(make_pair(parname, parval));
+
+      std::map<string, double>::iterator parit;
+
+      parit = m_GlobalParameterMap.find("CenterZ_Shift");
+      if (parit != m_GlobalParameterMap.end())
+      {
+        CenterZ_Shift = parit->second;  // in cm
+      }
+      
     }
 
-    /* Construct unique Tower ID */
-    unsigned int temp_id = RawTowerDefs::encode_towerid(m_CaloId, idphi_j, ideta_k);
+  
 
-    /* Create tower geometry object */
-    RawTowerGeom *temp_geo = new RawTowerGeomv4(temp_id);
-    temp_geo->set_center_x(cx);
-    temp_geo->set_center_y(cy);
-    temp_geo->set_center_z(cz);
-    temp_geo->set_roty(rot_y);
-    temp_geo->set_rotz(rot_z);
-    
-    m_Geoms->add_tower_geometry(temp_geo);
   }
     
   RawTowerGeomContainer::ConstRange all_towers = m_Geoms->get_tower_geometries();
@@ -282,26 +305,13 @@ bool RawTowerBuilderByHitIndexBECAL::ReadGeometryFromTable()
         
     TVector3 v_temp_r1(x_temp, y_temp, z_temp);
         
-    /* Rotation */
-    TRotation rot;
-    rot.RotateY(it->second->get_roty());
-    rot.RotateZ(it->second->get_rotz());
-   
-    v_temp_r1.Transform(rot);
-
-    double x_temp_rt = v_temp_r1.X();
-    double y_temp_rt = v_temp_r1.Y();
-    double z_temp_rt = v_temp_r1.Z();
-   
-    /* Update tower geometry object */
-    it->second->set_center_x(x_temp_rt);
-    it->second->set_center_y(y_temp_rt);
-    it->second->set_center_z(z_temp_rt);
+    it->second->set_center_x(x_temp);
+    it->second->set_center_y(y_temp);
+    it->second->set_center_z(z_temp+CenterZ_Shift);
 
     if (Verbosity() > 2)
     {
-      cout << "* Local tower x y z : " << x_temp << " " << y_temp << " " << z_temp << endl;
-      cout << "* Globl tower x y z : " << x_temp_rt << " " << y_temp_rt << " " << z_temp_rt << endl;      
+      cout << "*** Tower x y z : " << x_temp << " " << y_temp << " " << z_temp << endl;    
     }
   }
   if (Verbosity())
