@@ -84,7 +84,7 @@ class RawTowerBuilderByHitIndexBECAL : public SubsysReco
 
   RawTowerDefs::CalorimeterId m_CaloId;
 
-  double CenterZ_Shift = -41.; 
+  double thickness_wall = -41.; 
 
   double m_Emin;
 

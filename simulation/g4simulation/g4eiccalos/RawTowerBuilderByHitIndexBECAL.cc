@@ -270,6 +270,8 @@ bool RawTowerBuilderByHitIndexBECAL::ReadGeometryFromTable()
       temp_geo->set_center_x(cx);
       temp_geo->set_center_y(cy);
       temp_geo->set_center_z(cz);
+      temp_geo->set_roty(rot_y);
+      temp_geo->set_rotz(rot_z);
 
       m_Geoms->add_tower_geometry(temp_geo);
 
@@ -282,10 +284,10 @@ bool RawTowerBuilderByHitIndexBECAL::ReadGeometryFromTable()
 
       std::map<string, double>::iterator parit;
 
-      parit = m_GlobalParameterMap.find("CenterZ_Shift");
+      parit = m_GlobalParameterMap.find("thickness_wall");
       if (parit != m_GlobalParameterMap.end())
       {
-        CenterZ_Shift = parit->second;  // in cm
+        thickness_wall = parit->second*10;  // in cm
       }
       
     }
@@ -302,12 +304,17 @@ bool RawTowerBuilderByHitIndexBECAL::ReadGeometryFromTable()
     double x_temp = it->second->get_center_x();
     double y_temp = it->second->get_center_y();
     double z_temp = it->second->get_center_z();
+    double roty   = it->second->get_roty();
+    double rotz   = it->second->get_rotz();
         
-    TVector3 v_temp_r1(x_temp, y_temp, z_temp);
-        
-    it->second->set_center_x(x_temp);
-    it->second->set_center_y(y_temp);
-    it->second->set_center_z(z_temp+CenterZ_Shift);
+    double x_tempfinal =  x_temp + thickness_wall/2*abs(cos(roty - M_PI_2))*sin(rotz);
+    double y_tempfinal =  y_temp + thickness_wall*sin(roty - M_PI_2);
+    double z_tempfinal =  z_temp + thickness_wall/2*abs(cos(roty - M_PI_2))*cos(rotz);
+
+    it->second->set_center_x(x_tempfinal);
+    it->second->set_center_y(y_tempfinal);
+    it->second->set_center_z(z_tempfinal);
+
 
     if (Verbosity() > 2)
     {

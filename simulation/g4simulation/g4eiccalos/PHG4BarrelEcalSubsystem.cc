@@ -142,6 +142,11 @@ void PHG4BarrelEcalSubsystem::SetDefaultParameters()
   set_default_double_param("max_radius", 138.);
   set_default_double_param("CenterZ_Shift", -41.);
   set_default_double_param("tower_length", 45.5);
+  set_default_double_param("cone1_h",30.);
+  set_default_double_param("cone1_dz",24.);
+  set_default_double_param("cone2_h",20.5);
+  set_default_double_param("cone2_dz",25.5);
+  set_default_double_param("thickness_wall",0.1);
 
   return;
 }
