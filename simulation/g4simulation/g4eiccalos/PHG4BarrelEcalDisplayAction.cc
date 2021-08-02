@@ -42,7 +42,7 @@ void PHG4BarrelEcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
     if (it.second == "BCalCylinder") 
     {
       visatt->SetColour(G4Colour::White());
-      //visatt->SetForceWireframe(true);
+      visatt->SetForceWireframe(true);
       visatt->SetVisibility(false);
     }
     else if (it.second == "Block1")

@@ -174,7 +174,6 @@ int PHG4BarrelEcalDetector::PlaceTower(G4LogicalVolume* sec)
     {
       std::cout << "PHG4BarrelEcalDetector: Place tower " << iterator->first
                 << " idx_j = " << iterator->second.idx_j << ", idx_k = " << iterator->second.idx_k<< std::endl;
-                //<< " at x = " << iterator->second.x << " , y = " << iterator->second.y << " , z = " << iterator->second.z << std::endl;
     }
 
     int copyno = (iterator->second.idx_j << 16) + iterator->second.idx_k;
@@ -199,7 +198,7 @@ int PHG4BarrelEcalDetector::PlaceTower(G4LogicalVolume* sec)
 
     new G4PVPlacement(G4Transform3D(becal_rotm, G4ThreeVector(iterator->second.centerx, iterator->second.centery, iterator->second.centerz)),
                     block_logic,
-                    G4String(string(iterator->first) + to_string(iterator->second.idx_j) +to_string(iterator->second.idx_k) + string("_TT")),
+                    G4String(string(iterator->first) + string("_TT")),
                     sec,
                     0, copyno, OverlapCheck());
   
@@ -209,7 +208,7 @@ int PHG4BarrelEcalDetector::PlaceTower(G4LogicalVolume* sec)
 
     new G4PVPlacement(G4Transform3D(becal_rotm, G4ThreeVector(posx_glass, posy_glass, posz_glass)),
                     glass_logic,
-                    G4String(string(iterator->first) + to_string(iterator->second.idx_j) +to_string(iterator->second.idx_k) + string("_Glass")),
+                    G4String(string(iterator->first) + string("_Glass")),
                     sec,
                     0, copyno, OverlapCheck());
 
@@ -230,7 +229,7 @@ int PHG4BarrelEcalDetector::PlaceTower(G4LogicalVolume* sec)
     G4double posx_si  =  iterator->second.centerx + sci_mag*cos(theta + pTheta)*cos(iterator->second.rotz);
     new G4PVPlacement(G4Transform3D(becal_rotm, G4ThreeVector(posx_si, posy_si, posz_si)),
                     block_silicon,
-                    G4String(string(iterator->first) + to_string(iterator->second.idx_j) +to_string(iterator->second.idx_k) + string("_Si")),
+                    G4String(string(iterator->first) + string("_Si")),
                     sec,
                     0, copyno, OverlapCheck());
 
@@ -249,7 +248,7 @@ int PHG4BarrelEcalDetector::PlaceTower(G4LogicalVolume* sec)
     G4double posx_kapton  =  iterator->second.centerx + kapton_mag*cos(theta + pTheta)*cos(iterator->second.rotz);
     new G4PVPlacement(G4Transform3D(becal_rotm, G4ThreeVector(posx_kapton, posy_kapton, posz_kapton)),
                     block_kapton,
-                    G4String(string(iterator->first) + to_string(iterator->second.idx_j) +to_string(iterator->second.idx_k) + string("_Kapton")),
+                    G4String(string(iterator->first) + string("_Kapton")),
                     sec,
                     0, copyno, OverlapCheck());
 
@@ -268,7 +267,7 @@ int PHG4BarrelEcalDetector::PlaceTower(G4LogicalVolume* sec)
     G4double posx_SIO2  =  iterator->second.centerx + SIO2_mag*cos(theta + pTheta)*cos(iterator->second.rotz);
     new G4PVPlacement(G4Transform3D(becal_rotm, G4ThreeVector(posx_SIO2, posy_SIO2, posz_SIO2)),
                     block_SIO2,
-                    G4String(string(iterator->first) + to_string(iterator->second.idx_j) +to_string(iterator->second.idx_k) + string("SIO2")),
+                    G4String(string(iterator->first) + string("SIO2")),
                     sec,
                     0, copyno, OverlapCheck());
 
@@ -294,7 +293,7 @@ int PHG4BarrelEcalDetector::PlaceTower(G4LogicalVolume* sec)
     G4double posx_Carbon  =  iterator->second.centerx + Carbon_mag*cos(theta + pTheta)*cos(iterator->second.rotz);
     new G4PVPlacement(G4Transform3D(becal_rotm, G4ThreeVector(posx_Carbon, posy_Carbon, posz_Carbon)),
                     block_Carbon,
-                    G4String(string(iterator->first) + to_string(iterator->second.idx_j) +to_string(iterator->second.idx_k) + string("Carbon")),
+                    G4String(string(iterator->first) + string("Carbon")),
                     sec,
                     0, copyno, OverlapCheck());
 
@@ -353,7 +352,7 @@ int PHG4BarrelEcalDetector::ParseParametersFromTable()
       tower_new.centerx = cx*cm;
       tower_new.centery = cy*cm;
       tower_new.centerz = cz*cm;
-      tower_new.roty    = rot_x;
+      tower_new.rotx    = rot_x;
       tower_new.roty    = rot_y;
       tower_new.rotz    = rot_z;
       tower_new.idx_j   = idphi_j;
@@ -438,12 +437,12 @@ PHG4BarrelEcalDetector::ConstructTower(std::map<std::string, towerposition>::ite
   G4Trap *block_tower = GetTowerTrap(iterator);
   G4Trap *block_glass = GetGlassTrapSubtract(iterator); 
   G4ThreeVector shift = G4ThreeVector(-th*sin(iterator->second.roty - M_PI_2), 0, th/2*abs(cos(iterator->second.roty - M_PI_2)));
-  G4VSolid* block_solid = new G4SubtractionSolid(G4String(string(iterator->first) + to_string(iterator->second.idx_j) +to_string(iterator->second.idx_k) + string("_Envelope")), block_tower, block_glass, 0, shift);
+  G4VSolid* block_solid = new G4SubtractionSolid(G4String(string(iterator->first)  + string("_Envelope")), block_tower, block_glass, 0, shift);
   G4Material* material_shell = GetCarbonFiber();
   assert(material_shell);
     
   G4LogicalVolume* block_logic = new G4LogicalVolume(block_solid, material_shell,
-                                                     G4String(string(iterator->first) + to_string(iterator->second.idx_j) +to_string(iterator->second.idx_k) + string("_Tower")), 0, 0,
+                                                     G4String(string(iterator->first)  + string("_Tower")), 0, 0,
                                                      nullptr);
   m_AbsorberLogicalVolSet.insert(block_logic);
   return block_logic;
@@ -456,7 +455,7 @@ PHG4BarrelEcalDetector::ConstructGlass(std::map<std::string, towerposition>::ite
   G4Material* material_glass = GetSciGlass();
   assert(material_glass);
   G4LogicalVolume* block_logic = new G4LogicalVolume(block_solid, material_glass,
-                                                     G4String(string(iterator->first) + to_string(iterator->second.idx_j) +to_string(iterator->second.idx_k) + string("_Glass")), 0, 0,
+                                                     G4String(string(iterator->first) + string("_Glass")), 0, 0,
                                                      nullptr);
   m_ScintiLogicalVolSet.insert(block_logic);
   return block_logic;
@@ -581,7 +580,7 @@ PHG4BarrelEcalDetector::ConstructSi(std::map<std::string, towerposition>::iterat
   G4Material* material_si = G4Material::GetMaterial("G4_POLYSTYRENE");
   assert(material_si);
   G4LogicalVolume* block_logic = new G4LogicalVolume(block_solid, material_si,
-                                                     G4String(string(iterator->first) + to_string(iterator->second.idx_j) +to_string(iterator->second.idx_k) + string("_solid_Si")), 0, 0,
+                                                     G4String(string(iterator->first) + string("_solid_Si")), 0, 0,
                                                      nullptr);
   return block_logic;
 }
@@ -611,7 +610,7 @@ PHG4BarrelEcalDetector::ConstructKapton(std::map<std::string, towerposition>::it
   G4Material* material_kapton = G4Material::GetMaterial("G4_KAPTON");
   assert(material_kapton);
   G4LogicalVolume* block_logic = new G4LogicalVolume(block_solid, material_kapton,
-                                                     G4String(string(iterator->first) + to_string(iterator->second.idx_j) +to_string(iterator->second.idx_k) + string("_solid_Si")), 0, 0,
+                                                     G4String(string(iterator->first) + string("_solid_Si")), 0, 0,
                                                      nullptr);
   return block_logic;
 }
@@ -643,7 +642,7 @@ PHG4BarrelEcalDetector::ConstructSIO2(std::map<std::string, towerposition>::iter
   G4Material* material_SIO2 = G4Material::GetMaterial("Quartz");
   assert(material_SIO2);
   G4LogicalVolume* block_logic = new G4LogicalVolume(block_solid, material_SIO2,
-                                                     G4String(string(iterator->first) + to_string(iterator->second.idx_j) +to_string(iterator->second.idx_k) + string("_solid_material_SIO2")), 0, 0,
+                                                     G4String(string(iterator->first) + string("_solid_material_SIO2")), 0, 0,
                                                      nullptr);
   return block_logic;
 }
@@ -676,7 +675,7 @@ PHG4BarrelEcalDetector::ConstructCarbon(std::map<std::string, towerposition>::it
   G4Material* material_Carbon = G4Material::GetMaterial("G4_C");
   assert(material_Carbon);
   G4LogicalVolume* block_logic = new G4LogicalVolume(block_solid, material_Carbon,
-                                                     G4String(string(iterator->first) + to_string(iterator->second.idx_j) +to_string(iterator->second.idx_k) + string("_solid_material_C")), 0, 0,
+                                                     G4String(string(iterator->first) + string("_solid_material_C")), 0, 0,
                                                      nullptr);
   return block_logic;
 }
