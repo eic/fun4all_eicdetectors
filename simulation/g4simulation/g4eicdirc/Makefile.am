@@ -28,21 +28,11 @@ pkginclude_HEADERS = \
   G4DIRCTree.h 
 
 ROOT_IO_DICTS = \
-  PrtEvent_Dict.cc \
-  PrtHit_Dict.cc \
-  PrtLutNode_Dict.cc \
-  PrtTrackInfo_Dict.cc \
-  PrtPhotonInfo_Dict.cc \
-  PrtAmbiguityInfo_Dict.cc
+  PrtHit_Dict.cc
 
 pcmdir = $(libdir)
 nobase_dist_pcm_DATA = \
-  PrtEvent_Dict_rdict.pcm \
-  PrtHit_Dict_rdict.pcm \
-  PrtLutNode_Dict_rdict.pcm \
-  PrtTrackInfo_Dict_rdict.pcm \
-  PrtPhotonInfo_Dict_rdict.pcm \
-  PrtAmbiguityInfo_Dict_rdict.pcm
+  PrtHit_Dict_rdict.pcm 
 
 libg4eicdirc_la_SOURCES = \
   G4EicDircDetector.cc \
@@ -50,26 +40,9 @@ libg4eicdirc_la_SOURCES = \
   G4EicDircSubsystem.cc \
   G4EicDircStackingAction.cc \
   G4EicDircSteppingAction.cc \
-  PrtAmbiguityInfo.cxx \
-  PrtAmbiguityInfo_Dict.cc \
-  PrtBarSD.cxx \
-  PrtBarHit.cxx \
-  PrtCherenkovProcess.cxx \
-  PrtEvent.cxx \
-  PrtEvent_Dict.cc \
   PrtHit.cxx \
   PrtHit_Dict.cc \
-  PrtLutNode.cxx \
-  PrtLutNode_Dict.cc \
-  PrtManager.cxx \
   PrtOpBoundaryProcess.cxx \
-  PrtPhotonInfo.cxx \
-  PrtPhotonInfo_Dict.cc \
-  PrtPixelSD.cxx \
-  PrtPrizmSD.cxx \
-  PrtPrizmHit.cxx \
-  PrtTrackInfo.cxx \
-  PrtTrackInfo_Dict.cc \
   G4DIRCTree.cc
 
 # Rule for generating table CINT dictionaries.

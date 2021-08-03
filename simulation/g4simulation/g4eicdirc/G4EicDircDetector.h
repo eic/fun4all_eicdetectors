@@ -6,8 +6,7 @@
 #include <g4main/PHG4Detector.h>
 #include <Geant4/G4Types.hh>
 #include <Geant4/G4ThreeVector.hh>
-
-#include "PrtDetectorConstructionMessenger.h"
+#include <Geant4/G4Material.hh>
 
 #include <set>
 #include <map>
@@ -32,11 +31,7 @@ class G4EicDircDetector : public PHG4Detector
   //! construct
   virtual void ConstructMe(G4LogicalVolume *world);
 
-  virtual void ConstructSDandField();
   void SetVisualization();
-  void SetRotation(G4double angle);
-  void DrawHitBox(G4int id);
-  void SetLens(G4int id);
   void SetQuantumEfficiency(G4int id);
 
   virtual void Print(const std::string &what = "ALL") const;
@@ -50,7 +45,6 @@ class G4EicDircDetector : public PHG4Detector
   const std::string SuperDetector() const { return m_SuperDetector; }
  
  private:
-  G4LogicalVolume* lExpHall;
   G4LogicalVolume* lFront;
   G4LogicalVolume* lDirc;
   G4LogicalVolume* lFd;
@@ -116,7 +110,6 @@ class G4EicDircDetector : public PHG4Detector
 
   G4double fRotAngle;
   G4RotationMatrix *fPrtRot;
-  PrtDetectorConstructionMessenger* fGeomMessenger;
   G4double *fQuantumEfficiency;
 
 

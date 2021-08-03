@@ -17,7 +17,7 @@ class PHG4Hitv1;
 class PHG4HitContainer;
 class PHParameters;
 class PrtHit;
-
+class G4Track;
 
 class G4EicDircSteppingAction : public PHG4SteppingAction
 {
@@ -30,7 +30,6 @@ class G4EicDircSteppingAction : public PHG4SteppingAction
 
   //! stepping action
   bool UserSteppingAction(const G4Step*, bool) override;
-  //bool UserSteppingAction(const G4Step*, int) override; 
 
   //! reimplemented from base class
   void SetInterfacePointers(PHCompositeNode*) override;
@@ -39,6 +38,7 @@ class G4EicDircSteppingAction : public PHG4SteppingAction
   void SetAbsorberNodeName(const std::string& nam) { m_AbsorberNodeName = nam; }
   void SetSupportNodeName(const std::string& nam) { m_SupportNodeName = nam; }
 
+  
   std::vector<Int_t> vector_nid;
   std::vector<Int_t> vector_trackid;
 

@@ -1,14 +1,11 @@
 #include "G4EicDircSteppingAction.h"
-
 #include "G4EicDircDetector.h"
-#include "PrtManager.h"
 
 #include <phparameter/PHParameters.h>
 
 #include <g4detectors/PHG4StepStatusDecode.h>
 
 #include "PrtHit.h"
-#include "PrtOpBoundaryProcess.h"
 #include <g4main/PHG4Hit.h>
 #include <g4main/PHG4HitContainer.h>
 #include <g4main/PHG4Hitv1.h>
@@ -38,8 +35,6 @@
 #include <Geant4/G4VTouchable.hh>             // for G4VTouchable
 #include <Geant4/G4VUserTrackInformation.hh>  // for G4VUserTrackInformation
 #include <Geant4/G4TransportationManager.hh>
-#include <Geant4/G4ProcessManager.hh>
-#include <Geant4/G4ParticleTable.hh>
 #include <Geant4/Randomize.hh>
 
 #include <cmath>  // for isfinite
@@ -69,6 +64,7 @@ G4EicDircSteppingAction::~G4EicDircSteppingAction()
   delete m_Hit;
 }
 
+
 //____________________________________________________________________________..
 bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
                                                  bool was_used)
@@ -91,24 +87,6 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
     return false;
   }
 
-  PrtOpBoundaryProcess *fBoundaryProcess = new PrtOpBoundaryProcess();
-
-  G4ParticleTable *theParticleTable = G4ParticleTable::GetParticleTable();
-  G4ParticleTable::G4PTblDicIterator *_theParticleIterator;
-  _theParticleIterator = theParticleTable->GetIterator();
-  _theParticleIterator->reset();
-  while ((*_theParticleIterator)())
-    {
-      G4ParticleDefinition *particle = _theParticleIterator->value();
-      G4String particleName = particle->GetParticleName();
-      G4ProcessManager *pmanager = particle->GetProcessManager();
-
-      if (particleName == "opticalphoton")
-	{
-	  pmanager->AddDiscreteProcess(fBoundaryProcess);
-	}
-    }
-
 
   // collect energy and track length step by step
   G4double edep = aStep->GetTotalEnergyDeposit() / GeV;
@@ -116,6 +94,7 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
       (aStep->GetTotalEnergyDeposit() - aStep->GetNonIonizingEnergyDeposit()) /
       GeV;
   const G4Track *aTrack = aStep->GetTrack();
+
 
   /*if(aTrack->GetCurrentStepNumber()>50000 || aTrack->GetTrackLength() > 30000) 
     {
@@ -425,11 +404,12 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
 
       if (G4UniformRand() < totalProb) //{
       */     
+
+      // time since track created
       m_Hit->SetLeadTime(time);
       m_Hit->SetTotTime(wavelength); //set photon wavelength
       m_Hit->SetMcpId(mcp);
       m_Hit->SetPixelId(pix);
-      //hit.SetChannel(300*mcp+pix);
       m_Hit->SetGlobalPos(globalPos);
       m_Hit->SetLocalPos(localPos);
       m_Hit->SetDigiPos(digiPos);
@@ -475,8 +455,6 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
 
       //m_Hit->SetParticleId(aTrack->GetTrackID());
       //hit.SetParentParticleId(aTrack->GetParentID());
-      //m_Hit->SetCherenkovMC(PrtManager::Instance()->GetCurrentCherenkov());
-      // time since track created
       
 
       
@@ -593,3 +571,7 @@ void G4EicDircSteppingAction::SetInterfacePointers(PHCompositeNode *topNode)
   }
 
 }
+
+
+
+
