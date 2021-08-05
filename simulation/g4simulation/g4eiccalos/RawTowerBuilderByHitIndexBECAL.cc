@@ -263,7 +263,7 @@ bool RawTowerBuilderByHitIndexBECAL::ReadGeometryFromTable()
       }
 
       /* Construct unique Tower ID */
-      unsigned int temp_id = RawTowerDefs::encode_towerid(m_CaloId, idphi_j, ideta_k);
+      unsigned int temp_id = RawTowerDefs::encode_towerid(m_CaloId, ideta_k, idphi_j);
 
       /* Create tower geometry object */
       RawTowerGeom *temp_geo = new RawTowerGeomv4(temp_id);
