@@ -207,10 +207,10 @@ int PHG4BarrelEcalDetector::PlaceTower(G4LogicalVolume* sec)
                     sec,
                     0, copyno, OverlapCheck());
   
+    G4double posx_glass =  iterator->second.centerx + th/2*abs(cos(iterator->second.roty - M_PI_2))*cos(iterator->second.rotz);
     G4double posy_glass =  iterator->second.centery + th/2*abs(cos(iterator->second.roty - M_PI_2))*sin(iterator->second.rotz);
     G4double posz_glass =  iterator->second.centerz + th*sin(iterator->second.roty - M_PI_2);
-    G4double posx_glass =  iterator->second.centerx + th/2*abs(cos(iterator->second.roty - M_PI_2))*cos(iterator->second.rotz);
-
+   
     new G4PVPlacement(G4Transform3D(becal_rotm, G4ThreeVector(posx_glass, posy_glass, posz_glass)),
                     glass_logic,
                     G4String(string(iterator->first) + string("_Glass")),

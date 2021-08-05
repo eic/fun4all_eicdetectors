@@ -279,6 +279,10 @@ bool RawTowerBuilderByHitIndexBECAL::ReadGeometryFromTable()
       
       string parname;
       double parval;
+      if (!(iss >> parname >> parval))
+      {
+        cout << "ERROR in PHG4BarrelCalorimeterDetector: Failed to read line in mapping file " << endl;
+      }
 
       m_GlobalParameterMap.insert(make_pair(parname, parval));
 
@@ -287,7 +291,7 @@ bool RawTowerBuilderByHitIndexBECAL::ReadGeometryFromTable()
       parit = m_GlobalParameterMap.find("thickness_wall");
       if (parit != m_GlobalParameterMap.end())
       {
-        thickness_wall = parit->second*10;  // in cm
+        thickness_wall = parit->second;  // in cm
       }
       
     }
@@ -306,10 +310,11 @@ bool RawTowerBuilderByHitIndexBECAL::ReadGeometryFromTable()
     double z_temp = it->second->get_center_z();
     double roty   = it->second->get_roty();
     double rotz   = it->second->get_rotz();
-        
-    double x_tempfinal =  x_temp + thickness_wall/2*abs(cos(roty - M_PI_2))*sin(rotz);
-    double y_tempfinal =  y_temp + thickness_wall*sin(roty - M_PI_2);
-    double z_tempfinal =  z_temp + thickness_wall/2*abs(cos(roty - M_PI_2))*cos(rotz);
+  
+
+    double x_tempfinal =  x_temp + thickness_wall/2*abs(cos(roty - M_PI_2))*cos(rotz);
+    double y_tempfinal =  y_temp + thickness_wall/2*abs(cos(roty - M_PI_2))*sin(rotz);
+    double z_tempfinal =  z_temp + thickness_wall*sin(roty - M_PI_2);
 
     it->second->set_center_x(x_tempfinal);
     it->second->set_center_y(y_tempfinal);
