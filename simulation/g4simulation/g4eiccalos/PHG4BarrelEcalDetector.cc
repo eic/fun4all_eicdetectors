@@ -189,7 +189,12 @@ int PHG4BarrelEcalDetector::PlaceTower(G4LogicalVolume* sec)
 
 
     G4LogicalVolume*  glass_logic = ConstructGlass(iterator);
-    m_DisplayAction->AddVolume(glass_logic, "Glass");
+    if(iterator->second.idx_k%2 == 0)  {
+      m_DisplayAction->AddVolume(glass_logic, "Block1");
+    }
+    else {
+       m_DisplayAction->AddVolume(glass_logic, "Block2");
+    }
 
     G4RotationMatrix becal_rotm;
     becal_rotm.rotateY(iterator->second.rotx);
