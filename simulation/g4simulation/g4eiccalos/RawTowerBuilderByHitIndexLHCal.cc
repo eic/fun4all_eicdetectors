@@ -290,7 +290,9 @@ bool RawTowerBuilderByHitIndexLHCal::ReadGeometryFromTable()
         RawTowerGeom *temp_geo = new RawTowerGeomv3(temp_id);
         temp_geo->set_center_x(pos_x);
         temp_geo->set_center_y(pos_y);
-        temp_geo->set_center_z(pos_z+il*m_NLayersPerTowerSeg*(m_ThicknessAbsorber+m_ThicknessScintilator));
+        
+        float blocklength = m_NLayersPerTowerSeg*(m_ThicknessAbsorber+m_ThicknessScintilator);
+        temp_geo->set_center_z(pos_z-0.5*size_z+(il+0.5)*blocklength);
         temp_geo->set_size_x(size_x);
         temp_geo->set_size_y(size_y);
         temp_geo->set_size_z(m_NLayersPerTowerSeg*(m_ThicknessAbsorber+m_ThicknessScintilator));
