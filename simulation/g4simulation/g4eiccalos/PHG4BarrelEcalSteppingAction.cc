@@ -78,8 +78,9 @@ bool PHG4BarrelEcalSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
   }
 
    unsigned int icopy = touch->GetVolume(0)->GetCopyNo();
-  int idx_j = icopy >> 16;
-  int idx_k = icopy & 0xFFFF;
+  int idx_k = icopy >> 16;
+  int idx_j = icopy & 0xFFFF;
+
   int layer_id = m_Detector->get_Layer();
 
   /* Get energy deposited by this step */
