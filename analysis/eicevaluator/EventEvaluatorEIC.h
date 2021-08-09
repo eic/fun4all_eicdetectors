@@ -71,15 +71,15 @@ class EventEvaluatorEIC : public SubsysReco
   // limit the tracing of towers and clusters back to the truth particles
   // to only those reconstructed objects above a particular energy
   // threshold (evaluation for objects above threshold unaffected)
-  void set_reco_tracing_energy_threshold(float thresh)
+  void set_reco_tracing_energy_threshold(float thresh, int caloid)
   {
-    _reco_e_threshold = thresh;
+    _reco_e_threshold[caloid] = thresh;
   }
-  void set_reco_tracing_energy_threshold_BECAL(float thresh)
+  void set_reco_tracing_energy_thresholdMC(float thresh)
   {
-    _reco_e_threshold_BECAL = thresh;
+    _reco_e_thresholdMC = thresh;
   }
-
+  
   //! max depth/generation of the MC_particle/PHG4Particle that would be saved.
   void set_depth_MCstack(int d)
   {
@@ -325,8 +325,8 @@ class EventEvaluatorEIC : public SubsysReco
   float* _calo_towers_z;
   int* _geometry_done;
 
-  float _reco_e_threshold;
-  float _reco_e_threshold_BECAL;
+  float* _reco_e_threshold;
+  float _reco_e_thresholdMC;
   int _depth_MCstack;
 
   CaloEvalStack* _caloevalstackFHCAL;
@@ -372,7 +372,8 @@ class EventEvaluatorEIC : public SubsysReco
   const int _maxNProjections = 2000;
   const int _maxNMCPart = 100000;
   const int _maxNHepmcp = 1000;
-
+  const int _maxNCalo = 11;
+  
   enum calotype {
       kFHCAL         = 0,
       kFEMC         = 1,

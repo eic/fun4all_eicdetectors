@@ -285,8 +285,8 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   , _calo_towers_z(0)
   , _geometry_done(0)
 
-  , _reco_e_threshold(0.0)
-  , _reco_e_threshold_BECAL(0.0)
+  , _reco_e_threshold(0)
+  , _reco_e_thresholdMC(0.001)
   , _depth_MCstack(0)
   , _caloevalstackFHCAL(nullptr)
   , _caloevalstackBECAL(nullptr)
@@ -306,6 +306,19 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   , _tfile(nullptr)
   , _tfile_geometry(nullptr)
 {
+  _reco_e_threshold = new float[_maxNCalo];
+  _reco_e_threshold[kFHCAL]   = 0.05;
+  _reco_e_threshold[kFEMC]    = 0.005;
+  _reco_e_threshold[kDRCALO]  = 0.0;
+  _reco_e_threshold[kEEMC]    = 0.005;
+  _reco_e_threshold[kCEMC]    = 0.01;
+  _reco_e_threshold[kEHCAL]   = 0.05;
+  _reco_e_threshold[kHCALIN]  = 0.01;
+  _reco_e_threshold[kHCALOUT] = 0.05;
+  _reco_e_threshold[kLFHCAL]  = 0.001;
+  _reco_e_threshold[kEEMCG]   = 0.005;
+  _reco_e_threshold[kBECAL]   = 0.001;
+
   _hits_layerID = new int[_maxNHits];
   _hits_trueID = new int[_maxNHits];
   _hits_x = new float[_maxNHits];
@@ -1190,7 +1203,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
           if (tower)
           {
             // min energy cut
-            if (tower->get_energy() < _reco_e_threshold) continue;
+            if (tower->get_energy() < _reco_e_threshold[kFHCAL]) continue;
             // cout << "\tnew FHCAL tower" << endl;
             _tower_FHCAL_iEta[_nTowers_FHCAL] = tower->get_bineta();
             _tower_FHCAL_iPhi[_nTowers_FHCAL] = tower->get_binphi();
@@ -1325,7 +1338,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
           if (tower)
           {
             // min energy cut
-            if (tower->get_energy() < _reco_e_threshold_BECAL) continue;
+            if (tower->get_energy() < _reco_e_threshold[kBECAL]) continue;
             _tower_BECAL_iEta[_nTowers_BECAL] = tower->get_bineta();
             _tower_BECAL_iPhi[_nTowers_BECAL] = tower->get_binphi();
             _tower_BECAL_E[_nTowers_BECAL] = tower->get_energy();
@@ -1414,7 +1427,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
           if (tower)
           {
             // min energy cut
-            if (tower->get_energy() < _reco_e_threshold) continue;
+            if (tower->get_energy() < _reco_e_threshold[kHCALIN]) continue;
             _tower_HCALIN_iEta[_nTowers_HCALIN] = tower->get_bineta();
             _tower_HCALIN_iPhi[_nTowers_HCALIN] = tower->get_binphi();
             _tower_HCALIN_E[_nTowers_HCALIN] = tower->get_energy();
@@ -1503,7 +1516,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
           if (tower)
           {
             // min energy cut
-            if (tower->get_energy() < _reco_e_threshold) continue;
+            if (tower->get_energy() < _reco_e_threshold[kHCALOUT]) continue;
             _tower_HCALOUT_iEta[_nTowers_HCALOUT] = tower->get_bineta();
             _tower_HCALOUT_iPhi[_nTowers_HCALOUT] = tower->get_binphi();
             _tower_HCALOUT_E[_nTowers_HCALOUT] = tower->get_energy();
@@ -1592,7 +1605,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
           if (tower)
           {
             // min energy cut
-            if (tower->get_energy() < _reco_e_threshold) continue;
+            if (tower->get_energy() < _reco_e_threshold[kEHCAL]) continue;
             _tower_EHCAL_iEta[_nTowers_EHCAL] = tower->get_bineta();
             _tower_EHCAL_iPhi[_nTowers_EHCAL] = tower->get_binphi();
             _tower_EHCAL_E[_nTowers_EHCAL] = tower->get_energy();
@@ -1692,7 +1705,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
           if (tower)
           {
             // min energy cut
-            // if (tower->get_energy() < _reco_e_threshold) continue;
+            if (tower->get_energy() < _reco_e_threshold[kDRCALO]) continue;
 
             _tower_DRCALO_iEta[_nTowers_DRCALO] = tower->get_bineta();
             _tower_DRCALO_iPhi[_nTowers_DRCALO] = tower->get_binphi();
@@ -1799,7 +1812,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
           if (tower)
           {
             // min energy cut            
-            if (tower->get_energy() <= 0.) continue; //  _reco_e_threshold
+            if (tower->get_energy() < _reco_e_threshold[kLFHCAL]) continue; 
             if (Verbosity() > 1) cout << "\n event eval: \t" << tower->get_energy()<< "\t ieta: " << tower->get_bineta()<< "\t iphi: " << tower->get_binphi() << "\t iZ: " << tower->get_binl()<< endl;
             _tower_LFHCAL_iEta[_nTowers_LFHCAL] = tower->get_bineta();
             _tower_LFHCAL_iPhi[_nTowers_LFHCAL] = tower->get_binphi();
@@ -1890,7 +1903,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
           if (tower)
           {
             // min energy cut
-            if (tower->get_energy() < _reco_e_threshold) continue;
+            if (tower->get_energy() < _reco_e_threshold[kFEMC]) continue;
 
             _tower_FEMC_iEta[_nTowers_FEMC] = tower->get_bineta();
             _tower_FEMC_iPhi[_nTowers_FEMC] = tower->get_binphi();
@@ -2009,7 +2022,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
           if (tower)
           {
             // min energy cut
-            if (tower->get_energy() < _reco_e_threshold) continue;
+            if (tower->get_energy() < _reco_e_threshold[kCEMC]) continue;
 
             _tower_CEMC_iEta[_nTowers_CEMC] = tower->get_bineta();
             _tower_CEMC_iPhi[_nTowers_CEMC] = tower->get_binphi();
@@ -2099,7 +2112,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
           if (tower)
           {
             // min energy cut
-            if (tower->get_energy() < _reco_e_threshold) continue;
+            if (tower->get_energy() < _reco_e_threshold[kEEMC]) continue;
 
             _tower_EEMC_iEta[_nTowers_EEMC] = tower->get_bineta();
             _tower_EEMC_iPhi[_nTowers_EEMC] = tower->get_binphi();
@@ -2190,7 +2203,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
           if (tower)
           {
             // min energy cut
-            if (tower->get_energy() < _reco_e_threshold) continue;
+            if (tower->get_energy() < _reco_e_threshold[kEEMCG]) continue;
 
             _tower_EEMCG_iEta[_nTowers_EEMCG] = tower->get_bineta();
             _tower_EEMCG_iPhi[_nTowers_EEMCG] = tower->get_binphi();
@@ -2255,7 +2268,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       {
         RawCluster* cluster = iterator.second;
 
-        if (cluster->get_energy() < _reco_e_threshold) continue;
+        if (cluster->get_energy() < _reco_e_threshold[kFHCAL]) continue;
 
         _cluster_FHCAL_E[_nclusters_FHCAL] = cluster->get_energy();
         _cluster_FHCAL_NTower[_nclusters_FHCAL] = cluster->getNTowers();
@@ -2317,7 +2330,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       {
         RawCluster* cluster = iterator.second;
 
-        if (cluster->get_energy() < _reco_e_threshold) continue;
+        if (cluster->get_energy() < _reco_e_threshold[kHCALIN]) continue;
 
         _cluster_HCALIN_E[_nclusters_HCALIN] = cluster->get_energy();
         _cluster_HCALIN_NTower[_nclusters_HCALIN] = cluster->getNTowers();
@@ -2379,7 +2392,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       {
         RawCluster* cluster = iterator.second;
 
-        if (cluster->get_energy() < _reco_e_threshold) continue;
+        if (cluster->get_energy() < _reco_e_threshold[kHCALOUT]) continue;
 
         _cluster_HCALOUT_E[_nclusters_HCALOUT] = cluster->get_energy();
         _cluster_HCALOUT_NTower[_nclusters_HCALOUT] = cluster->getNTowers();
@@ -2441,7 +2454,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       {
         RawCluster* cluster = iterator.second;
 
-        if (cluster->get_energy() < _reco_e_threshold) continue;
+        if (cluster->get_energy() < _reco_e_threshold[kEHCAL]) continue;
 
         _cluster_EHCAL_E[_nclusters_EHCAL] = cluster->get_energy();
         _cluster_EHCAL_NTower[_nclusters_EHCAL] = cluster->getNTowers();
@@ -2504,7 +2517,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       {
         RawCluster* cluster = iterator.second;
 
-        if (cluster->get_energy() < _reco_e_threshold) continue;
+        if (cluster->get_energy() < _reco_e_threshold[kFEMC]) continue;
 
         _cluster_FEMC_E[_nclusters_FEMC] = cluster->get_energy();
         _cluster_FEMC_NTower[_nclusters_FEMC] = cluster->getNTowers();
@@ -2566,7 +2579,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       {
         RawCluster* cluster = iterator.second;
 
-        if (cluster->get_energy() < _reco_e_threshold) continue;
+        if (cluster->get_energy() < _reco_e_threshold[kCEMC]) continue;
 
         _cluster_CEMC_E[_nclusters_CEMC] = cluster->get_energy();
         _cluster_CEMC_NTower[_nclusters_CEMC] = cluster->getNTowers();
@@ -2628,7 +2641,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       {
         RawCluster* cluster = iterator.second;
 
-        if (cluster->get_energy() < _reco_e_threshold) continue;
+        if (cluster->get_energy() < _reco_e_threshold[kEEMC]) continue;
 
         _cluster_EEMC_E[_nclusters_EEMC] = cluster->get_energy();
         _cluster_EEMC_NTower[_nclusters_EEMC] = cluster->getNTowers();
@@ -2690,7 +2703,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       {
         RawCluster* cluster = iterator.second;
 
-        if (cluster->get_energy() < _reco_e_threshold) continue;
+        if (cluster->get_energy() < _reco_e_threshold[kEEMCG]) continue;
 
         _cluster_EEMCG_E[_nclusters_EEMCG] = cluster->get_energy();
         _cluster_EEMCG_NTower[_nclusters_EEMCG] = cluster->getNTowers();
@@ -2923,7 +2936,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
         // if(gtrackID < 0) continue;
 
         //using the e threshold also for the truth particles gets rid of all the low energy secondary particles
-        if (g4particle->get_e() < _reco_e_threshold) continue;
+        if (g4particle->get_e() < _reco_e_thresholdMC) continue;
 
         _mcpart_ID[_nMCPart] = g4particle->get_track_id();
         _mcpart_ID_parent[_nMCPart] = g4particle->get_parent_id();
