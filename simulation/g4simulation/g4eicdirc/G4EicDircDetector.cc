@@ -71,59 +71,40 @@ int G4EicDircDetector::IsInDetector(G4VPhysicalVolume *volume) const
 
 void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
 {
-  fGeomType = 0;
-  fEvType = 0;
-  fMcpLayout = 4;
-  fLensId = 3;
+  fGeomType = 0; // whole DIRC
+  fLensId = 3; // 3-layer spherical lens
   fNBar = 11;
   std::cout << "Nbars =" << fNBar << std::endl;
 
   fNRow = 6;
   fNCol = 4;
-  if(fNBar<0) fNBar=1;
 
-  fPrizm[0] = 360; fPrizm[1] = 300; fPrizm[3] = 50; fPrizm[2]= fPrizm[3]+300*tan(32*deg);
+  // ECCE parameters 
+
+  fPrizm[0] = 386.5; fPrizm[1] = 300; fPrizm[3] = 37; fPrizm[2]= fPrizm[3]+300*tan(32*deg);
+  fBar[0] = 17; fBar[1] = 35; fBar[2] = 1058.7;
+  fNBoxes = 12;
+  fRadius = 750;
+
+  //-------------------
+
   fBarsGap = 0.15;
   
-  std::cout<<"fPrizm[2] "<<fPrizm[2]<<std::endl;
-  
-  fdTilt = 80*deg;
-  fPrizmT[0] = 390;
-  fPrizmT[1] = 400 - 290*cos(fdTilt); //
-  fPrizmT[2] = 290*sin(fdTilt); // hight
-  fPrizmT[3] = 50; // face
-  fPrizmT[4] = 290;
-  fPrizmT[5] = 290*cos(fdTilt);
+  std::cout << "Nbarboxes = "<< fNBoxes << std::endl;
+  std::cout << "barrel radius = " << fRadius << " mm" << std::endl;
   
   fMirror[0] = 20; fMirror[1] = fPrizm[0]; fMirror[2] =1;
-  fBar[0] = 17; fBar[1] = (fPrizm[0]-(fNBar-1)*fBarsGap)/fNBar; fBar[2] = 1050; //4200; //4200
 
   fMcpTotal[0] = fMcpTotal[1] = 53+4; fMcpTotal[2]=1;
   fMcpActive[0] = fMcpActive[1] = 53; fMcpActive[2]=1;
   fLens[0] = fLens[1] = 40; fLens[2]=10;
-  fRadius = 970;
   
   fBoxWidth = fPrizm[0];
-  fNBoxes = 16;
-
-  if(fEvType==1){ //BaBar
-    fBar[0] = 17.25; fBar[1] = 35; fBar[2] = 1050;
-    fNBar = 12;
-    fRadius = 900;
-    fLensId = 0;
-    fBoxWidth = fNBar*(fBar[1]+fBarsGap);
-    fNRow = 7;
-    fNBoxes =12;
-  }
 
   if(fGeomType == 1)  fNBoxes = 1;
 
   fFd[0] = fBoxWidth; fFd[1]=fPrizm[2]; fFd[2] =1;
 
-  
-  if(fEvType == 4){
-    fFd[1]=fPrizmT[4];
-  }  
   
   if(fLensId == 0 || fLensId==10){
     fLens[2] =0;
@@ -172,7 +153,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
 
       G4RotationMatrix *tRot = new G4RotationMatrix();
       tRot->rotateZ(-tphi);     
-      phy = new G4PVPlacement(tRot,G4ThreeVector(dx,dy,-1200),lDirc,"wDirc",logicWorld,false,i);
+      phy = new G4PVPlacement(tRot,G4ThreeVector(dx,dy,-437.5),lDirc,"wDirc",logicWorld,false,i);
       m_PhysicalVolumesSet.insert(phy);
       m_PhysicalVolumes_active[phy] = 1;
     }
@@ -189,40 +170,20 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   G4Box *gGlue = new G4Box("gGlue",fBar[0]/2.,fBar[1]/2.,0.5*gluethickness);
   lGlue = new G4LogicalVolume(gGlue,epotekMaterial,"lGlue",0,0,0);
 
-  G4Box *gGlueE = new G4Box("gGlueE",fBar[0]/2.,0.5*fBoxWidth,0.5*gluethickness);
-  lGlueE = new G4LogicalVolume(gGlueE,epotekMaterial,"lGlueE",0,0,0);
+  int id=0, nparts=4;
 
-  if(fNBar==1){
-    for(int j=0;j<4; j++){
-      double z = -0.5*dirclength+0.5*fBar[2]+(fBar[2]+gluethickness)*j;
-      wBar =  new G4PVPlacement(0,G4ThreeVector(0,0,z),lBar,"wBar", lDirc,false,0);
-      m_PhysicalVolumes_active[wBar] = 3;
-      wGlue =  new G4PVPlacement(0,G4ThreeVector(0,0,z+0.5*(fBar[2]+gluethickness)),lGlue,"wGlue", lDirc,false,0);
+  for(int i=0; i<fNBar; i++){
+    double shifty = i*(fBar[1]+fBarsGap)- 0.5*fBoxWidth + fBar[1]/2.; 
+    for(int j=0;j<nparts; j++){
+      double z = 0.5*dirclength - 0.5*fBar[2] - (fBar[2]+gluethickness)*j;
+      pDirc[i] = new G4PVPlacement(0,G4ThreeVector(0,shifty,z),lBar,"wBar",lDirc,false,id);
+      m_PhysicalVolumes_active[pDirc[i]] = 3;
+      wGlue = new G4PVPlacement(0,G4ThreeVector(0,shifty,z-0.5*(fBar[2]+gluethickness)),lGlue,"wGlue", lDirc,false,id);
       m_PhysicalVolumes_active[wGlue] = 4;
-    }
-  }else{
-    int id=0, nparts=4;
-    if(fEvType==3){
-      double sh=0;
-      if(fLensId == 6) sh = fLens[2];
-      nparts=3;
-      double z = -0.5*dirclength+0.5*fBar[2]+(fBar[2]+gluethickness)*3;
-      phy = new G4PVPlacement(0,G4ThreeVector(0,0,z+sh),lExpVol,"wExpVol",lDirc,false,id);           
-      phy = new G4PVPlacement(0,G4ThreeVector(0,0,z+0.5*(fBar[2]+gluethickness)+sh),lGlueE,"wGlue", lDirc,false,id);
-  
-    }
-    for(int i=0; i<fNBar; i++){
-      double shifty = i*(fBar[1]+fBarsGap)- 0.5*fBoxWidth + fBar[1]/2.; 
-      for(int j=0;j<nparts; j++){
-	double z = 0.5*dirclength - 0.5*fBar[2] - (fBar[2]+gluethickness)*j;
-	pDirc[i] = new G4PVPlacement(0,G4ThreeVector(0,shifty,z),lBar,"wBar",lDirc,false,id);
-	m_PhysicalVolumes_active[pDirc[i]] = 3;
-	wGlue = new G4PVPlacement(0,G4ThreeVector(0,shifty,z-0.5*(fBar[2]+gluethickness)),lGlue,"wGlue", lDirc,false,id);
-	m_PhysicalVolumes_active[wGlue] = 4;
-	id++;
-      }
+      id++;
     }
   }
+
   
   // The Mirror
   G4Box* gMirror = new G4Box("gMirror",fMirror[0]/2.,fMirror[1]/2.,fMirror[2]/2.);
@@ -262,7 +223,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
       cr2 = r2;
     }
     fLens[2] = (2*lensMinThikness+r2-sqrt(r2*r2-cr2*cr2)+lensMinThikness);
-    std::cout<<"lens thickness "<<fLens[2]<<std::endl;
+    std::cout << "lens thickness ="<< fLens[2] << " mm" << std::endl;
     
     //G4ThreeVector zTrans1(0, 0, -(-r1-fLens[2]/2.+r1-sqrt(r1*r1-cr2*cr2) +lensMinThikness));
     //G4ThreeVector zTrans2(0, 0, -(-r2-fLens[2]/2.+r2-sqrt(r2*r2-cr2*cr2) +lensMinThikness*2));
@@ -309,11 +270,6 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
     r2 = (r2==0)? 24: r2;
     double shight = 25;
 
-    if(fEvType==3){
-      r1 = 1000;
-      r2 = 400;
-    }
-    
     G4ThreeVector zTrans1(0, 0, -r1-fLens[2]/2.+r1-sqrt(r1*r1-shight/2.*shight/2.) +lensMinThikness);
     G4ThreeVector zTrans2(0, 0, -r2-fLens[2]/2.+r2-sqrt(r2*r2-shight/2.*shight/2.) +layer12);
 
@@ -377,7 +333,6 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
       }
       if(fLensId==6){
 	double sh=0;
-	if(fEvType==3) sh = fBar[2]+gluethickness; 
 	phy = new G4PVPlacement(0,G4ThreeVector(0,0,shifth-sh),lLens1,"wLens1", lDirc,false,0);
 	phy = new G4PVPlacement(0,G4ThreeVector(0,0,shifth-sh),lLens2,"wLens2", lDirc,false,0);
 	phy = new G4PVPlacement(0,G4ThreeVector(0,0,shifth-sh),lLens3,"wLens3", lDirc,false,0);
@@ -390,12 +345,6 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   G4Trap* gPrizm = new G4Trap("gPrizm",fPrizm[0],fPrizm[1],fPrizm[2],fPrizm[3]);
   lPrizm = new G4LogicalVolume(gPrizm, BarMaterial,"lPrizm",0,0,0);
 
-  G4Trap* gPrizmT1 = new G4Trap("gPrizmT1",fPrizmT[0],fPrizmT[1],fPrizmT[2],fPrizmT[3]);
-  lPrizmT1 = new G4LogicalVolume(gPrizmT1, BarMaterial,"lPrizmT1",0,0,0);
-  
-  G4Trap* gPrizmT2 = new G4Trap("gPrizmT2",fPrizmT[0],fPrizmT[5],fPrizmT[2],0.0001);
-  lPrizmT2 = new G4LogicalVolume(gPrizmT2, BarMaterial,"lPrizmT2",0,0,0);
-
   G4RotationMatrix* xRot = new G4RotationMatrix();
   xRot->rotateX(-M_PI/2.*rad);
 
@@ -404,237 +353,51 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   double evshiftz = 0.5*dirclength+fPrizm[1]+fMcpActive[2]/2.+fLens[2];
   double evshiftx = 0;
 
-  if(fEvType == 1){ // focusing prism
-    
-    double fWindow[]={124,437,14.0}; // 9.6
-    double fWedge[]={33.25,91,79.537,27.0};
-    double fSWedge[]={fBoxWidth,60,123,89};
-    double fBlock[]={fBoxWidth,184.5,495,269};
+  fPrismShift = G4ThreeVector((fPrizm[2]+fPrizm[3])/4.-0.5*fPrizm[3],0,-(0.5*(dirclength+fPrizm[1])+fLens[2]));
+  phy = new G4PVPlacement(xRot,fPrismShift,lPrizm,"wPrizm", lDirc,false,0);
+  m_PhysicalVolumes_active[phy] = 9;
 
-    double currentz = 0.5*dirclength;
-    
-    double fdH = fWedge[1]*tan(0.006); // 6 mrad tilt
-    fWedge[2] = tan(30/180.*M_PI)* fWedge[1] +  fWedge[3] - fdH; // update the side of the prizm assuming bottom tilt
-    double theta = atan((fWedge[2]+2*fdH-fWedge[3])/2./fWedge[1]);
-    G4Trap* gWedge = new G4Trap("gWedge",fWedge[1]/2., theta, 0.,fWedge[0]/2., fWedge[2]/2., fWedge[2]/2., 0.,
-				fWedge[0]/2., fWedge[3]/2., fWedge[3]/2., 0.);
-    lWedge = new G4LogicalVolume(gWedge, BarMaterial,"lWedge",0,0,0);
-    G4RotationMatrix* tRot = new G4RotationMatrix();
-    tRot->rotateY(M_PI);
-
-    // window
-    G4Box* gWindow = new G4Box("gWindow",0.5*fWindow[0],0.5*fWindow[1],0.5*fWindow[2]);
-    lWindow = new G4LogicalVolume(gWindow,BarMaterial,"lWindow",0,0,0);
-
-    double xstep = 0.5*(fWedge[3]-fBar[0]);
-    for(int i=0; i<fNBar; i++){
-      double yshift = 0.5*fBoxWidth-0.5*fBar[1]-(fBar[1]+fBarsGap)*i;
-      fPrismShift = G4ThreeVector((fWedge[2]+fWedge[3])/4.-0.5*fWedge[3]+xstep,yshift,currentz+0.5*fWedge[1]);
-      phy = new G4PVPlacement(tRot,fPrismShift,lWedge,"wWedge", lDirc,false,i);
-    }
-    currentz += fWedge[1];    
-    
-    phy = new G4PVPlacement(0,G4ThreeVector(28+xstep,0,currentz+0.5*fWindow[2]),lWindow,"wWindow",lDirc,false,0);
-    currentz += fWindow[2];
-
-    // second wedge
-    G4Trap* gSWedge = new G4Trap("gSWedge",fSWedge[0],fSWedge[1],fSWedge[2],fSWedge[3]);
-    lSWedge = new G4LogicalVolume(gSWedge, BarMaterial,"lSWedge",0,0,0);
-    G4RotationMatrix* xwRot = new G4RotationMatrix();
-    xwRot->rotateX(0.5*M_PI);
-    phy = new G4PVPlacement(xwRot,G4ThreeVector((fSWedge[2]+fSWedge[3])/4.-0.5*fWedge[3]+xstep,0,currentz+0.5*fSWedge[1]),lSWedge,"wSWedge", lDirc,false,0);
-    currentz += fSWedge[1];
-     
-    // focusing block    
-    auto gBlockA = new G4Trap("gBlockA",fBlock[0],fBlock[1],fBlock[2],fBlock[3]);
-
-    double cradius = 900; 
-    double cangle = 16; 
-
-    double cpos = 240;
-    double apos = 80;
-    
-    double b=atan((cradius-sqrt(cradius*cradius-cpos*cpos))/cpos)-cangle*TMath::DegToRad(); //atan(apos/cpos);    
-    double mxcor=cradius*(1-cos(b));
-    double mycor=cradius*sin(b);
-
-    std::cout<<b<<" mxcor "<<mxcor <<" "<<mycor<<std::endl;
-    
-    
-    G4Tubs* gCyl  = new G4Tubs("gCyl",0,cradius,fBoxWidth,0*deg,360*deg);
-    G4RotationMatrix* cRot = new G4RotationMatrix();
-    auto cTrans = G4ThreeVector(-mycor+cpos-((fBlock[2]+fBlock[3])/4.),mxcor-cradius+0.5*fBlock[1],0);
-    auto gBlock = new G4IntersectionSolid("gBlock",gBlockA,gCyl,cRot,cTrans);
-
-    double mirrorthickness = 1;
-    cTrans.setY(cTrans.getY()-mirrorthickness);
-
-    auto gFmirror = new G4SubtractionSolid("gFmirror",gBlock,gCyl,new G4RotationMatrix(),cTrans);  
-    lFmirror = new G4LogicalVolume(gFmirror, MirrorMaterial,"lFmirror",0,0,0); 
-    
-    fPrismShift = G4ThreeVector((fBlock[2]+fBlock[3])/4.-0.5*fWedge[3]+xstep,0,currentz+0.5*fBlock[1]);
-    xRot->rotateX(M_PI);
-    
-    lBlock = new G4LogicalVolume(gBlock, BarMaterial,"lBlock",0,0,0);
-    phy = new G4PVPlacement(xRot,fPrismShift,lBlock,"wBlock", lDirc,false,0);
-    
-    fPrismShift.setZ(fPrismShift.getZ()+mirrorthickness);
-    phy = new G4PVPlacement(xRot,fPrismShift,lFmirror,"wFmirror", lDirc,false,0);
-
-    // PMT plane
-    double pmtrot = atan((fBlock[3]-fBlock[2])/fBlock[1]);
-    fdrot->rotateY(0.5*M_PI-pmtrot);
-    phy = new G4PVPlacement(fdrot,
-			    G4ThreeVector(0.5*(fBlock[2]+fBlock[3])-0.5*fWedge[3]+xstep,0,currentz+0.5*fBlock[1]),
-			    lFd,"wFd", lDirc,false,0);    
-  }
-  else if(fEvType == 4){ // tilted prism
-    fPrismShift = G4ThreeVector((fPrizmT[2]+fPrizmT[3])/4.-fPrizmT[3]/2.,0,0.5*dirclength+fPrizmT[1]/2.+fLens[2]);
-    phy = new G4PVPlacement(xRot,fPrismShift,lPrizmT1,"wPrizm", lDirc,false,0);
-    fPrismShift = G4ThreeVector((fPrizmT[2]+0.0001)/4.-0.0001/2.-0.5*fPrizm[3],0,fPrizmT[1]+0.5*dirclength+fPrizmT[5]/2.+fLens[2]);
-    G4RotationMatrix* yRot = new G4RotationMatrix();
-    yRot->rotateX(-0.5*M_PI*rad);
-    fdRot->rotateY(fdTilt);
-    fdrot->rotateY(fdTilt-90*deg);
-    evshiftz =0.5*dirclength+fLens[2] + fPrizmT[1]+0.5*fPrizmT[5] + 0.5*fFd[2]*sin(fdTilt); 
-    evshiftx=0.5*fPrizmT[4]*(1-sin(fdTilt)) - 0.5*fFd[2]*cos(fdTilt);
-    phy = new G4PVPlacement(yRot,fPrismShift,lPrizmT2,"wPrizm", lDirc,false,0);
-    phy = new G4PVPlacement(fdrot,G4ThreeVector(0.5*fFd[1]-0.5*fPrizm[3]-evshiftx,0,evshiftz),lFd,"wFd", lDirc,false,0);
-
-  }
-  else{ // normal prism
-    fPrismShift = G4ThreeVector((fPrizm[2]+fPrizm[3])/4.-0.5*fPrizm[3],0,-(0.5*(dirclength+fPrizm[1])+fLens[2]));
-    phy = new G4PVPlacement(xRot,fPrismShift,lPrizm,"wPrizm", lDirc,false,0);
-    m_PhysicalVolumes_active[phy] = 9;
-
-    phy = new G4PVPlacement(fdrot,G4ThreeVector(0.5*fFd[1]-0.5*fPrizm[3]-evshiftx,0,-evshiftz),lFd,"wFd", lDirc,false,0);
-    m_PhysicalVolumes_active[phy] = 2;
-  }
-
-  if(fMcpLayout==1){
-    // standard mcp pmt layout
-    // The MCP
-    G4Box* gMcp = new G4Box("gMcp",fMcpTotal[0]/2.,fMcpTotal[1]/2.,fMcpTotal[2]/2.);
-    lMcp = new G4LogicalVolume(gMcp,BarMaterial,"lMcp",0,0,0);
-    
-    // The MCP Pixel
-    G4Box* gPixel = new G4Box("gPixel",fMcpActive[0]/16.,fMcpActive[1]/16.,fMcpActive[2]/16.);
-    lPixel = new G4LogicalVolume(gPixel,BarMaterial,"lPixel",0,0,0);
-    
-    for(int i=0; i<8; i++){
-      for(int j=0; j<8; j++){
-	double shiftx = i*(fMcpActive[0]/8.)-fMcpActive[0]/2.+fMcpActive[0]/16.;
-	double shifty = j*(fMcpActive[0]/8.)-fMcpActive[0]/2.+fMcpActive[0]/16.;
-	phy = new G4PVPlacement(0,G4ThreeVector(shiftx,shifty,0),lPixel,"wPixel", lMcp,false,8*i+j);      
-      }
-    }
- 
-    int mcpId = 0;
-    double gapx = (fPrizm[2]-4*fMcpTotal[0])/5.;
-    double gapy = (fPrizm[0]-6*fMcpTotal[0])/7.;
-    for(int i=0; i<fNCol; i++){
-      for(int j=0; j<fNRow; j++){
-	double shiftx = i*(fMcpTotal[0]+gapx)-fFd[1]/2.+fMcpTotal[0]/2.+gapx;
-	double shifty = j*(fMcpTotal[0]+gapy)-fFd[0]/2.+fMcpTotal[0]/2.+gapy;
-	phy = new G4PVPlacement(0,G4ThreeVector(shiftx,shifty,0),lMcp,"wMcp", lFd,false,mcpId++);
-      }
-    }
-  }
-  if(fMcpLayout==0){
-    // The MCP
-    G4Box* gMcp = new G4Box("gMcp",fPrizm[2]/2.,fPrizm[0]/2.,fMcpTotal[2]/2.);
-    lMcp = new G4LogicalVolume(gMcp,BarMaterial,"lMcp",0,0,0);
+  phy = new G4PVPlacement(fdrot,G4ThreeVector(0.5*fFd[1]-0.5*fPrizm[3]-evshiftx,0,-evshiftz),lFd,"wFd", lDirc,false,0);
+  m_PhysicalVolumes_active[phy] = 2;
   
-    // The MCP Pixel
-    fNpix1=4;
-    fNpix2=6;
-    G4Box* gPixel = new G4Box("gPixel",fMcpTotal[0]/2.,fMcpTotal[1]/2.,fMcpTotal[2]/16.);
-    lPixel = new G4LogicalVolume(gPixel,BarMaterial,"lPixel",0,0,0);
+  // MCP --
 
-    //double disx = (fPrizm[0]-fNpix2*fMcpTotal[0])/(double)fNpix2;
-    double disy = (fPrizm[1]-fNpix1*fMcpTotal[0])/(double)(fNpix1+1);
-    if(true){
-      for(int i=0; i<fNpix1; i++){
-	for(int j=0; j<fNpix2; j++){
-	  double shiftx = i*(fMcpTotal[0] +disy/2.) - fPrizm[2]/2. + fMcpTotal[0]/2.+disy/2.;
-	  double shifty = j*(fMcpTotal[0] +disy/2.) - fPrizm[0]/2. + fMcpTotal[0]/2.+disy/2.;
-	  phy = new G4PVPlacement(0,G4ThreeVector(shiftx,shifty,0),lPixel,"wPixel", lMcp,false,fNpix1*i+j);
-	}
-      }
-    }else{
-      phy = new G4PVPlacement(fdRot,G4ThreeVector(0,0,0),lPixel,"wPixel", lMcp,false,1);
-    } 
-    phy = new G4PVPlacement(0,G4ThreeVector(0,0,0),lMcp,"wMcp", lFd,false,1);
+  G4Box* gMcp = new G4Box("gMcp",fMcpTotal[0]/2.,fMcpTotal[1]/2.,fMcpTotal[2]/2.);
+  lMcp = new G4LogicalVolume(gMcp,BarMaterial,"lMcp",0,0,0);
 
-  }
-  if(fMcpLayout==3){
-    // one mcp layout
-    G4Box* gMcp = new G4Box("gMcp",0.5*fPrizm[2],0.5*fPrizm[0],0.5*fMcpTotal[2]);
-    lMcp = new G4LogicalVolume(gMcp,BarMaterial,"lMcp",0,0,0);
+  fNpix1 = 16;
+  fNpix2 = 16;
 
-    double pixSize = 3*mm;
-    
-    fNpix1 = fPrizm[2]/pixSize-1;
-    fNpix2 = fPrizm[0]/pixSize-1;
- 
-    G4Box* gPixel = new G4Box("gPixel",0.5*fPrizm[2]/fNpix1,0.5*fPrizm[0]/fNpix2,0.2);
-    lPixel = new G4LogicalVolume(gPixel,BarMaterial,"lPixel",0,0,0);
-    int pixelId=0;
-    for(int i=0; i<fNpix1; i++){
-      for(int j=0; j<fNpix2; j++){
-	double shiftx = i*(fPrizm[2]/fNpix1) - 0.5*fPrizm[2]+0.5*fPrizm[2]/fNpix1;
-	double shifty = j*(fPrizm[0]/fNpix2) - 0.5*fPrizm[0]+0.5*fPrizm[0]/fNpix2;
-	phy = new G4PVPlacement(fdRot,G4ThreeVector(shiftx,shifty,0),lPixel,"wPixel", lMcp,false,fNpix1*i+j);
-      }
-    }
-    phy = new G4PVPlacement(0,G4ThreeVector(0,0,0),lMcp,"wMcp", lFd,false,1);
-
-  }
-  if(fMcpLayout==4){
-    // alternative mcp pmt
-    // The MCP
-
-    // fMcpTotal[1]=fPrizm[0]/6.-1;
-    // fMcpTotal[0]=fPrizm[2]/4.-5;
-    // fMcpActive[1]= fMcpTotal[1];
-    // fMcpActive[0]= fMcpTotal[0];
-    
-    G4Box* gMcp = new G4Box("gMcp",fMcpTotal[0]/2.,fMcpTotal[1]/2.,fMcpTotal[2]/2.);
-    lMcp = new G4LogicalVolume(gMcp,BarMaterial,"lMcp",0,0,0);
-
-    fNpix1 = 16;
-    fNpix2 = 16;
-
-    std::cout<<"fNpix1="<<fNpix1 << " fNpix2="<<fNpix2 <<std::endl;
+  std::cout<<"fNpix1="<<fNpix1 << " fNpix2="<<fNpix2 <<std::endl;
         
-    // The MCP Pixel
-    G4Box* gPixel = new G4Box("gPixel",0.5*fMcpActive[0]/fNpix1,0.5*fMcpActive[1]/fNpix2,fMcpActive[2]/16.);
-    lPixel = new G4LogicalVolume(gPixel,BarMaterial,"lPixel",0,0,0);
+  // The MCP Pixel
+  G4Box* gPixel = new G4Box("gPixel",0.5*fMcpActive[0]/fNpix1,0.5*fMcpActive[1]/fNpix2,fMcpActive[2]/16.);
+  lPixel = new G4LogicalVolume(gPixel,BarMaterial,"lPixel",0,0,0);
 
-    for(int i=0; i<fNpix2; i++){
-      for(int j=0; j<fNpix1; j++){
-	double shiftx = i*(fMcpActive[0]/fNpix1)-fMcpActive[0]/2.+0.5*fMcpActive[0]/fNpix1;
-	double shifty = j*(fMcpActive[1]/fNpix2)-fMcpActive[1]/2.+0.5*fMcpActive[1]/fNpix2;
-	phy = new G4PVPlacement(0,G4ThreeVector(shiftx,shifty,0),lPixel,"wPixel", lMcp,false,fNpix2*i+j);      
-	m_PhysicalVolumes_active[phy] = 11;
-      }
-    }
- 
-    int mcpId = 0;
-    double gapx = (fPrizm[2]-fNCol*fMcpTotal[0])/(double)(fNCol+1);
-    double gapy = (fBoxWidth-fNRow*fMcpTotal[1])/(double)(fNRow+1);
-    for(int i=0; i<fNCol; i++){
-      for(int j=0; j<fNRow; j++){
-
-	double shiftx = i*(fMcpTotal[0]+gapx)-0.5*(fFd[1]-fMcpTotal[0])+gapx;
-	double shifty = j*(fMcpTotal[1]+gapy)-0.5*(fBoxWidth-fMcpTotal[1])+gapy;
-	//phy = new G4PVPlacement(0,G4ThreeVector(shiftx,shifty,0),lMcp,"wMcp", lFd,false,mcpId++);
-	phy = new G4PVPlacement(0,G4ThreeVector(shiftx,shifty,0),lMcp,"wMcp", lFd,false,mcpId); 
-	m_PhysicalVolumes_active[phy] = 10;
-	mcpId++;
-      }
+  for(int i=0; i<fNpix2; i++){
+    for(int j=0; j<fNpix1; j++){
+      double shiftx = i*(fMcpActive[0]/fNpix1)-fMcpActive[0]/2.+0.5*fMcpActive[0]/fNpix1;
+      double shifty = j*(fMcpActive[1]/fNpix2)-fMcpActive[1]/2.+0.5*fMcpActive[1]/fNpix2;
+      phy = new G4PVPlacement(0,G4ThreeVector(shiftx,shifty,0),lPixel,"wPixel", lMcp,false,fNpix2*i+j);      
+      m_PhysicalVolumes_active[phy] = 11;
     }
   }
+ 
+  int mcpId = 0;
+  double gapx = (fPrizm[2]-fNCol*fMcpTotal[0])/(double)(fNCol+1);
+  double gapy = (fBoxWidth-fNRow*fMcpTotal[1])/(double)(fNRow+1);
+  for(int i=0; i<fNCol; i++){
+    for(int j=0; j<fNRow; j++){
+
+      double shiftx = i*(fMcpTotal[0]+gapx)-0.5*(fFd[1]-fMcpTotal[0])+gapx;
+      double shifty = j*(fMcpTotal[1]+gapy)-0.5*(fBoxWidth-fMcpTotal[1])+gapy;
+      //phy = new G4PVPlacement(0,G4ThreeVector(shiftx,shifty,0),lMcp,"wMcp", lFd,false,mcpId++);
+      phy = new G4PVPlacement(0,G4ThreeVector(shiftx,shifty,0),lMcp,"wMcp", lFd,false,mcpId); 
+      m_PhysicalVolumes_active[phy] = 10;
+      mcpId++;
+    }
+  }
+
 
   {
     const int num = 36; 
@@ -729,7 +492,6 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   
     MirrorOpSurface->SetMaterialPropertiesTable(MirrorMPT);
     new G4LogicalSkinSurface("MirrorSurface", lMirror,MirrorOpSurface);
-    new G4LogicalSkinSurface("MirrorSurfaceF", lFmirror,MirrorOpSurface);
   }
   
   SetVisualization();
@@ -1000,7 +762,6 @@ void G4EicDircDetector::SetVisualization(){
   G4VisAttributes *waGlue = new G4VisAttributes(G4Colour(0.,0.4,0.9,0.1));
   waGlue->SetVisibility(true);
   lGlue->SetVisAttributes(waGlue);
-  lGlueE->SetVisAttributes(waGlue);
   
   G4VisAttributes *waMirror = new G4VisAttributes(G4Colour(1.,1.,0.9,0.2));
   waMirror->SetVisibility(true);
@@ -1028,17 +789,7 @@ void G4EicDircDetector::SetVisualization(){
   // waPrizm->SetForceAuxEdgeVisible(true);
   // waPrizm->SetForceSolid(true);
   lPrizm->SetVisAttributes(waPrizm);
-  lPrizmT1->SetVisAttributes(waPrizm);
-  lPrizmT2->SetVisAttributes(waPrizm);
 
-  if(fEvType == 1){
-    lBlock->SetVisAttributes(waPrizm); 
-    lWindow->SetVisAttributes(waPrizm);
-    lWedge->SetVisAttributes(waBar);  
-    lSWedge->SetVisAttributes(waPrizm);
-    lFmirror->SetVisAttributes(waMirror);
-  }
-  
   // G4VisAttributes *waMcp = new G4VisAttributes(G4Colour(0.1,0.1,0.9,0.3));
   G4VisAttributes *waMcp = new G4VisAttributes(G4Colour(1.0,0.,0.1,0.4));
   // waMcp->SetForceWireframe(true);

@@ -40,7 +40,7 @@ int G4DIRCTree::Init(PHCompositeNode *)
   cout << "Initialize Geant 4 Tree ... << " << endl;
  
   /// Event level
-  g4tree->Branch("energy", &mG4EvtTree.energy, "energy/D");
+  g4tree->Branch("momentum", &mG4EvtTree.momentum, "p/D");
   g4tree->Branch("theta", &mG4EvtTree.theta, "theta/D");
   g4tree->Branch("phi", &mG4EvtTree.phi, "phi/D");
   g4tree->Branch("px", &mG4EvtTree.px, "px/D");
@@ -92,13 +92,13 @@ int G4DIRCTree::process_event(PHCompositeNode *topNode)
   double px = primRange.first->second->get_px();
   double py = primRange.first->second->get_py();
   double pz = primRange.first->second->get_pz();
-  double e = primRange.first->second->get_e();
+  double p = sqrt(px * px + py * py + pz * pz);
   double pt = sqrt(px * px + py * py);
   double phi = atan2(py, px);
   double theta = atan2(pt, pz);
   double pid = primRange.first->second->get_pid();
 
-  mG4EvtTree.energy = e;
+  mG4EvtTree.momentum = p;
   mG4EvtTree.theta = theta;
   mG4EvtTree.phi = phi;
   mG4EvtTree.px = px;

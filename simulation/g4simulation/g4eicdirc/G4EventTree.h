@@ -8,7 +8,7 @@
 typedef struct
 {
   // Event Level
-  Double_t energy;
+  Double_t momentum;
   Double_t theta;
   Double_t phi;
   Double_t px;
