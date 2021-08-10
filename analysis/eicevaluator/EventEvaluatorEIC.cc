@@ -261,6 +261,7 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   , _hepmcp_procid(0)
   , _hepmcp_x1(NAN)
   , _hepmcp_x2(NAN)
+  , _hepmcp_Q2(NAN)
 
   //  , _hepmcp_ID_parent(0)
   , _hepmcp_status(0)
@@ -728,6 +729,7 @@ int EventEvaluatorEIC::Init(PHCompositeNode* topNode)
     _event_tree->Branch("hepmcp_procid", &_hepmcp_procid, "hepmcp_procid/I");
     _event_tree->Branch("hepmcp_x1", &_hepmcp_x1, "hepmcp_x1/F");
     _event_tree->Branch("hepmcp_x2", &_hepmcp_x2, "hepmcp_x2/F");
+    _event_tree->Branch("hepmcp_Q2", &_hepmcp_Q2, "hepmcp_Q2/F");
 
     //    _event_tree->Branch("hepmcp_ID_parent", _hepmcp_ID_parent, "hepmcp_ID_parent[nHepmcp]/F");
     _event_tree->Branch("hepmcp_status", _hepmcp_status, "hepmcp_status[nHepmcp]/I");
@@ -2995,6 +2997,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
           // m_partid2 = pdfinfo->id2();
           _hepmcp_x1 = pdfinfo->x1();
           _hepmcp_x2 = pdfinfo->x2();
+          _hepmcp_Q2 = pdfinfo->scalePDF();
 
           // m_mpi = truthevent->mpi();
 
