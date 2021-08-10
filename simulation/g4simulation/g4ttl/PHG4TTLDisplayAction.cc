@@ -126,7 +126,7 @@ void PHG4TTLDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
     }
     else if (it.second == "ModuleEnvelope")
     {
-      // visatt->SetVisibility(false);
+      visatt->SetVisibility(false);
       visatt->SetColour(G4Colour::Red());
       // visatt->SetForceSolid(true);
       visatt->SetForceWireframe(true);

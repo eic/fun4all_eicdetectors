@@ -86,23 +86,30 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
   G4Element* elC  = new G4Element("Carbon"  ,symbol="C" , 6., 12.01*g/mole);
   G4Element* elN  = new G4Element("Nitrogen",symbol="N" , 7., 14.01*g/mole);
   G4Element* elO  = new G4Element("Oxygen"  ,symbol="O" , 8., 16.00*g/mole);
-  G4Material *mat_Epoxy = new G4Material("Epoxy",  density = 1.16*g/cm3, natoms=4);
-  mat_Epoxy->AddElement(elH, 32); // Hydrogen
-  mat_Epoxy->AddElement(elN,  2); // Nitrogen
-  mat_Epoxy->AddElement(elO,  4); // Oxygen
-  mat_Epoxy->AddElement(elC, 15); // Carbon
-  // G4Material *mat_Epoxy = G4Material::GetMaterial("Epoxy");
-
-  G4Material *mat_ALN = new G4Material("AluminiumNitrate", density = 3.255 * g / cm3, ncomponents = 2);
-  mat_ALN->AddElement(G4Element::GetElement("Al"), 1);
-  mat_ALN->AddElement(G4Element::GetElement("N"), 1);
-
-  G4Material *mat_Solder_Tin = new G4Material("Tin"   , z=50., a= 118.7*g/mole, density= 7.310*g/cm3);
+  G4Material *mat_Epoxy = G4Material::GetMaterial("EpoxyTTL");
+  if(!mat_Epoxy){
+    mat_Epoxy = new G4Material("EpoxyTTL",  density = 1.16*g/cm3, natoms=4);
+    mat_Epoxy->AddElement(elH, 32); // Hydrogen
+    mat_Epoxy->AddElement(elN,  2); // Nitrogen
+    mat_Epoxy->AddElement(elO,  4); // Oxygen
+    mat_Epoxy->AddElement(elC, 15); // Carbon
+    // G4Material *mat_Epoxy = G4Material::GetMaterial("Epoxy");
+  }
+  G4Material *mat_ALN = G4Material::GetMaterial("AluminiumNitrate");
+  if(!mat_ALN){
+    mat_ALN = new G4Material("AluminiumNitrate", density = 3.255 * g / cm3, ncomponents = 2);
+    // G4Material *mat_ALN = new G4Material("AluminiumNitrate", density = 3.255 * g / cm3, ncomponents = 2);
+    mat_ALN->AddElement(G4Element::GetElement("Al"), 1);
+    mat_ALN->AddElement(G4Element::GetElement("N"), 1);
+  }
+  G4Material *mat_Solder_Tin = G4Material::GetMaterial("Tin");
+  if(!mat_Solder_Tin){
+    mat_Solder_Tin = new G4Material("Tin"   , z=50., a= 118.7*g/mole, density= 7.310*g/cm3);
+  }
   G4Material* Air = G4Material::GetMaterial("G4_AIR");
 
   // positions
   G4double rMin = m_Params->get_double_param("rMin"); // center location of Al support plate
-  rMin = 80 * cm;
   G4double det_height = 2.1 * cm;
   G4double place_z = m_Params->get_double_param("place_z");
   G4double detlength = m_Params->get_double_param("length");
@@ -181,7 +188,7 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
                               "water_cooling_Physical_" + icup, log_module_envelope, false, 0, overlapcheck_sector), false);
   }
 
-  G4LogicalVolume *log_cooling_plate = new G4LogicalVolume(sol_cooling_plate,G4Material::GetMaterial("G4_Al"), "log_cooling_plate");
+  G4LogicalVolume *log_cooling_plate = new G4LogicalVolume(sol_cooling_plate,G4Material::GetMaterial("G4_Al"), "log_cooling_plate_barrel");
   RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(0, 0, 0), log_cooling_plate,
                         "physical_cooling_plate", log_module_envelope, false, 0, overlapcheck_sector), false);
   RegisterLogicalVolume(log_cooling_plate);
@@ -194,7 +201,7 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
                                 sin(M_PI/12.)*(rMin+det_height/2+cooling_plate_height/2+cooling_plate_epoxy_height),
                                 segmentlength/2,segmentlength/2,
                                 cooling_plate_epoxy_height/2);
-  G4LogicalVolume *log_cooling_plate_epoxy = new G4LogicalVolume(sol_cooling_plate_epoxy, mat_Epoxy, "log_cooling_plate_epoxy");
+  G4LogicalVolume *log_cooling_plate_epoxy = new G4LogicalVolume(sol_cooling_plate_epoxy, mat_Epoxy, "log_cooling_plate_barrel_epoxy");
   RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(0, 0, cooling_plate_height/2+cooling_plate_epoxy_height/2), log_cooling_plate_epoxy,
                         "physical_cooling_plate_epoxy", log_module_envelope, false, 0, overlapcheck_sector), false);
   RegisterLogicalVolume(log_cooling_plate_epoxy);
@@ -207,7 +214,7 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
                                 sin(M_PI/12.)*(rMin+det_height/2+cooling_plate_height/2+cooling_plate_epoxy_height+cooling_plate_cover_height),
                                 segmentlength/2,segmentlength/2,
                                 cooling_plate_cover_height/2);
-  G4LogicalVolume *log_cooling_plate_cover = new G4LogicalVolume(sol_cooling_plate_cover, G4Material::GetMaterial("G4_Al"), "log_cooling_plate_cover");
+  G4LogicalVolume *log_cooling_plate_cover = new G4LogicalVolume(sol_cooling_plate_cover, G4Material::GetMaterial("G4_Al"), "log_cooling_plate_barrel_cover");
   RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(0, 0, cooling_plate_height/2+cooling_plate_cover_height/2+cooling_plate_epoxy_height), log_cooling_plate_cover,
                         "physical_cooling_plate_cover", log_module_envelope, false, 0, overlapcheck_sector), false);
   RegisterLogicalVolume(log_cooling_plate_cover);
@@ -217,6 +224,7 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
   // Sensor Module:
   G4double sensor_width  = 21.2 * mm;
   G4double sensor_length  = 42.0 * mm;
+  G4double baseSH_width = baseplate_width/2;//-0.15*mm;
 
   const int nLayers = 8;
   string strLayerName[nLayers] = {
@@ -372,14 +380,13 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
   RegisterPhysicalVolume(new G4PVPlacement(rotationSensorDown, G4ThreeVector(-leftedge+13*baseplate_width, 0, -offsetyDown), log_sensor_ladder,
                             "physical_sensor_ladder_b9", log_module_envelope, false, 0, overlapcheck_sector), false);
   RegisterPhysicalVolume(new G4PVPlacement(rotationSensorFlip, G4ThreeVector(-leftedge+14*baseplate_width, 0, -offsetyDown), log_sensor_ladder,
-                            "physical_sensor_ladder_b8", log_module_envelope, false, 0, overlapcheck_sector), false);
+                            "physical_sensor_ladder_b10", log_module_envelope, false, 0, overlapcheck_sector), false);
 
 
 
 
 
   // SERVICE HYBRID
-  G4double baseSH_width = baseplate_width/2;
   const int nLayers_SH = 4;
   string strLayerName_SH[nLayers_SH] = {
     "ThermalPad",
@@ -522,8 +529,8 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
 
   G4double support_height = 7 * cm;
 
-  G4Material* mat_carbonfiber = new G4Material("CarbonFiberSupport", 1.44 * g / cm3, 1);
-  mat_carbonfiber->AddElement(G4Element::GetElement("C"), 1);
+  // G4Material* mat_carbonfiber = new G4Material("CarbonFiberSupport", 1.44 * g / cm3, 1);
+  // mat_carbonfiber->AddElement(G4Element::GetElement("C"), 1);
   // G4double density;  //z=mean number of protons;
   // G4int ncomponents;
   // carbon+epoxy material
@@ -533,12 +540,12 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
   // cfrp_intt->AddElement(G4Element::GetElement("O"), 1);
 
   // SUPPORT STRUCTURES
-  G4double support_width = 0.5 * mm;
+  G4double support_width = 1 * mm;
   // build components of single segment here
   G4VSolid *Sol_End_Support = new G4Trd("Sol_End_Support",
-                              sin(M_PI/12.)*(rMin-support_height*0.9) - 2*mm, sin(M_PI/12.)*(rMin) - 2*mm, // x1, x2
-                              support_width,support_width, // length
-                              support_height*0.9/2); // height
+                              sin(M_PI/12.)*(rMin-support_height*0.9) - 2*mm, sin(M_PI/12.)*(rMin) - 4*mm, // x1, x2
+                              support_width/2,support_width/2, // length
+                              support_height*0.73/2); // height
 
   G4LogicalVolume *Log_End_Support = new G4LogicalVolume(Sol_End_Support, G4Material::GetMaterial("G4_Fe"), "Log_End_Support_Raw");
 
@@ -552,9 +559,9 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
 
   // place longitudinal supports left, middle and right side of sector
   G4VSolid *Sol_Longitudinal_Support = new G4Trd("Sol_Longitudinal_Support",
-                              support_width, support_width, // x1, x2
-                              segmentlength/2,segmentlength/2, // length
-                              support_height*0.9/2); // height
+                              support_width/2, support_width/2, // x1, x2
+                              segmentlength/2-1*mm,segmentlength/2-1*mm, // length
+                              support_height*0.73/2); // height
 
   G4LogicalVolume *Log_Longitudinal_Support = new G4LogicalVolume(Sol_Longitudinal_Support, G4Material::GetMaterial("G4_Fe"), "Log_Longitudinal_Support_Raw");
 
@@ -589,11 +596,11 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
       // supfinalrot->rotateX(M_PI/2);
       supfinalrot->rotateX(M_PI/2);
       supfinalrot->rotateY((isec-3)*2*M_PI/12.);
-      if(ilen==2||(ilen==6)){
+      if(ilen==2||(ilen==7)){
         RegisterPhysicalVolume( new G4PVPlacement(supfinalrot, G4ThreeVector((rMin-support_height/2-det_height/2-cooling_plate_height/2)*cos(isec*2*M_PI/12.), (rMin-support_height/2-det_height/2-cooling_plate_height/2)*sin(isec*2*M_PI/12.), ilen*segmentlength+segmentlength/2+ilen*modulesep), Log_End_Support,
-                        "Front_Support_Physical", DetectorLog_Det, false, 0, overlapcheck_sector), false);
+                        "Front_Support_Physical_1_" + std::to_string(isec)+"_"+ std::to_string(ilen), DetectorLog_Det, false, 0, overlapcheck_sector), false);
         RegisterPhysicalVolume( new G4PVPlacement(supfinalrot, G4ThreeVector((rMin-support_height/2-det_height/2-cooling_plate_height/2)*cos(isec*2*M_PI/12.), (rMin-support_height/2-det_height/2-cooling_plate_height/2)*sin(isec*2*M_PI/12.), -(ilen*segmentlength+segmentlength/2+ilen*modulesep)), Log_End_Support,
-                        "Front_Support_Physical", DetectorLog_Det, false, 0, overlapcheck_sector), false);
+                        "Front_Support_Physical_2_" + std::to_string(isec)+"_"+ std::to_string(ilen), DetectorLog_Det, false, 0, overlapcheck_sector), false);
       }
 
       // forward segments
@@ -623,18 +630,26 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
   G4Element* elC  = new G4Element("Carbon"  ,symbol="C" , 6., 12.01*g/mole);
   G4Element* elN  = new G4Element("Nitrogen",symbol="N" , 7., 14.01*g/mole);
   G4Element* elO  = new G4Element("Oxygen"  ,symbol="O" , 8., 16.00*g/mole);
-  G4Material *mat_Epoxy = new G4Material("Epoxy",  density = 1.16*g/cm3, natoms=4);
-  mat_Epoxy->AddElement(elH, 32); // Hydrogen
-  mat_Epoxy->AddElement(elN,  2); // Nitrogen
-  mat_Epoxy->AddElement(elO,  4); // Oxygen
-  mat_Epoxy->AddElement(elC, 15); // Carbon
-  // G4Material *mat_Epoxy = G4Material::GetMaterial("Epoxy");
-
-  G4Material *mat_ALN = new G4Material("AluminiumNitrate", density = 3.255 * g / cm3, ncomponents = 2);
-  mat_ALN->AddElement(G4Element::GetElement("Al"), 1);
-  mat_ALN->AddElement(G4Element::GetElement("N"), 1);
-
-  G4Material *mat_Solder_Tin = new G4Material("Tin"   , z=50., a= 118.7*g/mole, density= 7.310*g/cm3);
+  G4Material *mat_Epoxy = G4Material::GetMaterial("EpoxyTTL");
+  if(!mat_Epoxy){
+    mat_Epoxy = new G4Material("EpoxyTTL",  density = 1.16*g/cm3, natoms=4);
+    mat_Epoxy->AddElement(elH, 32); // Hydrogen
+    mat_Epoxy->AddElement(elN,  2); // Nitrogen
+    mat_Epoxy->AddElement(elO,  4); // Oxygen
+    mat_Epoxy->AddElement(elC, 15); // Carbon
+    // G4Material *mat_Epoxy = G4Material::GetMaterial("Epoxy");
+  }
+  G4Material *mat_ALN = G4Material::GetMaterial("AluminiumNitrate");
+  if(!mat_ALN){
+    mat_ALN = new G4Material("AluminiumNitrate", density = 3.255 * g / cm3, ncomponents = 2);
+    // G4Material *mat_ALN = new G4Material("AluminiumNitrate", density = 3.255 * g / cm3, ncomponents = 2);
+    mat_ALN->AddElement(G4Element::GetElement("Al"), 1);
+    mat_ALN->AddElement(G4Element::GetElement("N"), 1);
+  }
+  G4Material *mat_Solder_Tin = G4Material::GetMaterial("Tin");
+  if(!mat_Solder_Tin){
+    mat_Solder_Tin = new G4Material("Tin"   , z=50., a= 118.7*g/mole, density= 7.310*g/cm3);
+  }
 
   G4double det_height = 2.5*cm;
   int isecmax = 4;
@@ -751,7 +766,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
     // }
     }
 
-    G4LogicalVolume *log_cooling_plate = new G4LogicalVolume(sol_cooling_plate,G4Material::GetMaterial("G4_Al"), "log_cooling_plate");
+    G4LogicalVolume *log_cooling_plate = new G4LogicalVolume(sol_cooling_plate,G4Material::GetMaterial("G4_Al"), "log_cooling_plate_fwd_"+std::to_string(isec));
     RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(0, 0, 0), log_cooling_plate,
                           "physical_cooling_plate_"+std::to_string(isec), log_module_envelope[isec], false, 0, overlapcheck_sector), false);
     RegisterLogicalVolume(log_cooling_plate);
@@ -765,7 +780,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
                                         cooling_plate_epoxy_height / 2.0,
                                         0, 0.5 * M_PI);
     sol_cooling_plate_epoxy = new G4SubtractionSolid(G4String("sol_cooling_plate_epoxy_"+std::to_string(isec)), sol_cooling_plate_epoxy, beampipe_cutout, 0 ,G4ThreeVector( x_offsets[isec] , y_offsets[isec] ,0.));
-    G4LogicalVolume *log_cooling_plate_epoxy = new G4LogicalVolume(sol_cooling_plate_epoxy, mat_Epoxy, "log_cooling_plate_epoxy_"+std::to_string(isec));
+    G4LogicalVolume *log_cooling_plate_epoxy = new G4LogicalVolume(sol_cooling_plate_epoxy, mat_Epoxy, "log_cooling_plate_fwd_epoxy_"+std::to_string(isec));
     RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(0, 0, cooling_plate_height/2+cooling_plate_epoxy_height/2), log_cooling_plate_epoxy,
                           "physical_cooling_plate_epoxy_"+std::to_string(isec), log_module_envelope[isec], false, 0, overlapcheck_sector), false);
     RegisterLogicalVolume(log_cooling_plate_epoxy);
@@ -778,7 +793,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
                                         cooling_plate_cover_height / 2.0,
                                         0, 0.5 * M_PI);
     sol_cooling_plate_cover = new G4SubtractionSolid(G4String("sol_cooling_plate_cover_"+std::to_string(isec)), sol_cooling_plate_cover, beampipe_cutout, 0 ,G4ThreeVector( x_offsets[isec] , y_offsets[isec] ,0.));
-    G4LogicalVolume *log_cooling_plate_cover = new G4LogicalVolume(sol_cooling_plate_cover, G4Material::GetMaterial("G4_Al"), "log_cooling_plate_cover_"+std::to_string(isec));
+    G4LogicalVolume *log_cooling_plate_cover = new G4LogicalVolume(sol_cooling_plate_cover, G4Material::GetMaterial("G4_Al"), "log_cooling_plate_fwd_cover_"+std::to_string(isec));
     RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(0, 0, cooling_plate_height/2+cooling_plate_cover_height/2+cooling_plate_epoxy_height), log_cooling_plate_cover,
                           "physical_cooling_plate_cover_"+std::to_string(isec), log_module_envelope[isec], false, 0, overlapcheck_sector), false);
     RegisterLogicalVolume(log_cooling_plate_cover);
