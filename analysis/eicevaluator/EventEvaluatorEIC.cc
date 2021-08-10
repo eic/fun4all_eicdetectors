@@ -261,6 +261,7 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   , _hepmcp_procid(0)
   , _hepmcp_x1(NAN)
   , _hepmcp_x2(NAN)
+  , _hepmcp_Q2(NAN)
 
   //  , _hepmcp_ID_parent(0)
   , _hepmcp_status(0)
@@ -741,6 +742,7 @@ int EventEvaluatorEIC::Init(PHCompositeNode* topNode)
     _event_tree->Branch("hepmcp_procid", &_hepmcp_procid, "hepmcp_procid/I");
     _event_tree->Branch("hepmcp_x1", &_hepmcp_x1, "hepmcp_x1/F");
     _event_tree->Branch("hepmcp_x2", &_hepmcp_x2, "hepmcp_x2/F");
+    _event_tree->Branch("hepmcp_Q2", &_hepmcp_Q2, "hepmcp_Q2/F");
 
     //    _event_tree->Branch("hepmcp_ID_parent", _hepmcp_ID_parent, "hepmcp_ID_parent[nHepmcp]/F");
     _event_tree->Branch("hepmcp_status", _hepmcp_status, "hepmcp_status[nHepmcp]/I");
@@ -2755,11 +2757,12 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
     // Loop over track maps, identifiy each source.
     // Although this configuration is fixed here, it doesn't require multiple sources.
     // It will only store them if they're available.
-    std::vector<std::pair<std::string, TrackSource_t>> trackMapInfo = {
+    std::vector<std::pair<std::string, TrackSource_t>> trackMapPairs = {
         {"TrackMap", TrackSource_t::all},
-        {"TrackMapInner", TrackSource_t::inner}};
+        {"TrackMapInner", TrackSource_t::inner}
+    };
     bool foundAtLeastOneTrackSource = false;
-    for (const auto& trackMapInfo : trackMapInfo)
+    for (const auto& trackMapInfo : trackMapPairs)
     {
       SvtxTrackMap* trackmap = findNode::getClass<SvtxTrackMap>(topNode, trackMapInfo.first);
       if (trackmap)
@@ -3007,6 +3010,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
           // m_partid2 = pdfinfo->id2();
           _hepmcp_x1 = pdfinfo->x1();
           _hepmcp_x2 = pdfinfo->x2();
+          _hepmcp_Q2 = pdfinfo->scalePDF();
 
           // m_mpi = truthevent->mpi();
 
