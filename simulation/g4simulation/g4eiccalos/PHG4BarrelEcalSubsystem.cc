@@ -139,9 +139,14 @@ void PHG4BarrelEcalSubsystem::SetDefaultParameters()
   mappingfilename << "BarrelEcal/mapping/towerMap_BEMC_v001.txt";
   set_default_string_param("mapping_file", mappingfilename.str());
   set_default_double_param("radius", 85.);
-  set_default_double_param("Length", 298.94);
   set_default_double_param("max_radius", 138.);
-
+  set_default_double_param("CenterZ_Shift", -41.);
+  set_default_double_param("tower_length", 45.5);
+  set_default_double_param("cone1_h",30.);
+  set_default_double_param("cone1_dz",24.);
+  set_default_double_param("cone2_h",20.5);
+  set_default_double_param("cone2_dz",25.5);
+  set_default_double_param("thickness_wall",0.1);
 
   return;
 }

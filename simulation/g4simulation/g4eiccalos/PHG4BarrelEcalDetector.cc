@@ -6,26 +6,24 @@
 #include <g4main/PHG4Detector.h>       // for PHG4Detector
 #include <g4main/PHG4DisplayAction.h>  // for PHG4DisplayAction
 #include <g4main/PHG4Subsystem.h>
-
 #include <phool/recoConsts.h>
-#include <Geant4/G4Trap.hh>
 #include <Geant4/G4Box.hh>
 #include <Geant4/G4Cons.hh>
 #include <Geant4/G4LogicalVolume.hh>
 #include <Geant4/G4Material.hh>
 #include <Geant4/G4PVPlacement.hh>
 #include <Geant4/G4RotationMatrix.hh>  // for G4RotationMatrix
-#include <Geant4/G4SystemOfUnits.hh>
 #include <Geant4/G4ThreeVector.hh>      // for G4ThreeVector
 #include <Geant4/G4Transform3D.hh>      // for G4Transform3D
 #include <Geant4/G4Types.hh>            // for G4double, G4int
 #include <Geant4/G4VPhysicalVolume.hh>  // for G4VPhysicalVolume
 #include <Geant4/G4DisplacedSolid.hh>
 #include <Geant4/G4Tubs.hh>
+#include <Geant4/G4CutTubs.hh>
 #include <Geant4/G4Material.hh>
 #include <Geant4/G4MaterialPropertiesTable.hh>  // for G4MaterialProperties...
 #include <Geant4/G4MaterialPropertyVector.hh>   // for G4MaterialPropertyVector
-
+#include <Geant4/G4SubtractionSolid.hh>
 #include <TSystem.h>
 
 #include <cmath>
@@ -99,349 +97,211 @@ void PHG4BarrelEcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
 
   ParseParametersFromTable();
 
- const double radius = 85*cm;
- const double Length = 412*cm;
- const double max_radius = 138*cm;
- const double pos_x1 = 0*cm;
- const double pos_y1 = 0*cm;
- const double pos_z1 = -41*cm;
- //const double pos_z1 = 0;
+  G4double Radius        = m_Params->get_double_param("radius")*cm;
+  G4double tower_length  = m_Params->get_double_param("tower_length")*cm;
+  G4double becal_length  = m_Params->get_double_param("becal_length")*cm;
+  G4double CenterZ_Shift = m_Params->get_double_param("CenterZ_Shift")*cm;
+  G4double cone1_h  =  m_Params->get_double_param("cone1_h")*cm;
+  G4double cone1_dz =  m_Params->get_double_param("cone1_dz")*cm;
+  G4double cone2_h  =  m_Params->get_double_param("cone2_h")*cm;
+  G4double cone2_dz =  m_Params->get_double_param("cone2_dz")*cm;
 
-  G4Tubs *cylinder_solid = new G4Tubs("BCAL_SOLID",
-                                       radius, max_radius,
-                                       Length/ 2.0, 0, 2*M_PI);
+  G4double max_radius    = Radius + tower_length + elec_length + support_length;
 
+  G4double pos_x1 = 0*cm;
+  G4double pos_y1 = 0*cm;
+  G4double pos_z1 = 0*cm;
+
+  G4Tubs *cylinder_solid1 = new G4Tubs("BCAL_SOLID1",
+                                       Radius, max_radius,
+                                       becal_length/2, 0, 2*M_PI);
+
+
+  G4Tubs *cylinder_solid2 = new G4Tubs("BCAL_SOLID2",
+                                       Radius - 1, max_radius + 1,
+                                       abs(CenterZ_Shift), 0, 2*M_PI);
+
+  G4ThreeVector shift_cs2 = G4ThreeVector(0, 0, becal_length/2);
+
+  G4VSolid* cylinder_solid3 = new G4SubtractionSolid("BCAL_SOLID3", cylinder_solid1, cylinder_solid2, 0, shift_cs2);
+
+  
+  G4Cons *cone1 = new G4Cons("cone1", 
+                                      Radius - 1, Radius - 1,
+                                      Radius - 1, Radius + cone1_h, 
+                                      cone1_dz, 0, 2*M_PI);
+
+  G4ThreeVector shift_cone1 = G4ThreeVector(0, 0, becal_length/2 - abs(CenterZ_Shift)- cone1_dz);
+
+  G4VSolid* cylinder_solid4 = new G4SubtractionSolid("BCAL_SOLID4", cylinder_solid3, cone1, 0, shift_cone1);
+ 
+  G4Cons *cone2 = new G4Cons("cone2", 
+                                      Radius - 1, Radius + cone2_h, 
+                                      Radius - 1, Radius - 1,                                     
+                                      cone2_dz, 0, 2*M_PI);
+
+  G4ThreeVector shift_cone2 = G4ThreeVector(0, 0, -becal_length/2 + cone2_dz);
+
+  G4VSolid* cylinder_solid = new G4SubtractionSolid("BCAL_SOLID", cylinder_solid4, cone2, 0, shift_cone2);
 
   G4Material *cylinder_mat = G4Material::GetMaterial("G4_AIR");
   assert(cylinder_mat);
-
 
   G4LogicalVolume *cylinder_logic = new G4LogicalVolume(cylinder_solid, cylinder_mat,
                                        "BCAL_SOLID", 0, 0, 0);
 
   m_DisplayAction->AddVolume(cylinder_logic, "BCalCylinder");
-
-  //cylinder_physi = 
-
+  
   std::string name_envelope = m_TowerLogicNamePrefix + "_envelope";
 
   new G4PVPlacement(0, G4ThreeVector(pos_x1, pos_y1, pos_z1), cylinder_logic, name_envelope,
                                      logicWorld, false, 0, OverlapCheck());
 
- 
-  std::pair<G4LogicalVolume *, G4Transform3D> psec = Construct_AzimuthalSeg();
-  G4LogicalVolume *sec_logic = psec.first;
-  const G4Transform3D &sec_trans = psec.second;
-  double Rot[32] = {0, 0.19635, 0.392699, 0.589049,0.785398, 0.981748, 1.1781, 1.37445, 1.5708, 1.76715, 1.9635, 2.15984, 2.35619, 2.55254, 2.74889, 2.94524, 3.14159, 3.33794, 3.53429, 3.73064, 3.92699, 4.12334, 4.31969, 4.51604, 4.71239, 4.90874, 5.10509, 5.30144, 5.49779, 5.69414, 5.89049, 6.08684};
-
-  for (int i =0; i<32; i++)
-  {
-    const int sec = i;
-    const double rot = Rot[i];
-
-    G4Transform3D sec_place = G4RotateZ3D(rot) * sec_trans;
-
-    stringstream name;
-    
-    name << GetName() << "_sec" << sec;
-
-    new G4PVPlacement(sec_place, sec_logic,
-                      "enclosure", cylinder_logic, false, sec,
-                      OverlapCheck());
-   }
-
-  /* Construct single calorimeter tower */
-  G4LogicalVolume* singletower = ConstructTower();
-
-  PlaceTower(cylinder_logic, singletower);
+  PlaceTower(cylinder_logic);
 
   return;
 }
 
-
-std::pair<G4LogicalVolume*, G4Transform3D>
-PHG4BarrelEcalDetector::Construct_AzimuthalSeg()
+int PHG4BarrelEcalDetector::PlaceTower(G4LogicalVolume* sec)
 {
 
-
-  const double Max_radius =  138*cm;
-  const double Thickness =  52.9998*cm;
-  const double Radius = 85*cm;
-  const int  phi_bin_in_sec = 4*cm;
-  const double side_wall_thickness = 0.0762;
-  const double sidewall_outer_torr = 0.15875;
-  const double assembly_spacing = 0.01905;
-  const double divider_width = 0;
-  const double length = 3880;
-
-  const int  Azimuthal_n_Sec = 256; 
-  if (!(Azimuthal_n_Sec > 4))
-  {
-    cout << "azimuthal n sec <= 4: " << Azimuthal_n_Sec << endl;
-    gSystem->Exit(1);
-  }
   
-  const G4double half_chord_backend =  Max_radius*tan(M_PI/Azimuthal_n_Sec) + fabs(Thickness*0.5);
-  const G4double reduced_outer_radius = sqrt(pow(Max_radius, 2) - half_chord_backend * half_chord_backend);
-  const G4double enclosure_depth = reduced_outer_radius - Radius;
-  const G4double enclosure_center = 0.5 * (reduced_outer_radius + Radius); 
-  const G4double enclosure_half_height_half_width = enclosure_center * tan(M_PI / Azimuthal_n_Sec);
-  
-  const G4double width_adj1 = tan(- M_PI / Azimuthal_n_Sec) * enclosure_depth * 0.5;
-  const G4double width_adj2 = tan(+ M_PI / Azimuthal_n_Sec) * enclosure_depth * 0.5;
-
-  const G4double center_adj = (width_adj1 + width_adj2) * 0.5;
-  const G4double center_tilt_angle = atan2(center_adj, enclosure_depth * 0.5);
-  
-  // enclosure walls
-  const G4double edge1_tilt_angle = atan2(width_adj1, enclosure_depth * 0.5);
-  const G4double edge2_tilt_angle = atan2(width_adj2, enclosure_depth * 0.5);
-  
-  // projective center
-  const G4double half_projection_ratio = 0.5 * (-width_adj1 + width_adj2) / enclosure_half_height_half_width;
-  const G4double projection_center_y = enclosure_center - ((enclosure_depth * 0.5) / half_projection_ratio);
-  const G4double projection_center_x = center_adj / half_projection_ratio;
-
-  // blocks azimuthal segmentation 
-  assert(phi_bin_in_sec >= 1);
-  const G4double block_azimuth_angle = (edge2_tilt_angle - edge1_tilt_angle) / phi_bin_in_sec;
-  assert(block_azimuth_angle > 0);
-
-  if (!(fabs(block_azimuth_angle - M_PI * 2 / Azimuthal_n_Sec / phi_bin_in_sec) < M_PI * numeric_limits<G4double>::epsilon()))
-  {
-    cout << "angle/nsec out of range: " << M_PI * numeric_limits<G4double>::epsilon() << endl;
-    gSystem->Exit(1);
-  }
-  const G4double block_edge1_half_width = enclosure_half_height_half_width - (side_wall_thickness+sidewall_outer_torr + 2.0 * assembly_spacing) / cos(edge1_tilt_angle);
-  const G4double block_edge2_half_width = enclosure_half_height_half_width - (side_wall_thickness+sidewall_outer_torr + 2.0 * assembly_spacing ) / cos(edge2_tilt_angle);
-
-  G4double block_width_ratio = 0;
-  for (int s = 0; s < phi_bin_in_sec; ++s)
-  {
-    block_width_ratio += 1 / cos(block_azimuth_angle * (0.5 + s) + edge1_tilt_angle);
-
-  }
-  const G4double block_half_height_width =(block_edge1_half_width + block_edge2_half_width) / block_width_ratio;
-
-  assert(block_half_height_width > 0);
-
- // write out the azimuthal block geometry
-  // block azimuth geometry records 
-  
-  struct block_azimuth_geom
-  {
-    G4double angle;
-    G4double projection_center_y;
-    G4double projection_center_x;
-    G4double projection_length;
-  };
-  
-  vector<block_azimuth_geom> block_azimuth_geoms(phi_bin_in_sec,
-                                                 block_azimuth_geom{
-                                                     numeric_limits<double>::signaling_NaN(),
-                                                     numeric_limits<double>::signaling_NaN(),
-                                                     numeric_limits<double>::signaling_NaN(),
-                                                     numeric_limits<double>::signaling_NaN()});  // [phi-bin in sector] -> azimuth geometry
-  
-  G4double block_x_edge1 = block_edge1_half_width;
-
-
-  for (int s = 0; s < phi_bin_in_sec; ++s)
-  {
-    block_azimuth_geom& geom = block_azimuth_geoms[s];
-
-    geom.angle = block_azimuth_angle * (0.5 + s) + edge1_tilt_angle;
-
-    const G4double block_x_size = block_half_height_width / cos(geom.angle);
-    assert(block_x_size > 0);
-    const G4double x_center = block_x_edge1 - 0.5 * block_x_size;
-    // projection center per block
-    geom.projection_length = block_half_height_width / 2. / tan(block_azimuth_angle / 2.);
-    assert(geom.projection_length > 0);
-    geom.projection_center_y = enclosure_center - geom.projection_length * cos(geom.angle);
-    geom.projection_center_x = x_center + geom.projection_length * sin(geom.angle);
-    // next step
-    block_x_edge1 -= block_x_size;
-
-  }
-
-  //write out the azimuthal block divider's geometry
-  struct block_divider_azimuth_geom
-  {
-    G4double angle;  //! rotation angle
-    G4double projection_center_y;
-    G4double projection_center_x;
-    G4double thickness;            // thickness in the approximate azimuth direction
-    G4double radial_displacement;  //! displacement along the width direction, which is the radial direction if tilt = 0
-    G4double width;                //! wdith along the approximate radial direction
-  };
-  assert(phi_bin_in_sec >= 1);
-  vector<block_divider_azimuth_geom> divider_azimuth_geoms(phi_bin_in_sec - 1,
-                                                           block_divider_azimuth_geom{
-                                                               numeric_limits<double>::signaling_NaN(),
-                                                               numeric_limits<double>::signaling_NaN(),
-                                                               numeric_limits<double>::signaling_NaN(),
-                                                               numeric_limits<double>::signaling_NaN(),
-                                                               numeric_limits<double>::signaling_NaN(),
-                                                               numeric_limits<double>::signaling_NaN()});
-
-  if (side_wall_thickness> 0 )
-  {
-    for (int s = 0; s < phi_bin_in_sec - 1; ++s)
-    {
-      block_divider_azimuth_geom& geom = divider_azimuth_geoms[s];
-
-      geom.angle = 0.5 * (block_azimuth_geoms[s].angle + block_azimuth_geoms[s + 1].angle);
-    //  geom.projection_center_y = 0.5 * (block_azimuth_geoms[s].projection_center_y + block_azimuth_geoms[s + 1].projection_center_y);
-
-      geom.projection_center_y = enclosure_center;
-      geom.projection_center_x = 0.5 * (block_azimuth_geoms[s].projection_center_x + block_azimuth_geoms[s + 1].projection_center_x);
-      geom.radial_displacement = 0.5 * (block_azimuth_geoms[s].projection_length + block_azimuth_geoms[s + 1].projection_length);
-
-      geom.thickness = 2.0 *assembly_spacing*cos(block_azimuth_angle / 2.) - 2 * um;
-      geom.width = divider_width;
-    }
-  }
-
-  if (fabs(block_x_edge1 - (-block_edge2_half_width)) > assembly_spacing )
-  {
-    cout << "PHG4FullProjBarrelCaloDetector2::Construct_AzimuthalSeg - ERROR - " << endl
-         << "\t block_x_edge1 = " << block_x_edge1 << endl
-         << "\t block_edge2_half_width = " << block_edge2_half_width << endl
-         << "\t fabs(block_x_edge1 - (-block_edge2_half_width)) = " << fabs(block_x_edge1 - (-block_edge2_half_width)) << endl
-         << "\t assembly_spacing() " << assembly_spacing  << endl;
-    cout << "closure check failed: " << fabs(block_x_edge1 - (-block_edge2_half_width)) << endl;
-    gSystem->Exit(1);
-  }
-
-  if (Verbosity())
-  {
-    cout << "PHG4FullProjBarrelCaloDetector2::Construct_AzimuthalSeg - " << endl
-         << "\t edge1_tilt_angle = " << edge1_tilt_angle << endl
-         << "\t edge2_tilt_angle = " << edge2_tilt_angle << endl
-         << "\t projection_center_y = " << projection_center_y << endl
-         << "\t projection_center_x = " << projection_center_x << endl
-         << "\t block_azimuth_angle = " << block_azimuth_angle << endl
-         << "\t block_edge1_half_width = " << block_edge1_half_width << endl
-         << "\t block_edge2_half_width = " << block_edge2_half_width << endl
-         << "\t block_width_ratio = " << block_width_ratio << endl
-         << "\t block_half_height_width = " << block_half_height_width << endl;
-
-    for (int s = 0; s < phi_bin_in_sec; ++s)
-    {
-      cout << "\t block[" << s << "].angle = " << block_azimuth_geoms[s].angle << endl;
-      cout << "\t block[" << s << "].projection_center_y = " << block_azimuth_geoms[s].projection_center_y << endl;
-      cout << "\t block[" << s << "].projection_center_x = " << block_azimuth_geoms[s].projection_center_x << endl;
-    }
-    for (int s = 0; s < phi_bin_in_sec - 1; ++s)
-    {
-      cout << "\t divider[" << s << "].angle = " << divider_azimuth_geoms[s].angle << endl;
-      cout << "\t divider[" << s << "].projection_center_x = " << divider_azimuth_geoms[s].projection_center_x << endl;
-      cout << "\t divider[" << s << "].projection_center_y = " << divider_azimuth_geoms[s].projection_center_y << endl;
-      cout << "\t divider[" << s << "].radial_displacement = " << divider_azimuth_geoms[s].radial_displacement << endl;
-      cout << "\t divider[" << s << "].thickness = " << divider_azimuth_geoms[s].thickness << endl;
-      cout << "\t divider[" << s << "].width = " << divider_azimuth_geoms[s].width << endl;
-    }
-  }
-
-  double halfpi = M_PI/2;
-
-  assert(enclosure_depth > 10 * cm);
-
-  G4VSolid* sec_solid = new G4Trap(
-      G4String(GetName() + string("_sec_trap")),
-      enclosure_depth * 0.5,                                                                              // G4double pDz,
-      center_tilt_angle, halfpi,                                                                          // G4double pTheta, G4double pPhi
-      //inner_half_width, length / 2.0, length  / 2.0,   // G4double pDy1, G4double pDx1, G4double pDx2,
-      0.01, length / 2.0, length  / 2.0,   // G4double pDy1, G4double pDx1, G4double pDx2,
-      0,                                                                                                  // G4double pAlp1,
-      //outter_half_width, length / 2.0, length / 2.0,  // G4double pDy2, G4double pDx3, G4double pDx4,
-      0.01,  length / 2.0, length / 2.0,
-      0                                                                                                   // G4double pAlp2 //
-  );
-
- 
-  G4Transform3D sec_solid_transform =
-      G4TranslateY3D(enclosure_center) * G4RotateY3D(halfpi) * G4RotateX3D(-halfpi);
-
-  G4VSolid* sec_solid_place = new G4DisplacedSolid(
-      G4String(GetName() + string("_sec")), sec_solid, sec_solid_transform);
-
-  G4Material* cylinder_mat = G4Material::GetMaterial("G4_AIR");
-  assert(cylinder_mat);
-
-  G4LogicalVolume* sec_logic = new G4LogicalVolume(sec_solid_place, cylinder_mat,
-                                                   G4String(G4String(GetName() + string("_sec"))), 0, 0, nullptr);
-
-  m_DisplayAction->AddVolume(sec_logic, "Sector");
-
-  m_SupportLogicalVolSet.insert(sec_logic);
-  return make_pair(sec_logic, G4Transform3D::Identity);
-
-}
-
-
-G4LogicalVolume*
-PHG4BarrelEcalDetector::ConstructTower()
-{
-
-  G4Trap* block_solid = new G4Trap(
-                  "solid_tower",
-      22.75*cm,                                                 // G4double pDz,
-      0,  0,                                                    // G4double pTheta, G4double pPhi,
-      2.0*cm, 2.0*cm,2.0*cm,                                    // G4double pDy1, G4double pDx1, G4double pDx2,
-      0,                                                       // G4double pAlp1,
-      3*cm, 2.*cm,2.*cm,                                    // G4double pDy2, G4double pDx3, G4double pDx4,
-      0                                                         // G4double pAlp2 //
-  );
-
-  
-  G4double density;
-  G4int ncomponents;
-  G4Material *sciglass1 = new G4Material("sciglass1", density = 4.22 * g / cm3, ncomponents = 4,  kStateSolid);
-  sciglass1->AddElement(G4Element::GetElement("Ba"), 0.3875);
-  sciglass1->AddElement(G4Element::GetElement("Gd"), 0.2146);
-  sciglass1->AddElement(G4Element::GetElement("Si"), 0.1369);
-  sciglass1->AddElement(G4Element::GetElement("O"),  0.2610);
-
-  G4Material* cylinder_mat = G4Material::GetMaterial("sciglass1");
-  assert(cylinder_mat);
-
-  G4LogicalVolume* block_logic = new G4LogicalVolume(block_solid, cylinder_mat,
-                                                     "solid_tower", 0, 0,
-                                                     nullptr);
-  m_ScintiLogicalVolSet.insert(block_logic);
-  m_DisplayAction->AddVolume(block_logic, "Block");
-
-  return block_logic;
-}
-
-int PHG4BarrelEcalDetector::PlaceTower(G4LogicalVolume* sec, G4LogicalVolume* singletower)
-{
   /* Loop over all tower positions in vector and place tower */
   for (std::map<std::string, towerposition>::iterator iterator = m_TowerPostionMap.begin(); iterator != m_TowerPostionMap.end(); ++iterator)
   {
+
     if (Verbosity() > 0)
     {
       std::cout << "PHG4BarrelEcalDetector: Place tower " << iterator->first
                 << " idx_j = " << iterator->second.idx_j << ", idx_k = " << iterator->second.idx_k<< std::endl;
-                //<< " at x = " << iterator->second.x << " , y = " << iterator->second.y << " , z = " << iterator->second.z << std::endl;
     }
-     int copyno = (iterator->second.idx_j << 16) + iterator->second.idx_k;
+
+    int copyno = (iterator->second.idx_j << 16) + iterator->second.idx_k;
+  
+    G4LogicalVolume*  block_logic = ConstructTower(iterator);
+    m_DisplayAction->AddVolume(block_logic, iterator->first);
+    if(iterator->second.idx_k%2 == 0)  {
+      m_DisplayAction->AddVolume(block_logic, "Block1");
+    }
+    else {
+       m_DisplayAction->AddVolume(block_logic, "Block2");
+    }
 
 
-     G4RotationMatrix becal_rotm;
-     becal_rotm.rotateY(iterator->second.roty);
-     becal_rotm.rotateZ(iterator->second.rotz);
+    G4LogicalVolume*  glass_logic = ConstructGlass(iterator);
+    if(iterator->second.idx_k%2 == 0)  {
+      m_DisplayAction->AddVolume(glass_logic, "Block1");
+    }
+    else {
+       m_DisplayAction->AddVolume(glass_logic, "Block2");
+    }
 
-      new G4PVPlacement(G4Transform3D(becal_rotm, G4ThreeVector(iterator->second.centerx, iterator->second.centery, iterator->second.centerz)),
-                      singletower,
-                      iterator->first,
-                      sec,
-                      0, copyno, OverlapCheck());
+    G4RotationMatrix becal_rotm;
+    becal_rotm.rotateY(iterator->second.rotx);
+    becal_rotm.rotateY(iterator->second.roty);
+    becal_rotm.rotateZ(iterator->second.rotz);
 
+    new G4PVPlacement(G4Transform3D(becal_rotm, G4ThreeVector(iterator->second.centerx, iterator->second.centery, iterator->second.centerz)),
+                    block_logic,
+                    G4String(string(iterator->first) + string("_TT")),
+                    sec,
+                    0, copyno, OverlapCheck());
+  
+    G4double posx_glass =  iterator->second.centerx + th/2*abs(cos(iterator->second.roty - M_PI_2))*cos(iterator->second.rotz);
+    G4double posy_glass =  iterator->second.centery + th/2*abs(cos(iterator->second.roty - M_PI_2))*sin(iterator->second.rotz);
+    G4double posz_glass =  iterator->second.centerz + th*sin(iterator->second.roty - M_PI_2);
+   
+    new G4PVPlacement(G4Transform3D(becal_rotm, G4ThreeVector(posx_glass, posy_glass, posz_glass)),
+                    glass_logic,
+                    G4String(string(iterator->first) + string("_Glass")),
+                    sec,
+                    0, copyno, OverlapCheck());
 
+    //=================Silicon 
+    G4LogicalVolume*  block_silicon = ConstructSi(iterator);
+    m_DisplayAction->AddVolume(block_silicon, "Si");
+
+    G4double pTheta   =  iterator->second.pTheta;   
+    G4double theta    =  iterator->second.roty - M_PI_2;
+    G4double len      = (tower_length/2) + silicon_width + overlap;
+    G4double sci_sr   =  len*tan(pTheta);
+    G4double sci_sz   = len;
+    G4double sci_mag  = sqrt(sci_sr*sci_sr + sci_sz*sci_sz);
     
+
+    G4double posz_si  =  iterator->second.centerz - sci_mag*sin(theta + pTheta);
+    G4double posy_si  =  iterator->second.centery + sci_mag*cos(theta + pTheta)*sin(iterator->second.rotz); 
+    G4double posx_si  =  iterator->second.centerx + sci_mag*cos(theta + pTheta)*cos(iterator->second.rotz);
+    new G4PVPlacement(G4Transform3D(becal_rotm, G4ThreeVector(posx_si, posy_si, posz_si)),
+                    block_silicon,
+                    G4String(string(iterator->first) + string("_Si")),
+                    sec,
+                    0, copyno, OverlapCheck());
+
+    //=================Kapton
+    G4LogicalVolume*  block_kapton = ConstructKapton(iterator);
+    m_DisplayAction->AddVolume(block_kapton, "Kapton");
+
+    len               += kapton_width + overlap + silicon_width; 
+
+    G4double kapton_sr    =  len*tan(pTheta);
+    G4double kapton_sz    =  len;
+    G4double kapton_mag   =  sqrt(kapton_sr*kapton_sr + kapton_sz*kapton_sz);
+   
+    G4double posz_kapton  =  iterator->second.centerz - kapton_mag*sin(theta + pTheta);
+    G4double posy_kapton  =  iterator->second.centery + kapton_mag*cos(theta + pTheta)*sin(iterator->second.rotz); 
+    G4double posx_kapton  =  iterator->second.centerx + kapton_mag*cos(theta + pTheta)*cos(iterator->second.rotz);
+    new G4PVPlacement(G4Transform3D(becal_rotm, G4ThreeVector(posx_kapton, posy_kapton, posz_kapton)),
+                    block_kapton,
+                    G4String(string(iterator->first) + string("_Kapton")),
+                    sec,
+                    0, copyno, OverlapCheck());
+
+    //=================SIO2
+    G4LogicalVolume*  block_SIO2 = ConstructSIO2(iterator);
+    m_DisplayAction->AddVolume(block_SIO2, "SIO2");
+
+    len              += SIO2_width + overlap + kapton_width; 
+
+    G4double SIO2_sr = len*tan(pTheta);
+    G4double SIO2_sz = len;
+    G4double SIO2_mag = sqrt(SIO2_sr*SIO2_sr + SIO2_sz*SIO2_sz);
+   
+    G4double posz_SIO2  =  iterator->second.centerz - SIO2_mag*sin(theta + pTheta);
+    G4double posy_SIO2  =  iterator->second.centery + SIO2_mag*cos(theta + pTheta)*sin(iterator->second.rotz); 
+    G4double posx_SIO2  =  iterator->second.centerx + SIO2_mag*cos(theta + pTheta)*cos(iterator->second.rotz);
+    new G4PVPlacement(G4Transform3D(becal_rotm, G4ThreeVector(posx_SIO2, posy_SIO2, posz_SIO2)),
+                    block_SIO2,
+                    G4String(string(iterator->first) + string("SIO2")),
+                    sec,
+                    0, copyno, OverlapCheck());
+
+    //=================Carbon
+    G4LogicalVolume*  block_Carbon = ConstructCarbon(iterator);
+ 
+     if(iterator->second.idx_k%2 == 0)  {
+      m_DisplayAction->AddVolume(block_Carbon, "Block1");
+    }
+    else {
+       m_DisplayAction->AddVolume(block_Carbon, "Block2");
+    }
+
+
+    len              += Carbon_width + overlap + SIO2_width; 
+
+    G4double Carbon_sr = len*tan(pTheta);
+    G4double Carbon_sz = len;
+    G4double Carbon_mag = sqrt(Carbon_sr*Carbon_sr + Carbon_sz*Carbon_sz);
+   
+    G4double posz_Carbon  =  iterator->second.centerz - Carbon_mag*sin(theta + pTheta);
+    G4double posy_Carbon  =  iterator->second.centery + Carbon_mag*cos(theta + pTheta)*sin(iterator->second.rotz); 
+    G4double posx_Carbon  =  iterator->second.centerx + Carbon_mag*cos(theta + pTheta)*cos(iterator->second.rotz);
+    new G4PVPlacement(G4Transform3D(becal_rotm, G4ThreeVector(posx_Carbon, posy_Carbon, posz_Carbon)),
+                    block_Carbon,
+                    G4String(string(iterator->first) + string("Carbon")),
+                    sec,
+                    0, copyno, OverlapCheck());
+
   }
   return 0;
 }
@@ -465,18 +325,22 @@ int PHG4BarrelEcalDetector::ParseParametersFromTable()
 
     std::istringstream iss(line_mapping);
 
-    unsigned idphi_j, ideta_k;
-    G4double cx, cy, cz;
-    G4double rot_z, rot_y;
-    std::string dummys;
- 
-    if (!(iss >> dummys >> idphi_j >> ideta_k >> cx >> cy >> cz >> rot_y >> rot_z))
+    if (line_mapping.find("BECALtower ") != string::npos)
     {
-      std::cout << "ERROR in PHG4BarrelEcalDetector: Failed to read line in mapping file " << m_Params->get_string_param("mapping_file") << std::endl;
-      gSystem->Exit(1);
-    }
 
-    /* Construct unique name for tower */
+      unsigned idphi_j, ideta_k;
+      G4double cx, cy, cz;
+      G4double rot_z, rot_y, rot_x;
+      G4double size_z, size_y1, size_x1, size_y2, size_x2, p_Theta;
+      std::string dummys;
+ 
+      if (!(iss >> dummys >> ideta_k >> idphi_j >>  size_x1 >>  size_x2 >> size_y1 >> size_y2 >> size_z >> p_Theta >> cx >> cy >> cz >> rot_x >> rot_y >> rot_z))
+      {
+        std::cout << "ERROR in PHG4BarrelEcalDetector: Failed to read line in mapping file " << m_Params->get_string_param("mapping_file") << std::endl;
+        gSystem->Exit(1);
+      }
+
+      /* Construct unique name for tower */
       /* Mapping file uses cm, this class uses mm for length */
       std::ostringstream towername;
       towername.str("");
@@ -484,17 +348,339 @@ int PHG4BarrelEcalDetector::ParseParametersFromTable()
 
       /* insert tower into tower map */
       towerposition tower_new;
-      tower_new.centerx = cx;
-      tower_new.centery = cy;
-      tower_new.centerz = cz;
-      tower_new.roty = rot_y;
-      tower_new.rotz = rot_z;
-      tower_new.idx_j = idphi_j;
-      tower_new.idx_k = ideta_k;
+      tower_new.sizex1  = size_x1*cm;
+      tower_new.sizex2  = size_x2*cm;
+      tower_new.sizey1  = size_y1*cm;
+      tower_new.sizey2  = size_y2*cm;
+      tower_new.sizez   = size_z*cm;
+      tower_new.pTheta  = p_Theta;
+      tower_new.centerx = cx*cm;
+      tower_new.centery = cy*cm;
+      tower_new.centerz = cz*cm;
+      tower_new.rotx    = rot_x;
+      tower_new.roty    = rot_y;
+      tower_new.rotz    = rot_z;
+      tower_new.idx_j   = idphi_j;
+      tower_new.idx_k   = ideta_k;
       m_TowerPostionMap.insert(make_pair(towername.str(), tower_new));
 
       
+    } else
+    {
+      /* If this line is not a comment and not a tower, save parameter as string / value. */
+      string parname;
+      G4double parval;
+
+      /* read string- break if error */
+      if (!(iss >> parname >> parval))
+      {
+        cout << "ERROR in PHG4CrystalCalorimeterDetector: Failed to read line in mapping file " << m_Params->get_string_param("mappingtower") << endl;
+        gSystem->Exit(1);
+      }
+
+      m_GlobalParameterMap.insert(make_pair(parname, parval));
+
+      /* Update member variables for global parameters based on parsed parameter file */
+
+      std::map<string, G4double>::iterator parit;
+
+      parit = m_GlobalParameterMap.find("CenterZ_Shift");
+      if (parit != m_GlobalParameterMap.end())
+      {
+        m_Params->set_double_param("CenterZ_Shift", parit->second);  // in cm
+      }
+      parit = m_GlobalParameterMap.find("radius");
+      if (parit != m_GlobalParameterMap.end())
+      {
+        m_Params->set_double_param("radius", parit->second);  // in cm
+      }
+      parit = m_GlobalParameterMap.find("tower_length");
+      if (parit != m_GlobalParameterMap.end())
+      {
+        m_Params->set_double_param("tower_length", parit->second);  // in cm
+      }
+      parit = m_GlobalParameterMap.find("becal_length");
+      if (parit != m_GlobalParameterMap.end())
+      {
+        m_Params->set_double_param("becal_length", parit->second);  // in cm
+      }
+      parit = m_GlobalParameterMap.find("cone1_h");
+      if (parit != m_GlobalParameterMap.end())
+      {
+        m_Params->set_double_param("cone1_h", parit->second);  // in cm
+      }
+      parit = m_GlobalParameterMap.find("cone1_dz");
+      if (parit != m_GlobalParameterMap.end())
+      {
+        m_Params->set_double_param("cone1_dz", parit->second);  // in cm
+      }
+      parit = m_GlobalParameterMap.find("cone2_h");
+      if (parit != m_GlobalParameterMap.end())
+      {
+        m_Params->set_double_param("cone2_dz", parit->second);  // in cm
+      }
+      if (parit != m_GlobalParameterMap.end())
+      {
+        m_Params->set_double_param("cone2_dz", parit->second);  // in cm
+      }
+      parit = m_GlobalParameterMap.find("thickness_wall");
+      if (parit != m_GlobalParameterMap.end())
+      {
+        m_Params->set_double_param("thickness_wall", parit->second);  // in cm
+      }
     }
+  }
 
   return 0;
+}
+
+
+
+G4LogicalVolume*
+PHG4BarrelEcalDetector::ConstructTower(std::map<std::string, towerposition>::iterator iterator)
+{
+  G4Trap *block_tower = GetTowerTrap(iterator);
+  G4Trap *block_glass = GetGlassTrapSubtract(iterator); 
+  G4ThreeVector shift = G4ThreeVector(-th*sin(iterator->second.roty - M_PI_2), 0, th/2*abs(cos(iterator->second.roty - M_PI_2)));
+  G4VSolid* block_solid = new G4SubtractionSolid(G4String(string(iterator->first)  + string("_Envelope")), block_tower, block_glass, 0, shift);
+  G4Material* material_shell = GetCarbonFiber();
+  assert(material_shell);
+    
+  G4LogicalVolume* block_logic = new G4LogicalVolume(block_solid, material_shell,
+                                                     G4String(string(iterator->first)  + string("_Tower")), 0, 0,
+                                                     nullptr);
+  m_AbsorberLogicalVolSet.insert(block_logic);
+  return block_logic;
+}
+
+G4LogicalVolume*
+PHG4BarrelEcalDetector::ConstructGlass(std::map<std::string, towerposition>::iterator iterator)
+{
+  G4Trap *block_solid = GetGlassTrap(iterator);   
+  G4Material* material_glass = GetSciGlass();
+  assert(material_glass);
+  G4LogicalVolume* block_logic = new G4LogicalVolume(block_solid, material_glass,
+                                                     G4String(string(iterator->first) + string("_Glass")), 0, 0,
+                                                     nullptr);
+  m_ScintiLogicalVolSet.insert(block_logic);
+  return block_logic;
+}
+
+
+
+G4Material* PHG4BarrelEcalDetector::GetCarbonFiber()
+{
+  static string matname = "CrystalCarbonFiber";
+  G4Material* carbonfiber = G4Material::GetMaterial(matname, false);  // false suppresses warning that material does not exist
+  if (!carbonfiber)
+  {
+    G4double density_carbon_fiber = 1.44 * g / cm3;
+    carbonfiber = new G4Material(matname, density_carbon_fiber, 1);
+    carbonfiber->AddElement(G4Element::GetElement("C"), 1);
+  }
+  return carbonfiber;
+}
+
+G4Material* PHG4BarrelEcalDetector::GetSciGlass()
+{
+  static string matname = "sciglass";
+  G4Material* sciglass = G4Material::GetMaterial(matname, false);  // false suppresses warning that material does not exist
+  if (!sciglass)
+  {
+    G4double density;
+    G4int ncomponents;
+    sciglass = new G4Material(matname, density = 4.22 * g / cm3, ncomponents = 4,  kStateSolid);
+    sciglass->AddElement(G4Element::GetElement("Ba"), 0.3875);
+    sciglass->AddElement(G4Element::GetElement("Gd"), 0.2146);
+    sciglass->AddElement(G4Element::GetElement("Si"), 0.1369);
+    sciglass->AddElement(G4Element::GetElement("O"),  0.2610);
+  }
+  return sciglass;
+}
+
+G4Trap* PHG4BarrelEcalDetector::GetGlassTrap(std::map<std::string, towerposition>::iterator iterator)
+{
+
+  G4double th =  m_Params->get_double_param("thickness_wall")*cm;
+  G4double size_x1 = iterator->second.sizex1/2 - th ;
+  G4double size_x2 = iterator->second.sizex2/2 - th; 
+  G4double size_y1 = iterator->second.sizey1/2 - th;
+  G4double size_y2 = iterator->second.sizey2/2 - th; 
+  G4double size_z  = iterator->second.sizez/2 - th; 
+
+  G4Trap* block_glass = new G4Trap( "solid_glass",
+      size_z,                                                                           // G4double pDz,
+      iterator->second.pTheta,  0,                                                              // G4double pTheta, G4double pPhi,
+      size_y1, size_x1, size_x1,      // G4double pDy1, G4double pDx1, G4double pDx2,
+      0,                                                                                        // G4double pAlp1,
+      size_y2, size_x2, size_x2,      // G4double pDy2, G4double pDx3, G4double pDx4,
+      0                                                                                         // G4double pAlp2 //
+  );
+
+  return block_glass;
+}
+
+G4Trap* PHG4BarrelEcalDetector::GetTowerTrap(std::map<std::string, towerposition>::iterator iterator)
+{
+
+  G4Trap* block_tower = new G4Trap( "solid_tower",
+      iterator->second.sizez/2,                                                                           // G4double pDz,
+      iterator->second.pTheta,  0,                                                              // G4double pTheta, G4double pPhi,
+      iterator->second.sizey1/2, iterator->second.sizex1/2, iterator->second.sizex1/2.,      // G4double pDy1, G4double pDx1, G4double pDx2,
+      0,                                                                                        // G4double pAlp1,
+      iterator->second.sizey2/2, iterator->second.sizex2/2, iterator->second.sizex2/2.,      // G4double pDy2, G4double pDx3, G4double pDx4,
+      0                                                                                         // G4double pAlp2 //
+  );
+
+  return block_tower;
+}
+
+
+G4Trap* PHG4BarrelEcalDetector::GetGlassTrapSubtract(std::map<std::string, towerposition>::iterator iterator)
+{
+  G4double th =  m_Params->get_double_param("thickness_wall")*cm;
+  G4double size_x1 = iterator->second.sizex1/2 - th + overlap;
+  G4double size_x2 = iterator->second.sizex2/2 - th + overlap; 
+  G4double size_y1 = iterator->second.sizey1/2 - th + overlap;
+  G4double size_y2 = iterator->second.sizey2/2 - th + overlap; 
+  G4double size_z  = iterator->second.sizez/2 - th/2  + overlap; 
+
+  G4Trap* block_glass = new G4Trap( "solid_glass",
+      size_z,                                                                           // G4double pDz,
+      iterator->second.pTheta,  0,                                                              // G4double pTheta, G4double pPhi,
+      size_y1, size_x1, size_x1,      // G4double pDy1, G4double pDx1, G4double pDx2,
+      0,                                                                                        // G4double pAlp1,
+      size_y2, size_x2, size_x2,      // G4double pDy2, G4double pDx3, G4double pDx4,
+      0                                                                                         // G4double pAlp2 //
+  );
+
+  return block_glass;
+}
+
+G4Trap* PHG4BarrelEcalDetector::GetSiTrap(std::map<std::string, towerposition>::iterator iterator)
+{
+
+  G4double size_x1 = iterator->second.sizex2/2 - overlap;
+  G4double size_x2 = iterator->second.sizex2/2 - overlap; 
+  G4double size_y1 = iterator->second.sizey2/2 - overlap;
+  G4double size_y2 = iterator->second.sizey2/2 - overlap; 
+  G4double size_z  = silicon_width; 
+
+  G4Trap* block_si = new G4Trap( "Si",
+      size_z,                                                                           // G4double pDz,
+      iterator->second.pTheta,  0,                                                              // G4double pTheta, G4double pPhi,
+      size_y1, size_x1, size_x1,      // G4double pDy1, G4double pDx1, G4double pDx2,
+      0,                                                                                        // G4double pAlp1,
+      size_y2, size_x2, size_x2,      // G4double pDy2, G4double pDx3, G4double pDx4,
+      0                                                                                         // G4double pAlp2 //
+  );
+
+  return block_si;
+}
+
+G4LogicalVolume*
+PHG4BarrelEcalDetector::ConstructSi(std::map<std::string, towerposition>::iterator iterator)
+{
+  G4Trap *block_solid = GetSiTrap(iterator);   
+  G4Material* material_si = G4Material::GetMaterial("G4_POLYSTYRENE");
+  assert(material_si);
+  G4LogicalVolume* block_logic = new G4LogicalVolume(block_solid, material_si,
+                                                     G4String(string(iterator->first) + string("_solid_Si")), 0, 0,
+                                                     nullptr);
+  return block_logic;
+}
+
+G4Trap* PHG4BarrelEcalDetector::GetKaptonTrap(std::map<std::string, towerposition>::iterator iterator)
+{
+  G4double size_x1 = iterator->second.sizex2/2 - overlap;
+  G4double size_x2 = iterator->second.sizex2/2 - overlap; 
+  G4double size_y1 = iterator->second.sizey2/2 - overlap;
+  G4double size_y2 = iterator->second.sizey2/2 - overlap; 
+  G4double size_z  = kapton_width; 
+  G4Trap* block_si = new G4Trap( "Kapton",
+      size_z,                                                                           // G4double pDz,
+      iterator->second.pTheta,  0,                                                              // G4double pTheta, G4double pPhi,
+      size_y1, size_x1, size_x1,      // G4double pDy1, G4double pDx1, G4double pDx2,
+      0,                                                                                        // G4double pAlp1,
+      size_y2, size_x2, size_x2,      // G4double pDy2, G4double pDx3, G4double pDx4,
+      0                                                                                         // G4double pAlp2 //
+  );
+  return block_si;
+}
+
+G4LogicalVolume*
+PHG4BarrelEcalDetector::ConstructKapton(std::map<std::string, towerposition>::iterator iterator)
+{
+  G4Trap *block_solid = GetKaptonTrap(iterator);   
+  G4Material* material_kapton = G4Material::GetMaterial("G4_KAPTON");
+  assert(material_kapton);
+  G4LogicalVolume* block_logic = new G4LogicalVolume(block_solid, material_kapton,
+                                                     G4String(string(iterator->first) + string("_solid_Si")), 0, 0,
+                                                     nullptr);
+  return block_logic;
+}
+
+G4Trap* PHG4BarrelEcalDetector::GetSIO2Trap(std::map<std::string, towerposition>::iterator iterator)
+{
+
+  G4double size_x1 = iterator->second.sizex2/2 - overlap;
+  G4double size_x2 = iterator->second.sizex2/2 - overlap; 
+  G4double size_y1 = iterator->second.sizey2/2 - overlap;
+  G4double size_y2 = iterator->second.sizey2/2 - overlap; 
+  G4double size_z  = SIO2_width; 
+
+  G4Trap* block_SIO2 = new G4Trap( "SIO2",
+      size_z,                                                                           // G4double pDz,
+      iterator->second.pTheta,  0,                                                              // G4double pTheta, G4double pPhi,
+      size_y1, size_x1, size_x1,      // G4double pDy1, G4double pDx1, G4double pDx2,
+      0,                                                                                        // G4double pAlp1,
+      size_y2, size_x2, size_x2,      // G4double pDy2, G4double pDx3, G4double pDx4,
+      0                                                                                         // G4double pAlp2 //
+  );
+  return block_SIO2;
+}
+
+G4LogicalVolume*
+PHG4BarrelEcalDetector::ConstructSIO2(std::map<std::string, towerposition>::iterator iterator)
+{
+  G4Trap *block_solid = GetSIO2Trap(iterator);   
+  G4Material* material_SIO2 = G4Material::GetMaterial("Quartz");
+  assert(material_SIO2);
+  G4LogicalVolume* block_logic = new G4LogicalVolume(block_solid, material_SIO2,
+                                                     G4String(string(iterator->first) + string("_solid_material_SIO2")), 0, 0,
+                                                     nullptr);
+  return block_logic;
+}
+
+
+G4Trap* PHG4BarrelEcalDetector::GetCarbonTrap(std::map<std::string, towerposition>::iterator iterator)
+{
+  G4double size_x1 = iterator->second.sizex2/2 - overlap;
+  G4double size_x2 = iterator->second.sizex2/2 - overlap; 
+  G4double size_y1 = iterator->second.sizey2/2 - overlap;
+  G4double size_y2 = iterator->second.sizey2/2 - overlap; 
+  G4double size_z  = Carbon_width; 
+
+  G4Trap* block_SIO2 = new G4Trap( "C",
+      size_z,                                                                           // G4double pDz,
+      iterator->second.pTheta,  0,                                                              // G4double pTheta, G4double pPhi,
+      size_y1, size_x1, size_x1,      // G4double pDy1, G4double pDx1, G4double pDx2,
+      0,                                                                                        // G4double pAlp1,
+      size_y2, size_x2, size_x2,      // G4double pDy2, G4double pDx3, G4double pDx4,
+      0                                                                                         // G4double pAlp2 //
+  );
+
+  return block_SIO2;
+}
+
+G4LogicalVolume*
+PHG4BarrelEcalDetector::ConstructCarbon(std::map<std::string, towerposition>::iterator iterator)
+{
+  G4Trap *block_solid = GetCarbonTrap(iterator);   
+  G4Material* material_Carbon = G4Material::GetMaterial("G4_C");
+  assert(material_Carbon);
+  G4LogicalVolume* block_logic = new G4LogicalVolume(block_solid, material_Carbon,
+                                                     G4String(string(iterator->first) + string("_solid_material_C")), 0, 0,
+                                                     nullptr);
+  return block_logic;
 }

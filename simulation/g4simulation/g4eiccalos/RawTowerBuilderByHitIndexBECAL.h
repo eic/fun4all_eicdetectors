@@ -84,6 +84,8 @@ class RawTowerBuilderByHitIndexBECAL : public SubsysReco
 
   RawTowerDefs::CalorimeterId m_CaloId;
 
+  double thickness_wall = -1.; 
+
   double m_Emin;
 
   std::map<std::string, double> m_GlobalParameterMap;

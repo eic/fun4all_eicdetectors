@@ -39,24 +39,40 @@ void PHG4BarrelEcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
     visatt->SetVisibility(true);
     visatt->SetForceSolid(true);
     m_VisAttVec.push_back(visatt);  // for later deletion
-    if (it.second == "Sector")
+    if (it.second == "BCalCylinder") 
     {
-      visatt->SetColour(G4Colour::Black());
+      visatt->SetColour(G4Colour::White());
       visatt->SetForceWireframe(true);
       visatt->SetVisibility(false);
     }
-     else if (it.second == "BCalCylinder") 
+    else if (it.second == "Block1")
     {
-      visatt->SetColour(G4Colour::Black());
-      visatt->SetForceWireframe(true);
-      visatt->SetVisibility(true);
+      visatt->SetColour(G4Colour(1.,0.5,0.));    
     }
-    else if (it.second == "Block")
+    else if (it.second == "Block2")
+    {
+      visatt->SetColour(G4Colour::Blue());
+    }
+    else if (it.second == "Glass")
+    {
+      visatt->SetColour(G4Colour::White());
+      //visatt->SetForceWireframe(true);
+    }
+    else if (it.second == "Si")
+    {
+      visatt->SetColour(G4Colour::Green());
+    }
+    else if (it.second == "Kapton")
+    {
+      visatt->SetColour(G4Colour::Brown());
+    }
+    else if (it.second == "SIO2")
+    {
+      visatt->SetColour(G4Colour::Gray());
+    }
+    else if (it.second == "Carbon")
     {
       visatt->SetColour(G4Colour::Black());
-      visatt->SetColor(1,165./255,0,1);
-//       visatt->SetColor(G4Colour::Yellow());
-      
     }
     else
     {
