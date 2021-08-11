@@ -5,12 +5,12 @@
 #include <g4main/PHG4HitContainer.h>
 #include <g4main/PHG4Hitv1.h>
 #include <g4main/PHG4Shower.h>
-#include <g4main/PHG4SteppingAction.h>        // for PHG4SteppingAction
+#include <g4main/PHG4SteppingAction.h>  // for PHG4SteppingAction
 #include <g4main/PHG4TrackUserInfoV1.h>
 
 #include <phool/getClass.h>
 
-#include <Geant4/G4ParticleDefinition.hh>     // for G4ParticleDefinition
+#include <Geant4/G4ParticleDefinition.hh>  // for G4ParticleDefinition
 #include <Geant4/G4Step.hh>
 #include <Geant4/G4StepPoint.hh>              // for G4StepPoint
 #include <Geant4/G4StepStatus.hh>             // for fGeomBoundary, fAtRestD...
@@ -25,12 +25,10 @@
 #include <Geant4/G4VUserTrackInformation.hh>  // for G4VUserTrackInformation
 
 #include <iostream>
-#include <string>                             // for string, operator+, oper...
+#include <string>  // for string, operator+, oper...
 
 class G4VPhysicalVolume;
 class PHCompositeNode;
-
-using namespace std;
 //____________________________________________________________________________..
 PHG4TTLSteppingAction::PHG4TTLSteppingAction(PHG4TTLDetector* detector)
   : PHG4SteppingAction(detector->GetName())
@@ -71,7 +69,7 @@ bool PHG4TTLSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
     // the check for the pdg code speeds things up, I do not want to make
     // an expensive string compare for every track when we know
     // geantino or chargedgeantino has pid=0
-    if (aTrack->GetParticleDefinition()->GetPDGEncoding() == 0 && aTrack->GetParticleDefinition()->GetParticleName().find("geantino") != string::npos)
+    if (aTrack->GetParticleDefinition()->GetPDGEncoding() == 0 && aTrack->GetParticleDefinition()->GetParticleName().find("geantino") != std::string::npos)
     {
       geantino = true;
     }
@@ -189,7 +187,7 @@ bool PHG4TTLSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
 //____________________________________________________________________________..
 void PHG4TTLSteppingAction::SetInterfacePointers(PHCompositeNode* topNode)
 {
-  string hitnodename;
+  std::string hitnodename;
   if (detector_->SuperDetector() != "NONE")
   {
     hitnodename = "G4HIT_" + detector_->SuperDetector();

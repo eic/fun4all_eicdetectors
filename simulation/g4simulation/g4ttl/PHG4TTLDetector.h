@@ -15,17 +15,17 @@
 #include <Geant4/G4PVPlacement.hh>
 #include <Geant4/G4PhysicalConstants.hh>  // for pi
 #include <Geant4/G4Sphere.hh>
+#include <Geant4/G4String.hh>         // for G4String
 #include <Geant4/G4SystemOfUnits.hh>  // for cm, um, perCent
 #include <Geant4/G4ThreeVector.hh>    // for G4ThreeVector
 #include <Geant4/G4Transform3D.hh>    // for G4Transform3D, G4RotateX3D
 #include <Geant4/G4Tubs.hh>
-#include <Geant4/G4Types.hh>              // for G4int
+#include <Geant4/G4Types.hh>  // for G4int
 #include <Geant4/globals.hh>  // for G4Exception
-#include <Geant4/G4String.hh>  // for G4String
 
 #include <map>
-#include <utility>
 #include <set>
+#include <utility>
 
 #include <cassert>
 #include <cmath>
@@ -39,12 +39,11 @@ class PHG4TTLDisplayAction;
 class PHG4Subsystem;
 class PHParameters;
 
-
 class PHG4TTLDetector : public PHG4Detector
 {
  public:
   //! constructor
-  PHG4TTLDetector(PHG4Subsystem *subsys, PHCompositeNode *Node, PHParameters* parameters, const std::string &dnam);
+  PHG4TTLDetector(PHG4Subsystem *subsys, PHCompositeNode *Node, PHParameters *parameters, const std::string &dnam);
 
   //! destructor
   ~PHG4TTLDetector(void) override
@@ -62,20 +61,18 @@ class PHG4TTLDetector : public PHG4Detector
   void SuperDetector(const std::string &name) { superdetector = name; }
   const std::string SuperDetector() const { return superdetector; }
 
-
   // void OverlapCheck(const bool chk = true) override
   // {
   //   PHG4Detector::OverlapCheck(chk);
   //   // PHG4SectorConstructor::OverlapCheck(chk);
   // }
- void
+  void
   OverlapCheck(bool check = true) override
   {
     overlapcheck_sector = check;
   }
   // void Verbosity(int v) override {m_Verbosity = v;}
   // int Verbosity() const {return m_Verbosity;}
-
 
  public:
   // properties
@@ -114,7 +111,5 @@ class PHG4TTLDetector : public PHG4Detector
   map_phy_vol_t map_phy_vol;         //! all physics volume
   map_phy_vol_t map_active_phy_vol;  //! active physics volume
 };
-
-
 
 #endif
