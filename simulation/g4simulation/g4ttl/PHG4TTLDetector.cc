@@ -176,10 +176,14 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
   G4RotationMatrix *rotcooling = new G4RotationMatrix();
   rotcooling->rotateX(M_PI/2);
   G4double leftedgeCU = sin(M_PI/12.)*(rMin+det_height/2+cooling_plate_height/2);
-  for(int icup=0;icup<11;icup++){
+  int maxicup = 12;
+  if(rMin<85*cm) maxicup = 11;
+  if(rMin<66*cm) maxicup = 9;
+  if(rMin<55*cm) maxicup = 7;
+  for(int icup=0;icup<maxicup;icup++){
     G4double edgeshift = 0;
     if(icup==0) edgeshift = baseplate_width/4;
-    if(icup==10) edgeshift = -baseplate_width/4;
+    if(icup==(maxicup-1)) edgeshift = -baseplate_width/4;
     sol_cooling_plate = new G4SubtractionSolid(G4String("sol_cooling_plate_cu1"), sol_cooling_plate, sol_cutout_tube
                                                       ,rotcooling ,G4ThreeVector( -leftedgeCU+icup*1.5*baseplate_width+edgeshift , 0 ,cooling_plate_height/2 - diameter_coolingtube/2));
         RegisterPhysicalVolume( new G4PVPlacement(rotcooling, G4ThreeVector(-leftedgeCU+icup*1.5*baseplate_width+edgeshift, 0, cooling_plate_height/2 - diameter_coolingtube/2 ), Log_cooling_tube,
@@ -339,17 +343,24 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
 
   RegisterPhysicalVolume(new G4PVPlacement(rotationSensor, G4ThreeVector(-leftedge+8*baseplate_width+baseplate_width/2, 0, offsety), log_sensor_ladder,
                             "physical_sensor_ladder_t6", log_module_envelope, false, 0, overlapcheck_sector), false);
-  RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(-leftedge+9*baseplate_width+baseplate_width/2, 0, offsety), log_sensor_ladder,
-                            "physical_sensor_ladder_t7", log_module_envelope, false, 0, overlapcheck_sector), false);
+  if(rMin>55*cm){
+    RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(-leftedge+9*baseplate_width+baseplate_width/2, 0, offsety), log_sensor_ladder,
+                              "physical_sensor_ladder_t7", log_module_envelope, false, 0, overlapcheck_sector), false);
 
-  RegisterPhysicalVolume(new G4PVPlacement(rotationSensor, G4ThreeVector(-leftedge+11*baseplate_width+baseplate_width/2, 0, offsety), log_sensor_ladder,
-                            "physical_sensor_ladder_t8", log_module_envelope, false, 0, overlapcheck_sector), false);
-  RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(-leftedge+12*baseplate_width+baseplate_width/2, 0, offsety), log_sensor_ladder,
-                            "physical_sensor_ladder_t9", log_module_envelope, false, 0, overlapcheck_sector), false);
+    RegisterPhysicalVolume(new G4PVPlacement(rotationSensor, G4ThreeVector(-leftedge+11*baseplate_width+baseplate_width/2, 0, offsety), log_sensor_ladder,
+                              "physical_sensor_ladder_t8", log_module_envelope, false, 0, overlapcheck_sector), false);
+  }
+  if(rMin>66*cm){
+    RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(-leftedge+12*baseplate_width+baseplate_width/2, 0, offsety), log_sensor_ladder,
+                              "physical_sensor_ladder_t9", log_module_envelope, false, 0, overlapcheck_sector), false);
 
-  RegisterPhysicalVolume(new G4PVPlacement(rotationSensor, G4ThreeVector(-leftedge+14*baseplate_width+baseplate_width/2, 0, offsety), log_sensor_ladder,
-                            "physical_sensor_ladder_t10", log_module_envelope, false, 0, overlapcheck_sector), false);
-
+    RegisterPhysicalVolume(new G4PVPlacement(rotationSensor, G4ThreeVector(-leftedge+14*baseplate_width+baseplate_width/2, 0, offsety), log_sensor_ladder,
+                              "physical_sensor_ladder_t10", log_module_envelope, false, 0, overlapcheck_sector), false);
+  }
+  if(rMin>85*cm){
+    RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(-leftedge+15*baseplate_width+baseplate_width/2, 0, offsety), log_sensor_ladder,
+                              "physical_sensor_ladder_t11", log_module_envelope, false, 0, overlapcheck_sector), false);
+  }
   // bottom side
   G4double offsetyDown = cooling_plate_height/2+thicknessDet/2;
   G4RotationMatrix *rotationSensorDown = new G4RotationMatrix();
@@ -371,17 +382,22 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
                             "physical_sensor_ladder_b5", log_module_envelope, false, 0, overlapcheck_sector), false);
   RegisterPhysicalVolume(new G4PVPlacement(rotationSensorFlip, G4ThreeVector(-leftedge+8*baseplate_width, 0, -offsetyDown), log_sensor_ladder,
                             "physical_sensor_ladder_b6", log_module_envelope, false, 0, overlapcheck_sector), false);
-
-  RegisterPhysicalVolume(new G4PVPlacement(rotationSensorDown, G4ThreeVector(-leftedge+10*baseplate_width, 0, -offsetyDown), log_sensor_ladder,
-                            "physical_sensor_ladder_b7", log_module_envelope, false, 0, overlapcheck_sector), false);
-  RegisterPhysicalVolume(new G4PVPlacement(rotationSensorFlip, G4ThreeVector(-leftedge+11*baseplate_width, 0, -offsetyDown), log_sensor_ladder,
-                            "physical_sensor_ladder_b8", log_module_envelope, false, 0, overlapcheck_sector), false);
-
-  RegisterPhysicalVolume(new G4PVPlacement(rotationSensorDown, G4ThreeVector(-leftedge+13*baseplate_width, 0, -offsetyDown), log_sensor_ladder,
-                            "physical_sensor_ladder_b9", log_module_envelope, false, 0, overlapcheck_sector), false);
-  RegisterPhysicalVolume(new G4PVPlacement(rotationSensorFlip, G4ThreeVector(-leftedge+14*baseplate_width, 0, -offsetyDown), log_sensor_ladder,
-                            "physical_sensor_ladder_b10", log_module_envelope, false, 0, overlapcheck_sector), false);
-
+  if(rMin>55*cm){
+    RegisterPhysicalVolume(new G4PVPlacement(rotationSensorDown, G4ThreeVector(-leftedge+10*baseplate_width, 0, -offsetyDown), log_sensor_ladder,
+                              "physical_sensor_ladder_b7", log_module_envelope, false, 0, overlapcheck_sector), false);
+    RegisterPhysicalVolume(new G4PVPlacement(rotationSensorFlip, G4ThreeVector(-leftedge+11*baseplate_width, 0, -offsetyDown), log_sensor_ladder,
+                              "physical_sensor_ladder_b8", log_module_envelope, false, 0, overlapcheck_sector), false);
+  }
+  if(rMin>66*cm){
+    RegisterPhysicalVolume(new G4PVPlacement(rotationSensorDown, G4ThreeVector(-leftedge+13*baseplate_width, 0, -offsetyDown), log_sensor_ladder,
+                              "physical_sensor_ladder_b9", log_module_envelope, false, 0, overlapcheck_sector), false);
+    RegisterPhysicalVolume(new G4PVPlacement(rotationSensorFlip, G4ThreeVector(-leftedge+14*baseplate_width, 0, -offsetyDown), log_sensor_ladder,
+                              "physical_sensor_ladder_b10", log_module_envelope, false, 0, overlapcheck_sector), false);
+  }
+  if(rMin>85*cm){
+    RegisterPhysicalVolume(new G4PVPlacement(rotationSensorDown, G4ThreeVector(-leftedge+16*baseplate_width, 0, -offsetyDown), log_sensor_ladder,
+                              "physical_sensor_ladder_b11", log_module_envelope, false, 0, overlapcheck_sector), false);
+  }
 
 
 
@@ -488,17 +504,22 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
                             "physical_SH_ladder_t5", log_module_envelope, false, 0, overlapcheck_sector), false);
   RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(-leftedge+5*baseplate_width+5*baseSH_width+baseSH_width/2, 0, offsety_SH), log_SH_ladder,
                             "physical_SH_ladder_t6", log_module_envelope, false, 0, overlapcheck_sector), false);
-
-  RegisterPhysicalVolume(new G4PVPlacement(rotationSensor, G4ThreeVector(-leftedge+7*baseplate_width+6*baseSH_width+baseSH_width/2, 0, offsety_SH), log_SH_ladder,
-                            "physical_SH_ladder_t7", log_module_envelope, false, 0, overlapcheck_sector), false);
-  RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(-leftedge+7*baseplate_width+7*baseSH_width+baseSH_width/2, 0, offsety_SH), log_SH_ladder,
-                            "physical_SH_ladder_t8", log_module_envelope, false, 0, overlapcheck_sector), false);
-
-  RegisterPhysicalVolume(new G4PVPlacement(rotationSensor, G4ThreeVector(-leftedge+9*baseplate_width+8*baseSH_width+baseSH_width/2, 0, offsety_SH), log_SH_ladder,
-                            "physical_SH_ladder_t9", log_module_envelope, false, 0, overlapcheck_sector), false);
-  RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(-leftedge+9*baseplate_width+9*baseSH_width+baseSH_width/2, 0, offsety_SH), log_SH_ladder,
-                            "physical_SH_ladder_t10", log_module_envelope, false, 0, overlapcheck_sector), false);
-
+  if(rMin>55*cm){
+    RegisterPhysicalVolume(new G4PVPlacement(rotationSensor, G4ThreeVector(-leftedge+7*baseplate_width+6*baseSH_width+baseSH_width/2, 0, offsety_SH), log_SH_ladder,
+                              "physical_SH_ladder_t7", log_module_envelope, false, 0, overlapcheck_sector), false);
+    RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(-leftedge+7*baseplate_width+7*baseSH_width+baseSH_width/2, 0, offsety_SH), log_SH_ladder,
+                              "physical_SH_ladder_t8", log_module_envelope, false, 0, overlapcheck_sector), false);
+  }
+  if(rMin>66*cm){
+    RegisterPhysicalVolume(new G4PVPlacement(rotationSensor, G4ThreeVector(-leftedge+9*baseplate_width+8*baseSH_width+baseSH_width/2, 0, offsety_SH), log_SH_ladder,
+                              "physical_SH_ladder_t9", log_module_envelope, false, 0, overlapcheck_sector), false);
+    RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(-leftedge+9*baseplate_width+9*baseSH_width+baseSH_width/2, 0, offsety_SH), log_SH_ladder,
+                              "physical_SH_ladder_t10", log_module_envelope, false, 0, overlapcheck_sector), false);
+  }
+  if(rMin>85*cm){
+    RegisterPhysicalVolume(new G4PVPlacement(rotationSensor, G4ThreeVector(-leftedge+11*baseplate_width+10*baseSH_width+baseSH_width/2, 0, offsety_SH), log_SH_ladder,
+                              "physical_SH_ladder_t11", log_module_envelope, false, 0, overlapcheck_sector), false);
+  }
   G4double offsetyDown_SH = cooling_plate_height/2+thicknessDet_SH/2;
   RegisterPhysicalVolume(new G4PVPlacement(rotationSensorFlip, G4ThreeVector(-leftedge+0*baseplate_width+baseSH_width/2, 0, -offsetyDown_SH), log_SH_ladder,
                             "physical_SH_ladder_b1", log_module_envelope, false, 0, overlapcheck_sector), false);
@@ -515,17 +536,23 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
 
   RegisterPhysicalVolume(new G4PVPlacement(rotationSensorDown, G4ThreeVector(-leftedge+6*baseplate_width+5*baseSH_width+baseSH_width/2, 0, -offsetyDown_SH), log_SH_ladder,
                             "physical_SH_ladder_b6", log_module_envelope, false, 0, overlapcheck_sector), false);
-  RegisterPhysicalVolume(new G4PVPlacement(rotationSensorFlip, G4ThreeVector(-leftedge+6*baseplate_width+6*baseSH_width+baseSH_width/2, 0, -offsetyDown_SH), log_SH_ladder,
-                            "physical_SH_ladder_b7", log_module_envelope, false, 0, overlapcheck_sector), false);
+  if(rMin>55*cm){
+    RegisterPhysicalVolume(new G4PVPlacement(rotationSensorFlip, G4ThreeVector(-leftedge+6*baseplate_width+6*baseSH_width+baseSH_width/2, 0, -offsetyDown_SH), log_SH_ladder,
+                              "physical_SH_ladder_b7", log_module_envelope, false, 0, overlapcheck_sector), false);
 
-  RegisterPhysicalVolume(new G4PVPlacement(rotationSensorDown, G4ThreeVector(-leftedge+8*baseplate_width+7*baseSH_width+baseSH_width/2, 0, -offsetyDown_SH), log_SH_ladder,
-                            "physical_SH_ladder_b8", log_module_envelope, false, 0, overlapcheck_sector), false);
-  RegisterPhysicalVolume(new G4PVPlacement(rotationSensorFlip, G4ThreeVector(-leftedge+8*baseplate_width+8*baseSH_width+baseSH_width/2, 0, -offsetyDown_SH), log_SH_ladder,
-                            "physical_SH_ladder_b9", log_module_envelope, false, 0, overlapcheck_sector), false);
-
-  // RegisterPhysicalVolume(new G4PVPlacement(rotationSensorDown, G4ThreeVector(-leftedge+10*baseplate_width+9*baseSH_width+baseSH_width/2, 0, -offsetyDown_SH), log_SH_ladder,
-  //                           "physical_SH_ladder_b10", log_module_envelope, false, 0, overlapcheck_sector), false);
-
+    RegisterPhysicalVolume(new G4PVPlacement(rotationSensorDown, G4ThreeVector(-leftedge+8*baseplate_width+7*baseSH_width+baseSH_width/2, 0, -offsetyDown_SH), log_SH_ladder,
+                              "physical_SH_ladder_b8", log_module_envelope, false, 0, overlapcheck_sector), false);
+  }
+  if(rMin>66*cm){
+    RegisterPhysicalVolume(new G4PVPlacement(rotationSensorFlip, G4ThreeVector(-leftedge+8*baseplate_width+8*baseSH_width+baseSH_width/2, 0, -offsetyDown_SH), log_SH_ladder,
+                              "physical_SH_ladder_b9", log_module_envelope, false, 0, overlapcheck_sector), false);
+  }
+  if(rMin>85*cm){
+    RegisterPhysicalVolume(new G4PVPlacement(rotationSensorDown, G4ThreeVector(-leftedge+10*baseplate_width+9*baseSH_width+baseSH_width/2, 0, -offsetyDown_SH), log_SH_ladder,
+                              "physical_SH_ladder_b10", log_module_envelope, false, 0, overlapcheck_sector), false);
+    RegisterPhysicalVolume(new G4PVPlacement(rotationSensorFlip, G4ThreeVector(-leftedge+10*baseplate_width+10*baseSH_width+baseSH_width/2, 0, -offsetyDown_SH), log_SH_ladder,
+                              "physical_SH_ladder_b11", log_module_envelope, false, 0, overlapcheck_sector), false);
+  }
 
   G4double support_height = 7 * cm;
 
@@ -569,27 +596,33 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
   //                     "Mother_Segment_Raw_Physical_Center", log_module_envelope, false, 0, overlapcheck_sector), false);
   G4RotationMatrix *supportrot = new G4RotationMatrix();
   supportrot->rotateY(-M_PI/12.);
-  RegisterPhysicalVolume( new G4PVPlacement(supportrot, G4ThreeVector(sin(M_PI/12.)*(rMin-support_height/2)-support_width/2, 0, -support_height/2), Log_Longitudinal_Support,
-                      "Mother_Segment_Raw_Physical_Left", log_module_envelope, false, 0, overlapcheck_sector), false);
-  G4RotationMatrix *supportrot2 = new G4RotationMatrix();
-  supportrot2->rotateY(M_PI/12.);
-  RegisterPhysicalVolume( new G4PVPlacement(supportrot2, G4ThreeVector(-sin(M_PI/12.)*(rMin-support_height/2)+support_width/2, 0, -support_height/2), Log_Longitudinal_Support,
-                      "Mother_Segment_Raw_Physical_Right", log_module_envelope, false, 0, overlapcheck_sector), false);
-
+  if(rMin<85*cm){
+    RegisterPhysicalVolume( new G4PVPlacement(supportrot, G4ThreeVector(sin(M_PI/12.)*(rMin-support_height/2)-support_width/2, 0, -support_height/2), Log_Longitudinal_Support,
+                        "Mother_Segment_Raw_Physical_Left", log_module_envelope, false, 0, overlapcheck_sector), false);
+    G4RotationMatrix *supportrot2 = new G4RotationMatrix();
+    supportrot2->rotateY(M_PI/12.);
+    RegisterPhysicalVolume( new G4PVPlacement(supportrot2, G4ThreeVector(-sin(M_PI/12.)*(rMin-support_height/2)+support_width/2, 0, -support_height/2), Log_Longitudinal_Support,
+                        "Mother_Segment_Raw_Physical_Right", log_module_envelope, false, 0, overlapcheck_sector), false);
+  }
   m_DisplayAction->AddVolume(Log_Longitudinal_Support, "Support");
 
   
   RegisterLogicalVolume(log_module_envelope);
   m_DisplayAction->AddVolume(log_module_envelope, "ModuleEnvelope");
-    G4double modulesep = 1*mm;
-  // for(int isec=0;isec<1;isec++){ // NOTE REMOVE
+  G4double modulesep = 1*mm;
+  G4double moduleShift = -8*mm;
+  if(rMin<85*cm) moduleShift = -3*mm;
+  if(rMin<66*cm) moduleShift = -1*mm;
+  if(rMin<55*cm) moduleShift = 4*mm;
+
   for(int isec=0;isec<12;isec++){
+    // if(isec!=3 && isec!=4)continue; // NOTE REMOVE
     // if(isec!=3)continue; // NOTE REMOVE
     G4RotationMatrix *motherrot = new G4RotationMatrix();
     motherrot->rotateX(M_PI/2);
     motherrot->rotateY((isec-3)*2*M_PI/12.);
     // // central segments
-    RegisterPhysicalVolume( new G4PVPlacement(motherrot, G4ThreeVector((rMin-det_height/2-0.3*cm)*cos(isec*2*M_PI/12.), (rMin-det_height/2-0.3*cm)*sin(isec*2*M_PI/12.), 0*modulesep), log_module_envelope,
+    RegisterPhysicalVolume( new G4PVPlacement(motherrot, G4ThreeVector((rMin-det_height/2+moduleShift)*cos(isec*2*M_PI/12.), (rMin-det_height/2+moduleShift)*sin(isec*2*M_PI/12.), 0*modulesep), log_module_envelope,
                         "Mother_Segment_Raw_Physical_Center_" + std::to_string(isec), DetectorLog_Det, false, 0, overlapcheck_sector),false);
     for(int ilen=1;ilen<((detlength/2-segmentlength/2)/segmentlength);ilen++){
       G4RotationMatrix *supfinalrot = new G4RotationMatrix();
@@ -597,17 +630,19 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
       supfinalrot->rotateX(M_PI/2);
       supfinalrot->rotateY((isec-3)*2*M_PI/12.);
       if(ilen==2||(ilen==7)){
-        RegisterPhysicalVolume( new G4PVPlacement(supfinalrot, G4ThreeVector((rMin-support_height/2-det_height/2-cooling_plate_height/2)*cos(isec*2*M_PI/12.), (rMin-support_height/2-det_height/2-cooling_plate_height/2)*sin(isec*2*M_PI/12.), ilen*segmentlength+segmentlength/2+ilen*modulesep), Log_End_Support,
-                        "Front_Support_Physical_1_" + std::to_string(isec)+"_"+ std::to_string(ilen), DetectorLog_Det, false, 0, overlapcheck_sector), false);
-        RegisterPhysicalVolume( new G4PVPlacement(supfinalrot, G4ThreeVector((rMin-support_height/2-det_height/2-cooling_plate_height/2)*cos(isec*2*M_PI/12.), (rMin-support_height/2-det_height/2-cooling_plate_height/2)*sin(isec*2*M_PI/12.), -(ilen*segmentlength+segmentlength/2+ilen*modulesep)), Log_End_Support,
-                        "Front_Support_Physical_2_" + std::to_string(isec)+"_"+ std::to_string(ilen), DetectorLog_Det, false, 0, overlapcheck_sector), false);
+        if(rMin<85*cm){
+          RegisterPhysicalVolume( new G4PVPlacement(supfinalrot, G4ThreeVector((rMin-support_height/2-det_height/2-cooling_plate_height/2+moduleShift)*cos(isec*2*M_PI/12.), (rMin-support_height/2-det_height/2-cooling_plate_height/2+moduleShift)*sin(isec*2*M_PI/12.), ilen*segmentlength+segmentlength/2+ilen*modulesep), Log_End_Support,
+                          "Front_Support_Physical_1_" + std::to_string(isec)+"_"+ std::to_string(ilen), DetectorLog_Det, false, 0, overlapcheck_sector), false);
+          RegisterPhysicalVolume( new G4PVPlacement(supfinalrot, G4ThreeVector((rMin-support_height/2-det_height/2-cooling_plate_height/2+moduleShift)*cos(isec*2*M_PI/12.), (rMin-support_height/2-det_height/2-cooling_plate_height/2+moduleShift)*sin(isec*2*M_PI/12.), -(ilen*segmentlength+segmentlength/2+ilen*modulesep)), Log_End_Support,
+                          "Front_Support_Physical_2_" + std::to_string(isec)+"_"+ std::to_string(ilen), DetectorLog_Det, false, 0, overlapcheck_sector), false);
+        }
       }
 
       // forward segments
-      RegisterPhysicalVolume( new G4PVPlacement(motherrot, G4ThreeVector((rMin-det_height/2-0.3*cm)*cos(isec*2*M_PI/12.), (rMin-det_height/2-0.3*cm)*sin(isec*2*M_PI/12.), ilen*segmentlength+ilen*modulesep), log_module_envelope,
+      RegisterPhysicalVolume( new G4PVPlacement(motherrot, G4ThreeVector((rMin-det_height/2+moduleShift)*cos(isec*2*M_PI/12.), (rMin-det_height/2+moduleShift)*sin(isec*2*M_PI/12.), ilen*segmentlength+ilen*modulesep), log_module_envelope,
                           "Mother_Segment_Raw_Physical_Fwd_" + std::to_string(isec) +"_"+ std::to_string(ilen), DetectorLog_Det, false, 0, overlapcheck_sector),false);
       // backward segments
-      RegisterPhysicalVolume( new G4PVPlacement(motherrot, G4ThreeVector((rMin-det_height/2-0.3*cm)*cos(isec*2*M_PI/12.), (rMin-det_height/2-0.3*cm)*sin(isec*2*M_PI/12.), -ilen*segmentlength-ilen*modulesep), log_module_envelope,
+      RegisterPhysicalVolume( new G4PVPlacement(motherrot, G4ThreeVector((rMin-det_height/2+moduleShift)*cos(isec*2*M_PI/12.), (rMin-det_height/2+moduleShift)*sin(isec*2*M_PI/12.), -ilen*segmentlength-ilen*modulesep), log_module_envelope,
                           "Mother_Segment_Raw_Physical_Bwd_" + std::to_string(isec) +"_"+ std::to_string(ilen), DetectorLog_Det, false, 0, overlapcheck_sector),false);
     }
   }
