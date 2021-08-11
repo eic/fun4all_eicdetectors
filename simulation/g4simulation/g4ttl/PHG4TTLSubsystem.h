@@ -7,7 +7,7 @@
 
 #include <g4detectors/PHG4DetectorSubsystem.h>  // for PHG4DetectorSubsystem
 
-#include <string>                   // for string
+#include <string>  // for string
 
 class PHCompositeNode;
 class PHG4Detector;
@@ -30,7 +30,7 @@ class PHG4TTLSubsystem : public PHG4DetectorSubsystem
    reates the stepping action and place it on the node tree, under "ACTIONS" node
    creates relevant hit nodes that will be populated by the stepping action and stored in the output DST
    */
-  int InitRunSubsystem(PHCompositeNode *) override;
+  int InitRunSubsystem(PHCompositeNode*) override;
 
   //! event processing
   /*!
@@ -68,9 +68,8 @@ class PHG4TTLSubsystem : public PHG4DetectorSubsystem
 
   /** Set level of detail for display
    */
-  void SetDetailed(bool b){showdetailed = b;}
+  void SetDetailed(bool b) { showdetailed = b; }
 
-  
  private:
   void SetDefaultParameters() override;
   //! detector geometry

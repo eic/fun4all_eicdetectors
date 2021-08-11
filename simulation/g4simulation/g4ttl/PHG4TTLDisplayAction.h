@@ -18,7 +18,7 @@ class PHG4TTLDisplayAction : public PHG4DisplayAction
  public:
   PHG4TTLDisplayAction(const std::string &name);
   PHG4TTLDisplayAction(const std::string &name, bool detailed);
-  
+
   ~PHG4TTLDisplayAction() override;
 
   void ApplyDisplayAction(G4VPhysicalVolume *physvol) override;
