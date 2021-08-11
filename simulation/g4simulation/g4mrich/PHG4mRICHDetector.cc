@@ -1123,6 +1123,6 @@ void PHG4mRICHDetector::build_mRICH_wall_eside_proj(G4LogicalVolume* logicWorld)
   G4ThreeVector pos(0, 0, shift);
   G4RotationMatrix* rot = new G4RotationMatrix();
   rot->rotateX(180 * deg);
-  mRICHwall->MakeImprint(logicWorld, pos, rot, 0, OverlapCheck());
+  mRICHwall->MakeImprint(logicWorld, pos, rot, 1000, OverlapCheck());
 }
 
