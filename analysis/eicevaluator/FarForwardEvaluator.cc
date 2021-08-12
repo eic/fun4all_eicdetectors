@@ -38,18 +38,20 @@
 
 #include <TSystem.h>
 
-
 // G4Hits includes
 #include <g4main/PHG4Hit.h>
 #include <g4main/PHG4HitContainer.h>
 
-
-using namespace std;
-
-FarForwardEvaluator::FarForwardEvaluator(const string& name, const string& ffrname, const string& filename, const string& ip_str)
+FarForwardEvaluator::FarForwardEvaluator(const std::string& name, const std::string& ffrname, const std::string& filename, const std::string& ip_str)
   : SubsysReco(name)
   , _ffrname(ffrname)
   , _ip_str(ip_str)
+  , g4hitntuple(nullptr)
+  , h2_ZDC_XY(nullptr)
+  , h2_ZDC_XY_double(nullptr)
+  , h2_B0_XY(nullptr)
+  , h2_RP_XY(nullptr)
+  , hm(nullptr)
   , _ievent(0)
   , _towerID_debug(0)
   , _ieta_debug(0)
@@ -61,12 +63,12 @@ FarForwardEvaluator::FarForwardEvaluator(const string& name, const string& ffrna
   , _y_debug(0)
   , _z_debug(0)
   , _truth_trace_embed_flags()
-  , _truth_e_threshold(0.0)
-  ,  // 0 GeV before reco is traced
-  _reco_e_threshold(0.0)
-//  ,  // 0 GeV before reco is traced
-//  _caloevalstack(nullptr)
-  , _strict(false)
+  //, _truth_e_threshold(0.0)
+  //, 0 GeV before reco is traced
+  //,_reco_e_threshold(0.0)
+  //, 0 GeV before reco is traced
+  //,_caloevalstack(nullptr)
+  //, _strict(false)
   , _do_gpoint_eval(true)
   , _do_gshower_eval(true)
   , _do_tower_eval(true)
@@ -76,11 +78,14 @@ FarForwardEvaluator::FarForwardEvaluator(const string& name, const string& ffrna
   , _ntp_tower(nullptr)
   , _tower_debug(nullptr)
   , _ntp_cluster(nullptr)
+  , ZDC_hit(0)
+  , event_itt(0)
   , _filename(filename)
   , _tfile(nullptr)
+  , h1_E_dep_smeared(nullptr)
+  , h1_E_dep(nullptr)
 {
 }
-
 
 int FarForwardEvaluator::Init(PHCompositeNode* topNode)
 {
@@ -178,13 +183,12 @@ int FarForwardEvaluator::Init(PHCompositeNode* topNode)
 //
 int FarForwardEvaluator::process_event(PHCompositeNode* topNode)
 {
-
   ZDC_hit = 0;
 
-  event_itt++; 
- 
-  if(event_itt%100 == 0)
-     std::cout << "Event Processing Counter: " << event_itt << endl;
+  event_itt++;
+
+  if (event_itt % 100 == 0)
+    std::cout << "Event Processing Counter: " << event_itt << std::endl;
 
   process_g4hits_ZDC(topNode);
 
@@ -193,35 +197,32 @@ int FarForwardEvaluator::process_event(PHCompositeNode* topNode)
   process_g4hits_B0(topNode);
 
   return Fun4AllReturnCodes::EVENT_OK;
-
 }
-
 
 //***************************************************
 
 int FarForwardEvaluator::process_g4hits_ZDC(PHCompositeNode* topNode)
 {
- ostringstream nodename;
+  std::ostringstream nodename;
 
   nodename.str("");
-  nodename << "G4HIT_" << "ZDCsurrogate";
+  nodename << "G4HIT_"
+           << "ZDCsurrogate";
 
   PHG4HitContainer* hits = findNode::getClass<PHG4HitContainer>(topNode, nodename.str().c_str());
 
-  float smeared_E;
 
-
-  if (hits) {
-
+  if (hits)
+  {
     PHG4HitContainer::ConstRange hit_range = hits->getHits();
     for (PHG4HitContainer::ConstIterator hit_iter = hit_range.first; hit_iter != hit_range.second; hit_iter++)
-
     {
-	ZDC_hit++;
+      ZDC_hit++;
     }
 
-    for (PHG4HitContainer::ConstIterator hit_iter = hit_range.first; hit_iter != hit_range.second; hit_iter++) {
-
+    for (PHG4HitContainer::ConstIterator hit_iter = hit_range.first; hit_iter != hit_range.second; hit_iter++)
+    {
+      float smeared_E = 0;
       g4hitntuple->Fill(hit_iter->second->get_x(0),
                         hit_iter->second->get_y(0),
                         hit_iter->second->get_z(0),
@@ -230,37 +231,38 @@ int FarForwardEvaluator::process_g4hits_ZDC(PHCompositeNode* topNode)
                         hit_iter->second->get_z(1),
                         hit_iter->second->get_edep());
 
-    float x_offset;
+      float x_offset;
 
-    if(_ip_str == "IP6"){
-      x_offset = 90; 
-    } else{
-      x_offset = -120; 
-    }
- 
-      h2_ZDC_XY->Fill(hit_iter->second->get_x(0) + x_offset, hit_iter->second->get_y(0)); 
-
-//
-//      smeared_E = EMCAL_Smear(hit_iter->second->get_edep());
-      smeared_E = hit_iter->second->get_edep();
-//
-      if (ZDC_hit == 2 ) {
-
-//      cout << hit_iter->second->get_x(0)-90 << "   " << hit_iter->second->get_y(0) << endl;
-//        h2_ZDC_XY_double->Fill(hit_iter->second->get_x(0)-90, hit_iter->second->get_y(0)); 
-        h2_ZDC_XY_double->Fill(hit_iter->second->get_x(0) + x_offset, hit_iter->second->get_y(0)); 
-//      h1_E_dep->Fill(hit_iter->second->get_edep()); 
-
-        h1_E_dep->Fill(hit_iter->second->get_edep()); 
-        h1_E_dep_smeared->Fill(smeared_E); 
-//
+      if (_ip_str == "IP6")
+      {
+        x_offset = 90;
+      }
+      else
+      {
+        x_offset = -120;
       }
 
+      h2_ZDC_XY->Fill(hit_iter->second->get_x(0) + x_offset, hit_iter->second->get_y(0));
+
+      //
+      //      smeared_E = EMCAL_Smear(hit_iter->second->get_edep());
+      smeared_E = hit_iter->second->get_edep();
+      //
+      if (ZDC_hit == 2)
+      {
+        //      cout << hit_iter->second->get_x(0)-90 << "   " << hit_iter->second->get_y(0) << endl;
+        //        h2_ZDC_XY_double->Fill(hit_iter->second->get_x(0)-90, hit_iter->second->get_y(0));
+        h2_ZDC_XY_double->Fill(hit_iter->second->get_x(0) + x_offset, hit_iter->second->get_y(0));
+        //      h1_E_dep->Fill(hit_iter->second->get_edep());
+
+        h1_E_dep->Fill(hit_iter->second->get_edep());
+        h1_E_dep_smeared->Fill(smeared_E);
+        //
+      }
     }
   }
 
   return Fun4AllReturnCodes::EVENT_OK;
-
 }
 
 //***************************************************
@@ -268,62 +270,61 @@ int FarForwardEvaluator::process_g4hits_ZDC(PHCompositeNode* topNode)
 
 int FarForwardEvaluator::process_g4hits_RomanPots(PHCompositeNode* topNode)
 {
-  ostringstream nodename;
+  std::ostringstream nodename;
 
   nodename.str("");
-  nodename << "G4HIT_" << "rpTruth";
+  nodename << "G4HIT_"
+           << "rpTruth";
 
   PHG4HitContainer* hits = findNode::getClass<PHG4HitContainer>(topNode, nodename.str().c_str());
 
-
-  if (hits) {
-//    // this returns an iterator to the beginning and the end of our G4Hits
+  if (hits)
+  {
+    //    // this returns an iterator to the beginning and the end of our G4Hits
     PHG4HitContainer::ConstRange hit_range = hits->getHits();
 
-    for (PHG4HitContainer::ConstIterator hit_iter = hit_range.first; hit_iter != hit_range.second; hit_iter++) {
-
-	h2_RP_XY->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
-
-      }
+    for (PHG4HitContainer::ConstIterator hit_iter = hit_range.first; hit_iter != hit_range.second; hit_iter++)
+    {
+      h2_RP_XY->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
     }
+  }
 
   return Fun4AllReturnCodes::EVENT_OK;
 }
 
 //-----------------------------------
 
-
 //***************************************************
 // Getting the RomanPots hits
 
 int FarForwardEvaluator::process_g4hits_B0(PHCompositeNode* topNode)
 {
-  ostringstream nodename;
+  std::ostringstream nodename;
 
   nodename.str("");
-  nodename << "G4HIT_" << "b0Truth";
+  nodename << "G4HIT_"
+           << "b0Truth";
 
   PHG4HitContainer* hits = findNode::getClass<PHG4HitContainer>(topNode, nodename.str().c_str());
 
-
-  if (hits) {
-//    // this returns an iterator to the beginning and the end of our G4Hits
+  if (hits)
+  {
+    //    // this returns an iterator to the beginning and the end of our G4Hits
     PHG4HitContainer::ConstRange hit_range = hits->getHits();
 
-    for (PHG4HitContainer::ConstIterator hit_iter = hit_range.first; hit_iter != hit_range.second; hit_iter++) {
+    for (PHG4HitContainer::ConstIterator hit_iter = hit_range.first; hit_iter != hit_range.second; hit_iter++)
+    {
+      //	cout << "B0 hits? " << endl;
+      //	cout << "This is where you can fill your loop " << endl;
 
-//	cout << "B0 hits? " << endl;
-//	cout << "This is where you can fill your loop " << endl;
-
-	h2_B0_XY->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
-      }
+      h2_B0_XY->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
     }
+  }
 
   return Fun4AllReturnCodes::EVENT_OK;
 }
 
 //***************************************************
-
 
 int FarForwardEvaluator::End(PHCompositeNode* topNode)
 {
@@ -335,6 +336,4 @@ int FarForwardEvaluator::End(PHCompositeNode* topNode)
   delete _tfile;
 
   return Fun4AllReturnCodes::EVENT_OK;
-
 }
-

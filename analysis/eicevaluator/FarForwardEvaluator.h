@@ -20,7 +20,7 @@ class CaloEvalStack;
 class PHCompositeNode;
 class TFile;
 class TNtuple;
-class TTree; 
+class TTree;
 
 /// \class FarForwardEvaluator
 ///
@@ -35,33 +35,31 @@ class FarForwardEvaluator : public SubsysReco
 {
  public:
   FarForwardEvaluator(const std::string &name = "FARFORWARDEVALUATOR",
-                const std::string &ffrname = "FFR",
-                const std::string &filename = "g4eval_ffr.root",
-		const std::string &ip_str = "IP6"
-);
+                      const std::string &ffrname = "FFR",
+                      const std::string &filename = "g4eval_ffr.root",
+                      const std::string &ip_str = "IP6");
   ~FarForwardEvaluator() override{};
 
   int Init(PHCompositeNode *topNode) override;
   int process_event(PHCompositeNode *topNode) override;
   int End(PHCompositeNode *topNode) override;
 
-private:
-
+ private:
   std::string _ffrname;
   std::string _ip_str;
 
-//  TFile *outfile;
-//  std::string outfilename;
+  //  TFile *outfile;
+  //  std::string outfilename;
 
   TNtuple *g4hitntuple;
-  TNtuple *clusterntuple;
+  //TNtuple *clusterntuple;
 
-  TH2F* h2_ZDC_XY; 
-  TH2F* h2_ZDC_XY_double; 
+  TH2F *h2_ZDC_XY;
+  TH2F *h2_ZDC_XY_double;
 
-  TH2F* h2_B0_XY; 
+  TH2F *h2_B0_XY;
 
-  TH2F* h2_RP_XY; 
+  TH2F *h2_RP_XY;
 
   Fun4AllHistoManager *hm;
 
@@ -79,15 +77,15 @@ private:
   float _z_debug;
 
   std::set<int> _truth_trace_embed_flags;
-  float _truth_e_threshold;
-  float _reco_e_threshold;
+  //float _truth_e_threshold;
+  //float _reco_e_threshold;
 
-//  CaloEvalStack *_caloevalstack;
+  //  CaloEvalStack *_caloevalstack;
 
   //----------------------------------
   // evaluator output ntuples
 
-  bool _strict;
+  //bool _strict;
 
   bool _do_gpoint_eval;
   bool _do_gshower_eval;
@@ -111,9 +109,9 @@ private:
   int process_g4hits_ZDC(PHCompositeNode *);
   int process_g4hits_RomanPots(PHCompositeNode *);
   int process_g4hits_B0(PHCompositeNode *);
-  
-  TH1F* h1_E_dep_smeared;
-  TH1F* h1_E_dep;
+
+  TH1F *h1_E_dep_smeared;
+  TH1F *h1_E_dep;
 };
 
 #endif  // G4EVAL_FARFORWARDEVALUATOR_H
