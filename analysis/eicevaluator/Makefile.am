@@ -32,11 +32,13 @@ libeiceval_la_LIBADD = \
   -lg4eval
 
 pkginclude_HEADERS = \
-  EventEvaluatorEIC.h 
+  EventEvaluatorEIC.h \
+  FarForwardEvaluator.h
 
 libeiceval_la_SOURCES = \
-  EventEvaluatorEIC.cc 
-  
+  EventEvaluatorEIC.cc \
+  FarForwardEvaluator.cc
+
 # Rule for generating table CINT dictionaries.
 %_Dict.cc: %.h %LinkDef.h
 	rootcint -f $@ @CINTDEFS@ $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
