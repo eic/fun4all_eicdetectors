@@ -1,5 +1,8 @@
 #include "RawTowerBuilderDRCALO.h"
 
+#include <Geant4/G4SystemOfUnits.hh>
+#include <Geant4/G4Types.hh>               // for G4double, G4int
+
 #include <calobase/RawTowerContainer.h>
 #include <calobase/RawTowerv1.h>
 #include <calobase/RawTowerv2.h>
@@ -300,38 +303,38 @@ bool RawTowerBuilderDRCALO::ReadGeometryFromTable()
 
   parit = m_GlobalParameterMap.find("Gx0");
   if (parit != m_GlobalParameterMap.end())
-    m_GlobalPlaceInX = parit->second;
+    m_GlobalPlaceInX = parit->second * cm;
 
   parit = m_GlobalParameterMap.find("Gy0");
   if (parit != m_GlobalParameterMap.end())
-    m_GlobalPlaceInY = parit->second;
+    m_GlobalPlaceInY = parit->second * cm;
 
   parit = m_GlobalParameterMap.find("Gz0");
   if (parit != m_GlobalParameterMap.end())
-    m_GlobalPlaceInZ = parit->second;
+    m_GlobalPlaceInZ = parit->second * cm;
 
   // unsigned idx_j, idx_k, idx_l;
-  double pos_x, pos_y, pos_z;
+  G4double pos_x, pos_y, pos_z;
   // double size_x, size_y, size_z;
-  double size_z = 10;
+  G4double size_z = 10;
   // double rot_x, rot_y, rot_z;
   double type = 0;
   string dummys;
 
   parit = m_GlobalParameterMap.find("Gdz");
   if (parit != m_GlobalParameterMap.end())
-    size_z = parit->second;
+    size_z = parit->second * cm;
 
   pos_z = m_GlobalPlaceInZ;
-  float twrsize = 1.0;//1.2
-  float drsize = 220;
+  G4double twrsize = 1.0;//1.2
+  G4double drsize = 220;
   parit = m_GlobalParameterMap.find("Gtower_dx");
   if (parit != m_GlobalParameterMap.end()){
-    twrsize = parit->second;
+    twrsize = parit->second * cm;
   }
   parit = m_GlobalParameterMap.find("Gr1_outer");
   if (parit != m_GlobalParameterMap.end()){
-    drsize = parit->second;
+    drsize = parit->second * cm;
   }
 
   float scaling = 1.;
