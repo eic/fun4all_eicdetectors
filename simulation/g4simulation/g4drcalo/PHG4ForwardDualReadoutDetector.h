@@ -83,6 +83,7 @@ class PHG4ForwardDualReadoutDetector : public PHG4Detector
 
  private:
   G4LogicalVolume *ConstructTower(int type);
+  G4LogicalVolume *ConstructTowerFCStyle(int type);
   // G4LogicalVolume *ConstructTowerType1();
   // G4LogicalVolume *ConstructTowerType2();
   // G4LogicalVolume *ConstructTowerType3();

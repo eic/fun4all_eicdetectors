@@ -170,7 +170,7 @@ bool PHG4ForwardDualReadoutSteppingAction::UserSteppingAction(const G4Step* aSte
     /* Get Geant4 pre- and post-step points */
     G4StepPoint* prePoint = aStep->GetPreStepPoint();
     G4StepPoint* postPoint = aStep->GetPostStepPoint();
-    if(abs( prePoint->GetPosition().y() / cm)>220  || abs( prePoint->GetPosition().x() / cm)>220) return false;
+    if(abs( prePoint->GetPosition().y() / cm)>(_detector_size*1.1)  || abs( prePoint->GetPosition().x() / cm)>(_detector_size*1.1)) return false;
     // cout << "x: " << prePoint->GetPosition().x() << "\ty: "  << prePoint->GetPosition().y() << "\tz: "  << prePoint->GetPosition().z() << endl;
     switch (prePoint->GetStepStatus())
     {
@@ -466,8 +466,8 @@ int PHG4ForwardDualReadoutSteppingAction::FindTowerIndexFromPosition(G4StepPoint
 
   // G4VPhysicalVolume* tower = touch->GetVolume(1);  //Get the tower solid
   // ParseG4VolumeName(tower, j_0, k_0);
-  j_0 = (int) ( ( _detector_size + ( prePoint->GetPosition().x() / cm ) ) / _tower_size ); //TODO DRCALO TOWER SIZE
-  k_0 = (int) ( ( _detector_size + ( prePoint->GetPosition().y() / cm ) ) / _tower_size ); //TODO DRCALO TOWER SIZE
+  j_0 = (int) ( ( _detector_size + ( prePoint->GetPosition().x() ) ) / _tower_size ); //TODO DRCALO TOWER SIZE
+  k_0 = (int) ( ( _detector_size + ( prePoint->GetPosition().y() ) ) / _tower_size ); //TODO DRCALO TOWER SIZE
   // if(prePoint->GetPosition().x()>290) cout << prePoint->GetPosition().x() << "\t" << k_0 << endl;
   j = (j_0 * 1);
   k = (k_0 * 1);

@@ -172,7 +172,9 @@ void PHG4ForwardDualReadoutDetector::ConstructMe(G4LogicalVolume* logicWorld)
                     drcalo_envelope_log, name_envelope.str().c_str(), logicWorld, 0, false, OverlapCheck());
 
 
-  G4LogicalVolume* singletower = ConstructTower(0); //4x4 fibre tower with 2 scint and 2 Cherenkov fibres
+  G4LogicalVolume* singletower;
+  if(_tower_type==5) singletower = ConstructTowerFCStyle(0);
+  else singletower = ConstructTower(0); //4x4 fibre tower with 2 scint and 2 Cherenkov fibres
 
 
   G4Material* material_air = G4Material::GetMaterial("G4_AIR");
@@ -502,6 +504,159 @@ PHG4ForwardDualReadoutDetector::ConstructTower(int type)
                       single_tower_logic,
                       0, 0, OverlapCheck());
   }
+
+  if (Verbosity() > 0)
+  {
+    cout << "PHG4ForwardDualReadoutDetector: Building logical volume for single tower done." << endl;
+  }
+
+  return single_tower_logic;
+}
+
+//_______________________________________________________________________
+G4LogicalVolume*
+PHG4ForwardDualReadoutDetector::ConstructTowerFCStyle(int type)
+{
+  if (Verbosity() > 0)
+  {
+    cout << "PHG4ForwardDualReadoutDetector: Build logical volume for single tower..." << endl;
+  }
+
+  //create logical volume for single tower
+  G4Material* material_air = G4Material::GetMaterial("G4_AIR");
+  // 2x2 tower base element
+  G4VSolid* single_tower_solid = new G4Box(G4String("single_tower_solid"),
+                                          _tower_dx / 2.0,
+                                          _tower_dy / 2.0,
+                                          _tower_dz / 2.0);
+
+  G4LogicalVolume* single_tower_logic = new G4LogicalVolume(single_tower_solid,
+                                                            material_air,
+                                                            "single_tower_logic",
+                                                            0, 0, 0);
+
+  //create geometry volumes to place inside single_tower
+
+  G4double copperTubeDiam = _tower_dx/2;
+  G4double diameter_fiber = _scintFiber_diam;
+  G4double diameter_fiber_cherenkov = _cerenkovFiber_diam;
+
+  // fibre cutout
+  G4VSolid* solid_absorber  = new G4Tubs(G4String("ttl_copper_tube_solid"),
+                                            0,
+                                            copperTubeDiam / 2.0,
+                                            _tower_dz / 2.0,
+                                            0.,2*M_PI*rad);
+
+  G4VSolid* solid_scintillator  = new G4Tubs(G4String("single_scintillator_fiber"),
+                                            0,
+                                            diameter_fiber / 2.0,
+                                            _tower_dz / 2.0,
+                                            0.,2*M_PI*rad);
+
+
+  G4VSolid* solid_cherenkov  = new G4Tubs(G4String("single_cherenkov_fiber"),
+                                            0,
+                                            diameter_fiber_cherenkov / 2.0,
+                                            _tower_dz / 2.0,
+                                            0.,2*M_PI*rad);
+
+
+  G4Material* material_scintillator = GetScintillatorMaterial();
+
+
+  G4NistManager* man = G4NistManager::Instance();
+  G4Material* material_absorber;
+  if(_absorber_Material==0)material_absorber = man->FindOrBuildMaterial(_materialAbsorber.c_str());
+  else if(_absorber_Material==1)material_absorber = man->FindOrBuildMaterial("G4_W");
+  else if(_absorber_Material==2)material_absorber = man->FindOrBuildMaterial("G4_Cu");
+  else if(_absorber_Material==3)material_absorber = man->FindOrBuildMaterial("G4_Pb");
+  else material_absorber = man->FindOrBuildMaterial(_materialAbsorber.c_str());
+
+
+  G4LogicalVolume* logic_absorber = new G4LogicalVolume(solid_absorber,
+                                                        material_absorber,
+                                                        "absorber_solid_logic",
+                                                        0, 0, 0);
+
+  G4LogicalVolume* logic_scint = new G4LogicalVolume(solid_scintillator,
+                                                    material_scintillator,
+                                                    "hdrcalo_single_scintillator_fiber_logic",
+                                                    0, 0, 0);
+
+  G4Material *material_cherenkov;
+  if(_cerenkovFiber_material==0) material_cherenkov = GetPMMAMaterial();
+  else if(_cerenkovFiber_material==1) material_cherenkov = GetQuartzMaterial();
+  else material_cherenkov = GetPMMAMaterial();
+
+  G4LogicalVolume* logic_cherenk = new G4LogicalVolume(solid_cherenkov,
+                                                    material_cherenkov,
+                                                    "hdrcalo_single_cherenkov_fiber_logic",
+                                                    0, 0, 0);
+
+  m_DisplayAction->AddVolume(logic_absorber, "Absorber");
+  m_DisplayAction->AddVolume(logic_scint, "Scintillator");
+  m_DisplayAction->AddVolume(logic_cherenk, "Cherenkov");
+
+  //place physical volumes for absorber and scintillator fiber
+
+  ostringstream name_absorber;
+  name_absorber.str("");
+  name_absorber << _towerlogicnameprefix << "absorbersolid" << endl;
+
+  ostringstream name_scintillator;
+  name_scintillator.str("");
+  name_scintillator << _towerlogicnameprefix << "singlescintillatorfiber" << endl;
+
+  ostringstream name_cherenkov;
+  name_cherenkov.str("");
+  name_cherenkov << _towerlogicnameprefix << "_single_cherenkov_fiber"  << endl;
+
+
+  new G4PVPlacement(0, G4ThreeVector( -_tower_dx/4,  _tower_dx/4 , 0),
+                    logic_absorber,
+                    name_absorber.str().c_str(),
+                    single_tower_logic,
+                    0, 0, OverlapCheck());
+  new G4PVPlacement(0, G4ThreeVector( -_tower_dx/4,  -_tower_dx/4 , 0),
+                    logic_absorber,
+                    name_absorber.str().c_str(),
+                    single_tower_logic,
+                    0, 0, OverlapCheck());
+  new G4PVPlacement(0, G4ThreeVector( _tower_dx/4,  _tower_dx/4 , 0),
+                    logic_absorber,
+                    name_absorber.str().c_str(),
+                    single_tower_logic,
+                    0, 0, OverlapCheck());
+  new G4PVPlacement(0, G4ThreeVector( _tower_dx/4,  -_tower_dx/4 , 0),
+                    logic_absorber,
+                    name_absorber.str().c_str(),
+                    single_tower_logic,
+                    0, 0, OverlapCheck());
+
+    // place scintillator fibers (top left, bottom right)
+    new G4PVPlacement(0, G4ThreeVector( 0,  0 , 0),
+                      logic_scint,
+                      name_scintillator.str().c_str(),
+                      single_tower_logic,
+                      0, 0, OverlapCheck());
+    new G4PVPlacement(0, G4ThreeVector( _tower_dx / 2, _tower_dx / 2 , 0),
+                      logic_scint,
+                      name_scintillator.str().c_str(),
+                      single_tower_logic,
+                      0, 0, OverlapCheck());
+
+    // place cherenkov fibers (top right, bottom left)
+    new G4PVPlacement(0, G4ThreeVector( _tower_dx / 2, 0 , 0),
+                      logic_cherenk,
+                      name_cherenkov.str().c_str(),
+                      single_tower_logic,
+                      0, 0, OverlapCheck());
+    new G4PVPlacement(0, G4ThreeVector( 0, _tower_dx / 2 , 0),
+                      logic_cherenk,
+                      name_cherenkov.str().c_str(),
+                      single_tower_logic,
+                      0, 0, OverlapCheck());
 
   if (Verbosity() > 0)
   {
