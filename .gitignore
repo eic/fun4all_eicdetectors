@@ -1,97 +1,178 @@
-macros/G4History.macro
-macros/auxiliary_studies/simplified_geometry/G4History.macro
-materialscan/
-macros/G4LBLVtx.root
-macros/SimpleNtuple.root
-macros/SimpleNtuple_copy.root
-macros/Fun4All_G4_FAIR_copy.C
-macros/SimpleNtuple_quadrant_limitedEta.root
-macros/barrel_only_FastTrackingEval_1.root
-macros/barrel_only_FastTrackingEval_2.root
-cori_batch/run_shared.sh~
-cori_batch/sPHENIX_shifter.sh~
-macros/FastTrackingEval.root
-cori_batch/#run_shared.sh#
-cori_batch/#slurm-29717230_1.out#
-macros/out_allSi_pi-_FastTrackingEval.root
+# http://www.gnu.org/software/automake
+
+Makefile.in
+
+# http://www.gnu.org/software/autoconf
+
+autom4te.cache
+aclocal.m4
+compile
+configure
+depcomp
+install-sh
+missing
+stamp-h1
+
+config.guess
+config.sub
+ltmain.sh
+
+
+# Have editor/IDE/OS specific files you need to ignore? Consider using a global gitignore: 
+#
+# * Create a file at ~/.gitignore
+# * Include files you want ignored
+# * Run: git config --global core.excludesfile ~/.gitignore
+#
+# After doing this, these files will be ignored in all your git projects,
+# saving you from having to 'pollute' every project you touch with them
+#
+# For MacOS:
+#
+.DS_Store
+
+# ignore RVM configuration
+.rvmrc
+
+# For TextMate
+*.tmproj
+tmtags
+
+# For emacs:
+*~
+\#*
+.\#*
+
+# For vim:
+*.swp
+
+# For redcar:
+.redcar
+
+# For rubinius:
+*.rbc
+
+# standard C++ Git igore
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+*.pcm
+*_Dict.cc
+*.status
+
+# Executables
+*.exe
 *.out
-source/Makefile.in
-source/aclocal.m4
-source/autom4te.cache/
-source/config.guess
-source/config.sub
-source/configure
-source/depcomp
-source/install-sh
-source/ltmain.sh
-source/missing
+*.app
+/.cproject
+/.project
+# http://www.gnu.org/software/automake
 
-macros/*.root
+Makefile.in
 
-cori_batch/sPHENIX_shifter.sh
-cori_batch/run_shared_pim_sPHENIX.sh
+# http://www.gnu.org/software/autoconf
+build
+autom4te.cache
+aclocal.m4
+compile
+configure
+depcomp
+install-sh
+missing
+stamp-h1
 
-macros/analysis.C
-macros/test.C
-macros/test2.C
+config.guess
+config.sub
+ltmain.sh
 
-macros/auxiliary_studies/vertexing/cori_batch/sourceme_0.05_10um.sh
-macros/auxiliary_studies/vertexing/cori_batch/sourceme_0.05_20um.sh
-macros/auxiliary_studies/vertexing/cori_batch/sourceme_0.3_10um.sh
-macros/auxiliary_studies/vertexing/cori_batch/sourceme_0.3_20um.sh
-macros/auxiliary_studies/vertexing/cori_batch/sourceme_overall.sh
 
-macros/A_Kiselev_study/
+# Have editor/IDE/OS specific files you need to ignore? Consider using a global gitignore: 
+#
+# * Create a file at ~/.gitignore
+# * Include files you want ignored
+# * Run: git config --global core.excludesfile ~/.gitignore
+#
+# After doing this, these files will be ignored in all your git projects,
+# saving you from having to 'pollute' every project you touch with them
+#
+# For MacOS:
+#
+.DS_Store
 
-macros/auxiliary_studies/vertexing/cori_batch/run_001_p_0_7_GeV_1.4T.sh
-macros/auxiliary_studies/vertexing/cori_batch/run_010_p_0_7_GeV_1.4T.sh
-macros/auxiliary_studies/vertexing/cori_batch/run_011_p_0_7_GeV_1.4T.sh
-macros/auxiliary_studies/vertexing/cori_batch/run_100_p_0_7_GeV_1.4T.sh
-macros/auxiliary_studies/vertexing/cori_batch/run_101_p_0_7_GeV_1.4T.sh
-macros/auxiliary_studies/vertexing/cori_batch/run_110_p_0_7_GeV_1.4T.sh
-macros/auxiliary_studies/vertexing/cori_batch/run_111_p_0_7_GeV_1.4T.sh
-macros/auxiliary_studies/vertexing/cori_batch/sourceme_p_0_7_GeV_1.4T.sh
+# ignore RVM configuration
+.rvmrc
 
-cori_batch/old_scripts/
+# For TextMate
+*.tmproj
+tmtags
 
-macros/auxiliary_studies/vertexing/G4History.macro
+# For emacs:
+*~
+\#*
+.\#*
 
-macros/auxiliary_studies/vertexing/cori_batch/run_001_p_0_1_GeV_1.4T.sh
-macros/auxiliary_studies/vertexing/cori_batch/run_001_p_0_1_GeV_3.0T.sh
-macros/auxiliary_studies/vertexing/cori_batch/run_001_p_7_30_GeV_1.4T.sh
-macros/auxiliary_studies/vertexing/cori_batch/run_010_p_0_1_GeV_1.4T.sh
-macros/auxiliary_studies/vertexing/cori_batch/run_010_p_0_1_GeV_3.0T.sh
-macros/auxiliary_studies/vertexing/cori_batch/run_010_p_7_30_GeV_1.4T.sh
-macros/auxiliary_studies/vertexing/cori_batch/run_011_p_0_1_GeV_1.4T.sh
-macros/auxiliary_studies/vertexing/cori_batch/run_011_p_0_1_GeV_3.0T.sh
-macros/auxiliary_studies/vertexing/cori_batch/run_011_p_7_30_GeV_1.4T.sh
-macros/auxiliary_studies/vertexing/cori_batch/run_100_p_0_1_GeV_1.4T.sh
-macros/auxiliary_studies/vertexing/cori_batch/run_100_p_0_1_GeV_3.0T.sh
-macros/auxiliary_studies/vertexing/cori_batch/run_100_p_7_30_GeV_1.4T.sh
-macros/auxiliary_studies/vertexing/cori_batch/run_101_p_0_1_GeV_1.4T.sh
-macros/auxiliary_studies/vertexing/cori_batch/run_101_p_0_1_GeV_3.0T.sh
-macros/auxiliary_studies/vertexing/cori_batch/run_101_p_7_30_GeV_1.4T.sh
-macros/auxiliary_studies/vertexing/cori_batch/run_110_p_0_1_GeV_1.4T.sh
-macros/auxiliary_studies/vertexing/cori_batch/run_110_p_0_1_GeV_3.0T.sh
-macros/auxiliary_studies/vertexing/cori_batch/run_110_p_7_30_GeV_1.4T.sh
-macros/auxiliary_studies/vertexing/cori_batch/run_111_p_0_1_GeV_1.4T.sh
-macros/auxiliary_studies/vertexing/cori_batch/run_111_p_0_1_GeV_3.0T.sh
-macros/auxiliary_studies/vertexing/cori_batch/run_111_p_7_30_GeV_1.4T.sh
-macros/auxiliary_studies/vertexing/cori_batch/shifter_dead_layers.sh
-macros/auxiliary_studies/vertexing/cori_batch/sourceme_p_0_1_GeV_1.4T.sh
-macros/auxiliary_studies/vertexing/cori_batch/sourceme_p_0_1_GeV_3.0T.sh
-macros/auxiliary_studies/vertexing/cori_batch/sourceme_p_7_30_GeV_1.4T.sh
+# For vim:
+*.swp
 
-cori_batch/new_vtx_run_shared_pim_det1_10x10.sh
-cori_batch/new_vtx_run_shared_pim_det1_20x20.sh
-cori_batch/new_vtx_run_shared_pim_det2_20x20.sh
-cori_batch/new_vtx_run_shared_pim_det3_10x10.sh
-cori_batch/new_vtx_run_shared_pim_det3_20x20.sh
+# For redcar:
+.redcar
 
-cori_batch/run_shared_pim_det1_20x20.sh
-cori_batch/run_shared_pim_det2_10x10_GEM.sh
-cori_batch/run_shared_pim_det2_10x10_GEM_RICH.sh
-cori_batch/run_shared_pim_det2_20x20.sh
-cori_batch/run_shared_pim_det2_20x20_GEM.sh
-cori_batch/run_shared_pim_det2_20x20_GEM_RICH.sh
+# For rubinius:
+*.rbc
 
+# standard C++ Git igore
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+*.pcm
+*_Dict.cc
+*.status
+
+# Executables
+*.exe
+*.out
+*.app
+/.cproject
+/.project

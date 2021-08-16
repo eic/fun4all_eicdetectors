@@ -191,6 +191,13 @@ PHG4ForwardHcalDetector::ConstructTower()
   G4Material* material_wls = G4Material::GetMaterial(m_Params->get_string_param("scintillator"));
   G4Material* material_support = G4Material::GetMaterial(m_Params->get_string_param("support"));
 
+  if(m_Params->get_int_param("absorber_FeTungsten")==1){
+    G4double density;
+    G4int natoms;
+    material_absorber = new G4Material("FeTungstenMix",  density =  10.1592*g/cm3, natoms=2);
+    material_absorber->AddMaterial(G4Material::GetMaterial("G4_Fe"), 80*perCent);  // Steel
+    material_absorber->AddMaterial(G4Material::GetMaterial("G4_W"),  20*perCent);  // Tungsten
+  }
   G4LogicalVolume* logic_absorber = new G4LogicalVolume(solid_absorber,
                                                         material_absorber,
                                                         "single_plate_absorber_logic",
@@ -264,7 +271,7 @@ PHG4ForwardHcalDetector::ConstructTower()
                     name_wls,
                     single_tower_logic,
                     0, 0, OverlapCheck());
-  m_DisplayAction->AddVolume(single_tower_logic, "SingleScintillator");
+  m_DisplayAction->AddVolume(single_tower_logic, "SingleTower");
 
   if (Verbosity() > 0)
   {

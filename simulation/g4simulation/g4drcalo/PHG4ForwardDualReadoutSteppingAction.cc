@@ -64,6 +64,8 @@ PHG4ForwardDualReadoutSteppingAction::PHG4ForwardDualReadoutSteppingAction(PHG4F
   , hitcontainer(nullptr)
   , hit(nullptr)
   , saveshower(nullptr)
+  , _tower_size(1.0)
+  , _detector_size(100)
   , absorbertruth(absorberactive)
   , light_scint_model(1)
 {
@@ -168,7 +170,7 @@ bool PHG4ForwardDualReadoutSteppingAction::UserSteppingAction(const G4Step* aSte
     /* Get Geant4 pre- and post-step points */
     G4StepPoint* prePoint = aStep->GetPreStepPoint();
     G4StepPoint* postPoint = aStep->GetPostStepPoint();
-    if(abs( prePoint->GetPosition().y() / cm)>220  || abs( prePoint->GetPosition().x() / cm)>220) return false;
+    if(abs( prePoint->GetPosition().y() / cm)>(_detector_size*1.1)  || abs( prePoint->GetPosition().x() / cm)>(_detector_size*1.1)) return false;
     // cout << "x: " << prePoint->GetPosition().x() << "\ty: "  << prePoint->GetPosition().y() << "\tz: "  << prePoint->GetPosition().z() << endl;
     switch (prePoint->GetStepStatus())
     {
@@ -300,9 +302,9 @@ bool PHG4ForwardDualReadoutSteppingAction::UserSteppingAction(const G4Step* aSte
       // cout << aTrack->GetCreatorProcess()->GetProcessName() << endl;
       //scintillation photons
       G4Material* prevMaterial = aStep->GetPreStepPoint()->GetMaterial();
-      if(ptype == fScinType && pstype == fScinSubType && (prevMaterial->GetName().find("G4_POLYSTYRENE") != std::string::npos)){ fNscin++;}
+      if((ptype == fScinType) && (pstype == fScinSubType) && (prevMaterial->GetName().find("G4_POLYSTYRENE") != std::string::npos)){ fNscin++;}
       //Cerenkov photons
-      if(ptype == fCerenkovType && pstype == fCerenkovSubType && (prevMaterial->GetName().find("PMMA") != std::string::npos)){ fNcerenkov++;}
+      if( (ptype == fCerenkovType) && (pstype == fCerenkovSubType) && ((prevMaterial->GetName().find("PMMA") != std::string::npos) || (prevMaterial->GetName().find("Quartz") != std::string::npos))){ fNcerenkov++;}
     //   if(aTrack->GetParentID() > 0)
     // {
     //   if(aTrack->GetCreatorProcess()->GetProcessName().find("enkov") != string::npos)cout << aTrack->GetCreatorProcess()->GetProcessName() << endl;
@@ -311,8 +313,8 @@ bool PHG4ForwardDualReadoutSteppingAction::UserSteppingAction(const G4Step* aSte
     }//secondary tracks loop
 //     cout << __LINE__ << endl;
 //       cout << hit->get_property_float(PHG4Hit::PROPERTY::scint_gammas) <<  "\tadd fNscin: " << fNscin <<  "\t" << hit->get_property_float(PHG4Hit::PROPERTY::cerenkov_gammas) << "\t add fNcerenkov: " << fNcerenkov<< endl;
-    G4Material* nextMaterial = aStep->GetPostStepPoint()->GetMaterial();
-    string materialstr = nextMaterial->GetName();
+    //G4Material* nextMaterial = aStep->GetPostStepPoint()->GetMaterial();
+    //string materialstr = nextMaterial->GetName();
 //     string materialstr2 = prevMaterial->GetName();
 //     if(materialstr.find("G4_AIR") == std::string::npos)cout << materialstr << endl;;
 //     if(materialstr2.find("G4_AIR") == std::string::npos)cout << "\t" << materialstr2 << endl;;
@@ -462,13 +464,10 @@ int PHG4ForwardDualReadoutSteppingAction::FindTowerIndexFromPosition(G4StepPoint
   int j_0 = 0;  //The j and k indices for the scintillator / tower
   int k_0 = 0;  //The j and k indices for the scintillator / tower
 
-  float twrsize = 1.2;//1.2; // was 0.3
-  // float twrsize = 1.2;//1.2; // was 0.3
-  float drsize = 220.;
   // G4VPhysicalVolume* tower = touch->GetVolume(1);  //Get the tower solid
   // ParseG4VolumeName(tower, j_0, k_0);
-  j_0 = (int) ( ( drsize + ( prePoint->GetPosition().x() / cm ) ) / twrsize ); //TODO DRCALO TOWER SIZE
-  k_0 = (int) ( ( drsize + ( prePoint->GetPosition().y() / cm ) ) / twrsize ); //TODO DRCALO TOWER SIZE
+  j_0 = (int) ( ( _detector_size + ( prePoint->GetPosition().x() ) ) / _tower_size ); //TODO DRCALO TOWER SIZE
+  k_0 = (int) ( ( _detector_size + ( prePoint->GetPosition().y() ) ) / _tower_size ); //TODO DRCALO TOWER SIZE
   // if(prePoint->GetPosition().x()>290) cout << prePoint->GetPosition().x() << "\t" << k_0 << endl;
   j = (j_0 * 1);
   k = (k_0 * 1);

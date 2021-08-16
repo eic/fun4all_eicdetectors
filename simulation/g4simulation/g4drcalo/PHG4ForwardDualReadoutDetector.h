@@ -7,6 +7,7 @@
 
 #include <Geant4/G4String.hh>  // for G4String
 #include <Geant4/G4Types.hh>   // for G4double
+#include <Geant4/G4Material.hh>
 
 #include <map>
 #include <string>
@@ -15,6 +16,7 @@ class G4LogicalVolume;
 class G4VPhysicalVolume;
 class PHCompositeNode;
 class PHG4ForwardDualReadoutDisplayAction;
+class PHG4ForwardDualReadoutSteppingAction;
 class PHG4Subsystem;
 
 /**
@@ -71,6 +73,7 @@ class PHG4ForwardDualReadoutDetector : public PHG4Detector
   int IsActive() const { return _active; }
 
   void SuperDetector(const std::string &name) { _superdetector = name; }
+  void SetSteppingAction(PHG4ForwardDualReadoutSteppingAction *stpact) { m_SteppingAction = stpact; }
   const std::string SuperDetector() const { return _superdetector; }
 
   int get_Layer() const { return _layer; }
@@ -80,8 +83,15 @@ class PHG4ForwardDualReadoutDetector : public PHG4Detector
 
  private:
   G4LogicalVolume *ConstructTower(int type);
+  G4LogicalVolume *ConstructTowerFCStyle(int type);
+  // G4LogicalVolume *ConstructTowerType1();
+  // G4LogicalVolume *ConstructTowerType2();
+  // G4LogicalVolume *ConstructTowerType3();
+  G4Material *GetScintillatorMaterial();
+  G4Material *GetQuartzMaterial();
+  G4Material *GetPMMAMaterial();
   int PlaceTower(G4LogicalVolume *envelope, G4LogicalVolume *tower);
-  int InitDefaultParams();
+  int ParseParametersFromTable();
 
   struct towerposition
   {
@@ -94,11 +104,15 @@ class PHG4ForwardDualReadoutDetector : public PHG4Detector
   };
 
   PHG4ForwardDualReadoutDisplayAction *m_DisplayAction;
+  PHG4ForwardDualReadoutSteppingAction *m_SteppingAction;
 
   /* Calorimeter envelope geometry */
   G4double _place_in_x;
   G4double _place_in_y;
   G4double _place_in_z;
+  G4double _center_offset_x;
+  G4double _center_offset_y;
+  int _quadratic_detector;
 
   G4double _rot_in_x;
   G4double _rot_in_y;
@@ -113,10 +127,17 @@ class PHG4ForwardDualReadoutDetector : public PHG4Detector
   G4double _sPhi;
   G4double _dPhi;
 
-  /* HCAL tower geometry */
+  /* DRCALO tower geometry */
+  int _tower_type;
   G4double _tower_dx;
   G4double _tower_dy;
   G4double _tower_dz;
+
+  G4double _scintFiber_diam;
+  G4double _cerenkovFiber_diam;
+  int _cerenkovFiber_material;
+  int _tower_makeNotched;
+  int _absorber_Material;
 
   G4double _wls_dw;
   G4double _support_dw;
@@ -132,8 +153,8 @@ class PHG4ForwardDualReadoutDetector : public PHG4Detector
   std::string _towerlogicnameprefix;
   std::string _superdetector;
   std::string _mapping_tower_file;
+  std::map<std::string, G4double> m_GlobalParameterMap;
 
-  std::map<std::string, G4double> _map_global_parameter;
   std::map<std::string, towerposition> _map_tower;
 };
 

@@ -16,19 +16,29 @@ AM_LDFLAGS = \
   -L$(ROOTSYS)/lib
 
 libdrcalo_la_LIBADD = \
+  -lphool \
+  -lSubsysReco \
   -lfun4all \
   -lphg4hit \
+  -lg4testbench \
   -lg4detectors \
-  -ltrackbase_historic_io
+  -lg4detectors_io \
+  -ltrackbase_historic_io \
+  -lphparameter \
+  -lgsl \
+  -lgslcblas \
+  -lcalo_io
 
 pkginclude_HEADERS = \
-  PHG4ForwardDualReadoutSubsystem.h
+  PHG4ForwardDualReadoutSubsystem.h \
+  RawTowerBuilderDRCALO.h
 
 libdrcalo_la_SOURCES = \
   PHG4ForwardDualReadoutDetector.cc \
   PHG4ForwardDualReadoutDisplayAction.cc \
   PHG4ForwardDualReadoutSteppingAction.cc \
-  PHG4ForwardDualReadoutSubsystem.cc
+  PHG4ForwardDualReadoutSubsystem.cc \
+  RawTowerBuilderDRCALO.cc
 
 # Rule for generating table CINT dictionaries.
 %_Dict.cc: %.h %LinkDef.h

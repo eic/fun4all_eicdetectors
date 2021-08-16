@@ -46,7 +46,7 @@ int PHG4ForwardHcalSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
   PHCompositeNode* dstNode = dynamic_cast<PHCompositeNode*>(iter.findFirst("PHCompositeNode", "DST"));
 
   // create display settings before detector
-  m_DisplayAction = new PHG4ForwardHcalDisplayAction(Name());
+  m_DisplayAction = new PHG4ForwardHcalDisplayAction(Name(), showdetailed);
   // create detector
   m_Detector = new PHG4ForwardHcalDetector(this, topNode, GetParams(), Name());
   m_Detector->SuperDetector(SuperDetector());
@@ -143,6 +143,7 @@ void PHG4ForwardHcalSubsystem::SetDefaultParameters()
   set_default_double_param("rot_z", 0.);
   set_default_double_param("thickness_absorber", 2.);
   set_default_double_param("thickness_scintillator", 0.231);
+  set_default_int_param("absorber_FeTungsten", 0);
 
   std::ostringstream mappingfilename;
   const char* calibroot = getenv("CALIBRATIONROOT");

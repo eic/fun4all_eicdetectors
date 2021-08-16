@@ -16,6 +16,14 @@ PHG4ForwardEcalDisplayAction::PHG4ForwardEcalDisplayAction(const std::string &na
 {
 }
 
+PHG4ForwardEcalDisplayAction::PHG4ForwardEcalDisplayAction(const std::string &name, bool detailed)
+  : PHG4DisplayAction(name)
+{
+  showdetails = detailed;
+  if (!detailed) std::cout << "PHG4ForwardEcalDisplayAction::disabled detailed view of towers" << std::endl;
+}
+
+
 PHG4ForwardEcalDisplayAction::~PHG4ForwardEcalDisplayAction()
 {
   for (auto &it : m_VisAttVec)
@@ -42,6 +50,10 @@ void PHG4ForwardEcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol
     if (it.second == "Absorber")
     {
       visatt->SetColour(G4Colour::Cyan());
+      if (showdetails)
+        visatt->SetVisibility(true);
+      else 
+        visatt->SetVisibility(false);
     }
     else if (it.second == "Envelope")
     {
@@ -52,15 +64,26 @@ void PHG4ForwardEcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol
     else if (it.second == "Fiber")
     {
       visatt->SetColour(G4Colour::Cyan());
+      if (showdetails)
+        visatt->SetVisibility(true);
+      else 
+        visatt->SetVisibility(false);
     }
     else if (it.second == "Scintillator")
     {
       visatt->SetColour(G4Colour::White());
+      if (showdetails)
+        visatt->SetVisibility(true);
+      else 
+        visatt->SetVisibility(false);
     }
-    else if (it.second == "ScintillatorSingleTower")
+    else if (it.second == "SingleTower")
     {
       visatt->SetColour(G4Colour::Cyan());
-      visatt->SetVisibility(false);
+      if (showdetails)
+        visatt->SetVisibility(false);
+      else 
+        visatt->SetVisibility(true);
     }
     else
     {

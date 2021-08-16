@@ -17,7 +17,8 @@ class PHG4BackwardHcalDisplayAction : public PHG4DisplayAction
 {
  public:
   PHG4BackwardHcalDisplayAction(const std::string &name);
-
+  PHG4BackwardHcalDisplayAction(const std::string &name, bool detailed);
+  
   virtual ~PHG4BackwardHcalDisplayAction();
 
   void ApplyDisplayAction(G4VPhysicalVolume *physvol);
@@ -26,6 +27,7 @@ class PHG4BackwardHcalDisplayAction : public PHG4DisplayAction
  private:
   std::map<G4LogicalVolume *, std::string> m_LogicalVolumeMap;
   std::vector<G4VisAttributes *> m_VisAttVec;
+  bool showdetails = false;
 };
 
 #endif  // G4DETECTORS_PHG4BACKWARDHCALDISPLAYACTION_H

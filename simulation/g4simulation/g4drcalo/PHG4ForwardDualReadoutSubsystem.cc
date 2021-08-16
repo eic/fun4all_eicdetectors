@@ -113,6 +113,7 @@ int PHG4ForwardDualReadoutSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
     }
     // create stepping action
     m_SteppingAction = new PHG4ForwardDualReadoutSteppingAction(m_Detector,absorber_active);
+    m_Detector->SetSteppingAction(dynamic_cast<PHG4ForwardDualReadoutSteppingAction*>(m_SteppingAction));
   }
 
   return 0;
@@ -161,4 +162,12 @@ void PHG4ForwardDualReadoutSubsystem::SetDefaultParameters()
   // set_default_string_param("absorber", "G4_Fe");
   // set_default_string_param("support", "G4_Fe");
   return;
+}
+
+
+void PHG4ForwardDualReadoutSubsystem::SetTowerMappingFile(const std::string& filename)
+{
+  // set_string_param("mapping_file", filename);
+  // set_string_param("mapping_file_md5", PHG4Utils::md5sum(get_string_param("mapping_file")));
+  mappingfile_ = filename;
 }

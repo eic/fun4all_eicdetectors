@@ -7,7 +7,7 @@
 #ifndef G4DETECTORS_PHG4MRICHSUBSYSTEM_H
 #define G4DETECTORS_PHG4MRICHSUBSYSTEM_H
 
-#include <g4detectors/PHG4DetectorSubsystem.h>
+#include <g4detectors/PHG4DetectorSubsystem.h> 
 
 #include <string>                   // for string
 
