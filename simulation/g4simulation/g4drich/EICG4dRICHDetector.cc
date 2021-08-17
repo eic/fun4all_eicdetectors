@@ -101,6 +101,18 @@ void EICG4dRICHDetector::ConstructMe(G4LogicalVolume *logicWorld)
   auto mirror = new EICG4dRICHMirror("EICG4dRICHmirror");
   mirror->setOpticalParams("EICG4dRICH");
 
+  G4RotationMatrix* rotation = new G4RotationMatrix(m_Params->get_double_param("rot_x") * deg,
+                                                    m_Params->get_double_param("rot_y") * deg,
+                                                    m_Params->get_double_param("rot_z") * deg);
+
+  const G4ThreeVector* position = new G4ThreeVector(m_Params->get_double_param("place_x") * cm,
+                                                    m_Params->get_double_param("place_y") * cm,
+                                                    m_Params->get_double_param("place_z") * cm);
+
+
+  vesselPhysVol->SetRotation(rotation);
+  vesselPhysVol->SetTranslation(*position);
+
   // add to logical world
   logicWorld->AddDaughter(vesselPhysVol);
 
