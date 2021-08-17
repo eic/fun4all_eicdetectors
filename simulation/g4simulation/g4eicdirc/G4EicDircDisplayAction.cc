@@ -11,8 +11,6 @@
 
 #include <cmath>  // for isfinite
 
-using namespace std;
-
 G4EicDircDisplayAction::G4EicDircDisplayAction(const std::string &name, PHParameters *pars)
   : PHG4DisplayAction(name)
   , m_Params(pars)
@@ -63,7 +61,7 @@ void G4EicDircDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
 
 void G4EicDircDisplayAction::SetColor(const double red, const double green, const double blue, const double alpha)
 {
-  if (isfinite(red) && isfinite(green) && isfinite(blue) && isfinite(alpha))
+  if (std::isfinite(red) && std::isfinite(green) && std::isfinite(blue) && std::isfinite(alpha))
   {
     m_Colour = new G4Colour(red, green, blue, alpha);
   }
