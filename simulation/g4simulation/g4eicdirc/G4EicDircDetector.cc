@@ -9,6 +9,8 @@
 #include <g4main/PHG4Subsystem.h>
 
 #include <Geant4/G4Box.hh>
+#include <Geant4/G4Cons.hh>
+#include <Geant4/G4Trd.hh>
 #include <Geant4/G4IntersectionSolid.hh>
 #include <Geant4/G4LogicalVolume.hh>
 #include <Geant4/G4Material.hh>
@@ -71,6 +73,149 @@ int G4EicDircDetector::IsInDetector(G4VPhysicalVolume *volume) const
 
 void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
 {
+  // ---------- DIRC supoort stucture ---------------
+
+  G4Material *Air = G4Material::GetMaterial("G4_AIR");
+
+  // positions
+  G4double rMin = m_Params->get_double_param("rMin");  // center location of Al support plate
+  G4double det_height = 2.1 * cm;
+  G4double place_z = m_Params->get_double_param("place_z");
+  G4double detlength = m_Params->get_double_param("length");
+
+  //Create the envelope = 'world volume' for the calorimeter
+  G4VSolid *ttl_envelope_solid = new G4Cons("ttl_envelope_solid",
+                                            rMin - det_height / 2 - 2 * cm, rMin + det_height / 2 + 2 * cm,
+                                            rMin - det_height / 2 - 2 * cm, rMin + det_height / 2 + 2 * cm,
+                                            detlength / 2.0,
+                                            0, 2 * M_PI);
+
+  G4LogicalVolume *DetectorLog_Det = new G4LogicalVolume(ttl_envelope_solid, Air, name_base + "_Log");
+  RegisterLogicalVolume(DetectorLog_Det);
+  m_DisplayAction->AddVolume(DetectorLog_Det, "FullEnvelope");
+
+  RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(0, 0, place_z), DetectorLog_Det,
+                                           name_base + "_Physical", logicWorld, false, 0, overlapcheck_sector));
+
+  // Single module with length based on readout (contains 14 LGADs [counting across both sides] in x-direction and 6 in z-direction)
+  G4double baseplate_length = 43.1 * mm;
+  G4double baseplate_width = 56.5 * mm / 2;
+  G4double segmentlength = 6 * baseplate_length;  //(detlength - 10 * cm) / 6;//m_Params->get_double_param("length");
+
+  G4VSolid *sol_module_envelope = new G4Trd("sol_module_envelope",
+                                            sin(M_PI / 12.) * rMin, sin(M_PI / 12.) * (rMin + det_height),
+                                            segmentlength / 2, segmentlength / 2,
+                                            det_height / 2);
+
+  G4LogicalVolume *log_module_envelope = new G4LogicalVolume(sol_module_envelope, Air, "log_module_envelope");
+
+  G4double cooling_plate_height = 6.35 * mm;
+  G4double support_height = 7 * cm;
+
+  // G4Material* mat_carbonfiber = new G4Material("CarbonFiberSupport", 1.44 * g / cm3, 1);
+  // mat_carbonfiber->AddElement(G4Element::GetElement("C"), 1);
+  // G4double density;  //z=mean number of protons;
+  // G4int ncomponents;
+  // carbon+epoxy material
+  // G4Material *cfrp_intt = new G4Material("CFRP_INTT", density = 1.69 * g / cm3, ncomponents = 3);
+  // cfrp_intt->AddElement(G4Element::GetElement("C"), 10);
+  // cfrp_intt->AddElement(G4Element::GetElement("H"), 6);
+  // cfrp_intt->AddElement(G4Element::GetElement("O"), 1);
+
+  // SUPPORT STRUCTURES
+  G4double support_width = 1 * mm;
+  // build components of single segment here
+  G4VSolid *Sol_End_Support = new G4Trd("Sol_End_Support",
+                                        sin(M_PI / 12.) * (rMin - support_height * 0.9) - 2 * mm, sin(M_PI / 12.) * (rMin) -4 * mm,  // x1, x2
+                                        support_width / 2, support_width / 2,                                                        // length
+                                        support_height * 0.73 / 2);                                                                  // height
+
+  G4LogicalVolume *Log_End_Support = new G4LogicalVolume(Sol_End_Support, G4Material::GetMaterial("G4_Fe"), "Log_End_Support_Raw");
+
+  // place End side and back side support structure for the segment
+  // RegisterPhysicalVolume( new G4PVPlacement(0, G4ThreeVector(0, segmentlength/2-support_width/2, -support_height/2), Log_End_Support,
+  //                     "Front_Support_Physical", log_module_envelope, false, 0, overlapcheck_sector), false);
+  // RegisterPhysicalVolume( new G4PVPlacement(0, G4ThreeVector(0, -segmentlength/2+support_width/2, -support_height/2), Log_End_Support,
+  //                     "Back_Support_Physical", log_module_envelope, false, 0, overlapcheck_sector), false);
+
+  m_DisplayAction->AddVolume(Log_End_Support, "Support");
+
+  // place longitudinal supports left, middle and right side of sector
+  G4VSolid *Sol_Longitudinal_Support = new G4Trd("Sol_Longitudinal_Support",
+                                                 support_width / 2, support_width / 2,                    // x1, x2
+                                                 segmentlength / 2 - 1 * mm, segmentlength / 2 - 1 * mm,  // length
+                                                 support_height * 0.73 / 2);                              // height
+
+  G4LogicalVolume *Log_Longitudinal_Support = new G4LogicalVolume(Sol_Longitudinal_Support, G4Material::GetMaterial("G4_Fe"), "Log_Longitudinal_Support_Raw");
+
+  // RegisterPhysicalVolume( new G4PVPlacement(0, G4ThreeVector(0, 0, 0), Log_Longitudinal_Support,
+  //                     "Mother_Segment_Raw_Physical_Center", log_module_envelope, false, 0, overlapcheck_sector), false);
+  G4RotationMatrix *supportrot = new G4RotationMatrix();
+  supportrot->rotateY(-M_PI / 12.);
+  if (rMin < 85 * cm)
+    {
+      RegisterPhysicalVolume(new G4PVPlacement(supportrot, G4ThreeVector(sin(M_PI / 12.) * (rMin - support_height / 2) - support_width / 2, 0, -support_height / 2), Log_Longitudinal_Support,
+					       "Mother_Segment_Raw_Physical_Left", log_module_envelope, false, 0, overlapcheck_sector),
+			     false);
+      G4RotationMatrix *supportrot2 = new G4RotationMatrix();
+      supportrot2->rotateY(M_PI / 12.);
+      RegisterPhysicalVolume(new G4PVPlacement(supportrot2, G4ThreeVector(-sin(M_PI / 12.) * (rMin - support_height / 2) + support_width / 2, 0, -support_height / 2), Log_Longitudinal_Support,
+					       "Mother_Segment_Raw_Physical_Right", log_module_envelope, false, 0, overlapcheck_sector),
+			     false);
+    }
+  m_DisplayAction->AddVolume(Log_Longitudinal_Support, "Support");
+
+  RegisterLogicalVolume(log_module_envelope);
+  m_DisplayAction->AddVolume(log_module_envelope, "ModuleEnvelope");
+  G4double modulesep = 1 * mm;
+  G4double moduleShift = -8 * mm;
+  if (rMin < 85 * cm) moduleShift = -3 * mm;
+  if (rMin < 66 * cm) moduleShift = -1 * mm;
+  if (rMin < 55 * cm) moduleShift = 4 * mm;
+
+  for (int isec = 0; isec < 12; isec++)
+    {
+      // if(isec!=3 && isec!=4)continue; // NOTE REMOVE
+      // if(isec!=3)continue; // NOTE REMOVE
+      G4RotationMatrix *motherrot = new G4RotationMatrix();
+      motherrot->rotateX(M_PI / 2);
+      motherrot->rotateY((isec - 3) * 2 * M_PI / 12.);
+      // // central segments
+      RegisterPhysicalVolume(new G4PVPlacement(motherrot, G4ThreeVector((rMin - det_height / 2 + moduleShift) * cos(isec * 2 * M_PI / 12.), (rMin - det_height / 2 + moduleShift) * sin(isec * 2 * M_PI / 12.), 0 * modulesep), log_module_envelope,
+					       "Mother_Segment_Raw_Physical_Center_" + std::to_string(isec), DetectorLog_Det, false, 0, overlapcheck_sector),
+			     false);
+      for (int ilen = 1; ilen < ((detlength / 2 - segmentlength / 2) / segmentlength); ilen++)
+	{
+	  G4RotationMatrix *supfinalrot = new G4RotationMatrix();
+	  // supfinalrot->rotateX(M_PI/2);
+	  supfinalrot->rotateX(M_PI / 2);
+	  supfinalrot->rotateY((isec - 3) * 2 * M_PI / 12.);
+	  if (ilen == 2 || (ilen == 7))
+	    {
+	      if (rMin < 85 * cm)
+		{
+		  RegisterPhysicalVolume(new G4PVPlacement(supfinalrot, G4ThreeVector((rMin - support_height / 2 - det_height / 2 - cooling_plate_height / 2 + moduleShift) * cos(isec * 2 * M_PI / 12.), (rMin - support_height / 2 - det_height / 2 - cooling_plate_height / 2 + moduleShift) * sin(isec * 2 * M_PI / 12.), ilen * segmentlength + segmentlength / 2 + ilen * modulesep), Log_End_Support,
+							   "Front_Support_Physical_1_" + std::to_string(isec) + "_" + std::to_string(ilen), DetectorLog_Det, false, 0, overlapcheck_sector),
+					 false);
+		  RegisterPhysicalVolume(new G4PVPlacement(supfinalrot, G4ThreeVector((rMin - support_height / 2 - det_height / 2 - cooling_plate_height / 2 + moduleShift) * cos(isec * 2 * M_PI / 12.), (rMin - support_height / 2 - det_height / 2 - cooling_plate_height / 2 + moduleShift) * sin(isec * 2 * M_PI / 12.), -(ilen * segmentlength + segmentlength / 2 + ilen * modulesep)), Log_End_Support,
+							   "Front_Support_Physical_2_" + std::to_string(isec) + "_" + std::to_string(ilen), DetectorLog_Det, false, 0, overlapcheck_sector),
+					 false);
+		}
+	    }
+
+	  // forward segments
+	  RegisterPhysicalVolume(new G4PVPlacement(motherrot, G4ThreeVector((rMin - det_height / 2 + moduleShift) * cos(isec * 2 * M_PI / 12.), (rMin - det_height / 2 + moduleShift) * sin(isec * 2 * M_PI / 12.), ilen * segmentlength + ilen * modulesep), log_module_envelope,
+						   "Mother_Segment_Raw_Physical_Fwd_" + std::to_string(isec) + "_" + std::to_string(ilen), DetectorLog_Det, false, 0, overlapcheck_sector),
+				 false);
+	  // backward segments
+	  RegisterPhysicalVolume(new G4PVPlacement(motherrot, G4ThreeVector((rMin - det_height / 2 + moduleShift) * cos(isec * 2 * M_PI / 12.), (rMin - det_height / 2 + moduleShift) * sin(isec * 2 * M_PI / 12.), -ilen * segmentlength - ilen * modulesep), log_module_envelope,
+						   "Mother_Segment_Raw_Physical_Bwd_" + std::to_string(isec) + "_" + std::to_string(ilen), DetectorLog_Det, false, 0, overlapcheck_sector),
+				 false);
+	}
+    }
+
+  // -------------- DIRC ----------------------
+
   fGeomType = 0; // whole DIRC
   fLensId = 3; // 3-layer spherical lens
   fNBar = 11;

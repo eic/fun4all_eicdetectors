@@ -7,6 +7,8 @@
 #include <Geant4/G4Types.hh>
 #include <Geant4/G4ThreeVector.hh>
 #include <Geant4/G4Material.hh>
+#include <Geant4/G4PVPlacement.hh>
+#include <Geant4/G4LogicalVolume.hh>
 
 #include <set>
 #include <map>
@@ -43,6 +45,14 @@ class G4EicDircDetector : public PHG4Detector
  
   void SuperDetector(const std::string &name) { m_SuperDetector = name; }
   const std::string SuperDetector() const { return m_SuperDetector; }
+  std::string name_base = "test";
+
+  void
+    OverlapCheck(bool check = true) override
+  {
+    overlapcheck_sector = check;
+  }
+
  
  private:
   G4LogicalVolume* lFront;
@@ -107,8 +117,12 @@ class G4EicDircDetector : public PHG4Detector
   PHParameters *m_Params;
 
   G4EicDircDisplayAction *m_DisplayAction;
-
+  bool overlapcheck_sector;
+  
   // active volumes
+  G4LogicalVolume* RegisterLogicalVolume(G4LogicalVolume *);
+  G4PVPlacement* RegisterPhysicalVolume(G4PVPlacement *v, const bool active = false);
+
   std::set<G4VPhysicalVolume *> m_PhysicalVolumesSet;
   std::map<G4VPhysicalVolume *, int> m_PhysicalVolumes_active;
   //std::map<G4LogicalVolume*, int> m_logVol_active;
