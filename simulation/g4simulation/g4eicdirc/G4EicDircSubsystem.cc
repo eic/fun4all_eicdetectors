@@ -23,6 +23,9 @@
 //_______________________________________________________________________
 G4EicDircSubsystem::G4EicDircSubsystem(const std::string &name)
   : PHG4DetectorSubsystem(name)
+  , m_Detector(nullptr)
+  , m_SteppingAction(nullptr)
+  , m_DisplayAction(nullptr)
 {
   // call base class method which will set up parameter infrastructure
   // and call our SetDefaultParameters() method
@@ -49,6 +52,7 @@ int G4EicDircSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
   //   disp_action->SetColor(m_ColorArray[0], m_ColorArray[1], m_ColorArray[2], m_ColorArray[3]);
   // }
   // m_DisplayAction = disp_action;
+  m_DisplayAction = new G4EicDircDisplayAction(Name(), GetParams());
   // create detector
   m_Detector = new G4EicDircDetector(this, topNode, GetParams(), Name());
   m_Detector->SuperDetector(SuperDetector());
@@ -146,6 +150,9 @@ void G4EicDircSubsystem::SetDefaultParameters()
   set_default_double_param("size_x", 20.);
   set_default_double_param("size_y", 20.);
   set_default_double_param("size_z", 20.);
+
+  set_default_double_param("rMin", 74.1);
+  set_default_double_param("length", 287 + 168);
 
   set_default_string_param("material", "G4_Galactic");
 }

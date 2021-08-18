@@ -82,13 +82,13 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   G4double detlength = m_Params->get_double_param("length");
 
   //Create the envelope = 'world volume' for the calorimeter
-  G4VSolid *ttl_envelope_solid = new G4Cons("ttl_envelope_solid",
-                                            rMin - det_height / 2 - 2 * cm, rMin + det_height / 2 + 2 * cm,
-                                            rMin - det_height / 2 - 2 * cm, rMin + det_height / 2 + 2 * cm,
-                                            detlength / 2.0,
-                                            0, 2 * M_PI);
+  G4VSolid *dirc_envelope_solid = new G4Cons("dirc_envelope_solid",
+                                             rMin - det_height / 2 - 2 * cm, rMin + det_height / 2 + 2 * cm,
+                                             rMin - det_height / 2 - 2 * cm, rMin + det_height / 2 + 2 * cm,
+                                             detlength / 2.0,
+                                             0, 2 * M_PI);
 
-  G4LogicalVolume *DetectorLog_Det = new G4LogicalVolume(ttl_envelope_solid, Air, name_base + "_Log");
+  G4LogicalVolume *DetectorLog_Det = new G4LogicalVolume(dirc_envelope_solid, Air, name_base + "_Log");
   RegisterLogicalVolume(DetectorLog_Det);
   m_DisplayAction->AddVolume(DetectorLog_Det, "FullEnvelope");
 
