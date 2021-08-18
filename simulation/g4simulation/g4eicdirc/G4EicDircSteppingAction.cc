@@ -78,7 +78,7 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
   //  < 0 for hits in passive material
   int whichactive_int = m_Detector->IsInDetector(volume);
   int whichactive_int_post = m_Detector->IsInDetector(volume_post);
-  bool whichactive = (whichactive_int > 0 && whichactive_int < 12);
+  bool whichactive = (whichactive_int > 0 && whichactive_int < 28);
   //int whichactive = m_Detector->IsInDetector(volume);
   if (!whichactive)
   {
