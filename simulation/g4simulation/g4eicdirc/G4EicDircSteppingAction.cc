@@ -427,7 +427,7 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
 	    {
 	      ++refl;
 	      Int_t normal_id = vector_nid[i];
-		  //std::cout << "nid = " << normal_id << std::endl;
+		    //std::cout << "nid = " << normal_id << std::endl;
 	      pathId = (pathId * 10L) + normal_id;
 	    }
 	}
