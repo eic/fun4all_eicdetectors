@@ -58,7 +58,7 @@ G4EicDircDetector::G4EicDircDetector(PHG4Subsystem *subsys,
 //_______________________________________________________________
 
 int G4EicDircDetector::IsInDetector(G4VPhysicalVolume *volume) const
-{
+{ 
   std::map<G4VPhysicalVolume *, int>::const_iterator iter = m_PhysicalVolumes_active.find(volume);
   if(iter != m_PhysicalVolumes_active.end())
     {
@@ -490,6 +490,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
 
   G4RotationMatrix* xRot = new G4RotationMatrix();
   xRot->rotateX(-M_PI/2.*rad);
+
 
   G4RotationMatrix *fdrot = new G4RotationMatrix();
   double evshiftz = 0.5*dirclength+fPrizm[1]+fMcpActive[2]/2.+fLens[2];
@@ -976,7 +977,6 @@ void G4EicDircDetector::SetQuantumEfficiency(int id){
   G4RunManager::GetRunManager()->GeometryHasBeenModified();
 
 }
-
 
 void G4EicDircDetector::Print(const std::string &what) const
 {
