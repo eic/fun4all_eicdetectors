@@ -45,8 +45,6 @@
 class G4VSolid;
 class PHCompositeNode;
 
-using namespace std;
-
 G4EicDircDetector::G4EicDircDetector(PHG4Subsystem *subsys,
                                      PHCompositeNode *Node,
                                      PHParameters *parameters,
@@ -60,8 +58,8 @@ G4EicDircDetector::G4EicDircDetector(PHG4Subsystem *subsys,
 //_______________________________________________________________
 
 int G4EicDircDetector::IsInDetector(G4VPhysicalVolume *volume) const
-{
-  map<G4VPhysicalVolume *, int>::const_iterator iter = m_PhysicalVolumes_active.find(volume);
+{ 
+  std::map<G4VPhysicalVolume *, int>::const_iterator iter = m_PhysicalVolumes_active.find(volume);
   if(iter != m_PhysicalVolumes_active.end())
     {
       return iter->second;
@@ -99,7 +97,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
 
   // Single module with length based on readout (contains 14 LGADs [counting across both sides] in x-direction and 6 in z-direction)
   G4double baseplate_length = 43.1 * mm;
-  G4double baseplate_width = 56.5 * mm / 2;
+  //G4double baseplate_width = 56.5 * mm / 2;
   G4double segmentlength = 6 * baseplate_length;  //(detlength - 10 * cm) / 6;//m_Params->get_double_param("length");
 
   G4VSolid *sol_module_envelope = new G4Trd("sol_module_envelope",
@@ -283,7 +281,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   G4Box* gFd = new G4Box("gFd",0.5*fFd[1],0.5*fFd[0],0.5*fFd[2]);
   lFd = new G4LogicalVolume(gFd,defaultMaterial,"lFd",0,0,0);
 
-  double tphi, dphi = 360*deg/(double)fNBoxes;  
+  double dphi = 360*deg/(double)fNBoxes;  
   G4VPhysicalVolume* phy;
 
 
@@ -292,7 +290,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
     m_PhysicalVolumesSet.insert(phy);
     }else{*/ 
     for(int i=0; i<fNBoxes; i++){
-      tphi = dphi*i; 
+      double tphi = dphi*i; 
       double dx = fRadius * cos(tphi);
       double dy = fRadius * sin(tphi);
 
@@ -354,11 +352,11 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   if(fLensId == 3){ // 3-component spherical lens
     double lensMinThikness = 2; 
   
-    double r1 = 0; 
-    double r2 = 0; 
+    double r1 = 47.8;//0; 
+    double r2 = 29.1;//0; 
   
-    r1 = (r1==0)? 47.8: r1;
-    r2 = (r2==0)? 29.1: r2;
+    //r1 = (r1==0)? 47.8: r1;
+    //r2 = (r2==0)? 29.1: r2;
     // r1=80;
     // r2=35;
 
@@ -402,8 +400,8 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   if(fLensId == 6){ // 3-component cylindrical lens
     double lensMinThikness = 2.0;
 
-    double r1 = 0; 
-    double r2 = 0; 
+    double r1 = 33;//0; 
+    double r2 = 24;//0; 
 
     lensMinThikness = 2;
     double layer12 = lensMinThikness*2;
@@ -411,8 +409,8 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
     // r1 = (r1==0)? 27.45: r1;
     // r2 = (r2==0)? 20.02: r2;
 
-    r1 = (r1==0)? 33: r1;
-    r2 = (r2==0)? 24: r2;
+    //r1 = (r1==0)? 33: r1;
+    //r2 = (r2==0)? 24: r2;
     double shight = 25;
 
     G4ThreeVector zTrans1(0, 0, -r1-fLens[2]/2.+r1-sqrt(r1*r1-shight/2.*shight/2.) +lensMinThikness);
@@ -493,7 +491,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   G4RotationMatrix* xRot = new G4RotationMatrix();
   xRot->rotateX(-M_PI/2.*rad);
 
-  G4RotationMatrix* fdRot = new G4RotationMatrix();
+
   G4RotationMatrix *fdrot = new G4RotationMatrix();
   double evshiftz = 0.5*dirclength+fPrizm[1]+fMcpActive[2]/2.+fLens[2];
   double evshiftx = 0;
@@ -980,15 +978,55 @@ void G4EicDircDetector::SetQuantumEfficiency(int id){
 
 }
 
-
 void G4EicDircDetector::Print(const std::string &what) const
 {
-  cout << "EIC Dirc Detector:" << endl;
+  std::cout << "EIC Dirc Detector:" << std::endl;
   if (what == "ALL" || what == "VOLUME")
   {
-    cout << "Version 0.1" << endl;
-    cout << "Parameters:" << endl;
+    std::cout << "Version 0.1" << std::endl;
+    std::cout << "Parameters:" << std::endl;
     m_Params->Print();
   }
   return;
+}
+
+G4LogicalVolume *G4EicDircDetector::RegisterLogicalVolume(G4LogicalVolume *v)
+{
+  if (!v)
+  {
+    std::cout << "G4EicDircDetector::RegisterVolume - Error - invalid volume!" << std::endl;
+    return v;
+  }
+  if (map_log_vol.find(v->GetName()) != map_log_vol.end())
+  {
+    std::cout << "G4EicDircDetector::RegisterVolume - Warning - replacing " << v->GetName() << std::endl;
+  }
+
+  map_log_vol[v->GetName()] = v;
+
+  return v;
+}
+
+G4PVPlacement *G4EicDircDetector::RegisterPhysicalVolume(G4PVPlacement *v, const bool active)
+{
+  if (!v)
+  {
+    std::cout << "G4EicDircDetector::RegisterPhysicalVolume - Error - invalid volume!" << std::endl;
+    return v;
+  }
+
+  phy_vol_idx_t id(v->GetName(), v->GetCopyNo());
+
+  if (map_phy_vol.find(id) != map_phy_vol.end())
+  {
+    std::cout
+        << "G4EicDircDetector::RegisterPhysicalVolume - Warning - replacing "
+        << v->GetName() << "[" << v->GetCopyNo() << "]" << std::endl;
+  }
+
+  map_phy_vol[id] = v;
+
+  if (active) map_active_phy_vol[id] = v;
+
+  return v;
 }

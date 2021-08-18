@@ -17,8 +17,8 @@ G4VParticleChange* PrtOpBoundaryProcess::PostStepDoIt(const G4Track& aTrack, con
   //G4TouchableHandle touchpost = pPostStepPoint->GetTouchableHandle();
 
   // get volume of the current step
-  G4VPhysicalVolume *volume = pPreStepPoint->GetPhysicalVolume();
-  G4VPhysicalVolume *volume_post = pPostStepPoint->GetPhysicalVolume();
+  //G4VPhysicalVolume *volume = pPreStepPoint->GetPhysicalVolume();
+  //G4VPhysicalVolume *volume_post = pPostStepPoint->GetPhysicalVolume();
 
   /*G4String vol_name = volume->GetName();
 
@@ -38,7 +38,7 @@ G4VParticleChange* PrtOpBoundaryProcess::PostStepDoIt(const G4Track& aTrack, con
   // std::cout<<"parentId   "<<parentId <<std::endl;
   // if(parentId==1) particleChange->ProposeTrackStatus(fStopAndKill);
 
-  double endofbar = 0.5*(4200+4*0.05); //1250/2.;
+  //double endofbar = 0.5*(4200+4*0.05); //1250/2.;
   
   // LUT
   /*if(PrtManager::Instance()->GetRunType() == 1 && pPostStepPoint->GetPosition().z() > pPreStepPoint->GetPosition().z()){

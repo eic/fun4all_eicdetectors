@@ -20,8 +20,6 @@
 
 #include <cmath>  // for isfinite
 
-using namespace std;
-
 //_______________________________________________________________________
 G4EicDircSubsystem::G4EicDircSubsystem(const std::string &name)
   : PHG4DetectorSubsystem(name)
@@ -56,7 +54,7 @@ int G4EicDircSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
   m_Detector->SuperDetector(SuperDetector());
   m_Detector->OverlapCheck(CheckOverlap());
 
-  string detector_suffix = SuperDetector();
+  std::string detector_suffix = SuperDetector();
   if (detector_suffix == "NONE")
   {
     detector_suffix = SuperDetector();
@@ -119,7 +117,7 @@ int G4EicDircSubsystem::process_event(PHCompositeNode *topNode)
   return 0;
 }
 
-void G4EicDircSubsystem::Print(const string &what) const
+void G4EicDircSubsystem::Print(const std::string &what) const
 {
   if (m_Detector)
   {

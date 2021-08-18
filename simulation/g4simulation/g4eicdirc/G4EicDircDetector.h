@@ -31,12 +31,12 @@ class G4EicDircDetector : public PHG4Detector
   virtual ~G4EicDircDetector() {}
 
   //! construct
-  virtual void ConstructMe(G4LogicalVolume *world);
+  virtual void ConstructMe(G4LogicalVolume *world) override;
 
   void SetVisualization();
   void SetQuantumEfficiency(G4int id);
 
-  virtual void Print(const std::string &what = "ALL") const;
+  virtual void Print(const std::string &what = "ALL") const override;
 
   //!@name volume accessors
   //@{
@@ -55,7 +55,7 @@ class G4EicDircDetector : public PHG4Detector
 
  
  private:
-  G4LogicalVolume* lFront;
+  //G4LogicalVolume* lFront;
   G4LogicalVolume* lDirc;
   G4LogicalVolume* lFd;
   G4LogicalVolume* lBar;
@@ -68,13 +68,13 @@ class G4EicDircDetector : public PHG4Detector
   G4LogicalVolume* lMcp;
   G4LogicalVolume* lPixel;
   G4LogicalVolume* lExpVol;
-  G4LogicalVolume* lGlueE;
+  //G4LogicalVolume* lGlueE;
   G4VPhysicalVolume*   pDirc[100];
 
-  G4VPhysicalVolume* wBar;
+  //G4VPhysicalVolume* wBar;
   G4VPhysicalVolume* wGlue;
   G4VPhysicalVolume* wMirror;
-  G4VPhysicalVolume* wDirc;
+  //G4VPhysicalVolume* wDirc;
 
   G4Material*        defaultMaterial; // material for bars
   G4Material*        BarMaterial; // material for bars
@@ -107,7 +107,7 @@ class G4EicDircDetector : public PHG4Detector
   G4ThreeVector fPrismShift;
   G4double fBarsGap;
 
-  G4double fRotAngle;
+  //G4double fRotAngle;
   G4RotationMatrix *fPrtRot;
   G4double *fQuantumEfficiency;
 
@@ -127,6 +127,14 @@ class G4EicDircDetector : public PHG4Detector
   std::map<G4VPhysicalVolume *, int> m_PhysicalVolumes_active;
   //std::map<G4LogicalVolume*, int> m_logVol_active;
   std::string m_SuperDetector;
+
+  typedef std::map<G4String, G4LogicalVolume *> map_log_vol_t;
+  typedef std::pair<G4String, G4int> phy_vol_idx_t;
+  typedef std::map<phy_vol_idx_t, G4PVPlacement *> map_phy_vol_t;
+
+  map_log_vol_t map_log_vol;
+  map_phy_vol_t map_phy_vol;         //! all physics volume
+  map_phy_vol_t map_active_phy_vol;  //! active physics volume
 };
 
 #endif  // G4EICDIRCDETECTOR_H

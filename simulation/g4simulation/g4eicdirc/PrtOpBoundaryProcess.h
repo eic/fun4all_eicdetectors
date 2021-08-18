@@ -17,8 +17,8 @@ public:
 
   G4EicDircDetector* m_Detector;
 
-private:
-  int fLensId;
+//private:
+  //int fLensId;
 
 };
 

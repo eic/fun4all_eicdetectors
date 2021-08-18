@@ -19,9 +19,6 @@
 #include <sstream>
 #include <utility>                          // for pair
 
-
-using namespace std;
-
 G4DIRCTree::G4DIRCTree(const std::string &name, const std::string &filename)
   : SubsysReco(name)
   , nblocks(0)
@@ -37,7 +34,7 @@ int G4DIRCTree::Init(PHCompositeNode *)
   g4tree = new TTree("mG4EvtTree", "g4tree");
   g4tree->SetAutoSave(1000000);
 
-  cout << "Initialize Geant 4 Tree ... << " << endl;
+  std::cout << "Initialize Geant 4 Tree ... << " << std::endl;
  
   /// Event level
   g4tree->Branch("momentum", &mG4EvtTree.momentum, "p/D");
@@ -115,8 +112,8 @@ int G4DIRCTree::process_event(PHCompositeNode *topNode)
   	  
   int nhits = 0;
 
-  ostringstream nodename;
-  set<string>::const_iterator iter;
+  std::ostringstream nodename;
+  std::set<std::string>::const_iterator iter;
 
   for (iter = _node_postfix.begin(); iter != _node_postfix.end(); ++iter)
   {
@@ -158,7 +155,7 @@ void G4DIRCTree::AddNode(const std::string &name, const int detid)
   return;
 }
 
-int G4DIRCTree::process_hit(PHG4HitContainer *hits, const string &dName, int detid, int &nhits)
+int G4DIRCTree::process_hit(PHG4HitContainer *hits, const std::string &dName, int detid, int &nhits)
 {
   if (hits)
   {   

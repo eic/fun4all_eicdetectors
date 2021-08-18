@@ -42,8 +42,6 @@
 #include <string>  // for operator<<, string
 
 class PHCompositeNode;
-
-using namespace std;
 //____________________________________________________________________________..
 G4EicDircSteppingAction::G4EicDircSteppingAction(
     G4EicDircDetector *detector, const PHParameters *parameters)
@@ -127,7 +125,7 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
   // geantino or chargedgeantino has pid=0
   if (aTrack->GetParticleDefinition()->GetPDGEncoding() == 0 &&
       aTrack->GetParticleDefinition()->GetParticleName().find("geantino") !=
-          string::npos)  // this also accounts for "chargedgeantino"
+          std::string::npos)  // this also accounts for "chargedgeantino"
   {
     geantino = true;
   }
@@ -151,21 +149,21 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
     {
       // this is bad from G4 print out diagnostic to help debug, not sure if
       // this is still with us
-      cout << GetName() << ": New Hit for  " << endl;
-      cout << "prestep status: "
-           << PHG4StepStatusDecode::GetStepStatus(prePoint->GetStepStatus())
-           << ", poststep status: "
-           << PHG4StepStatusDecode::GetStepStatus(postPoint->GetStepStatus())
-           << ", last pre step status: "
-           << PHG4StepStatusDecode::GetStepStatus(m_SavePreStepStatus)
-           << ", last post step status: "
-           << PHG4StepStatusDecode::GetStepStatus(m_SavePostStepStatus) << endl;
-      cout << "last track: " << m_SaveTrackId
-           << ", current trackid: " << aTrack->GetTrackID() << endl;
-      cout << "phys pre vol: " << volume->GetName()
-           << " post vol : " << touchpost->GetVolume()->GetName() << endl;
-      cout << " previous phys pre vol: " << m_SaveVolPre->GetName()
-           << " previous phys post vol: " << m_SaveVolPost->GetName() << endl;
+      std::cout << GetName() << ": New Hit for  " << std::endl;
+      std::cout << "prestep status: "
+                << PHG4StepStatusDecode::GetStepStatus(prePoint->GetStepStatus())
+                << ", poststep status: "
+                << PHG4StepStatusDecode::GetStepStatus(postPoint->GetStepStatus())
+                << ", last pre step status: "
+                << PHG4StepStatusDecode::GetStepStatus(m_SavePreStepStatus)
+                << ", last post step status: "
+                << PHG4StepStatusDecode::GetStepStatus(m_SavePostStepStatus) << std::endl;
+      std::cout << "last track: " << m_SaveTrackId
+                << ", current trackid: " << aTrack->GetTrackID() << std::endl;
+      std::cout << "phys pre vol: " << volume->GetName()
+                << " post vol : " << touchpost->GetVolume()->GetName() << std::endl;
+      std::cout << " previous phys pre vol: " << m_SaveVolPre->GetName()
+                << " previous phys post vol: " << m_SaveVolPost->GetName() << std::endl;
     }
  
   case fGeomBoundary:
@@ -205,7 +203,7 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
     }
     else
     {
-      cout << "implement stuff for whichactive < 0 (inactive volumes)" << endl;
+      std::cout << "implement stuff for whichactive < 0 (inactive volumes)" << std::endl;
       gSystem->Exit(1);
     }
     // this is for the tracking of the truth info
@@ -229,31 +227,31 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
   // check if this hit was created, if not print out last post step status
   if (!m_Hit || !isfinite(m_Hit->get_x(0)))
   {
-    cout << GetName() << ": hit was not created" << endl;
-    cout << "prestep status: "
-         << PHG4StepStatusDecode::GetStepStatus(prePoint->GetStepStatus())
-         << ", poststep status: "
-         << PHG4StepStatusDecode::GetStepStatus(postPoint->GetStepStatus())
-         << ", last pre step status: "
-         << PHG4StepStatusDecode::GetStepStatus(m_SavePreStepStatus)
-         << ", last post step status: "
-         << PHG4StepStatusDecode::GetStepStatus(m_SavePostStepStatus) << endl;
-    cout << "last track: " << m_SaveTrackId
-         << ", current trackid: " << aTrack->GetTrackID() << endl;
-    cout << "phys pre vol: " << volume->GetName()
-         << " post vol : " << touchpost->GetVolume()->GetName() << endl;
-    cout << " previous phys pre vol: " << m_SaveVolPre->GetName()
-         << " previous phys post vol: " << m_SaveVolPost->GetName() << endl;
+    std::cout << GetName() << ": hit was not created" << std::endl;
+    std::cout << "prestep status: "
+              << PHG4StepStatusDecode::GetStepStatus(prePoint->GetStepStatus())
+              << ", poststep status: "
+              << PHG4StepStatusDecode::GetStepStatus(postPoint->GetStepStatus())
+              << ", last pre step status: "
+              << PHG4StepStatusDecode::GetStepStatus(m_SavePreStepStatus)
+              << ", last post step status: "
+              << PHG4StepStatusDecode::GetStepStatus(m_SavePostStepStatus) << std::endl;
+    std::cout << "last track: " << m_SaveTrackId
+              << ", current trackid: " << aTrack->GetTrackID() << std::endl;
+    std::cout << "phys pre vol: " << volume->GetName()
+              << " post vol : " << touchpost->GetVolume()->GetName() << std::endl;
+    std::cout << " previous phys pre vol: " << m_SaveVolPre->GetName()
+              << " previous phys post vol: " << m_SaveVolPost->GetName() << std::endl;
     gSystem->Exit(1);
   }
   // check if track id matches the initial one when the hit was created
   if (aTrack->GetTrackID() != m_SaveTrackId)
   {
-    cout << GetName() << ": hits do not belong to the same track" << endl;
-    cout << "saved track: " << m_SaveTrackId
-         << ", current trackid: " << aTrack->GetTrackID()
-         << ", prestep status: " << prePoint->GetStepStatus()
-         << ", previous post step status: " << m_SavePostStepStatus << endl;
+    std::cout << GetName() << ": hits do not belong to the same track" << std::endl;
+    std::cout << "saved track: " << m_SaveTrackId
+              << ", current trackid: " << aTrack->GetTrackID()
+              << ", prestep status: " << prePoint->GetStepStatus()
+              << ", previous post step status: " << m_SavePostStepStatus << std::endl;
 
     gSystem->Exit(1);
   }
@@ -349,10 +347,10 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
       if(whichactive_int_post == 11) // post step in Pixel ---------------
 	{
       // Get cell id 
-      G4int layerNumber = touchpost->GetReplicaNumber(0);
-      const G4DynamicParticle* dynParticle = aTrack->GetDynamicParticle();
-      G4ParticleDefinition* particle = dynParticle->GetDefinition();  
-      G4String ParticleName = particle->GetParticleName();
+      //G4int layerNumber = touchpost->GetReplicaNumber(0);
+      //const G4DynamicParticle* dynParticle = aTrack->GetDynamicParticle();
+      //G4ParticleDefinition* particle = dynParticle->GetDefinition();  
+      //G4String ParticleName = particle->GetParticleName();
   
       G4ThreeVector globalpos = aStep->GetPostStepPoint()->GetPosition();
       G4ThreeVector localpos = touchpost->GetHistory()->GetTopTransform().TransformPoint(globalpos);
@@ -361,7 +359,7 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
       G4ThreeVector g4mom = aTrack->GetVertexMomentumDirection();//GetMomentum();
       G4ThreeVector g4pos = aTrack->GetVertexPosition();
  
-      G4ThreeVector localvec = touchpost->GetHistory()->GetTopTransform().TransformAxis(g4mom);
+      //G4ThreeVector localvec = touchpost->GetHistory()->GetTopTransform().TransformAxis(g4mom);
 
       TVector3 globalPos(inPrismpos.x(),inPrismpos.y(),inPrismpos.z());
       TVector3 localPos(localpos.x(),localpos.y(),localpos.z());
@@ -417,7 +415,7 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
       m_Hit->SetMomentum(momentum);
                   
       int refl = 0;
-      Int_t normal_id = 0;
+      //Int_t normal_id = 0;
       Long64_t pathId = 0;
       //TVector3 mom_bar;
       //TVector3 pos_bar;
@@ -428,8 +426,8 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
 	  if(m_SaveTrackId == vector_trackid[i])
 	    {
 	      ++refl;
-	      normal_id = vector_nid[i];
-		  //std::cout << "nid = " << normal_id << std::endl;
+	      Int_t normal_id = vector_nid[i];
+		    //std::cout << "nid = " << normal_id << std::endl;
 	      pathId = (pathId * 10L) + normal_id;
 	    }
 	}
