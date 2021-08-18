@@ -76,10 +76,15 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   G4Material *Air = G4Material::GetMaterial("G4_AIR");
 
   // positions
-  G4double rMin = m_Params->get_double_param("rMin");  // center location of Al support plate
+  /*G4double rMin = m_Params->get_double_param("rMin");  // center location of Al support plate
   G4double det_height = 2.1 * cm;
   G4double place_z = m_Params->get_double_param("place_z");
   G4double detlength = m_Params->get_double_param("length");
+  */
+  G4double rMin = 80 * cm;  // center location of Al support plate                                                         
+  G4double det_height = 2.1 * cm;
+  G4double place_z = -40 * cm;
+  G4double detlength = 2.0 * 218* cm;
 
   //Create the envelope = 'world volume' for the calorimeter
   G4VSolid *dirc_envelope_solid = new G4Cons("dirc_envelope_solid",
@@ -92,8 +97,8 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   RegisterLogicalVolume(DetectorLog_Det);
   m_DisplayAction->AddVolume(DetectorLog_Det, "FullEnvelope");
 
-  RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(0, 0, place_z), DetectorLog_Det,
-                                           name_base + "_Physical", logicWorld, false, 0, overlapcheck_sector));
+  G4VPhysicalVolume* wDetectorLog_Det = new G4PVPlacement(0, G4ThreeVector(0, 0, place_z), DetectorLog_Det, name_base + "_Physical", logicWorld, false, 0, overlapcheck_sector); // FullEnvelope
+  m_PhysicalVolumes_active[wDetectorLog_Det] = 20;
 
   // Single module with length based on readout (contains 14 LGADs [counting across both sides] in x-direction and 6 in z-direction)
   G4double baseplate_length = 43.1 * mm;
@@ -105,7 +110,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
                                             segmentlength / 2, segmentlength / 2,
                                             det_height / 2);
 
-  G4LogicalVolume *log_module_envelope = new G4LogicalVolume(sol_module_envelope, Air, "log_module_envelope");
+  log_module_envelope = new G4LogicalVolume(sol_module_envelope, Air, "log_module_envelope");
 
   G4double cooling_plate_height = 6.35 * mm;
   G4double support_height = 7 * cm;
@@ -128,7 +133,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
                                         support_width / 2, support_width / 2,                                                        // length
                                         support_height * 0.73 / 2);                                                                  // height
 
-  G4LogicalVolume *Log_End_Support = new G4LogicalVolume(Sol_End_Support, G4Material::GetMaterial("G4_Fe"), "Log_End_Support_Raw");
+  Log_End_Support = new G4LogicalVolume(Sol_End_Support, G4Material::GetMaterial("G4_Fe"), "Log_End_Support_Raw");
 
   // place End side and back side support structure for the segment
   // RegisterPhysicalVolume( new G4PVPlacement(0, G4ThreeVector(0, segmentlength/2-support_width/2, -support_height/2), Log_End_Support,
@@ -136,7 +141,6 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   // RegisterPhysicalVolume( new G4PVPlacement(0, G4ThreeVector(0, -segmentlength/2+support_width/2, -support_height/2), Log_End_Support,
   //                     "Back_Support_Physical", log_module_envelope, false, 0, overlapcheck_sector), false);
 
-  m_DisplayAction->AddVolume(Log_End_Support, "Support");
 
   // place longitudinal supports left, middle and right side of sector
   G4VSolid *Sol_Longitudinal_Support = new G4Trd("Sol_Longitudinal_Support",
@@ -144,27 +148,22 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
                                                  segmentlength / 2 - 1 * mm, segmentlength / 2 - 1 * mm,  // length
                                                  support_height * 0.73 / 2);                              // height
 
-  G4LogicalVolume *Log_Longitudinal_Support = new G4LogicalVolume(Sol_Longitudinal_Support, G4Material::GetMaterial("G4_Fe"), "Log_Longitudinal_Support_Raw");
+  Log_Longitudinal_Support = new G4LogicalVolume(Sol_Longitudinal_Support, G4Material::GetMaterial("G4_Fe"), "Log_Longitudinal_Support_Raw");
 
-  // RegisterPhysicalVolume( new G4PVPlacement(0, G4ThreeVector(0, 0, 0), Log_Longitudinal_Support,
-  //                     "Mother_Segment_Raw_Physical_Center", log_module_envelope, false, 0, overlapcheck_sector), false);
   G4RotationMatrix *supportrot = new G4RotationMatrix();
   supportrot->rotateY(-M_PI / 12.);
   if (rMin < 85 * cm)
     {
-      RegisterPhysicalVolume(new G4PVPlacement(supportrot, G4ThreeVector(sin(M_PI / 12.) * (rMin - support_height / 2) - support_width / 2, 0, -support_height / 2), Log_Longitudinal_Support,
-					       "Mother_Segment_Raw_Physical_Left", log_module_envelope, false, 0, overlapcheck_sector),
-			     false);
+      G4VPhysicalVolume* wMother_Segment_Raw_Physical_Left = new G4PVPlacement(supportrot, G4ThreeVector(sin(M_PI / 12.) * (rMin - support_height / 2) - support_width / 2, 0, -support_height / 2), Log_Longitudinal_Support, "Mother_Segment_Raw_Physical_Left", log_module_envelope, false, 0, overlapcheck_sector); // Support
+      m_PhysicalVolumes_active[wMother_Segment_Raw_Physical_Left] = 21;
+
       G4RotationMatrix *supportrot2 = new G4RotationMatrix();
       supportrot2->rotateY(M_PI / 12.);
-      RegisterPhysicalVolume(new G4PVPlacement(supportrot2, G4ThreeVector(-sin(M_PI / 12.) * (rMin - support_height / 2) + support_width / 2, 0, -support_height / 2), Log_Longitudinal_Support,
-					       "Mother_Segment_Raw_Physical_Right", log_module_envelope, false, 0, overlapcheck_sector),
-			     false);
-    }
-  m_DisplayAction->AddVolume(Log_Longitudinal_Support, "Support");
 
-  RegisterLogicalVolume(log_module_envelope);
-  m_DisplayAction->AddVolume(log_module_envelope, "ModuleEnvelope");
+      G4VPhysicalVolume* wMother_Segment_Raw_Physical_Right = new G4PVPlacement(supportrot2, G4ThreeVector(-sin(M_PI / 12.) * (rMin - support_height / 2) + support_width / 2, 0, -support_height / 2), Log_Longitudinal_Support, "Mother_Segment_Raw_Physical_Right", log_module_envelope, false, 0, overlapcheck_sector);
+      m_PhysicalVolumes_active[wMother_Segment_Raw_Physical_Right] = 22;
+    }
+
   G4double modulesep = 1 * mm;
   G4double moduleShift = -8 * mm;
   if (rMin < 85 * cm) moduleShift = -3 * mm;
@@ -179,9 +178,10 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
       motherrot->rotateX(M_PI / 2);
       motherrot->rotateY((isec - 3) * 2 * M_PI / 12.);
       // // central segments
-      RegisterPhysicalVolume(new G4PVPlacement(motherrot, G4ThreeVector((rMin - det_height / 2 + moduleShift) * cos(isec * 2 * M_PI / 12.), (rMin - det_height / 2 + moduleShift) * sin(isec * 2 * M_PI / 12.), 0 * modulesep), log_module_envelope,
-					       "Mother_Segment_Raw_Physical_Center_" + std::to_string(isec), DetectorLog_Det, false, 0, overlapcheck_sector),
-			     false);
+      G4VPhysicalVolume* wlog_module_envelope = new G4PVPlacement(motherrot, G4ThreeVector((rMin - det_height / 2 + moduleShift) * cos(isec * 2 * M_PI / 12.), (rMin - det_height / 2 + moduleShift) * sin(isec * 2 * M_PI / 12.), 0 * modulesep), log_module_envelope, "Mother_Segment_Raw_Physical_Center_" + std::to_string(isec), DetectorLog_Det, false, 0, overlapcheck_sector); // ModuleEnvelope
+      
+      m_PhysicalVolumes_active[wlog_module_envelope] = 23;
+      
       for (int ilen = 1; ilen < ((detlength / 2 - segmentlength / 2) / segmentlength); ilen++)
 	{
 	  G4RotationMatrix *supfinalrot = new G4RotationMatrix();
@@ -191,24 +191,28 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
 	  if (ilen == 2 || (ilen == 7))
 	    {
 	      if (rMin < 85 * cm)
-		{
-		  RegisterPhysicalVolume(new G4PVPlacement(supfinalrot, G4ThreeVector((rMin - support_height / 2 - det_height / 2 - cooling_plate_height / 2 + moduleShift) * cos(isec * 2 * M_PI / 12.), (rMin - support_height / 2 - det_height / 2 - cooling_plate_height / 2 + moduleShift) * sin(isec * 2 * M_PI / 12.), ilen * segmentlength + segmentlength / 2 + ilen * modulesep), Log_End_Support,
-							   "Front_Support_Physical_1_" + std::to_string(isec) + "_" + std::to_string(ilen), DetectorLog_Det, false, 0, overlapcheck_sector),
-					 false);
-		  RegisterPhysicalVolume(new G4PVPlacement(supfinalrot, G4ThreeVector((rMin - support_height / 2 - det_height / 2 - cooling_plate_height / 2 + moduleShift) * cos(isec * 2 * M_PI / 12.), (rMin - support_height / 2 - det_height / 2 - cooling_plate_height / 2 + moduleShift) * sin(isec * 2 * M_PI / 12.), -(ilen * segmentlength + segmentlength / 2 + ilen * modulesep)), Log_End_Support,
-							   "Front_Support_Physical_2_" + std::to_string(isec) + "_" + std::to_string(ilen), DetectorLog_Det, false, 0, overlapcheck_sector),
-					 false);
-		}
-	    }
+		{		  
+		  G4VPhysicalVolume* wFront_Support_Physical_1 = new G4PVPlacement(supfinalrot, G4ThreeVector((rMin - support_height / 2 - det_height / 2 - cooling_plate_height / 2 + moduleShift) * cos(isec * 2 * M_PI / 12.), (rMin - support_height / 2 - det_height / 2 - cooling_plate_height / 2 + moduleShift) * sin(isec* 2 * M_PI / 12.), ilen * segmentlength + segmentlength / 2 + ilen * modulesep), Log_End_Support, "Front_Support_Physical_1_" + std::to_string(isec) + "_" + std::to_string(ilen), DetectorLog_Det, false, 0, overlapcheck_sector);
+		  m_PhysicalVolumes_active[wFront_Support_Physical_1] = 24;
+		 
+		  G4VPhysicalVolume* wFront_Support_Physical_2 = new G4PVPlacement(supfinalrot, G4ThreeVector((rMin - support_height / 2 - det_height / 2 - cooling_plate_height / 2 + moduleShift) * cos(isec * 2 * M_PI / 12.), (rMin - support_height / 2 - det_height / 2 - cooling_plate_height / 2 + moduleShift) * sin(isec* 2 * M_PI / 12.), -(ilen * segmentlength + segmentlength / 2 + ilen * modulesep)), Log_End_Support, "Front_Support_Physical_2_" + std::to_string(isec) + "_" + std::to_string(ilen), DetectorLog_Det, false, 0, overlapcheck_sector);
 
-	  // forward segments
-	  RegisterPhysicalVolume(new G4PVPlacement(motherrot, G4ThreeVector((rMin - det_height / 2 + moduleShift) * cos(isec * 2 * M_PI / 12.), (rMin - det_height / 2 + moduleShift) * sin(isec * 2 * M_PI / 12.), ilen * segmentlength + ilen * modulesep), log_module_envelope,
-						   "Mother_Segment_Raw_Physical_Fwd_" + std::to_string(isec) + "_" + std::to_string(ilen), DetectorLog_Det, false, 0, overlapcheck_sector),
-				 false);
-	  // backward segments
-	  RegisterPhysicalVolume(new G4PVPlacement(motherrot, G4ThreeVector((rMin - det_height / 2 + moduleShift) * cos(isec * 2 * M_PI / 12.), (rMin - det_height / 2 + moduleShift) * sin(isec * 2 * M_PI / 12.), -ilen * segmentlength - ilen * modulesep), log_module_envelope,
-						   "Mother_Segment_Raw_Physical_Bwd_" + std::to_string(isec) + "_" + std::to_string(ilen), DetectorLog_Det, false, 0, overlapcheck_sector),
-				 false);
+		  m_PhysicalVolumes_active[wFront_Support_Physical_2] = 25;
+		    
+		}    
+	    }	
+	    
+	  // forward segments	  
+	  G4VPhysicalVolume* wMother_Segment_Raw_Physical_Fwd = new G4PVPlacement(motherrot, G4ThreeVector((rMin - det_height / 2 + moduleShift) * cos(isec * 2 * M_PI / 12.), (rMin - det_height / 2 + moduleShift) * sin(isec * 2 * M_PI / 12.), ilen * segmentlength + ilen * modulesep), log_module_envelope, "Mother_Segment_Raw_Physical_Fwd_" + std::to_string(isec) + "_" + std::to_string(ilen), DetectorLog_Det, false, 0, overlapcheck_sector);
+	  
+	  m_PhysicalVolumes_active[wMother_Segment_Raw_Physical_Fwd] = 26;
+
+
+	  // backward segments	  
+	  G4VPhysicalVolume* wMother_Segment_Raw_Physical_Bwd = new G4PVPlacement(motherrot, G4ThreeVector((rMin - det_height / 2 + moduleShift) * cos(isec * 2 * M_PI / 12.), (rMin - det_height / 2 + moduleShift) * sin(isec * 2 * M_PI / 12.), -ilen * segmentlength - ilen * modulesep), log_module_envelope, "Mother_Segment_Raw_Physical_Bwd_" + std::to_string(isec) + "_" + std::to_string(ilen), DetectorLog_Det, false, 0, overlapcheck_sector);
+	  
+	  m_PhysicalVolumes_active[wMother_Segment_Raw_Physical_Bwd] = 27;
+
 	}
     }
 
@@ -297,7 +301,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
       G4RotationMatrix *tRot = new G4RotationMatrix();
       tRot->rotateZ(-tphi);     
       phy = new G4PVPlacement(tRot,G4ThreeVector(dx,dy,-437.5),lDirc,"wDirc",logicWorld,false,i);
-      m_PhysicalVolumesSet.insert(phy);
+      //m_PhysicalVolumesSet.insert(phy);
       m_PhysicalVolumes_active[phy] = 1;
     }
     //}
@@ -886,6 +890,25 @@ void G4EicDircDetector::DefineMaterials()
 
 void G4EicDircDetector::SetVisualization(){
 
+  G4VisAttributes *waModuleEnvelope = new G4VisAttributes();
+  waModuleEnvelope->SetVisibility(false);
+  waModuleEnvelope->SetColour(G4Colour::Red());
+  waModuleEnvelope->SetForceWireframe(true);
+  log_module_envelope->SetVisAttributes(waModuleEnvelope);
+
+  G4VisAttributes *waFullEnvelope = new G4VisAttributes();
+  waFullEnvelope->SetVisibility(false);
+  waFullEnvelope->SetColour(G4Colour::Red());
+  waFullEnvelope->SetForceWireframe(true);
+  DetectorLog_Det->SetVisAttributes(waFullEnvelope);
+
+  G4VisAttributes *waSupport = new G4VisAttributes();
+  waSupport->SetColour(G4Colour::Gray());
+  waSupport->SetVisibility(true);
+  waSupport->SetForceSolid(true);
+  Log_End_Support->SetVisAttributes(waSupport);
+  Log_Longitudinal_Support->SetVisAttributes(waSupport);
+
   G4Colour DircColour = G4Colour(1.,1.0,0.);
 
   G4VisAttributes *waDirc = new G4VisAttributes(DircColour);
@@ -990,43 +1013,3 @@ void G4EicDircDetector::Print(const std::string &what) const
   return;
 }
 
-G4LogicalVolume *G4EicDircDetector::RegisterLogicalVolume(G4LogicalVolume *v)
-{
-  if (!v)
-  {
-    std::cout << "G4EicDircDetector::RegisterVolume - Error - invalid volume!" << std::endl;
-    return v;
-  }
-  if (map_log_vol.find(v->GetName()) != map_log_vol.end())
-  {
-    std::cout << "G4EicDircDetector::RegisterVolume - Warning - replacing " << v->GetName() << std::endl;
-  }
-
-  map_log_vol[v->GetName()] = v;
-
-  return v;
-}
-
-G4PVPlacement *G4EicDircDetector::RegisterPhysicalVolume(G4PVPlacement *v, const bool active)
-{
-  if (!v)
-  {
-    std::cout << "G4EicDircDetector::RegisterPhysicalVolume - Error - invalid volume!" << std::endl;
-    return v;
-  }
-
-  phy_vol_idx_t id(v->GetName(), v->GetCopyNo());
-
-  if (map_phy_vol.find(id) != map_phy_vol.end())
-  {
-    std::cout
-        << "G4EicDircDetector::RegisterPhysicalVolume - Warning - replacing "
-        << v->GetName() << "[" << v->GetCopyNo() << "]" << std::endl;
-  }
-
-  map_phy_vol[id] = v;
-
-  if (active) map_active_phy_vol[id] = v;
-
-  return v;
-}
