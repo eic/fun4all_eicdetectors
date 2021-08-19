@@ -58,6 +58,9 @@ class G4EicDircDetector : public PHG4Detector
   G4LogicalVolume* log_module_envelope;
   G4LogicalVolume* Log_End_Support;
   G4LogicalVolume* Log_Longitudinal_Support;
+  G4LogicalVolume* log_module_envelope_inner;
+  G4LogicalVolume* Log_End_Support_inner;
+  G4LogicalVolume* Log_Longitudinal_Support_inner;
 
   G4LogicalVolume* lDirc;
   G4LogicalVolume* lFd;
