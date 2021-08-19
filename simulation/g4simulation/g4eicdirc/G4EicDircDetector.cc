@@ -93,10 +93,8 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
                                              detlength / 2.0,
                                              0, 2 * M_PI);
 
-  G4LogicalVolume *DetectorLog_Det = new G4LogicalVolume(dirc_envelope_solid, Air, name_base + "_Log");
-  RegisterLogicalVolume(DetectorLog_Det);
-  m_DisplayAction->AddVolume(DetectorLog_Det, "FullEnvelope");
-
+  DetectorLog_Det = new G4LogicalVolume(dirc_envelope_solid, Air, name_base + "_Log");
+ 
   G4VPhysicalVolume* wDetectorLog_Det = new G4PVPlacement(0, G4ThreeVector(0, 0, place_z), DetectorLog_Det, name_base + "_Physical", logicWorld, false, 0, overlapcheck_sector); // FullEnvelope
   m_PhysicalVolumes_active[wDetectorLog_Det] = 20;
 
