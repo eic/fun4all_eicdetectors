@@ -81,7 +81,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   G4double place_z = m_Params->get_double_param("place_z");
   G4double detlength = m_Params->get_double_param("length");
   */
-  G4double rMin = 80 * cm;  // center location of Al support plate                                                         
+  G4double rMin = 84.5 * cm;  // center location of Al support plate                                                         
   G4double det_height = 2.1 * cm;
   G4double place_z = -40 * cm;
   G4double detlength = 2.0 * 218* cm;
@@ -216,7 +216,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
 
   // -------- INNER FRAME -----------------
 
-  G4double rMin_inner = 74.15 * cm;  // center location of Al support plate                                                         
+  G4double rMin_inner = 74 * cm;  // center location of Al support plate                                                         
 
   G4VSolid *sol_module_envelope_inner = new G4Trd("sol_module_envelope_inner", sin(M_PI / 12.) * rMin_inner, sin(M_PI / 12.) * (rMin_inner + det_height), segmentlength / 2, segmentlength / 2, det_height / 2);
 
