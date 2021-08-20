@@ -6,6 +6,7 @@
 #include <g4main/PHG4DisplayAction.h>
 
 #include <string>  // for string
+#include <map>
 
 class G4Colour;
 class G4VisAttributes;
@@ -27,6 +28,7 @@ class G4EicDircDisplayAction : public PHG4DisplayAction
  private:
   PHParameters *m_Params;
   G4LogicalVolume *m_MyVolume;
+  std::map<G4LogicalVolume *, std::string> m_LogicalVolumeMap;
   G4VisAttributes *m_VisAtt;
   G4Colour *m_Colour;
 };

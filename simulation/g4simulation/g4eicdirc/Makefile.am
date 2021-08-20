@@ -21,14 +21,36 @@ libg4eicdirc_la_LIBADD = \
   -lg4testbench 
 
 pkginclude_HEADERS = \
-  G4EicDircSubsystem.h
+  G4EicDircSubsystem.h \
+  PrtOpBoundaryProcess.h \
+  PrtHit.h \
+  G4EventTree.h \
+  G4DIRCTree.h 
 
+ROOT_IO_DICTS = \
+  PrtHit_Dict.cc
+
+pcmdir = $(libdir)
+nobase_dist_pcm_DATA = \
+  PrtHit_Dict_rdict.pcm 
 
 libg4eicdirc_la_SOURCES = \
   G4EicDircDetector.cc \
   G4EicDircDisplayAction.cc \
   G4EicDircSubsystem.cc \
-  G4EicDircSteppingAction.cc
+  G4EicDircStackingAction.cc \
+  G4EicDircSteppingAction.cc \
+  PrtHit.cxx \
+  PrtHit_Dict.cc \
+  PrtOpBoundaryProcess.cxx \
+  G4DIRCTree.cc
+
+# Rule for generating table CINT dictionaries.
+%_Dict.cc: %.h %LinkDef.h
+	rootcint -f $@ @CINTDEFS@ $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
+
+#just to get the dependency
+%_Dict_rdict.pcm: %_Dict.cc ;
 
 ################################################
 # linking tests

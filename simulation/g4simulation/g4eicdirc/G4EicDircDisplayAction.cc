@@ -11,8 +11,6 @@
 
 #include <cmath>  // for isfinite
 
-using namespace std;
-
 G4EicDircDisplayAction::G4EicDircDisplayAction(const std::string &name, PHParameters *pars)
   : PHG4DisplayAction(name)
   , m_Params(pars)
@@ -24,6 +22,7 @@ G4EicDircDisplayAction::G4EicDircDisplayAction(const std::string &name, PHParame
 
 G4EicDircDisplayAction::~G4EicDircDisplayAction()
 {
+  
   delete m_VisAtt;
   delete m_Colour;
 }
@@ -31,39 +30,43 @@ G4EicDircDisplayAction::~G4EicDircDisplayAction()
 void G4EicDircDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
 {
   // check if vis attributes exist, if so someone else has set them and we do nothing
-  if (m_MyVolume->GetVisAttributes())
+  for (auto it : m_LogicalVolumeMap)
   {
-    return;
+    m_MyVolume = it.first;
+    if (m_MyVolume->GetVisAttributes())
+    {
+      continue;
+    }
+    m_VisAtt = new G4VisAttributes();
+    if (m_Params->get_int_param("blackhole"))
+    {
+      PHG4Utils::SetColour(m_VisAtt, "BlackHole");
+      m_VisAtt->SetVisibility(false);
+      m_VisAtt->SetForceSolid(false);
+    }
+    else
+    {
+      PHG4Utils::SetColour(m_VisAtt, m_Params->get_string_param("material"));
+      m_VisAtt->SetVisibility(true);
+      m_VisAtt->SetForceSolid(true);
+    }
+    if (m_Colour)
+    {
+      m_VisAtt->SetColour(m_Colour->GetRed(),
+                          m_Colour->GetGreen(),
+                          m_Colour->GetBlue(),
+                          m_Colour->GetAlpha());
+      m_VisAtt->SetVisibility(true);
+      m_VisAtt->SetForceSolid(true);
+    }
+    m_MyVolume->SetVisAttributes(m_VisAtt);
   }
-  m_VisAtt = new G4VisAttributes();
-  if (m_Params->get_int_param("blackhole"))
-  {
-    PHG4Utils::SetColour(m_VisAtt, "BlackHole");
-    m_VisAtt->SetVisibility(false);
-    m_VisAtt->SetForceSolid(false);
-  }
-  else
-  {
-    PHG4Utils::SetColour(m_VisAtt, m_Params->get_string_param("material"));
-    m_VisAtt->SetVisibility(true);
-    m_VisAtt->SetForceSolid(true);
-  }
-  if (m_Colour)
-  {
-    m_VisAtt->SetColour(m_Colour->GetRed(),
-                        m_Colour->GetGreen(),
-                        m_Colour->GetBlue(),
-                        m_Colour->GetAlpha());
-    m_VisAtt->SetVisibility(true);
-    m_VisAtt->SetForceSolid(true);
-  }
-  m_MyVolume->SetVisAttributes(m_VisAtt);
   return;
 }
 
 void G4EicDircDisplayAction::SetColor(const double red, const double green, const double blue, const double alpha)
 {
-  if (isfinite(red) && isfinite(green) && isfinite(blue) && isfinite(alpha))
+  if (std::isfinite(red) && std::isfinite(green) && std::isfinite(blue) && std::isfinite(alpha))
   {
     m_Colour = new G4Colour(red, green, blue, alpha);
   }
