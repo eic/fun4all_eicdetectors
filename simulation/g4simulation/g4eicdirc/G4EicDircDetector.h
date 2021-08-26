@@ -64,7 +64,7 @@ class G4EicDircDetector : public PHG4Detector
 
   G4LogicalVolume* lDirc;
   G4LogicalVolume* lFd;
-  G4LogicalVolume* lBar;
+  G4LogicalVolume *lBar, *lBarL, *lBarS;
   G4LogicalVolume* lGlue;
   G4LogicalVolume* lMirror;
   G4LogicalVolume* lLens1;
@@ -100,6 +100,7 @@ class G4EicDircDetector : public PHG4Detector
   G4int fLensId;
   G4double fNBar;
   G4double fBar[3];
+  G4double fBarL[3], fBarS[3];
   G4double fMirror[3];
   G4double fFd[3];
   G4double fPrizm[4];

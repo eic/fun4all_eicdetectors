@@ -73,7 +73,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
 {
   // ---------- DIRC supoort stucture ---------------
 
-  G4Material *Air = G4Material::GetMaterial("G4_AIR");
+  //G4Material *Air = G4Material::GetMaterial("G4_AIR");
 
   // positions
   /*G4double rMin = m_Params->get_double_param("rMin");  // center location of Al support plate
@@ -81,7 +81,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   G4double place_z = m_Params->get_double_param("place_z");
   G4double detlength = m_Params->get_double_param("length");
   */
-  G4double rMin = 84.5 * cm;  // center location of Al support plate                                                         
+  /*G4double rMin = 84.5 * cm;  // center location of Al support plate                                                         
   G4double det_height = 2.1 * cm;
   G4double place_z = -40 * cm;
   G4double detlength = 2.0 * 218* cm;
@@ -228,17 +228,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   G4VSolid *Sol_End_Support_inner = new G4Trd("Sol_End_Support_inner", sin(M_PI / 12.) * (rMin_inner - support_height * 0.9) - 2 * mm, sin(M_PI / 12.) * (rMin_inner) -4 * mm,  support_width / 2, support_width / 2, support_height * 0.73 / 2);                                                           
 
   Log_End_Support_inner = new G4LogicalVolume(Sol_End_Support_inner, G4Material::GetMaterial("G4_Fe"), "Log_End_Support_Raw_inner");
-
-  // place longitudinal supports left, middle and right side of sector
-  /*G4VSolid *Sol_Longitudinal_Support = new G4Trd("Sol_Longitudinal_Support",
-                                                 support_width / 2, support_width / 2,                    // x1, x2
-                                                 segmentlength / 2 - 1 * mm, segmentlength / 2 - 1 * mm,  // length
-                                                 support_height * 0.73 / 2);                              // height
-
-  Log_Longitudinal_Support = new G4LogicalVolume(Sol_Longitudinal_Support, G4Material::GetMaterial("G4_Fe"), "Log_Longitudinal_Support_Raw");
-  */
-  //G4RotationMatrix *supportrot = new G4RotationMatrix();
-  //supportrot->rotateY(-M_PI / 12.);
+  
   if (rMin_inner < 85 * cm)
     {
       G4VPhysicalVolume* wMother_Segment_Raw_Physical_Left_inner = new G4PVPlacement(supportrot, G4ThreeVector(sin(M_PI / 12.) * (rMin_inner - support_height / 2) - support_width / 2, 0, -support_height / 2), Log_Longitudinal_Support, "Mother_Segment_Raw_Physical_Left_inner", log_module_envelope_inner, false, 0, overlapcheck_sector); // Support
@@ -249,11 +239,11 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
 
       G4VPhysicalVolume* wMother_Segment_Raw_Physical_Right_inner = new G4PVPlacement(supportrot2, G4ThreeVector(-sin(M_PI / 12.) * (rMin_inner - support_height / 2) + support_width / 2, 0, -support_height / 2), Log_Longitudinal_Support, "Mother_Segment_Raw_Physical_Right_inner", log_module_envelope_inner, false, 0, overlapcheck_sector);
       m_PhysicalVolumes_active[wMother_Segment_Raw_Physical_Right_inner] = 29;
-    }
+      }*/
 
   //G4double modulesep = 1 * mm;
   //G4double moduleShift = -8 * mm;
-  if (rMin_inner < 85 * cm) moduleShift = -3 * mm;
+  /*if (rMin_inner < 85 * cm) moduleShift = -3 * mm;
   //if (rMin < 66 * cm) moduleShift = -1 * mm;
   //if (rMin < 55 * cm) moduleShift = 4 * mm;
 
@@ -301,26 +291,26 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
 	  m_PhysicalVolumes_active[wMother_Segment_Raw_Physical_Bwd_inner] = 34;
 
 	}
-    }
+	}*/
 
 
   // -------------- DIRC ----------------------
 
-  fGeomType = 0; // whole DIRC
+  fGeomType = 1; // whole DIRC
   fLensId = 3; // 3-layer spherical lens
   fNBar = 11;
   std::cout << "Nbars =" << fNBar << std::endl;
 
   fNRow = 6;
   fNCol = 4;
-
+  
   // ECCE parameters 
 
   fPrizm[0] = 386.5; fPrizm[1] = 300; fPrizm[3] = 37; fPrizm[2]= fPrizm[3]+300*tan(32*deg);
   fBar[0] = 17; fBar[1] = 35; fBar[2] = 1058.7;
   fNBoxes = 12;
   fRadius = 750;
-
+  
   //-------------------
 
   fBarsGap = 0.15;
@@ -329,7 +319,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   std::cout << "barrel radius = " << fRadius << " mm" << std::endl;
   
   fMirror[0] = 20; fMirror[1] = fPrizm[0]; fMirror[2] =1;
-
+  
   fMcpTotal[0] = fMcpTotal[1] = 53+4; fMcpTotal[2]=1;
   fMcpActive[0] = fMcpActive[1] = 53; fMcpActive[2]=1;
   fLens[0] = fLens[1] = 40; fLens[2]=10;
@@ -365,6 +355,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
 
   double gluethickness=0.05;
   double dirclength=fBar[2]*4+gluethickness*4;
+  //double dirclength = fBarL[2]*2 + fBarS[2] + gluethickness*3;
 
   // The DIRC
   G4Box* gDirc = new G4Box("gDirc",500,300,0.5*dirclength+550);
@@ -380,7 +371,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   // LUT
   /*phy = new G4PVPlacement(0,G4ThreeVector(0,0,0),lDirc,"wDirc",logicWorld,false,0);
     m_PhysicalVolumesSet.insert(phy);
-    }else{*/ 
+  */ 
     for(int i=0; i<fNBoxes; i++){
       double tphi = dphi*i; 
       double dx = fRadius * cos(tphi);
@@ -389,15 +380,19 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
       G4RotationMatrix *tRot = new G4RotationMatrix();
       tRot->rotateZ(-tphi);     
       phy = new G4PVPlacement(tRot,G4ThreeVector(dx,dy,-437.5),lDirc,"wDirc",logicWorld,false,i);
-      //m_PhysicalVolumesSet.insert(phy);
       m_PhysicalVolumes_active[phy] = 1;
     }
-    //}
   
   // The Bar
   G4Box *gBar = new G4Box("gBar",fBar[0]/2.,fBar[1]/2.,fBar[2]/2.);
   lBar = new G4LogicalVolume(gBar,BarMaterial,"lBar",0,0,0);
 
+  /*G4Box *gBarL = new G4Box("gBarL", fBarL[0]/2., fBarL[1]/2., fBarL[2]/2.);
+  lBarL = new G4LogicalVolume(gBarL,BarMaterial,"lBarL",0,0,0);
+
+  G4Box *gBarS = new G4Box("gBarS", fBarS[0]/2., fBarS[1]/2., fBarS[2]/2.);
+  lBarS = new G4LogicalVolume(gBarS,BarMaterial,"lBarS",0,0,0);
+  */
   G4Box *gExpVol = new G4Box("gExpVol",fBar[0]/2.,0.5*fBoxWidth,fBar[2]/2.);
   lExpVol = new G4LogicalVolume(gExpVol,BarMaterial,"lExpVol",0,0,0);
   
@@ -415,6 +410,24 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
       m_PhysicalVolumes_active[pDirc[i]] = 3;
       wGlue = new G4PVPlacement(0,G4ThreeVector(0,shifty,z-0.5*(fBar[2]+gluethickness)),lGlue,"wGlue", lDirc,false,id);
       m_PhysicalVolumes_active[wGlue] = 4;
+
+      // --- 2 long bars + 3rd short bar -----
+      /*if(j < 2)
+	{
+	  double z = 0.5*dirclength - 0.5*fBarL[2] - (fBarL[2]+gluethickness)*j;
+	  pDirc[i] = new G4PVPlacement(0,G4ThreeVector(0,shifty,z),lBarL,"wBar",lDirc,false,id);
+	  m_PhysicalVolumes_active[pDirc[i]] = 3;
+	  wGlue = new G4PVPlacement(0,G4ThreeVector(0,shifty,z-0.5*(fBarL[2]+gluethickness)),lGlue,"wGlue", lDirc,false,id);
+	  m_PhysicalVolumes_active[pDirc[i]] = 3;
+	}
+      else
+	{
+	  double z = 0.5*dirclength - 2.0*fBarL[2] - 0.5*fBarS[2] - gluethickness*j;
+	  pDirc[i] = new G4PVPlacement(0,G4ThreeVector(0,shifty,z),lBarS,"wBar",lDirc,false,id);
+	  m_PhysicalVolumes_active[pDirc[i]] = 3;
+	  wGlue = new G4PVPlacement(0,G4ThreeVector(0,shifty,z-0.5*(fBarS[2]+gluethickness)),lGlue,"wGlue", lDirc,false,id);
+	  m_PhysicalVolumes_active[wGlue] = 4;
+	  }*/
       id++;
     }
   }
@@ -978,7 +991,7 @@ void G4EicDircDetector::DefineMaterials()
 
 void G4EicDircDetector::SetVisualization(){
 
-  G4VisAttributes *waModuleEnvelope = new G4VisAttributes();
+  /*G4VisAttributes *waModuleEnvelope = new G4VisAttributes();
   waModuleEnvelope->SetVisibility(false);
   waModuleEnvelope->SetColour(G4Colour::Red());
   waModuleEnvelope->SetForceWireframe(true);
@@ -998,7 +1011,7 @@ void G4EicDircDetector::SetVisualization(){
   Log_End_Support->SetVisAttributes(waSupport);
   Log_Longitudinal_Support->SetVisAttributes(waSupport);
   Log_End_Support_inner->SetVisAttributes(waSupport);
-
+  */
   G4Colour DircColour = G4Colour(1.,1.0,0.);
 
   G4VisAttributes *waDirc = new G4VisAttributes(DircColour);
@@ -1013,6 +1026,8 @@ void G4EicDircDetector::SetVisualization(){
   G4VisAttributes *waBar = new G4VisAttributes(G4Colour(0.,1.,0.9,0.05)); //0.05
   waBar->SetVisibility(true);
   lBar->SetVisAttributes(waBar);
+  //lBarL->SetVisAttributes(waBar);
+  //lBarS->SetVisAttributes(waBar);
   lExpVol->SetVisAttributes(waBar);
   
   G4VisAttributes *waGlue = new G4VisAttributes(G4Colour(0.,0.4,0.9,0.1));
