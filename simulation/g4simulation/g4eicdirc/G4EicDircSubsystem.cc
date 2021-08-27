@@ -2,8 +2,10 @@
 
 #include "G4EicDircDetector.h"
 #include "G4EicDircDisplayAction.h"
+#include "G4EicDircOpBoundaryProcess.h"
 #include "G4EicDircStackingAction.h"
 #include "G4EicDircSteppingAction.h"
+
 
 #include <phparameter/PHParameters.h>
 
@@ -17,6 +19,9 @@
 #include <phool/PHNodeIterator.h>  // for PHNodeIterator
 #include <phool/PHObject.h>        // for PHObject
 #include <phool/getClass.h>
+
+#include <Geant4/G4ParticleTable.hh>
+#include <Geant4/G4ProcessManager.hh>
 
 #include <cmath>  // for isfinite
 
@@ -43,6 +48,7 @@ int G4EicDircSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
 {
   PHNodeIterator iter(topNode);
   PHCompositeNode *dstNode = dynamic_cast<PHCompositeNode *>(iter.findFirst("PHCompositeNode", "DST"));
+  DircBoundary = new G4EicDircOpBoundaryProcess();
   // G4EicDircDisplayAction *disp_action = new G4EicDircDisplayAction(Name(), GetParams());
   // if (isfinite(m_ColorArray[0]) &&
   //     isfinite(m_ColorArray[1]) &&
@@ -107,6 +113,15 @@ int G4EicDircSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
   }
   m_StackingAction = new G4EicDircStackingAction(m_Detector);
   return 0;
+}
+
+void G4EicDircSubsystem::AddProcesses(G4ParticleDefinition *particle)
+{
+    G4ProcessManager* pmanager = particle->GetProcessManager();
+    if (DircBoundary->IsApplicable(*particle))
+    {
+      pmanager->AddDiscreteProcess(DircBoundary);
+    }
 }
 
 //_______________________________________________________________________
