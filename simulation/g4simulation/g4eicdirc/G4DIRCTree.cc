@@ -1,10 +1,11 @@
 #include "G4DIRCTree.h"
 
+#include "PrtHit.h"
+
 #include <g4main/PHG4Hit.h>
 #include <g4main/PHG4HitContainer.h>        // for PHG4HitContainer, PHG4Hit...
 #include <g4main/PHG4Particle.h>
 #include <g4main/PHG4TruthInfoContainer.h>
-#include "PrtHit.h"
 
 #include <fun4all/SubsysReco.h>             // for SubsysReco
 

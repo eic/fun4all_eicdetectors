@@ -1,11 +1,11 @@
 #include "G4EicDircSteppingAction.h"
 #include "G4EicDircDetector.h"
+#include "PrtHit.h"
 
 #include <phparameter/PHParameters.h>
 
 #include <g4detectors/PHG4StepStatusDecode.h>
 
-#include "PrtHit.h"
 #include <g4main/PHG4Hit.h>
 #include <g4main/PHG4HitContainer.h>
 #include <g4main/PHG4Hitv1.h>

@@ -38,9 +38,6 @@
 
 #include <cmath>
 #include <iostream>  // for operator<<, endl, bas...
-#include <TMath.h>
-
-#include "PrtOpBoundaryProcess.h"
 
 class G4VSolid;
 class PHCompositeNode;
