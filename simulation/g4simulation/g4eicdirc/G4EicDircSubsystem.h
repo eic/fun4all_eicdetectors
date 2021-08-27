@@ -7,6 +7,7 @@
 
 #include <string>
 
+class G4VProcess;
 class G4EicDircDetector;
 class PHCompositeNode;
 class PHG4Detector;
@@ -58,6 +59,8 @@ class G4EicDircSubsystem : public PHG4DetectorSubsystem
 
   PHG4DisplayAction* GetDisplayAction() const override { return m_DisplayAction; }
 
+  void AddProcesses(G4ParticleDefinition *particle) override;
+
  private:
   // \brief Set default parameter values
   void SetDefaultParameters() override;
@@ -76,6 +79,9 @@ class G4EicDircSubsystem : public PHG4DetectorSubsystem
   /*! derives from PHG4DisplayAction */
   PHG4DisplayAction* m_DisplayAction = nullptr;
   //! Color setting if we want to override the default
+
+  //! Optical photon G4 Process for DIRC boundaries
+  G4VProcess *DircBoundary = nullptr;
 
   std::string m_HitNodeName;
   std::string m_AbsorberNodeName;

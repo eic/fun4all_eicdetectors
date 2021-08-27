@@ -22,7 +22,6 @@ libg4eicdirc_la_LIBADD = \
 
 pkginclude_HEADERS = \
   G4EicDircSubsystem.h \
-  PrtOpBoundaryProcess.h \
   PrtHit.h \
   G4EventTree.h \
   G4DIRCTree.h 
@@ -37,12 +36,12 @@ nobase_dist_pcm_DATA = \
 libg4eicdirc_la_SOURCES = \
   G4EicDircDetector.cc \
   G4EicDircDisplayAction.cc \
+  G4EicDircOpBoundaryProcess.cc \
   G4EicDircSubsystem.cc \
   G4EicDircStackingAction.cc \
   G4EicDircSteppingAction.cc \
   PrtHit.cxx \
   PrtHit_Dict.cc \
-  PrtOpBoundaryProcess.cxx \
   G4DIRCTree.cc
 
 # Rule for generating table CINT dictionaries.
