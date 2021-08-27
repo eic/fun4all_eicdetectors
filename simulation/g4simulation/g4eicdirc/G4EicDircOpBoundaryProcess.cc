@@ -4,10 +4,28 @@
 #include <Geant4/G4Track.hh>
 #include <Geant4/G4TouchableHistory.hh>
 
+#include <set>
+
 G4VParticleChange* G4EicDircOpBoundaryProcess::PostStepDoIt(const G4Track& aTrack, const G4Step& aStep)
 {  
   G4StepPoint* pPreStepPoint  = aStep.GetPreStepPoint();
   G4StepPoint* pPostStepPoint = aStep.GetPostStepPoint();
+
+  // static std::set<std::string> prevol;
+  // static std::set<std::string> postvol;
+  // std::string prevolnam = pPreStepPoint->GetPhysicalVolume()->GetName();
+  // if (prevol.find(prevolnam) == prevol.end())
+  // {
+  //   std::cout << "PreStep in " <<prevolnam << std::endl;
+  //   prevol.insert(prevolnam);
+  // }
+  // std::string postvolnam = pPostStepPoint->GetPhysicalVolume()->GetName();
+  // if (postvol.find(postvolnam) == postvol.end())
+  // {
+  //   std::cout << "PostStep in " <<postvolnam       << std::endl;
+  //   postvol.insert(postvolnam);
+  // }
+
   // int parentId = aTrack.GetParentID();
   // std::cout<<"parentId   "<<parentId <<std::endl;
   // if(parentId==1) pParticleChange->ProposeTrackStatus(fStopAndKill);
