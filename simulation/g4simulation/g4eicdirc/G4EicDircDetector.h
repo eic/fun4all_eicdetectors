@@ -64,7 +64,7 @@ class G4EicDircDetector : public PHG4Detector
 
   G4LogicalVolume* lDirc;
   G4LogicalVolume* lFd;
-  G4LogicalVolume *lBar, *lBarL, *lBarS;
+  G4LogicalVolume *lBarL, *lBarS;
   G4LogicalVolume* lGlue;
   G4LogicalVolume* lMirror;
   G4LogicalVolume* lLens1;
@@ -73,7 +73,6 @@ class G4EicDircDetector : public PHG4Detector
   G4LogicalVolume* lPrizm;
   G4LogicalVolume* lMcp;
   G4LogicalVolume* lPixel;
-  G4LogicalVolume* lExpVol;
   G4VPhysicalVolume*   pDirc[100];
   G4VPhysicalVolume* wGlue;
   G4VPhysicalVolume* wMirror;
@@ -109,6 +108,7 @@ class G4EicDircDetector : public PHG4Detector
   G4double fMcpActive[3];
   G4ThreeVector fPrismShift;
   G4double fBarsGap;
+  G4double zshift;
 
   //G4double fRotAngle;
   G4RotationMatrix *fPrtRot;
