@@ -34,6 +34,10 @@ class PHG4ForwardDualReadoutSteppingAction : public PHG4SteppingAction
     {
       _tower_size = twrsze;
     }
+  void SetTowerReadout(G4double rdosze)
+    {
+      _readout_size = rdosze;
+    }
   void SetDetectorSize(G4double detsze)
     {
       _detector_size = detsze;
@@ -54,7 +58,9 @@ class PHG4ForwardDualReadoutSteppingAction : public PHG4SteppingAction
   PHG4Hit* hit;
   PHG4Shower* saveshower;
 
+  G4double _towerdivision;
   G4double _tower_size;
+  G4double _readout_size;
   G4double _detector_size;
   int absorbertruth;
   int light_scint_model;
