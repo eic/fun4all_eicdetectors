@@ -22,6 +22,7 @@
 
 #include <Geant4/G4ParticleTable.hh>
 #include <Geant4/G4ProcessManager.hh>
+#include <Geant4/G4ios.hh>
 
 #include <cmath>  // for isfinite
 
@@ -121,6 +122,9 @@ void G4EicDircSubsystem::AddProcesses(G4ParticleDefinition *particle)
     if (DircBoundary->IsApplicable(*particle))
     {
       pmanager->AddDiscreteProcess(DircBoundary);
+      pmanager->SetProcessOrderingToFirst(DircBoundary, idxPostStep);
+      G4cout << "dirc boundary process index = " << pmanager->GetProcessIndex(DircBoundary) << G4endl;
+      G4cout << "dirc boundary process ordering = " << pmanager->GetProcessOrdering(DircBoundary, idxPostStep) << G4endl;
     }
 }
 
