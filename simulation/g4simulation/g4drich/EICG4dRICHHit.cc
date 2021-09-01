@@ -7,7 +7,7 @@ EICG4dRICHHit::EICG4dRICHHit(const PHG4Hit *g4hit) { CopyFrom(g4hit); };
 void EICG4dRICHHit::Reset() 
 { // TODO: make sure this is filled out
   hitid = ULONG_LONG_MAX;
-  trackid = INT_MIN;
+  //trackid = INT_MIN;
   showerid = INT_MIN;
   edep = NAN;
   for (int i = 0; i < 2; i++) 
