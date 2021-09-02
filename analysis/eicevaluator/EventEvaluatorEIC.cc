@@ -93,6 +93,9 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   , _hits_x(0)
   , _hits_y(0)
   , _hits_z(0)
+  , _hits_x2(0)
+  , _hits_y2(0)
+  , _hits_z2(0)
   , _hits_t(0)
   , _hits_edep(0)
 
@@ -338,6 +341,9 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   _hits_x = new float[_maxNHits];
   _hits_y = new float[_maxNHits];
   _hits_z = new float[_maxNHits];
+  _hits_x2 = new float[_maxNHits];
+  _hits_y2 = new float[_maxNHits];
+  _hits_z2 = new float[_maxNHits];
   _hits_t = new float[_maxNHits];
   _hits_edep = new float[_maxNHits];
 
@@ -522,6 +528,9 @@ int EventEvaluatorEIC::Init(PHCompositeNode* topNode)
     _event_tree->Branch("hits_x", _hits_x, "hits_x[nHits]/F");
     _event_tree->Branch("hits_y", _hits_y, "hits_y[nHits]/F");
     _event_tree->Branch("hits_z", _hits_z, "hits_z[nHits]/F");
+    _event_tree->Branch("hits_x2", _hits_x2, "hits_x2[nHits]/F");
+    _event_tree->Branch("hits_y2", _hits_y2, "hits_y2[nHits]/F");
+    _event_tree->Branch("hits_z2", _hits_z2, "hits_z2[nHits]/F");
     _event_tree->Branch("hits_t", _hits_t, "hits_t[nHits]/F");
     _event_tree->Branch("hits_edep", _hits_edep, "hits_edep[nHits]/F");
   }
@@ -1120,6 +1129,9 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
           (GetProjectionNameFromIndex(iIndex).find("LBLVTX") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("BARREL") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("FST") != std::string::npos) ||
+          (GetProjectionNameFromIndex(iIndex).find("ZDCsurrogate") != std::string::npos) ||
+          (GetProjectionNameFromIndex(iIndex).find("rpTruth") != std::string::npos) ||
+          (GetProjectionNameFromIndex(iIndex).find("b0Truth") != std::string::npos) ||
           (((GetProjectionNameFromIndex(iIndex).find("BH_1") != std::string::npos) || (GetProjectionNameFromIndex(iIndex).find("BH_FORWARD_PLUS") != std::string::npos) || (GetProjectionNameFromIndex(iIndex).find("BH_FORWARD_NEG") != std::string::npos)) && _do_BLACKHOLE)
       ){
         string nodename = "G4HIT_" + GetProjectionNameFromIndex(iIndex);
@@ -1144,6 +1156,9 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
             _hits_x[_nHitsLayers] = hit_iter->second->get_x(0);
             _hits_y[_nHitsLayers] = hit_iter->second->get_y(0);
             _hits_z[_nHitsLayers] = hit_iter->second->get_z(0);
+            _hits_x2[_nHitsLayers] = hit_iter->second->get_x(1);
+            _hits_y2[_nHitsLayers] = hit_iter->second->get_y(1);
+            _hits_z2[_nHitsLayers] = hit_iter->second->get_z(1);
             _hits_t[_nHitsLayers] = hit_iter->second->get_t(0);
             _hits_edep[_nHitsLayers] = hit_iter->second->get_edep();
             _hits_layerID[_nHitsLayers] = iIndex;
@@ -3358,6 +3373,13 @@ int EventEvaluatorEIC::GetProjectionIndex(std::string projname)
   else if (projname.find("LFHCAL") != std::string::npos)
     return 67;
 
+  else if (projname.find("ZDCsurrogate") != std::string::npos)
+    return 70;
+  else if (projname.find("rpTruth") != std::string::npos)
+    return 71;
+  else if (projname.find("b0Truth") != std::string::npos)
+    return 72;
+
   else if (projname.find("BH_1") != std::string::npos)
     return 90;
   else if (projname.find("BH_FORWARD_PLUS") != std::string::npos)
@@ -3471,6 +3493,13 @@ std::string EventEvaluatorEIC::GetProjectionNameFromIndex(int projindex)
   case 67:
     return "LFHCAL";
 
+  case 70:
+    return "ZDCsurrogate";
+  case 71:
+    return "rpTruth";
+  case 72:
+    return "b0Truth";
+
   case 90:
     return "BH_1";
   case 91:
@@ -3529,6 +3558,9 @@ void EventEvaluatorEIC::resetBuffer()
       _hits_x[ihit] = 0;
       _hits_y[ihit] = 0;
       _hits_z[ihit] = 0;
+      _hits_x2[ihit] = 0;
+      _hits_y2[ihit] = 0;
+      _hits_z2[ihit] = 0;
       _hits_t[ihit] = 0;
       _hits_edep[ihit] = 0;
     }

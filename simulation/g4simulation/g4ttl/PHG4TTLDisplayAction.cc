@@ -107,7 +107,7 @@ void PHG4TTLDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
       visatt->SetForceSolid(true);
       // visatt->SetForceWireframe(true);
     }
-    else if (it.second == "SensorStack" || it.second == "SensorLadder")
+    else if (it.second == "SensorStack" || it.second == "SensorLadder" || it.second == "SensorAndReadoutLadder")
     {
       visatt->SetVisibility(false);
       visatt->SetColour(G4Colour(G4Colour::Green()));

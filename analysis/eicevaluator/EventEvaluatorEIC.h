@@ -125,6 +125,9 @@ class EventEvaluatorEIC : public SubsysReco
   float* _hits_x;
   float* _hits_y;
   float* _hits_z;
+  float* _hits_x2;
+  float* _hits_y2;
+  float* _hits_z2;
   float* _hits_t;
   float* _hits_edep;
 
