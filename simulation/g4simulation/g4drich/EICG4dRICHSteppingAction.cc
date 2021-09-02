@@ -277,7 +277,8 @@ bool EICG4dRICHSteppingAction::UserSteppingAction(const G4Step *aStep,
     {
       // if hit already exists, then Reset() has likely just been
       // called; in this case, initialize, but don't reset accumulators
-      this->InitHit(prePoint, aTrack, false);
+      if(m_Hit->get_trkid()!=aTrack->GetTrackID()) this->InitHit(prePoint,aTrack,true);
+	else this->InitHit(prePoint,aTrack,false);
     }
 
     // print info
@@ -437,7 +438,8 @@ bool EICG4dRICHSteppingAction::UserSteppingAction(const G4Step *aStep,
           m_Hit->set_process("exitProcess");
           break;
         default:
-          m_Hit->set_process(aTrack->GetCreatorProcess()->GetProcessName());
+	  if(aTrack->GetCreatorProcess()) m_Hit->set_process(aTrack->GetCreatorProcess()->GetProcessName());
+		else m_Hit->set_process("unknown");
       }
 
       m_Hit->set_parent_id(aTrack->GetParentID());
