@@ -41,9 +41,9 @@ using std::string;
 */
 //-------------------------------------
 EICG4dRICHTree::EICG4dRICHTree(const std::string &name, const std::string &filename)
-    : SubsysReco(name)
-    , m_outfileN(filename)
-    , evnum(0)
+  : SubsysReco(name)
+  , m_outfileN(filename)
+  , evnum(0)
 //, m_hm(nullptr) //---
 {
   // resetVars(); //---
@@ -51,17 +51,18 @@ EICG4dRICHTree::EICG4dRICHTree(const std::string &name, const std::string &filen
 }
 
 //-------------------------------------
-EICG4dRICHTree::~EICG4dRICHTree() 
+EICG4dRICHTree::~EICG4dRICHTree()
 {
   delete m_tree;
   // delete m_hm; //---
 }
 
 //-------------------------------------
-int EICG4dRICHTree::Init(PHCompositeNode *topNode) 
+int EICG4dRICHTree::Init(PHCompositeNode *topNode)
 {
-  if (Verbosity() >  VERBOSITY_A_LOT)
-    std::cout << std::endl << "CALL EICG4dRICHTree::Init" << std::endl;
+  if (Verbosity() > VERBOSITY_A_LOT)
+    std::cout << std::endl
+              << "CALL EICG4dRICHTree::Init" << std::endl;
 
   m_outfile = new TFile(m_outfileN.c_str(), "RECREATE");
 
@@ -69,13 +70,13 @@ int EICG4dRICHTree::Init(PHCompositeNode *topNode)
 }
 
 //-------------------------------------
-int EICG4dRICHTree::process_event(PHCompositeNode *topNode) 
+int EICG4dRICHTree::process_event(PHCompositeNode *topNode)
 {
-  if (Verbosity() >  VERBOSITY_A_LOT)
+  if (Verbosity() > VERBOSITY_A_LOT)
   {
     std::cout << std::endl
-         << "CALL EICG4dRICHTree::process_event"
-         << " ====================" << std::endl;
+              << "CALL EICG4dRICHTree::process_event"
+              << " ====================" << std::endl;
   }
 
   getHits(topNode);
@@ -84,9 +85,10 @@ int EICG4dRICHTree::process_event(PHCompositeNode *topNode)
 }
 
 //-------------------------------------
-int EICG4dRICHTree::End(PHCompositeNode *topNode) 
+int EICG4dRICHTree::End(PHCompositeNode *topNode)
 {
-  if (Verbosity() >= VERBOSITY_MORE) std::cout << std::endl << "CALL EICG4dRICHTree::End" << std::endl;
+  if (Verbosity() >= VERBOSITY_MORE) std::cout << std::endl
+                                               << "CALL EICG4dRICHTree::End" << std::endl;
 
   m_outfile->cd();
   m_tree->Write();
@@ -99,13 +101,12 @@ int EICG4dRICHTree::End(PHCompositeNode *topNode)
 }
 
 //----------------------------------------------
-void EICG4dRICHTree::getHits(PHCompositeNode *topNode) 
+void EICG4dRICHTree::getHits(PHCompositeNode *topNode)
 {
-
   // get hits container
-  PHG4HitContainer *hitCont = findNode::getClass<PHG4HitContainer>(topNode, "G4HIT_dRICH_0"); // TODO: do not hard code name
+  PHG4HitContainer *hitCont = findNode::getClass<PHG4HitContainer>(topNode, "G4HIT_dRICH_0");  // TODO: do not hard code name
 
-  if (!hitCont) 
+  if (!hitCont)
   {
     std::cerr << "ERROR: hitCont not found" << std::endl;
     return;
@@ -117,45 +118,46 @@ void EICG4dRICHTree::getHits(PHCompositeNode *topNode)
 
   // loop over hits, filling tree
   auto hitRange = hitCont->getHits();
-  for (auto hitIter = hitRange.first; hitIter != hitRange.second; hitIter++) {
+  for (auto hitIter = hitRange.first; hitIter != hitRange.second; hitIter++)
+  {
     EICG4dRICHHit *hit = dynamic_cast<EICG4dRICHHit *>(hitIter->second);
 
-    if (Verbosity() >  VERBOSITY_A_LOT) 
+    if (Verbosity() > VERBOSITY_A_LOT)
     {
       std::cout << "----- HIT PRINTOUT:" << std::endl;
       hit->print();
     }
 
-    trackID = (Int_t)hit->get_trkid();
+    trackID = (Int_t) hit->get_trkid();
     strcpy(hitType, hit->get_hit_type_name());
     strcpy(hitSubtype, hit->get_hit_subtype_name());
-    petal = (Int_t)hit->get_petal();
-    psst = (Int_t)hit->get_psst();
-    pdg = (Int_t)hit->get_pdg();
+    petal = (Int_t) hit->get_petal();
+    psst = (Int_t) hit->get_psst();
+    pdg = (Int_t) hit->get_pdg();
     strcpy(particleName, hit->get_particle_name().c_str());
     strcpy(process, hit->get_process().c_str());
-    parentID = (Int_t)hit->get_parent_id();
+    parentID = (Int_t) hit->get_parent_id();
     vectorToArray(hit->get_position(1), hitPos);
     vectorToArray(hit->get_momentum(), hitP);
     vectorToArray(hit->get_momentum_dir(), hitPdir);
     vectorToArray(hit->get_vertex_position(), hitVtxPos);
     vectorToArray(hit->get_vertex_momentum_dir(), hitVtxPdir);
-    deltaT = (Double_t)hit->get_delta_t();
-    edep = (Double_t)hit->get_edep();
+    deltaT = (Double_t) hit->get_delta_t();
+    edep = (Double_t) hit->get_edep();
     m_tree->Fill();
   }
 }
 
 //---------------------------------------------
-void EICG4dRICHTree::vectorToArray(G4ThreeVector vec, Double_t *arr) 
+void EICG4dRICHTree::vectorToArray(G4ThreeVector vec, Double_t *arr)
 {
-  arr[0] = (Double_t)vec.x();
-  arr[1] = (Double_t)vec.y();
-  arr[2] = (Double_t)vec.z();
+  arr[0] = (Double_t) vec.x();
+  arr[1] = (Double_t) vec.y();
+  arr[2] = (Double_t) vec.z();
 }
 
 //---------------------------------------------
-void EICG4dRICHTree::initTrees() 
+void EICG4dRICHTree::initTrees()
 {
   m_tree = new TTree("tree", "tree");
   m_tree->Branch("evnum", &evnum, "evnum/I");

@@ -41,21 +41,23 @@ class PHCompositeNode;
 
 //____________________________________________________________________________..
 EICG4dRICHSteppingAction::EICG4dRICHSteppingAction(EICG4dRICHDetector *detector,
-                                         const PHParameters *parameters)
-    : PHG4SteppingAction(detector->GetName())
-    , m_Detector(detector)
-    , m_Params(parameters)
-    , m_HitContainer(nullptr)
-    , m_Hit(nullptr)
-    , m_SaveHitContainer(nullptr)
-    , m_SaveVolPre(nullptr)
-    , m_SaveVolPost(nullptr)
-    , m_SaveTrackId(-1)
-    , m_SavePreStepStatus(-1)
-    , m_SavePostStepStatus(-1)
-    , m_ActiveFlag(m_Params->get_int_param("active"))
-    , m_EdepSum(0)
-    , m_EionSum(0)
+                                                   const PHParameters *parameters)
+  : PHG4SteppingAction(detector->GetName())
+  , m_Detector(detector)
+  , m_Params(parameters)
+  , m_HitContainer(nullptr)
+  , m_Hit(nullptr)
+  , m_SaveHitContainer(nullptr)
+  , m_SaveVolPre(nullptr)
+  , m_SaveVolPost(nullptr)
+  , m_SaveTrackId(-1)
+  , m_SavePreStepStatus(-1)
+  , m_SavePostStepStatus(-1)
+  , m_ActiveFlag(m_Params->get_int_param("active"))
+  , m_EdepSum(0)
+  , m_EionSum(0)
+  , hitType(-1)
+  , hitSubtype(-1)
 {
   // hit type strings
   hitTypeStr[hEntrance] = "entrance";
@@ -79,7 +81,7 @@ EICG4dRICHSteppingAction::EICG4dRICHSteppingAction(EICG4dRICHDetector *detector,
 }
 
 //____________________________________________________________________________..
-EICG4dRICHSteppingAction::~EICG4dRICHSteppingAction() 
+EICG4dRICHSteppingAction::~EICG4dRICHSteppingAction()
 {
   // if the last hit was a zero energy deposit hit, it is
   // just reset and the memory is still allocated, so we
@@ -92,9 +94,8 @@ EICG4dRICHSteppingAction::~EICG4dRICHSteppingAction()
 //____________________________________________________________________________..
 // This is the implementation of the G4 UserSteppingAction
 bool EICG4dRICHSteppingAction::UserSteppingAction(const G4Step *aStep,
-                                             bool was_used) 
+                                                  bool was_used)
 {
-
   if (Verbosity() >= Fun4AllBase::VERBOSITY_MORE)
   {
     std::cout << "[>>>>>] call EICG4dRICHSteppingAction::UserSteppingAction" << std::endl;
@@ -109,7 +110,7 @@ bool EICG4dRICHSteppingAction::UserSteppingAction(const G4Step *aStep,
   G4StepPoint *postPoint = aStep->GetPostStepPoint();
 
   // skip this step, if leaving the world (postVol will be nullptr)
-  if (postPoint->GetStepStatus() == fWorldBoundary) 
+  if (postPoint->GetStepStatus() == fWorldBoundary)
   {
     if (Verbosity() >= Fun4AllBase::VERBOSITY_MORE) std::cout << "... skip this step (leaving world)" << std::endl;
     if (m_Hit) m_Hit->Reset();
@@ -144,8 +145,8 @@ bool EICG4dRICHSteppingAction::UserSteppingAction(const G4Step *aStep,
   }
 
   // reset hit classifiers
-  hitType = -1;
-  hitSubtype = -1;
+  //hitType = -1;
+  //hitSubtype = -1;
 
   // classify hit type
   if (prePointVolName.contains("DRICHpetal") && postPointVolName.contains("DRICHpsst"))
@@ -165,14 +166,14 @@ bool EICG4dRICHSteppingAction::UserSteppingAction(const G4Step *aStep,
     hitType = hIgnore;
   }
 
-  if (Verbosity() >= Fun4AllBase::VERBOSITY_MORE && hitType == hEntrance) 
-  {  
+  if (Verbosity() >= Fun4AllBase::VERBOSITY_MORE && hitType == hEntrance)
+  {
     std::cout << "[__] step is ENTERING vessel" << std::endl;
   }
 
   // skip this step, if it's outside the detector, and not an entrance
   // or exit of the vessel
-  if (!whichactive && hitType != hEntrance && hitType != hExit) 
+  if (!whichactive && hitType != hEntrance && hitType != hExit)
   {
     if (Verbosity() >= Fun4AllBase::VERBOSITY_MORE) std::cout << "... skip this step" << std::endl;
     return false;
@@ -181,11 +182,12 @@ bool EICG4dRICHSteppingAction::UserSteppingAction(const G4Step *aStep,
   // get step energy // TODO: do we need `eion`?
   G4double edep = 0;
   G4double eion = 0;
-  if (hitType != hEntrance) 
+  if (hitType != hEntrance)
   {
     edep = aStep->GetTotalEnergyDeposit() / GeV;
     eion = (aStep->GetTotalEnergyDeposit() -
-            aStep->GetNonIonizingEnergyDeposit()) / GeV;
+            aStep->GetNonIonizingEnergyDeposit()) /
+           GeV;
   }
   if (Verbosity() >= Fun4AllBase::VERBOSITY_MORE) std::cout << "[_] step edep=" << edep << ",   eion=" << eion << std::endl;
 
@@ -200,21 +202,21 @@ bool EICG4dRICHSteppingAction::UserSteppingAction(const G4Step *aStep,
   // can reproduce G4 runs identically (if given the sequence of random number
   // seeds you find in the log), the printouts help us giving the G4 support
   // information about those failures
-  switch (prePoint->GetStepStatus()) {
-
+  switch (prePoint->GetStepStatus())
+  {
   // --- abnormal cases
-  case fPostStepDoItProc: // step defined by PostStepDoItVector
-    if (m_SavePostStepStatus != fGeomBoundary) 
+  case fPostStepDoItProc:  // step defined by PostStepDoItVector
+    if (m_SavePostStepStatus != fGeomBoundary)
     {
       // this is the okay case, fPostStepDoItProc called in a volume, not first
       // thing inside a new volume, just proceed here
       if (Verbosity() >= Fun4AllBase::VERBOSITY_MORE)
         std::cout << "[__] first step in a new volume" << std::endl;
-    } 
-    else 
+    }
+    else
     {
       if (Verbosity() >= Fun4AllBase::VERBOSITY_MORE) std::cout << "[ + ] step was defined by PostStepDoItVector" << std::endl;
-      if (hitType != hEntrance) 
+      if (hitType != hEntrance)
       {
         // this is an impossible G4 Step print out diagnostic to help debug, not
         // sure if this is still with us
@@ -235,8 +237,8 @@ bool EICG4dRICHSteppingAction::UserSteppingAction(const G4Step *aStep,
                   << " post vol : " << postTouch->GetVolume()->GetName() << std::endl;
         std::cout << " previous phys pre vol: " << m_SaveVolPre->GetName()
                   << " previous phys post vol: " << m_SaveVolPost->GetName() << std::endl;
-      } 
-      else 
+      }
+      else
       {
         hitSubtype = entPostStep;
       }
@@ -244,9 +246,9 @@ bool EICG4dRICHSteppingAction::UserSteppingAction(const G4Step *aStep,
 
     // if this step is incident on the vessel, and we have not yet created a
     // hit, create one
-    if (hitType == hEntrance) 
+    if (hitType == hEntrance)
     {
-      m_Hit = nullptr; // kill any leftover hit
+      m_Hit = nullptr;  // kill any leftover hit
       if (Verbosity() >= Fun4AllBase::VERBOSITY_MORE) std::cout << "[++++] NEW hit (entrance)" << std::endl;
       m_Hit = new EICG4dRICHHit();
       this->InitHit(prePoint, aTrack, true);
@@ -260,40 +262,46 @@ bool EICG4dRICHSteppingAction::UserSteppingAction(const G4Step *aStep,
 
     // do nothing if not geometry boundary, not undefined, and not entrance
     if (prePoint->GetStepStatus() != fGeomBoundary &&
-        prePoint->GetStepStatus() != fUndefined && hitType != hEntrance) 
+        prePoint->GetStepStatus() != fUndefined && hitType != hEntrance)
     {
       if (Verbosity() >= Fun4AllBase::VERBOSITY_MORE) std::cout << "[+] prepoint status ignored" << std::endl;
       break;
     }
 
     // create new hit
-    if (!m_Hit) 
+    if (!m_Hit)
     {
       if (Verbosity() >= Fun4AllBase::VERBOSITY_MORE) std::cout << "[++++] NEW hit" << std::endl;
       m_Hit = new EICG4dRICHHit();
       this->InitHit(prePoint, aTrack, true);
-    } 
-    else 
+    }
+    else
     {
       // if hit already exists, then Reset() has likely just been
       // called; in this case, initialize, but don't reset accumulators
-      this->InitHit(prePoint, aTrack, false);
+      if (m_Hit->get_trkid() != aTrack->GetTrackID())
+        this->InitHit(prePoint, aTrack, true);
+      else
+        this->InitHit(prePoint, aTrack, false);
     }
 
     // print info
-    if (Verbosity() >= Fun4AllBase::VERBOSITY_MORE) 
+    if (Verbosity() >= Fun4AllBase::VERBOSITY_MORE)
     {
       std::cout << "[+] prepoint status=";
-      if (prePoint->GetStepStatus() == fGeomBoundary) std::cout << "fGeomBoundary";
-      else if (prePoint->GetStepStatus() == fUndefined) std::cout << "fUndefined";
-      else std::cout << "UNKNOWN!";
+      if (prePoint->GetStepStatus() == fGeomBoundary)
+        std::cout << "fGeomBoundary";
+      else if (prePoint->GetStepStatus() == fUndefined)
+        std::cout << "fUndefined";
+      else
+        std::cout << "UNKNOWN!";
       std::cout << std::endl;
-      if (aTrack->GetTrackID() > 1) 
+      if (aTrack->GetTrackID() > 1)
       {
         std::cout << "[-] secondary track, creator process="
-             << aTrack->GetCreatorProcess()->GetProcessName();
-      } 
-      else 
+                  << aTrack->GetCreatorProcess()->GetProcessName();
+      }
+      else
       {
         std::cout << "[-] primary track, particle=" << particleName;
       }
@@ -301,9 +309,9 @@ bool EICG4dRICHSteppingAction::UserSteppingAction(const G4Step *aStep,
     }
 
     // tracking of the truth info // TODO: not used yet?
-    if (G4VUserTrackInformation *p = aTrack->GetUserInformation()) 
+    if (G4VUserTrackInformation *p = aTrack->GetUserInformation())
     {
-      if (PHG4TrackUserInfoV1 *pp = dynamic_cast<PHG4TrackUserInfoV1 *>(p)) 
+      if (PHG4TrackUserInfoV1 *pp = dynamic_cast<PHG4TrackUserInfoV1 *>(p))
       {
         m_Hit->set_trkid(pp->GetUserTrackId());
         pp->GetShower()->add_g4hit_id(m_SaveHitContainer->GetID(), m_Hit->get_hit_id());
@@ -315,9 +323,9 @@ bool EICG4dRICHSteppingAction::UserSteppingAction(const G4Step *aStep,
   // This section is called for every step -------------------------------------
   // - some sanity checks for inconsistencies (aka bugs) we have seen over the years
   // - check if this hit was created, if not print out last post step status
-  if (!m_Hit || !std::isfinite(m_Hit->get_x(0))) 
+  if (!m_Hit || !std::isfinite(m_Hit->get_x(0)))
   {
-    std::cout << "m_Hit @" << static_cast<void*>(m_Hit) << " isfinite = " << std::isfinite(m_Hit->get_x(0)) << std::endl;
+    std::cout << "m_Hit @" << static_cast<void *>(m_Hit) << " isfinite = " << std::isfinite(m_Hit->get_x(0)) << std::endl;
     std::cout << GetName() << ": hit was not created" << std::endl;
     std::cout << "prestep status: "
               << PHG4StepStatusDecode::GetStepStatus(prePoint->GetStepStatus())
@@ -337,7 +345,7 @@ bool EICG4dRICHSteppingAction::UserSteppingAction(const G4Step *aStep,
     gSystem->Exit(1);
   }
   // check if track id matches the initial one when the hit was created
-  if (aTrack->GetTrackID() != m_SaveTrackId) 
+  if (aTrack->GetTrackID() != m_SaveTrackId)
   {
     std::cout << GetName() << ": hits do not belong to the same track" << std::endl;
     std::cout << "saved track: " << m_SaveTrackId
@@ -356,11 +364,11 @@ bool EICG4dRICHSteppingAction::UserSteppingAction(const G4Step *aStep,
 
   // update accumulators
   m_EdepSum += edep;
-  if (whichactive > 0) 
+  if (whichactive > 0)
   {
     m_EionSum += eion;
   }
-  if (Verbosity() >= Fun4AllBase::VERBOSITY_MORE) 
+  if (Verbosity() >= Fun4AllBase::VERBOSITY_MORE)
   {
     std::cout << "[_] m_EdepSum=" << m_EdepSum << ",   m_EionSum=" << m_EionSum << std::endl;
   }
@@ -380,41 +388,46 @@ bool EICG4dRICHSteppingAction::UserSteppingAction(const G4Step *aStep,
   if (postPoint->GetStepStatus() == fGeomBoundary      /*left volume*/
       || postPoint->GetStepStatus() == fWorldBoundary  /*left world*/
       || postPoint->GetStepStatus() == fAtRestDoItProc /*track stops*/
-      || aTrack->GetTrackStatus() == fStopAndKill)      /*track ends*/
+      || aTrack->GetTrackStatus() == fStopAndKill)     /*track ends*/
   {
-
     if (Verbosity() >= Fun4AllBase::VERBOSITY_MORE)
     {
       std::cout << "[---+] last step in the volume (pre=" << prePointVolName << ", post=" << postPointVolName << ")" << std::endl;
     }
 
     // hits to keep +++++++++++++++++++++++
-    if (hitType != hIgnore) 
+    if (hitType != hIgnore)
     {
-
       if (Verbosity() >= Fun4AllBase::VERBOSITY_MORE) std::cout << "[-+] " << hitTypeStr[hitType] << " hit, KEEP!" << std::endl;
 
       // classify hit subtype
-      switch (hitType) 
+      switch (hitType)
       {
-        case hEntrance:
-          if (hitSubtype != entPostStep) 
-          {
-            if (aTrack->GetTrackID() == 1) hitSubtype = entPrimary;
-            else hitSubtype = entSecondary;
-          }
-          break;
-        case hExit:
-          if (aTrack->GetTrackID() == 1) hitSubtype = exPrimary;
-          else hitSubtype = exSecondary;
-          break;
-        case hPSST:
-          if (particleName == "opticalphoton") hitSubtype = psOptical;
-          else if (particleName == "gamma") hitSubtype = psGamma;
-          else hitSubtype = psOther;
-          break;
-        default:
-          hitSubtype = subtypeUnknown;
+      case hEntrance:
+        if (hitSubtype != entPostStep)
+        {
+          if (aTrack->GetTrackID() == 1)
+            hitSubtype = entPrimary;
+          else
+            hitSubtype = entSecondary;
+        }
+        break;
+      case hExit:
+        if (aTrack->GetTrackID() == 1)
+          hitSubtype = exPrimary;
+        else
+          hitSubtype = exSecondary;
+        break;
+      case hPSST:
+        if (particleName == "opticalphoton")
+          hitSubtype = psOptical;
+        else if (particleName == "gamma")
+          hitSubtype = psGamma;
+        else
+          hitSubtype = psOther;
+        break;
+      default:
+        hitSubtype = subtypeUnknown;
       }
       if (hitSubtype == -1) hitSubtype = subtypeUnknown;
 
@@ -426,18 +439,24 @@ bool EICG4dRICHSteppingAction::UserSteppingAction(const G4Step *aStep,
       m_Hit->set_pdg(aTrack->GetParticleDefinition()->GetPDGEncoding());
       m_Hit->set_particle_name(particleName);
 
-      switch (hitType) 
+      switch (hitType)
       {
-        case hEntrance:
-          if (hitSubtype == entPostStep) m_Hit->set_process("postStep");
-          else if (hitSubtype == entPrimary) m_Hit->set_process("primary");
-          else  m_Hit->set_process(aTrack->GetCreatorProcess()->GetProcessName());
-          break;
-        case hExit:
-          m_Hit->set_process("exitProcess");
-          break;
-        default:
+      case hEntrance:
+        if (hitSubtype == entPostStep)
+          m_Hit->set_process("postStep");
+        else if (hitSubtype == entPrimary)
+          m_Hit->set_process("primary");
+        else
           m_Hit->set_process(aTrack->GetCreatorProcess()->GetProcessName());
+        break;
+      case hExit:
+        m_Hit->set_process("exitProcess");
+        break;
+      default:
+        if (aTrack->GetCreatorProcess())
+          m_Hit->set_process(aTrack->GetCreatorProcess()->GetProcessName());
+        else
+          m_Hit->set_process("unknown");
       }
 
       m_Hit->set_parent_id(aTrack->GetParentID());
@@ -449,11 +468,11 @@ bool EICG4dRICHSteppingAction::UserSteppingAction(const G4Step *aStep,
       m_Hit->set_t(1, postPoint->GetGlobalTime() / nanosecond);
 
       // tracking of the truth info // TODO: not used yet?
-      if (G4VUserTrackInformation *p = aTrack->GetUserInformation()) 
+      if (G4VUserTrackInformation *p = aTrack->GetUserInformation())
       {
-        if (PHG4TrackUserInfoV1 *pp = dynamic_cast<PHG4TrackUserInfoV1 *>(p)) 
+        if (PHG4TrackUserInfoV1 *pp = dynamic_cast<PHG4TrackUserInfoV1 *>(p))
         {
-          pp->SetKeep(1); // we want to keep the track
+          pp->SetKeep(1);  // we want to keep the track
         }
       }
 
@@ -467,9 +486,9 @@ bool EICG4dRICHSteppingAction::UserSteppingAction(const G4Step *aStep,
 
       // transfer ownership to container
       m_SaveHitContainer->AddHit(petal, m_Hit);
-      m_Hit = nullptr; // so that next track will create new hit
+      m_Hit = nullptr;  // so that next track will create new hit
     }
-    else 
+    else
     {
       // do not save this hit ++++++++++++++++++++++++++++
       // - reset hit object for reuse
@@ -486,8 +505,8 @@ bool EICG4dRICHSteppingAction::UserSteppingAction(const G4Step *aStep,
 
 //____________________________________________________________________________..
 void EICG4dRICHSteppingAction::InitHit(const G4StepPoint *prePoint_,
-                                  const G4Track *aTrack_,
-                                  bool resetAccumulators) 
+                                       const G4Track *aTrack_,
+                                       bool resetAccumulators)
 {
   // set some entrance attributes, and track ID
   m_Hit->set_position(0, prePoint_->GetPosition() / cm);
@@ -496,7 +515,7 @@ void EICG4dRICHSteppingAction::InitHit(const G4StepPoint *prePoint_,
   m_SaveTrackId = aTrack_->GetTrackID();
   m_SaveHitContainer = m_HitContainer;
   // initializate accumulators (e.g., for total energy deposition)
-  if (resetAccumulators) 
+  if (resetAccumulators)
   {
     m_EdepSum = 0;
     m_EionSum = 0;
@@ -504,13 +523,13 @@ void EICG4dRICHSteppingAction::InitHit(const G4StepPoint *prePoint_,
 }
 
 //____________________________________________________________________________..
-void EICG4dRICHSteppingAction::SetInterfacePointers(PHCompositeNode *topNode) 
+void EICG4dRICHSteppingAction::SetInterfacePointers(PHCompositeNode *topNode)
 {
   std::string hitnodename = "G4HIT_" + m_Detector->GetName();
   // now look for the map and grab a pointer to it.
   m_HitContainer = findNode::getClass<PHG4HitContainer>(topNode, hitnodename);
   // if we do not find the node we need to make it.
-  if (!m_HitContainer) 
+  if (!m_HitContainer)
   {
     std::cout << "EICG4dRICHSteppingAction::SetTopNode - unable to find " << hitnodename << std::endl;
   }
