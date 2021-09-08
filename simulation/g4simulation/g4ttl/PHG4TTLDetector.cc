@@ -40,6 +40,7 @@ PHG4TTLDetector::PHG4TTLDetector(PHG4Subsystem *subsys, PHCompositeNode *Node, P
   : PHG4Detector(subsys, Node, dnam)
   , name_base(dnam)
   , m_DisplayAction(dynamic_cast<PHG4TTLDisplayAction *>(subsys->GetDisplayAction()))
+  , m_SteppingAction(0)
   , m_Params(parameters)
   , overlapcheck_sector(false)
 {
@@ -81,6 +82,9 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
   G4int ncomponents, z;
   G4int natoms;
   G4String symbol;
+
+  m_SteppingAction->SetNPhiModules(12);
+  m_SteppingAction->SetIsForwardTTL(false);
 
   G4Element *elH = new G4Element("Hydrogen", symbol = "H", 1., 1.01 * g / mole);
   G4Element *elC = new G4Element("Carbon", symbol = "C", 6., 12.01 * g / mole);
@@ -726,6 +730,10 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
   G4int natoms;
   G4String symbol;
 
+  m_SteppingAction->SetNPhiModules(0);
+  m_SteppingAction->SetIsForwardTTL(true);
+
+
   G4Element *elH = new G4Element("Hydrogen", symbol = "H", 1., 1.01 * g / mole);
   G4Element *elC = new G4Element("Carbon", symbol = "C", 6., 12.01 * g / mole);
   G4Element *elN = new G4Element("Nitrogen", symbol = "N", 7., 14.01 * g / mole);
@@ -780,6 +788,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
       G4RotateX3D(-m_Params->get_double_param("polar_angle")) * G4TranslateZ3D(
                                                                     m_Params->get_double_param("place_z") + det_height / 2);
 
+  m_SteppingAction->SetZPositionFwd(m_Params->get_double_param("place_z") + det_height / 2);
   G4LogicalVolume *DetectorLog_Det = new G4LogicalVolume(ttl_envelope_solid, Air, name_base + "_Log");
   RegisterLogicalVolume(DetectorLog_Det);
 
@@ -1114,10 +1123,10 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
                         kXAxis,((numSensorsRow - numSensorsRowInner) / 2 - offsetrows ),segmentlength);
 
         new G4PVPlacement(row%2==0 ? rotationSensor : 0, G4ThreeVector( ( ( numSensorsRowInner / 2.0 ) * segmentlength ) + ( ((numSensorsRow - numSensorsRowInner) / 2 + offsetrows) * segmentlength / 2.0 + addshiftleft*segmentlength/2 ), (row*fullsensor_width), offsetzFront),
-                      FoCalRowRightLogical, "FoCalRowRightLogical" + std::to_string(row), log_module_envelope, 0, false, overlapcheck_sector);
+                      FoCalRowRightLogical, "FoCalRowRightPlaced" + std::to_string(row), log_module_envelope, 0, false, overlapcheck_sector);
 
         new G4PVPlacement(row%2==0 ? rotationSensorBck2 : rotationSensorBck1, G4ThreeVector( ( ( numSensorsRowInner / 2.0 ) * segmentlength ) + ( ((numSensorsRow - numSensorsRowInner) / 2 + offsetrows) * segmentlength / 2.0 + addshiftleft*segmentlength/2 ), (row*fullsensor_width), offsetzBack),
-                      FoCalRowRightLogical, "FoCalRowRightLogical" + std::to_string(row), log_module_envelope, 0, false, overlapcheck_sector);
+                      FoCalRowRightLogical, "FoCalRowRightPlaced" + std::to_string(row), log_module_envelope, 0, false, overlapcheck_sector);
 
 
       } else {
@@ -1156,7 +1165,6 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
       }
     } else {
         // create mother volume with space for numSensorsRow towers along x-axis
-        // cout << numSensorsRow << endl;
         auto FoCalRowSolid    = new G4Box("FoCalRowBox" + std::to_string(row), numSensorsRow * segmentlength / 2.0,fullsensor_width / 2.0,thicknessDet_SH / 2.0);
         auto FoCalRowLogical  = new G4LogicalVolume(FoCalRowSolid,Air,"FoCalRowLogical" + std::to_string(row));
         // replicate singletower tower design numSensorsRow times along x-axis
@@ -1175,6 +1183,14 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
         rotationSensorBck2->rotateX(-M_PI);
         RegisterPhysicalVolume(new G4PVPlacement(row%2==0 ? rotationSensorBck2 : rotationSensorBck1, G4ThreeVector(0, (row*fullsensor_width), offsetzBack),
                       FoCalRowLogical, "FoCalRowPhysicalBack" + std::to_string(row), log_module_envelope, false, 0, overlapcheck_sector),false);
+
+        // for(int icol=-(numSensorsRow-1)/2;icol<=(numSensorsRow-1)/2;icol++){
+        //   RegisterPhysicalVolume(new G4PVPlacement(row%2==0 ? rotationSensor : 0, G4ThreeVector(icol*segmentlength, (row*fullsensor_width), offsetzFront),
+        //                 log_sensor_and_readout, "FoCalRowPhysicalFront_j" + std::to_string(row) + "_k"  + std::to_string(icol), log_module_envelope, false, 0, overlapcheck_sector),false);
+
+        //   RegisterPhysicalVolume(new G4PVPlacement(row%2==0 ? rotationSensorBck2 : rotationSensorBck1, G4ThreeVector(icol*segmentlength, (row*fullsensor_width), offsetzBack),
+        //                 log_sensor_and_readout, "FoCalRowPhysicalBack_j" + std::to_string(row) + "_k"  + std::to_string(icol), log_module_envelope, false, 0, overlapcheck_sector),false);
+        // }
     }
   }
 }

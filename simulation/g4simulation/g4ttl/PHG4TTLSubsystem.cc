@@ -1,7 +1,5 @@
 #include "PHG4TTLSubsystem.h"
 #include "PHG4TTLDetector.h"
-#include "PHG4TTLDisplayAction.h"
-#include "PHG4TTLSteppingAction.h"
 
 #include <phparameter/PHParameters.h>
 
@@ -9,6 +7,8 @@
 #include <g4main/PHG4HitContainer.h>
 #include <g4main/PHG4SteppingAction.h>  // for PHG4SteppingAction
 #include <g4main/PHG4Subsystem.h>       // for PHG4Subsystem
+#include "PHG4TTLDisplayAction.h"
+#include "PHG4TTLSteppingAction.h"
 
 #include <phool/PHCompositeNode.h>
 #include <phool/PHIODataNode.h>    // for PHIODataNode
@@ -77,6 +77,7 @@ int PHG4TTLSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
   }
   // create stepping action
   m_SteppingAction = new PHG4TTLSteppingAction(m_Detector);
+  m_Detector->SetSteppingAction(dynamic_cast<PHG4TTLSteppingAction*>(m_SteppingAction));
   // }
   return 0;
 }
@@ -115,6 +116,7 @@ void PHG4TTLSubsystem::SetDefaultParameters()
   set_default_double_param("polar_angle", 0.);
   set_default_double_param("total_thickness", 1. * cm);
   set_default_double_param("tSilicon", 1. * um);
+  set_default_double_param("resLGAD", 500e-4 / sqrt(12));
   // set_default_double_param("wls_dw", 0.3);
   // set_default_double_param("support_dw", 0.2);
   set_default_double_param("rot_x", 0.);
