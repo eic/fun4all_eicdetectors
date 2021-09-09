@@ -23,6 +23,7 @@
 #include <phool/PHObject.h>
 #include <phool/phool.h>
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <exception>
@@ -34,88 +35,11 @@
 
 using namespace std;
 
-// this is just a helper class which enables us to handle rollovers
-// when checking for adjacent towers, it requires one bit of
-// information (the total number of phibins) which
-// is not in the tower class
-class twrs
-{
- public:
-  twrs(RawTower *);
-  virtual ~twrs() {}
-  bool is_adjacent(twrs &);
-  void set_id(const int i)
-  {
-    id = i;
-  }
-  int get_id() const
-  {
-    return id;
-  }
-  void set_maxphibin(const int i)
-  {
-    maxphibin = i;
-  }
-  int get_maxphibin() const
-  {
-    return maxphibin;
-  }
-  int get_bineta() const
-  {
-    return bineta;
-  }
-  int get_binphi() const
-  {
-    return binphi;
-  }
-
- protected:
-  int bineta;
-  int binphi;
-  int maxphibin;
-  RawTowerDefs::keytype id;
-};
-
-twrs::twrs(RawTower *rt)
-  : maxphibin(-10)
-  , id(-1)
-{
-  bineta = rt->get_bineta();
-  binphi = rt->get_binphi();
-}
-
-bool twrs::is_adjacent(twrs &tower)
-{
-  if (bineta - 1 <= tower.get_bineta() && tower.get_bineta() <= bineta + 1)
-  {
-    if (binphi - 1 <= tower.get_binphi() && tower.get_binphi() <= binphi + 1)
-    {
-      return true;
-    }
-    // cluster through the phi-wraparound
-    else if (((tower.get_binphi() == maxphibin - 1) && (binphi == 0)) ||
-             ((tower.get_binphi() == 0) && (binphi == maxphibin - 1)))
-    {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-bool operator<(const twrs &a, const twrs &b)
-{
-  if (a.get_bineta() != b.get_bineta())
-  {
-    return a.get_bineta() < b.get_bineta();
-  }
-  return a.get_binphi() < b.get_binphi();
-}
-
 RawClusterBuilderkV3::RawClusterBuilderkV3(const std::string &name)
   : SubsysReco(name)
   , _clusters(nullptr)
-  , _min_tower_e(0.0)
+  , _seed_e(0.0)
+  , _agg_e(0.0)
   , chkenergyconservation(0)
   , detector("NONE")
 {
@@ -136,145 +60,116 @@ int RawClusterBuilderkV3::InitRun(PHCompositeNode *topNode)
   return Fun4AllReturnCodes::EVENT_OK;
 }
 
+
+
+
+
 int RawClusterBuilderkV3::process_event(PHCompositeNode *topNode)
 {
   string towernodename = "TOWER_CALIB_" + detector;
   // Grab the towers
   RawTowerContainer *towers = findNode::getClass<RawTowerContainer>(topNode, towernodename);
-  if (!towers)
-  {
+  if (!towers) {
     std::cout << PHWHERE << ": Could not find node " << towernodename << std::endl;
     return Fun4AllReturnCodes::DISCARDEVENT;
   }
   string towergeomnodename = "TOWERGEOM_" + detector;
   RawTowerGeomContainer *towergeom = findNode::getClass<RawTowerGeomContainer>(topNode, towergeomnodename);
-  if (!towergeom)
-  {
+  if (!towergeom) {
     cout << PHWHERE << ": Could not find node " << towergeomnodename << endl;
     return Fun4AllReturnCodes::ABORTEVENT;
   }
+
   // make the list of towers above threshold
-  std::vector<twrs> towerVector;
-  RawTowerContainer::ConstRange begin_end = towers->getTowers();
-  RawTowerContainer::ConstIterator itr = begin_end.first;
-  for (; itr != begin_end.second; ++itr)
-  {
-    RawTower *tower = itr->second;
-    RawTowerDefs::keytype towerid = itr->first;
-    if (tower->get_energy() > _min_tower_e)
-    {
-      twrs twr(tower);
-      twr.set_maxphibin(towergeom->get_phibins());
-      twr.set_id(towerid);
-      towerVector.push_back(twr);
-    }
-  }
-
-  // cluster the towers
-  std::multimap<int, twrs> clusteredTowers;
-  // PHMakeGroups(towerVector, clusteredTowers);
-
-  RawCluster *cluster = nullptr;
-  int last_id = -1;
-  std::multimap<int, twrs>::iterator ctitr = clusteredTowers.begin();
-  std::multimap<int, twrs>::iterator lastct = clusteredTowers.end();
-  for (; ctitr != lastct; ++ctitr)
-  {
-    int clusterid = ctitr->first;
-
-    if (last_id != clusterid)
-    {
-      // new cluster
-      cluster = new RawClusterv1();
-      _clusters->AddCluster(cluster);
-
-      last_id = clusterid;
-    }
-    assert(cluster);
-
-    const twrs &tmptower = ctitr->second;
-    RawTower *rawtower = towers->getTower(tmptower.get_id());
-
-    const double e = rawtower->get_energy();
-    cluster->addTower(rawtower->get_id(), e);
-  }
-
-  for (const auto &cluster_pair : _clusters->getClustersMap())
-  {
-    RawClusterDefs::keytype clusterid = cluster_pair.first;
-    RawCluster *cluster = cluster_pair.second;
-
-    assert(cluster);
-    assert(cluster->get_id() == clusterid);
-
-    double sum_x(0);
-    double sum_y(0);
-    double sum_z(0);
-    double sum_e(0);
-
-    for (const auto tower_pair : cluster->get_towermap())
-    {
-      const RawTower *rawtower = towers->getTower(tower_pair.first);
-      const RawTowerGeom *rawtowergeom = towergeom->get_tower_geometry(tower_pair.first);
-
-      assert(rawtower);
-      assert(rawtowergeom);
-      const double e = rawtower->get_energy();
-
-      sum_e += e;
-
-      if (e > 0)
-      {
-        sum_x += e * rawtowergeom->get_center_x();
-        sum_y += e * rawtowergeom->get_center_y();
-        sum_z += e * rawtowergeom->get_center_z();
-      }
-    }  //     for (const auto tower_pair : cluster->get_towermap())
-
-    cluster->set_energy(sum_e);
-
-    if (sum_e > 0)
-    {
-      sum_x /= sum_e;
-      sum_y /= sum_e;
-      sum_z /= sum_e;
-
-      cluster->set_r(sqrt(sum_y * sum_y + sum_x * sum_x));
-      cluster->set_phi(atan2(sum_y, sum_x));
-      cluster->set_z(sum_z);
-    }
-
-    if (Verbosity() > 1)
-    {
-      cout << "RawClusterBuilderkV3 constucted ";
-      cluster->identify();
-    }
-  }  //  for (const auto & cluster_pair : _clusters->getClustersMap())
-
-  if (chkenergyconservation)
-  {
-    double ecluster = _clusters->getTotalEdep();
-    double etower = towers->getTotalEdep();
-    if (ecluster > 0)
-    {
-      if (fabs(etower - ecluster) / ecluster > 1e-9)
-      {
-        cout << "energy conservation violation: ETower: " << etower
-             << " ECluster: " << ecluster
-             << " diff: " << etower - ecluster << endl;
-      }
-    }
-    else
-    {
-      if (etower != 0)
-      {
-        cout << "energy conservation violation: ETower: " << etower
-             << " ECluster: " << ecluster << endl;
+  std::vector<towersStrct> input_towers;  
+  // towers in the current cluster
+  std::vector<towersStrct> cluster_towers;
+  if (towers->getCalorimeterID() == 12) { // BECAL calo_id = 12
+    RawTowerContainer::ConstRange begin_end = towers->getTowers();
+    for (RawTowerContainer::ConstIterator itr = begin_end.first; itr != begin_end.second; ++itr) {
+      RawTower *tower = itr->second;
+      RawTowerDefs::keytype towerid = itr->first;
+      if (tower->get_energy() > _agg_e) {   // TODO where are aggE and E_Scaling going to be set?
+        towersStrct tempTower;
+        tempTower.tower_E = tower->get_energy();
+        tempTower.tower_iEta = tower->get_bineta();
+        tempTower.tower_iPhi = tower->get_binphi();
+        tempTower.tower_trueID = towerid; // currently unsigned -> signed, will this matter?
+        tempTower.twr = itr->second;
+        input_towers.push_back(tempTower);
       }
     }
   }
+
+  // Next we'll sort the towers from most energetic to least
+  // This is straight from https://github.com/FriederikeBock/AnalysisSoftwareEIC/blob/642aeb13b13271820dfee59efe93380e58456289/treeAnalysis/clusterizer.cxx#L281
+
+  RawCluster *cluster = new RawClusterv1();
+  _clusters->AddCluster(cluster);
+
+  std::sort(input_towers.begin(), input_towers.end(), &acompare);
+  std::vector<int> clslabels;
+  while (!input_towers.empty()) {
+    cluster_towers.clear();
+    clslabels.clear();
+    // always start with highest energetic tower
+    if(input_towers.at(0).tower_E > _seed_e){
+      // fill seed cell information into current cluster
+      cluster->addTower(input_towers.at(0).twr->get_id(), input_towers.at(0).tower_E);
+      // kV3 Clustering
+      input_towers.erase(input_towers.begin());
+      for (int tit = 0; tit < (int)cluster_towers.size(); tit++){
+        // Now go recursively to the next 4 neighbours and add them to the cluster if they fulfill the conditions
+        int iEtaTwr = cluster_towers.at(tit).tower_iEta;
+        int iPhiTwr = cluster_towers.at(tit).tower_iPhi;
+        for (int ait = 0; ait < (int)input_towers.size(); ait++){
+          int iEtaTwrAgg = input_towers.at(ait).tower_iEta;
+          int iPhiTwrAgg = input_towers.at(ait).tower_iPhi;
+          
+          if (iPhiTwr < 5 && iPhiTwrAgg > 128-5){  // _caloTowersPhi is the geometry? 128 for BECAL
+            iPhiTwrAgg= iPhiTwrAgg-128;
+          }
+          if (iPhiTwr > 128-5 && iPhiTwrAgg < 5){
+            iPhiTwr= iPhiTwr-128;
+          }
+          int deltaEta = std::abs(iEtaTwrAgg-iEtaTwr);
+          int deltaPhi = std::abs(iPhiTwrAgg-iPhiTwr);
+
+          if( (deltaEta+deltaPhi) == 1){
+            // only aggregate towers with lower energy than current tower
+            if(input_towers.at(ait).tower_E >= (cluster_towers.at(tit).tower_E + aggregation_margin_V3)) continue;
+            float sum_e = cluster->get_energy();
+            sum_e += input_towers.at(ait).tower_E;
+            cluster->set_energy(sum_e);
+            cluster->addTower(input_towers.at(ait).twr->get_id(), input_towers.at(ait).tower_E);
+            cluster_towers.push_back(input_towers.at(ait));
+            if(!(std::find(clslabels.begin(), clslabels.end(), input_towers.at(ait).tower_trueID) != clslabels.end())){
+              clslabels.push_back(input_towers.at(ait).tower_trueID);
+            }
+            input_towers.erase(input_towers.begin()+ait);
+            ait--;
+          }
+        }
+      }
+    }
+
+    // TODO
+    // Sum x, y, z, deal with their geometry
+  
+
+
+
+  // The output of the cluster will be in the RawClusterContainer class
+  }
+
+  
   return Fun4AllReturnCodes::EVENT_OK;
 }
+
+
+
+
+
 
 int RawClusterBuilderkV3::End(PHCompositeNode */*topNode*/)
 {
