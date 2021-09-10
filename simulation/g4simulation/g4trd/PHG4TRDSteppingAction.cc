@@ -11,7 +11,6 @@
 #include <g4main/PHG4Hitv1.h>
 #include <g4main/PHG4Shower.h>
 #include <g4main/PHG4SteppingAction.h>  // for PHG4SteppingAction
-
 #include <g4main/PHG4TrackUserInfoV1.h>
 
 #include <phool/getClass.h>
@@ -41,13 +40,16 @@
 
 class PHCompositeNode;
 
+using namespace std;
+
 //____________________________________________________________________________..
-PHG4TRDSteppingAction::PHG4TRDSteppingAction(PHG4TRDSubsystem* subsys, PHG4TRDDetector* detector, const PHParameters* parameters)
+//PHG4TRDSteppingAction::PHG4TRDSteppingAction(PHG4TRDSubsystem *subsys, PHG4TRDDetector* detector, const PHParameters* parameters)
+PHG4TRDSteppingAction::PHG4TRDSteppingAction( PHG4TRDDetector* detector, const PHParameters* parameters)
   : PHG4SteppingAction(detector->GetName())
-  , m_Subsystem(subsys)
   , m_Detector(detector)
   , m_Params(parameters)
   , m_HitContainer(nullptr)
+  , m_ActiveGasHits(nullptr)
   , m_Hit(nullptr)
   , m_SaveShower(nullptr)
   , m_SaveVolPre(nullptr)
@@ -55,16 +57,17 @@ PHG4TRDSteppingAction::PHG4TRDSteppingAction(PHG4TRDSubsystem* subsys, PHG4TRDDe
   , m_SaveTrackId(-1)
   , m_SavePreStepStatus(-1)
   , m_SavePostStepStatus(-1)
-  , m_BlackHoleFlag(m_Params->get_int_param("blackhole"))
+ , m_BlackHoleFlag(m_Params->get_int_param("blackhole"))
   , m_ActiveFlag(m_Params->get_int_param("active"))
   , m_UseG4StepsFlag(m_Params->get_int_param("use_g4steps"))
-  , m_Zmin(m_Params->get_double_param("PosZ") * cm - m_Params->get_double_param("ThicknessZ") * cm / 2.)
-  , m_Zmax(m_Params->get_double_param("PosZ") * cm + m_Params->get_double_param("ThicknessZ") * cm / 2.)
-  //, m_EdepSum(0)
+  , m_Zmin(m_Params->get_double_param("PosZ")*cm - m_Params->get_double_param("ThicknessZ") * cm / 2.)
+  , m_Zmax(m_Params->get_double_param("PosZ")*cm + m_Params->get_double_param("ThicknessZ") * cm / 2.)
+  ,m_EdepSum(0)
 {
   m_Zmin -= copysign(m_Zmin, 1. / 1e6 * cm);
   m_Zmax += copysign(m_Zmax, 1. / 1e6 * cm);
 }
+
 
 PHG4TRDSteppingAction::~PHG4TRDSteppingAction()
 {
@@ -78,23 +81,25 @@ PHG4TRDSteppingAction::~PHG4TRDSteppingAction()
 //____________________________________________________________________________..
 bool PHG4TRDSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
 {
-  // get volume of the current step
+// get volume of the current step
   G4TouchableHandle touch = aStep->GetPreStepPoint()->GetTouchableHandle();
   G4TouchableHandle touchpost = aStep->GetPostStepPoint()->GetTouchableHandle();
 
   G4VPhysicalVolume* volume = touch->GetVolume();
   // G4 just calls  UserSteppingAction for every step (and we loop then over all our
   // steppingactions. First we have to check if we are actually in our volume
-  if (!m_Detector->IsInTRD(volume))
+   if (!m_Detector->IsInTRD(volume))
   {
     return false;
   }
 
-  // collect energy and track length step by step
+   int whichactive = m_Detector->IsInTRD(volume);
+    
+// collect energy and track length step by step
   G4double edep = aStep->GetTotalEnergyDeposit() / GeV;
 
   const G4Track* aTrack = aStep->GetTrack();
-  // if this volume stops everything, just put all kinetic energy into edep
+// if this volume stops everything, just put all kinetic energy into edep
   if (m_BlackHoleFlag)
   {
     edep = aTrack->GetKineticEnergy() / GeV;
@@ -103,7 +108,7 @@ bool PHG4TRDSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
   }
   int layer_id = m_Detector->get_Layer();
 
-  if (m_ActiveFlag)
+   if (m_ActiveFlag)
   {
     bool geantino = false;
     // the check for the pdg code speeds things up, I do not want to make
@@ -132,7 +137,7 @@ bool PHG4TRDSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
         m_Hit = new PHG4Hitv1();
       }
 
-      m_Hit->set_layer((unsigned int) layer_id);
+       m_Hit->set_layer((unsigned int) layer_id);
 
       //here we set the entrance values in cm
       m_Hit->set_x(0, prePoint->GetPosition().x() / cm);
@@ -150,30 +155,52 @@ bool PHG4TRDSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
       m_SaveTrackId = aTrack->GetTrackID();
       //set the initial energy deposit
       m_Hit->set_edep(0);
-      if (!geantino && !m_BlackHoleFlag)
-      {
-        m_Hit->set_eion(0);
-      }
-      if (G4VUserTrackInformation* p = aTrack->GetUserInformation())
-      {
+
+      //cout << " which active  : "  << whichactive  <<  " layer ID :" << layer_id  << "  hit id :  " << aTrack->GetTrackID()  <<"  vol name :  " <<    volume->GetName()  <<"  z :  " << prePoint->GetPosition().z()/cm <<   "  end z  :  " << postPoint->GetPosition().z()/cm << endl;
+      /*
+       if(whichactive > 0 )
+	{
+	  m_SaveHitContainer = m_AbsorberHits;
+	}
+      else
+	{
+	 m_SaveHitContainer = m_HitContainer; 
+	}
+      */
+       if(whichactive < 0 )
+	{
+	  m_SaveHitContainer = m_HitContainer;
+	}
+       else
+	 {
+	   //m_SaveHitContainer = m_AbsorberHits; 
+	   m_SaveHitContainer = m_ActiveGasHits; 
+	}
+       
+       if (!geantino && !m_BlackHoleFlag)
+	 {
+	   m_Hit->set_eion(0);
+	 }
+       if (G4VUserTrackInformation* p = aTrack->GetUserInformation())
+	 {
         if (PHG4TrackUserInfoV1* pp = dynamic_cast<PHG4TrackUserInfoV1*>(p))
-        {
-          m_Hit->set_trkid(pp->GetUserTrackId());
-          m_Hit->set_shower_id(pp->GetShower()->get_id());
-          m_SaveShower = pp->GetShower();
-        }
+	  {
+	    m_Hit->set_trkid(pp->GetUserTrackId());
+	    m_Hit->set_shower_id(pp->GetShower()->get_id());
+	    m_SaveShower = pp->GetShower();
+	  }
       }
-
-      if (!hasMotherSubsystem() && (m_Hit->get_z(0) * cm > m_Zmax || m_Hit->get_z(0) * cm < m_Zmin))
-      {
-        boost::io::ios_precision_saver ips(std::cout);
+       /*
+	 if (!hasMotherSubsystem() && (m_Hit->get_z(0) * cm > m_Zmax || m_Hit->get_z(0) * cm < m_Zmin))
+	 {
+	 boost::io::ios_precision_saver ips(std::cout);
         std::cout << m_Detector->SuperDetector() << std::setprecision(9)
-                  << " PHG4TRDSteppingAction: Entry hit z " << m_Hit->get_z(0) * cm
-                  << " outside acceptance,  zmin " << m_Zmin
-                  << ", zmax " << m_Zmax << ", layer: " << layer_id << std::endl;
-      }
-
-    }  //  END ..... ||  m_UseG4StepsFlag > 0)
+	<< " PHG4TRDSteppingAction: Entry hit z " << m_Hit->get_z(0) * cm
+	<< " outside acceptance,  zmin " << m_Zmin
+	<< ", zmax " << m_Zmax << ", layer: " << layer_id << std::endl;
+	}
+       */ 
+    } //  END ..... ||  m_UseG4StepsFlag > 0)
     /*
     // here we just update the exit values, it will be overwritten
     // for every step until we leave the volume or the particle
@@ -195,41 +222,42 @@ bool PHG4TRDSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
 		<< " previous phys post vol: " << m_SaveVolPost->GetName() << std::endl;
       exit(1);
       }
-    */
+    */ 
     m_SavePostStepStatus = postPoint->GetStepStatus();
     // check if track id matches the initial one when the hit was created
     if (aTrack->GetTrackID() != m_SaveTrackId)
-    {
-      std::cout << "hits do not belong to the same track" << std::endl;
-      std::cout << "saved track: " << m_SaveTrackId
-                << ", current trackid: " << aTrack->GetTrackID()
-                << std::endl;
-      exit(1);
-    }
+      {
+	std::cout << "hits do not belong to the same track" << std::endl;
+	std::cout << "saved track: " << m_SaveTrackId
+		  << ", current trackid: " << aTrack->GetTrackID()
+		  << std::endl;
+	exit(1);
+      }
     m_SavePreStepStatus = prePoint->GetStepStatus();
     m_SavePostStepStatus = postPoint->GetStepStatus();
     m_SaveVolPre = volume;
     m_SaveVolPost = touchpost->GetVolume();
-
+    
     m_Hit->set_x(1, postPoint->GetPosition().x() / cm);
     m_Hit->set_y(1, postPoint->GetPosition().y() / cm);
     m_Hit->set_z(1, postPoint->GetPosition().z() / cm);
-
+    
     m_Hit->set_px(1, postPoint->GetMomentum().x() / GeV);
     m_Hit->set_py(1, postPoint->GetMomentum().y() / GeV);
     m_Hit->set_pz(1, postPoint->GetMomentum().z() / GeV);
-
+    
     m_Hit->set_t(1, postPoint->GetGlobalTime() / nanosecond);
     //sum up the energy to get total deposited
     m_Hit->set_edep(m_Hit->get_edep() + edep);
-
+    /*
     if (!hasMotherSubsystem() && (m_Hit->get_z(1) * cm > m_Zmax || m_Hit->get_z(1) * cm < m_Zmin))
     {
       std::cout << m_Detector->SuperDetector() << std::setprecision(9)
-                << " PHG4TRDSteppingAction: Exit hit z " << m_Hit->get_z(1) * cm
-                << " outside acceptance zmin " << m_Zmin
-                << ", zmax " << m_Zmax << ", layer: " << layer_id << std::endl;
+           << " PHG4TRDSteppingAction: Exit hit z " << m_Hit->get_z(1) * cm
+           << " outside acceptance zmin " << m_Zmin
+           << ", zmax " << m_Zmax << ", layer: " << layer_id << std::endl;
     }
+    */
     if (geantino)
     {
       m_Hit->set_edep(-1);  // only energy=0 g4hits get dropped, this way geantinos survive the g4hit compression
@@ -242,22 +270,25 @@ bool PHG4TRDSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
         m_Hit->set_eion(m_Hit->get_eion() + eion);
       }
     }
+    
+    
 
     // if any of these conditions is true this is the last step in
     // this volume and we need to save the hit
-    if (postPoint->GetStepStatus() == fGeomBoundary ||
+      if (postPoint->GetStepStatus() == fGeomBoundary ||
         postPoint->GetStepStatus() == fWorldBoundary ||
         postPoint->GetStepStatus() == fAtRestDoItProc ||
         aTrack->GetTrackStatus() == fStopAndKill ||
         m_UseG4StepsFlag > 0)
     {
       // save only hits with energy deposit (or -1 for geantino) or if save all hits flag is set
-      if (m_Hit->get_edep())
+      if (m_Hit->get_edep() )
       {
-        m_HitContainer->AddHit(layer_id, m_Hit);
+        m_SaveHitContainer->AddHit(layer_id, m_Hit);
+
         if (m_SaveShower)
         {
-          m_SaveShower->add_g4hit_id(m_HitContainer->GetID(), m_Hit->get_hit_id());
+          m_SaveShower->add_g4hit_id(m_SaveHitContainer->GetID(), m_Hit->get_hit_id());
         }
         // ownership has been transferred to container, set to null
         // so we will create a new hit for the next track
@@ -273,16 +304,19 @@ bool PHG4TRDSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
     }
     // return true to indicate the hit was used
     return true;
-  }  // END Acitve flag condition
-  else
-  {
-    return false;
-  }
+  } // END Acitve flag condition
+   else
+     {
+       return false;
+     }
+   
 }
+
 
 //____________________________________________________________________________..
 void PHG4TRDSteppingAction::SetInterfacePointers(PHCompositeNode* topNode)
 {
+  /*
   // Node Name is passed down from PHG4TRDSubsystem
   //now look for the map and grab a pointer to it.
   m_HitContainer = findNode::getClass<PHG4HitContainer>(topNode, m_HitNodeName);
@@ -292,8 +326,43 @@ void PHG4TRDSteppingAction::SetInterfacePointers(PHCompositeNode* topNode)
   {
     std::cout << "PHG4TRDSteppingAction::SetTopNode - unable to find " << m_HitNodeName << std::endl;
   }
+  */
+
+  string hitnodename ;
+  string gasnodename;
+  if (m_Detector->SuperDetector() != "NONE")
+  {
+    hitnodename = "G4HIT_" + m_Detector->SuperDetector();
+    gasnodename = "G4HIT_ACTIVEGAS_" + m_Detector->SuperDetector();
+  }
+  else
+  {
+    hitnodename = "G4HIT_" + m_Detector->GetName();
+    gasnodename = "G4HIT_ACTIVEGAS_" + m_Detector->SuperDetector();
+  }
+
+  //now look for the map and grab a pointer to it.
+  m_HitContainer = findNode::getClass<PHG4HitContainer>(topNode, hitnodename.c_str());
+  m_ActiveGasHits = findNode::getClass<PHG4HitContainer>(topNode, gasnodename.c_str());
+
+  // if we do not find the node it's messed up.
+  if (!m_HitContainer)
+  {
+    std::cout << "PHG4TRDSteppingAction::SetTopNode - unable to find " << hitnodename << std::endl;
+  }
+  // if (!m_AbsorberHits)
+  if (!m_ActiveGasHits)
+  {
+    if (Verbosity() > 1)
+    {
+      cout << "PHG4TRDSteppingAction::SetTopNode - unable to find " << gasnodename << endl;
+    }
+  }
 }
 
+
+
+/*
 bool PHG4TRDSteppingAction::hasMotherSubsystem() const
 {
   if (m_Subsystem->GetMotherSubsystem())
@@ -302,3 +371,4 @@ bool PHG4TRDSteppingAction::hasMotherSubsystem() const
   }
   return false;
 }
+*/
