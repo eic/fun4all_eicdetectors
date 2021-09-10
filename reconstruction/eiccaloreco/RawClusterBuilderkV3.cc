@@ -38,8 +38,8 @@ using namespace std;
 RawClusterBuilderkV3::RawClusterBuilderkV3(const std::string &name)
   : SubsysReco(name)
   , _clusters(nullptr)
-  , _seed_e(0.0)
-  , _agg_e(0.0)
+  , _seed_e(0.5)
+  , _agg_e(0.1)
   , chkenergyconservation(0)
   , detector("NONE")
 {
@@ -66,6 +66,7 @@ int RawClusterBuilderkV3::InitRun(PHCompositeNode *topNode)
 
 int RawClusterBuilderkV3::process_event(PHCompositeNode *topNode)
 {
+  std::cout << "Processing event!" << std::endl;
   string towernodename = "TOWER_CALIB_" + detector;
   // Grab the towers
   RawTowerContainer *towers = findNode::getClass<RawTowerContainer>(topNode, towernodename);
@@ -84,6 +85,7 @@ int RawClusterBuilderkV3::process_event(PHCompositeNode *topNode)
   std::vector<towersStrct> input_towers;  
   // towers in the current cluster
   std::vector<towersStrct> cluster_towers;
+  int towers_added = 0;
   if (towers->getCalorimeterID() == 12) { // BECAL calo_id = 12
     RawTowerContainer::ConstRange begin_end = towers->getTowers();
     for (RawTowerContainer::ConstIterator itr = begin_end.first; itr != begin_end.second; ++itr) {
@@ -97,15 +99,15 @@ int RawClusterBuilderkV3::process_event(PHCompositeNode *topNode)
         tempTower.tower_trueID = towerid; // currently unsigned -> signed, will this matter?
         tempTower.twr = itr->second;
         input_towers.push_back(tempTower);
+        towers_added++;
       }
     }
   }
+  std::cout << "added " << towers_added << " towers" << std::endl;
 
   // Next we'll sort the towers from most energetic to least
   // This is straight from https://github.com/FriederikeBock/AnalysisSoftwareEIC/blob/642aeb13b13271820dfee59efe93380e58456289/treeAnalysis/clusterizer.cxx#L281
 
-  RawCluster *cluster = new RawClusterv1();
-  _clusters->AddCluster(cluster);
 
   std::sort(input_towers.begin(), input_towers.end(), &acompare);
   std::vector<int> clslabels;
@@ -114,8 +116,13 @@ int RawClusterBuilderkV3::process_event(PHCompositeNode *topNode)
     clslabels.clear();
     // always start with highest energetic tower
     if(input_towers.at(0).tower_E > _seed_e){
+      RawCluster *cluster = new RawClusterv1();
+      _clusters->AddCluster(cluster);
       // fill seed cell information into current cluster
       cluster->addTower(input_towers.at(0).twr->get_id(), input_towers.at(0).tower_E);
+      cluster->set_energy(input_towers.at(0).tower_E);
+      std::cout << "Added a tower to the cluster! " << input_towers.at(0).tower_E << std::endl;
+      cluster_towers.push_back(input_towers.at(0));
       // kV3 Clustering
       input_towers.erase(input_towers.begin());
       for (int tit = 0; tit < (int)cluster_towers.size(); tit++){
@@ -134,6 +141,7 @@ int RawClusterBuilderkV3::process_event(PHCompositeNode *topNode)
           }
           int deltaEta = std::abs(iEtaTwrAgg-iEtaTwr);
           int deltaPhi = std::abs(iPhiTwrAgg-iPhiTwr);
+          std::cout << "dedp " << deltaEta << " " << deltaPhi << std::endl;
 
           if( (deltaEta+deltaPhi) == 1){
             // only aggregate towers with lower energy than current tower
@@ -141,6 +149,7 @@ int RawClusterBuilderkV3::process_event(PHCompositeNode *topNode)
             float sum_e = cluster->get_energy();
             sum_e += input_towers.at(ait).tower_E;
             cluster->set_energy(sum_e);
+            std::cout << "?!?" << sum_e << std::endl;
             cluster->addTower(input_towers.at(ait).twr->get_id(), input_towers.at(ait).tower_E);
             cluster_towers.push_back(input_towers.at(ait));
             if(!(std::find(clslabels.begin(), clslabels.end(), input_towers.at(ait).tower_trueID) != clslabels.end())){
@@ -151,6 +160,9 @@ int RawClusterBuilderkV3::process_event(PHCompositeNode *topNode)
           }
         }
       }
+    }
+    else {
+      input_towers.clear();
     }
 
     // TODO
