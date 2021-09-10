@@ -34,7 +34,8 @@ class EventEvaluatorEIC : public SubsysReco
   enum class TrackSource_t : unsigned short
   {
     all = 0,
-    inner = 1
+    inner = 1,
+    silicon = 2
   };
 
   EventEvaluatorEIC(const std::string& name = "EventEvaluatorEIC",
