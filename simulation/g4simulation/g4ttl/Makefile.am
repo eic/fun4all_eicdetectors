@@ -19,7 +19,8 @@ libttl_la_LIBADD = \
   -lfun4all \
   -lphg4hit \
   -lg4detectors \
-  -ltrackbase_historic_io
+  -ltrackbase_historic_io \
+  -ltrack_io
 
 pkginclude_HEADERS = \
   PHG4TTLDetector.h \

@@ -1,7 +1,5 @@
 #include "RawDigitBuilderTTL.h"
 
-#include <Geant4/G4SystemOfUnits.hh>
-#include <Geant4/G4Types.hh>               // for G4double, G4int
 
 
 #include <trackbase/TrkrClusterContainerv3.h>
@@ -22,8 +20,6 @@
 // #include <calobase/RawTowerGeomContainerv1.h>
 // #include <calobase/RawTowerGeomv3.h>
 
-#include <g4main/PHG4Hit.h>
-#include <g4main/PHG4HitContainer.h>
 
 #include <fun4all/Fun4AllReturnCodes.h>
 #include <fun4all/SubsysReco.h>  // for SubsysReco
@@ -59,9 +55,6 @@ RawDigitBuilderTTL::RawDigitBuilderTTL(const string &name)
   , m_clusterlist(nullptr)
   // , m_clusterhitassoc(nullptr)
   , m_Detector("NONE")
-  , m_GlobalPlaceInX(0)
-  , m_GlobalPlaceInY(0)
-  , m_GlobalPlaceInZ(0)
   , m_Emin(1e-6)
 {
 }
@@ -103,10 +96,10 @@ int RawDigitBuilderTTL::InitRun(PHCompositeNode *topNode)
       dstNode->addNode(DetNode);
     }
 
-    // trkrclusters = new TrkrClusterContainerv3;
-    // PHIODataNode<PHObject> *TrkrClusterContainerNode =
-    //   new PHIODataNode<PHObject>(trkrclusters, "TRKR_CLUSTER", "PHObject");
-    // DetNode->addNode(TrkrClusterContainerNode);
+    trkrclusters = new TrkrClusterContainerv3;
+    PHIODataNode<PHObject> *TrkrClusterContainerNode =
+      new PHIODataNode<PHObject>(trkrclusters, "TRKR_CLUSTER", "PHObject");
+    DetNode->addNode(TrkrClusterContainerNode);
   }
 
   return Fun4AllReturnCodes::EVENT_OK;
@@ -122,85 +115,50 @@ int RawDigitBuilderTTL::process_event(PHCompositeNode *topNode)
     cout << "Could not locate g4 hit node " << NodeNameHits << endl;
     exit(1);
   }
-  cout << NodeNameHits << endl;
+
+  // get node for clusters
+  m_clusterlist = findNode::getClass<TrkrClusterContainer>(topNode, "TRKR_CLUSTER");
+  if (!m_clusterlist)
+  {
+    cout << PHWHERE << " ERROR: Can't find TRKR_CLUSTER." << endl;
+    return Fun4AllReturnCodes::ABORTRUN;
+  }
+
   // loop over all hits in the event
   PHG4HitContainer::ConstIterator hiter;
   PHG4HitContainer::ConstRange hit_begin_end = g4hit->getHits();
-
+  int clusid =0;
   for (hiter = hit_begin_end.first; hiter != hit_begin_end.second; hiter++)
   {
     PHG4Hit *g4hit_i = hiter->second;
 
     // Don't include hits with zero energy
-    // if (g4hit_i->get_edep() <= 0 && g4hit_i->get_edep() != -1) continue;
+    if (g4hit_i->get_edep() <= 0 && g4hit_i->get_edep() != -1) continue;
 
+    auto clus = std::make_unique<TrkrClusterv2>();
 
-cout << "phi " << g4hit_i->get_index_i() << "\tlayer " <<g4hit_i->get_index_j() << "\tsensID_x " <<g4hit_i->get_index_k() << "\tsensID_y " << g4hit_i->get_index_l() << "\tpixel_x "<< g4hit_i->get_strip_z_index()<< "\tpixel_y "<< g4hit_i->get_strip_y_index()  << "\tMCID " << g4hit_i->get_trkid()  << endl;
+    auto ckey = TrkrDefs::genHitSetKey(TrkrDefs::TrkrId::ttl,g4hit_i->get_index_j());
+    TrkrDefs::hitsetkey tmps = g4hit_i->get_strip_z_index();
+    ckey |= (tmps << 8);
+    tmps = g4hit_i->get_strip_y_index();
+    ckey |= (tmps << 0);
 
+    TrkrDefs::cluskey tmp = ckey;
+    TrkrDefs::cluskey key = (tmp << TrkrDefs::kBitShiftClusId);
+    key |= clusid;
+    clus->setClusKey(key);
 
+    // G4double clusx,clusy,clusz;
+    // GetPixelGlobalCoordinates(g4hit_i,clusx,clusy,clusz);
+    clus->setPosition(0, g4hit_i->get_local_x(0));
+    clus->setPosition(1, g4hit_i->get_local_y(0));
+    clus->setPosition(2, g4hit_i->get_local_z(0));
+    clus->setGlobal();
 
-    // cout << g4hit_i->get_index_j() << "\tk" << g4hit_i->get_index_k() << "\t"  << endl;
-//     // encode CaloTowerID from j, k index of tower / hit and calorimeter ID
-//     RawTowerDefs::keytype calotowerid = RawTowerDefs::encode_towerid(m_CaloId,
-//                                                                      g4hit_i->get_index_j(),
-//                                                                      g4hit_i->get_index_k());
-//     // add the energy to the corresponding tower
-//     RawTowerv2 *tower = dynamic_cast<RawTowerv2 *>(m_Towers->getTower(calotowerid));
-//     if (!tower)
-//     {
-//       tower = new RawTowerv2(calotowerid);
-//       tower->set_energy(0);
-//       tower->set_scint_gammas(0.);
-//       tower->set_cerenkov_gammas(0.);
-//       m_Towers->AddTower(tower->get_id(), tower);
-// //       cout << "intializing tower" << endl;
-// //       tower->identify();
-//     }
-//     else
-//     {
-//       // check version consistency
-//       if (dynamic_cast<RawTowerv2 *>(tower) == nullptr)
-//       {
-//         cout << __PRETTY_FUNCTION__ << " : Fatal Error! "
-//              << "Expect RawTowerv2, but found this tower:";
-//         tower->identify();
-//         exit(1);
-//       }
-//     }
+    m_clusterlist->addCluster(clus.release());
 
-//     if (Verbosity() > 3)
-//       cout << g4hit_i->get_property_float(PHG4Hit::PROPERTY::scint_gammas) << "\t" << g4hit_i->get_property_float(PHG4Hit::PROPERTY::cerenkov_gammas) << endl;
-//     // cout << tower->get_scint_gammas() << "\t" << g4hit_i->get_property_float(PHG4Hit::PROPERTY::scint_gammas) << "\t" << tower->get_cerenkov_gammas() << "\t" << g4hit_i->get_property_float(PHG4Hit::PROPERTY::cerenkov_gammas) << endl;
-//     tower->set_scint_gammas(tower->get_scint_gammas() + g4hit_i->get_property_float(PHG4Hit::PROPERTY::scint_gammas));
-//     tower->set_cerenkov_gammas(tower->get_cerenkov_gammas() + g4hit_i->get_property_float(PHG4Hit::PROPERTY::cerenkov_gammas));
-
-//     tower->add_ecell((g4hit_i->get_index_j() << 16) + g4hit_i->get_index_k(), g4hit_i->get_light_yield());
-//     // cout << (g4hit_i->get_index_j() << 16) + g4hit_i->get_index_k() << "\t" << g4hit_i->get_light_yield() << endl;
-//     tower->set_energy(tower->get_energy() + g4hit_i->get_light_yield());
-//     tower->add_eshower(g4hit_i->get_shower_id(), g4hit_i->get_edep());
-//     // tower->identify();
+    clusid++;
   }
-
-  // float towerE = 0.;
-
-  // if (Verbosity())
-  // {
-  //   towerE = m_Towers->getTotalEdep();
-  // }
-
-  // m_Towers->compress(m_Emin);
-  // if (Verbosity())
-  // {
-  //   cout << "Energy lost by dropping towers with less than " << m_Emin
-  //        << " energy, lost energy: " << towerE - m_Towers->getTotalEdep() << endl;
-  //   m_Towers->identify();
-  //   RawTowerContainer::ConstRange begin_end = m_Towers->getTowers();
-  //   RawTowerContainer::ConstIterator iter;
-  //   for (iter = begin_end.first; iter != begin_end.second; ++iter)
-  //   {
-  //     iter->second->identify();
-  //   }
-  // }
 
   return Fun4AllReturnCodes::EVENT_OK;
 }
@@ -229,13 +187,6 @@ void RawDigitBuilderTTL::CreateNodes(PHCompositeNode *topNode)
     throw std::runtime_error("Failed to find DST node in RawDigitBuilderTTL::CreateNodes");
   }
 
-  // Create the tower geometry node on the tree
-  // m_Geoms = new RawTowerGeomContainerv1(RawTowerDefs::convert_name_to_caloid(m_Detector));
-  // string NodeNameTowerGeometries = "TOWERGEOM_" + m_Detector;
-
-  // PHIODataNode<PHObject> *geomNode = new PHIODataNode<PHObject>(m_Geoms, NodeNameTowerGeometries, "PHObject");
-  // runNode->addNode(geomNode);
-
   // Find detector node (or create new one if not found)
   PHNodeIterator dstiter(dstNode);
   PHCompositeNode *DetNode = dynamic_cast<PHCompositeNode *>(dstiter.findFirst(
@@ -245,43 +196,25 @@ void RawDigitBuilderTTL::CreateNodes(PHCompositeNode *topNode)
     DetNode = new PHCompositeNode(m_Detector);
     dstNode->addNode(DetNode);
   }
-
-
-  // Create the tower nodes on the tree
-  // m_Towers = new RawTowerContainer(RawTowerDefs::convert_name_to_caloid(m_Detector));
-  // string NodeNameTowers;
-  // if (m_SimTowerNodePrefix.empty())
-  // {
-  //   // no prefix, consistent with older convension
-  //   NodeNameTowers = "TOWER_" + m_Detector;
-  // }
-  // else
-  // {
-  //   NodeNameTowers = "TOWER_" + m_SimTowerNodePrefix + "_" + m_Detector;
-  // }
-
-  // PHIODataNode<PHObject> *towerNode = new PHIODataNode<PHObject>(m_Towers, NodeNameTowers, "PHObject");
-  // DetNode->addNode(towerNode);
-
   return;
 }
 
 
-// void RawDigitBuilderTTL::PrintClusters(PHCompositeNode *topNode)
-// {
-//   if (Verbosity() >= 1)
-//   {
-//     TrkrClusterContainer *clusterlist = findNode::getClass<TrkrClusterContainer>(topNode, "TRKR_CLUSTER");
-//     if (!clusterlist) return;
+void RawDigitBuilderTTL::PrintClusters(PHCompositeNode *topNode)
+{
+  if (Verbosity() >= 1)
+  {
+    TrkrClusterContainer *clusterlist = findNode::getClass<TrkrClusterContainer>(topNode, "TRKR_CLUSTER");
+    if (!clusterlist) return;
 
-//     cout << "================= Aftyer MvtxClusterizer::process_event() ====================" << endl;
+    cout << "================= Aftyer MvtxClusterizer::process_event() ====================" << endl;
 
-//     cout << " There are " << clusterlist->size() << " clusters recorded: " << endl;
+    cout << " There are " << clusterlist->size() << " clusters recorded: " << endl;
 
-//     clusterlist->identify();
+    clusterlist->identify();
 
-//     cout << "===========================================================================" << endl;
-//   }
+    cout << "===========================================================================" << endl;
+  }
 
-//   return;
-// }
+  return;
+}

@@ -19,6 +19,20 @@
 #include <Geant4/G4VTouchable.hh>             // for G4VTouchable
 #include <Geant4/G4VUserTrackInformation.hh>  // for G4VUserTrackInformation
 
+
+#include <g4main/PHG4Hit.h>
+#include <g4main/PHG4HitContainer.h>
+#include <g4main/PHG4Hitv1.h>
+#include <g4main/PHG4Shower.h>
+#include <g4main/PHG4SteppingAction.h>  // for PHG4SteppingAction
+#include <g4main/PHG4TrackUserInfoV1.h>
+
+#include <phool/getClass.h>
+#include <TVector3.h>
+
+#include <iostream>
+#include <string>  // for string, operator+, oper...
+
 class G4Step;
 class PHCompositeNode;
 class PHG4Hit;
@@ -53,7 +67,7 @@ class PHG4TTLSteppingAction : public PHG4SteppingAction
   void SetIsForwardTTL(bool isfwd){
     _isFwd_TTL = isfwd;
     };
-  void CalculateSensorHitIndices(G4StepPoint* prePoint, int& module_ret, int& layer, int& sensor_0, int& sensor_1, int& j, int& k);
+  void CalculateSensorHitIndices(G4StepPoint* prePoint, int& module_ret, int& layer, int& sensor_0, int& sensor_1, int& j, int& k, TVector3& sensorposition);
 
  private:
   //! pointer to the detector

@@ -3,10 +3,15 @@
 
 // #include <calobase/RawTowerDefs.h>
 
+#include <Geant4/G4SystemOfUnits.hh>
+#include <Geant4/G4Types.hh>               // for G4double, G4int
+
 #include <fun4all/SubsysReco.h>
 #include <trackbase/TrkrDefs.h>
 #include <trackbase/TrkrCluster.h>
 
+#include <g4main/PHG4Hit.h>
+#include <g4main/PHG4HitContainer.h>
 // #include <trackbase/TrkrCluster.h>
 #include <map>
 #include <string>
@@ -71,6 +76,7 @@ class RawDigitBuilderTTL : public SubsysReco
    */
   void CreateNodes(PHCompositeNode *topNode);
   void PrintClusters(PHCompositeNode *topNode);
+  // void GetPixelGlobalCoordinates(PHG4Hit* g4hit, G4double &xpos, G4double &ypos, G4double &zpos);
   // TrkrHitSetContainer *m_hits;
   TrkrClusterContainer *m_clusterlist; 
 
@@ -86,10 +92,6 @@ class RawDigitBuilderTTL : public SubsysReco
   std::string m_SimTowerNodePrefix;
 
   // RawTowerDefs::CalorimeterId m_CaloId;
-
-  double m_GlobalPlaceInX;
-  double m_GlobalPlaceInY;
-  double m_GlobalPlaceInZ;
 
   double m_Emin;
 

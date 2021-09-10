@@ -1,18 +1,6 @@
 #include "PHG4TTLSteppingAction.h"
 #include "PHG4TTLDetector.h"
 
-#include <g4main/PHG4Hit.h>
-#include <g4main/PHG4HitContainer.h>
-#include <g4main/PHG4Hitv1.h>
-#include <g4main/PHG4Shower.h>
-#include <g4main/PHG4SteppingAction.h>  // for PHG4SteppingAction
-#include <g4main/PHG4TrackUserInfoV1.h>
-
-#include <phool/getClass.h>
-#include <TVector3.h>
-
-#include <iostream>
-#include <string>  // for string, operator+, oper...
 
 class G4VPhysicalVolume;
 class PHCompositeNode;
@@ -55,6 +43,7 @@ bool PHG4TTLSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
 
   const G4Track* aTrack = aStep->GetTrack();
 
+  TVector3 sensorPosition;
   // make sure we are in a volume
   if (detector_->IsInSectorActive(volume))
   {
@@ -106,13 +95,17 @@ bool PHG4TTLSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
       }
 
       // std::cout << std::endl;
-      CalculateSensorHitIndices(prePoint, moduleID,layer,sensor0,sensor1,idx_j, idx_k);
+      CalculateSensorHitIndices(prePoint, moduleID,layer,sensor0,sensor1,idx_j, idx_k,sensorPosition);
       hit->set_index_i(moduleID);
       hit->set_index_j(layer);
       hit->set_index_k(sensor0);
       hit->set_index_l(sensor1);
       hit->set_strip_z_index(idx_j);
       hit->set_strip_y_index(idx_k);
+
+      hit->set_local_x(0, sensorPosition.X());
+      hit->set_local_y(0, sensorPosition.Y());
+      hit->set_local_z(0, sensorPosition.Z());
 
       //set the initial energy deposit
       hit->set_edep(0);
@@ -196,7 +189,7 @@ bool PHG4TTLSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
 }
 
 
-void PHG4TTLSteppingAction::CalculateSensorHitIndices(G4StepPoint* prePoint, int& module_ret, int& layer, int& sensor_0, int& sensor_1, int& j, int& k)
+void PHG4TTLSteppingAction::CalculateSensorHitIndices(G4StepPoint* prePoint, int& module_ret, int& layer, int& sensor_0, int& sensor_1, int& j, int& k, TVector3 &sensorposition)
 {
   int module_ID = -1;  //The j and k indices for the scintillator / tower
   int layer_ID = -1;  //The j and k indices for the scintillator / tower
@@ -215,8 +208,8 @@ void PHG4TTLSteppingAction::CalculateSensorHitIndices(G4StepPoint* prePoint, int
   G4double sensor_y_dimension = 21.2 * mm;
   G4double sensor_x_dimension = 42.0 * mm;
 
-  _sensor_resolution_x = 500e-4 / sqrt(12);
-  _sensor_resolution_y = 500e-4 / sqrt(12);
+  _sensor_resolution_x = (500e-4 / sqrt(12)) * cm; // in mm
+  _sensor_resolution_y = (500e-4 / sqrt(12)) * cm; // in mm
 
   TVector3 prePointVec(prePoint->GetPosition().x(),prePoint->GetPosition().y(),prePoint->GetPosition().z());
   if(_N_phi_modules>0){
@@ -245,8 +238,13 @@ void PHG4TTLSteppingAction::CalculateSensorHitIndices(G4StepPoint* prePoint, int
     // std::cout << "\tcorner_x " << sensorcorner_x << "\tposition_x " <<  prePoint->GetPosition().x() << "\treso " << _sensor_resolution_x << std::endl;
     // std::cout << "\tcorner_y " << sensorcorner_y << "\tposition_y " <<  prePoint->GetPosition().y() << "\treso " << _sensor_resolution_y << std::endl;
     hit_j_0 = (int) ( ( prePoint->GetPosition().x() - sensorcorner_x)  / _sensor_resolution_x );
+    sensorposition.SetX( (hit_j_0 * _sensor_resolution_x) + sensorcorner_x );
     hit_k_0 = (int) ( ( prePoint->GetPosition().y() - sensorcorner_y)  / _sensor_resolution_y );
+    sensorposition.SetY( (hit_k_0 * _sensor_resolution_y) + sensorcorner_y );
+
+    sensorposition.SetZ( prePoint->GetPosition().z() );
   }
+
 
   module_ret = module_ID;
   layer = layer_ID;
