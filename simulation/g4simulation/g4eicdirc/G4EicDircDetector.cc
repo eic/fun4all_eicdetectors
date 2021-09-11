@@ -359,7 +359,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   double dirclength = fBarL[2]*(nparts-1) + fBarS[2] + gluethickness*nparts;
 
   // The DIRC
-  G4Box* gDirc = new G4Box("gDirc",220,300,0.5*dirclength+350);
+  G4Box* gDirc = new G4Box("gDirc",210,195,0.5*dirclength+350);
   lDirc = new G4LogicalVolume(gDirc,defaultMaterial,"lDirc",0,0,0);
 
   G4Box* gFd = new G4Box("gFd",0.5*fFd[1],0.5*fFd[0],0.5*fFd[2]);
