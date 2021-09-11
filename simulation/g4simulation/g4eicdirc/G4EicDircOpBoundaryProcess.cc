@@ -10,7 +10,7 @@ G4VParticleChange* G4EicDircOpBoundaryProcess::PostStepDoIt(const G4Track& aTrac
 {  
   G4StepPoint* pPreStepPoint  = aStep.GetPreStepPoint();
   G4StepPoint* pPostStepPoint = aStep.GetPostStepPoint();
-  //G4VParticleChange *pParticleChange = G4OpBoundaryProcess::PostStepDoIt(aTrack, aStep);
+  G4VParticleChange *pParticleChange = G4OpBoundaryProcess::PostStepDoIt(aTrack, aStep);
   // static std::set<std::string> prevol;
   // static std::set<std::string> postvol;
   // std::string prevolnam = pPreStepPoint->GetPhysicalVolume()->GetName();
@@ -93,7 +93,7 @@ G4VParticleChange* G4EicDircOpBoundaryProcess::PostStepDoIt(const G4Track& aTrac
   if(aStep.GetPreStepPoint()->GetPhysicalVolume()->GetName()=="wLens2" 
      && aStep.GetPostStepPoint()->GetPhysicalVolume()->GetName()=="wLens2"){
     pParticleChange->ProposeTrackStatus(fStopAndKill);
-  }
+    }
   
 
   return pParticleChange;

@@ -49,7 +49,7 @@ int G4EicDircSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
 {
   PHNodeIterator iter(topNode);
   PHCompositeNode *dstNode = dynamic_cast<PHCompositeNode *>(iter.findFirst("PHCompositeNode", "DST"));
-  DircBoundary = new G4EicDircOpBoundaryProcess();
+  //DircBoundary = new G4EicDircOpBoundaryProcess();
   // G4EicDircDisplayAction *disp_action = new G4EicDircDisplayAction(Name(), GetParams());
   // if (isfinite(m_ColorArray[0]) &&
   //     isfinite(m_ColorArray[1]) &&
@@ -116,17 +116,18 @@ int G4EicDircSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
   return 0;
 }
 
-void G4EicDircSubsystem::AddProcesses(G4ParticleDefinition *particle)
+/*void G4EicDircSubsystem::AddProcesses(G4ParticleDefinition *particle)
 {
     G4ProcessManager* pmanager = particle->GetProcessManager();
     if (DircBoundary->IsApplicable(*particle))
     {
       pmanager->AddDiscreteProcess(DircBoundary);
       pmanager->SetProcessOrderingToFirst(DircBoundary, idxPostStep);
+      
       G4cout << "dirc boundary process index = " << pmanager->GetProcessIndex(DircBoundary) << G4endl;
       G4cout << "dirc boundary process ordering = " << pmanager->GetProcessOrdering(DircBoundary, idxPostStep) << G4endl;
     }
-}
+    }*/
 
 //_______________________________________________________________________
 int G4EicDircSubsystem::process_event(PHCompositeNode *topNode)
