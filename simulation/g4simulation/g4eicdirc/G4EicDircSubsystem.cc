@@ -180,12 +180,12 @@ void G4EicDircSubsystem::SetDefaultParameters()
   set_default_double_param("Prizm_width", 38.65);
   set_default_double_param("Prizm_length", 30.0);
   set_default_double_param("Prizm_height_at_lens", 3.7);
-  set_default_double_param("Bar_thickness", 1.7);
+  set_default_double_param("Bar_thickness", 1.725);
   set_default_double_param("Bar_width", 3.5);
   set_default_double_param("BarL_length", 122.5);
   set_default_double_param("BarS_length", 56.0);
   set_default_double_param("Mirror_height", 2.0);
-  set_default_double_param("z_shift", 0);
+  set_default_double_param("z_shift", -43.75);
   set_default_int_param("Geom_type", 0); // 0-whole DIRC, 1-one bar box
   set_default_int_param("Lens_id", 3); // 3- 3-layer spherical lens
   set_default_int_param("MCP_rows", 6);
