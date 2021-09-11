@@ -46,11 +46,11 @@ class G4EicDircDetector : public PHG4Detector
   const std::string SuperDetector() const { return m_SuperDetector; }
   std::string name_base = "test";
 
-  void
+  /*void
     OverlapCheck(bool check = true) override
   {
     overlapcheck_sector = check;
-  }
+    }*/
 
  
  private:
@@ -120,7 +120,7 @@ class G4EicDircDetector : public PHG4Detector
   PHParameters *m_Params;
 
   G4EicDircDisplayAction *m_DisplayAction;
-  bool overlapcheck_sector;
+  //bool overlapcheck_sector;
   
   // active volumes
   std::map<G4VPhysicalVolume *, int> m_PhysicalVolumes_active;
