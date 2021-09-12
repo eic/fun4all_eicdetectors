@@ -113,7 +113,7 @@ class G4EicDircDetector : public PHG4Detector
   PHParameters *m_Params;
 
   G4EicDircDisplayAction *m_DisplayAction;
-  
+
   // active volumes
   std::map<G4VPhysicalVolume *, int> m_PhysicalVolumes_active;
 

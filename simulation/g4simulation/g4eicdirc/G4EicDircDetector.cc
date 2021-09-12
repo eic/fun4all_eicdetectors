@@ -8,6 +8,7 @@
 #include <g4main/PHG4DisplayAction.h>  // for PHG4DisplayAction
 #include <g4main/PHG4Subsystem.h>
 
+#include <Geant4/G4AssemblyVolume.hh>
 #include <Geant4/G4Box.hh>
 #include <Geant4/G4Cons.hh>
 #include <Geant4/G4Trd.hh>
@@ -368,12 +369,9 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   double dphi = 360*deg/(double)fNBoxes;  
   G4VPhysicalVolume* phy;
 
-
-  // LUT
-  /*phy = new G4PVPlacement(0,G4ThreeVector(0,0,0),lDirc,"wDirc",logicWorld,false,0);
-    m_PhysicalVolumesSet.insert(phy);
-  */ 
-    for(int i=0; i<fNBoxes; i++){
+  G4AssemblyVolume* assemblySector = new G4AssemblyVolume();
+ 
+  /*for(int i=0; i<fNBoxes; i++){
       double tphi = dphi*i; 
       double dx = fRadius * cos(tphi);
       double dy = fRadius * sin(tphi);
@@ -382,7 +380,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
       tRot->rotateZ(-tphi);     
       phy = new G4PVPlacement(tRot,G4ThreeVector(dx,dy,zshift),lDirc,"wDirc",logicWorld,false,i,OverlapCheck());
       m_PhysicalVolumes_active[phy] = 1;
-    }
+      }*/
   
   // The Bar
   G4Box *gBarL = new G4Box("gBarL", fBarL[0]/2., fBarL[1]/2., fBarL[2]/2.);
@@ -403,7 +401,8 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
       if(j < (nparts-1))
 	{
 	  double z = 0.5*dirclength - 0.5*fBarL[2] - (fBarL[2]+gluethickness)*j;
-	  pDirc[i] = new G4PVPlacement(0,G4ThreeVector(0,shifty,z),lBarL,"wBar",lDirc,false,id,OverlapCheck());
+	  //pDirc[i] = new G4PVPlacement(0,G4ThreeVector(0,shifty,z),lBarL,"wBar",lDirc,false,id,OverlapCheck());
+	  assemblySector->AddPlacedVolume(lBarL, G4ThreeVector(0,shifty,z), 0);
 	  m_PhysicalVolumes_active[pDirc[i]] = 3;
 	  wGlue = new G4PVPlacement(0,G4ThreeVector(0,shifty,z-0.5*(fBarL[2]+gluethickness)),lGlue,"wGlue", lDirc,false,id,OverlapCheck());
 	  m_PhysicalVolumes_active[wGlue] = 4;
