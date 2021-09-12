@@ -106,22 +106,20 @@ int RawClusterBuilderkV3::process_event(PHCompositeNode *topNode)
   std::cout << "added " << towers_added << " towers" << std::endl;
 
   // Next we'll sort the towers from most energetic to least
-  // This is straight from https://github.com/FriederikeBock/AnalysisSoftwareEIC/blob/642aeb13b13271820dfee59efe93380e58456289/treeAnalysis/clusterizer.cxx#L281
-
-
+  // This is from https://github.com/FriederikeBock/AnalysisSoftwareEIC/blob/642aeb13b13271820dfee59efe93380e58456289/treeAnalysis/clusterizer.cxx#L281
   std::sort(input_towers.begin(), input_towers.end(), &acompare);
   std::vector<int> clslabels;
+  // And run kV3 clustering
   while (!input_towers.empty()) {
     cluster_towers.clear();
     clslabels.clear();
     // always start with highest energetic tower
     if(input_towers.at(0).tower_E > _seed_e){
       RawCluster *cluster = new RawClusterv1();
-      _clusters->AddCluster(cluster);
+      _clusters->AddCluster(cluster); // Add cluster to cluster container
       // fill seed cell information into current cluster
       cluster->addTower(input_towers.at(0).twr->get_id(), input_towers.at(0).tower_E);
-      cluster->set_energy(input_towers.at(0).tower_E);
-      std::cout << "Added a tower to the cluster! " << input_towers.at(0).tower_E << std::endl;
+      std::cout << "Started new cluster! " << input_towers.at(0).tower_E << std::endl;
       cluster_towers.push_back(input_towers.at(0));
       // kV3 Clustering
       input_towers.erase(input_towers.begin());
@@ -141,16 +139,12 @@ int RawClusterBuilderkV3::process_event(PHCompositeNode *topNode)
           }
           int deltaEta = std::abs(iEtaTwrAgg-iEtaTwr);
           int deltaPhi = std::abs(iPhiTwrAgg-iPhiTwr);
-          std::cout << "dedp " << deltaEta << " " << deltaPhi << std::endl;
 
           if( (deltaEta+deltaPhi) == 1){
             // only aggregate towers with lower energy than current tower
             if(input_towers.at(ait).tower_E >= (cluster_towers.at(tit).tower_E + aggregation_margin_V3)) continue;
-            float sum_e = cluster->get_energy();
-            sum_e += input_towers.at(ait).tower_E;
-            cluster->set_energy(sum_e);
-            std::cout << "?!?" << sum_e << std::endl;
-            cluster->addTower(input_towers.at(ait).twr->get_id(), input_towers.at(ait).tower_E);
+            cluster->addTower(input_towers.at(ait).twr->get_id(), input_towers.at(ait).tower_E); // Add tower to cluster
+            std::cout << "Added a tower to the cluster! " << input_towers.at(ait).tower_E << std::endl;
             cluster_towers.push_back(input_towers.at(ait));
             if(!(std::find(clslabels.begin(), clslabels.end(), input_towers.at(ait).tower_trueID) != clslabels.end())){
               clslabels.push_back(input_towers.at(ait).tower_trueID);
@@ -165,9 +159,62 @@ int RawClusterBuilderkV3::process_event(PHCompositeNode *topNode)
       input_towers.clear();
     }
 
-    // TODO
-    // Sum x, y, z, deal with their geometry
-  
+
+    // Sum x, y, z, e
+    // from https://github.com/ECCE-EIC/coresoftware/blob/ae0526adf82f49cb8906d447411b90287de6a56e/offline/packages/CaloReco/RawClusterBuilderGraph.cc#L202
+    for (const auto &cluster_pair : _clusters->getClustersMap())
+    {
+      RawClusterDefs::keytype clusterid = cluster_pair.first;
+      RawCluster *cluster = cluster_pair.second;
+
+      assert(cluster);
+      assert(cluster->get_id() == clusterid);
+
+      double sum_x(0);
+      double sum_y(0);
+      double sum_z(0);
+      double sum_e(0);
+
+      for (const auto tower_pair : cluster->get_towermap())
+      {
+        const RawTower *rawtower = towers->getTower(tower_pair.first);
+        const RawTowerGeom *rawtowergeom = towergeom->get_tower_geometry(tower_pair.first);
+
+        assert(rawtower);
+        assert(rawtowergeom);
+        const double e = rawtower->get_energy();
+
+        sum_e += e;
+
+        if (e > 0)
+        {
+          sum_x += e * rawtowergeom->get_center_x();
+          sum_y += e * rawtowergeom->get_center_y();
+          sum_z += e * rawtowergeom->get_center_z();
+        }
+      }  //     for (const auto tower_pair : cluster->get_towermap())
+
+      cluster->set_energy(sum_e);
+
+      if (sum_e > 0)
+      {
+        sum_x /= sum_e;
+        sum_y /= sum_e;
+        sum_z /= sum_e;
+
+        cluster->set_r(sqrt(sum_y * sum_y + sum_x * sum_x));
+        cluster->set_phi(atan2(sum_y, sum_x));
+
+        cluster->set_z(sum_z);
+      }
+
+      if (Verbosity() > 1)
+      {
+        cout << "RawClusterBuilderGraph constucted ";
+        cluster->identify();
+      }
+    }  //  for (const auto & cluster_pair : _clusters->getClustersMap())
+    
 
 
 
