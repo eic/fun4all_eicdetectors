@@ -285,8 +285,9 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
       aTrack->GetTrackStatus() == fStopAndKill)
   {       
     //if((prePoint->GetStepStatus() == fGeomBoundary) && 
-    if(whichactive_int == 9 || whichactive_int == 7 || whichactive_int == 8) // for relection information (7-wLens2, 8-wLens3, 9-wPrizm) 
-      	{	 
+    //if(whichactive_int == 9 || whichactive_int == 7 || whichactive_int == 8) // for relection information (7-wLens2, 8-wLens3, 9-wPrizm) 
+      if(whichactive_int == 7 || whichactive_int == 8 || whichactive_int == 9) // for relection information (7-lLens2, 8-lLens3, 9-lPrizm)
+      {	 
 	  G4String vname = touch->GetVolume()->GetName();
 	     
 	  // normal to the closest boundary

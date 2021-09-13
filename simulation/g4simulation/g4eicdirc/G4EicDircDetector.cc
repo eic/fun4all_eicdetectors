@@ -57,12 +57,17 @@ G4EicDircDetector::G4EicDircDetector(PHG4Subsystem *subsys,
 
 int G4EicDircDetector::IsInDetector(G4VPhysicalVolume *volume) const
 { 
-  std::map<G4VPhysicalVolume *, int>::const_iterator iter = m_PhysicalVolumes_active.find(volume);
+  /*std::map<G4VPhysicalVolume *, int>::const_iterator iter = m_PhysicalVolumes_active.find(volume);
   if(iter != m_PhysicalVolumes_active.end())
     {
       return iter->second;
+      }*/
+  std::map<G4LogicalVolume *, int>::const_iterator iter = m_LogicalVolumes_active.find(volume->GetLogicalVolume());
+  if(iter != m_LogicalVolumes_active.end())
+    {
+      return iter->second;
     }
-
+  
   return 0;
 }
 
@@ -365,9 +370,10 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
 
   G4Box* gFd = new G4Box("gFd",0.5*fFd[1],0.5*fFd[0],0.5*fFd[2]);
   lFd = new G4LogicalVolume(gFd,defaultMaterial,"lFd",0,0,0);
+  m_LogicalVolumes_active[lFd] = 1;
 
   double dphi = 360*deg/(double)fNBoxes;  
-  G4VPhysicalVolume* phy;
+  //G4VPhysicalVolume* phy;
 
   G4AssemblyVolume* assemblySector = new G4AssemblyVolume();
  
@@ -387,13 +393,16 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   // The Bar
   G4Box *gBarL = new G4Box("gBarL", fBarL[0]/2., fBarL[1]/2., fBarL[2]/2.);
   lBarL = new G4LogicalVolume(gBarL,BarMaterial,"lBarL",0,0,0);
+  m_LogicalVolumes_active[lBarL] = 2;
 
   G4Box *gBarS = new G4Box("gBarS", fBarS[0]/2., fBarS[1]/2., fBarS[2]/2.);
   lBarS = new G4LogicalVolume(gBarS,BarMaterial,"lBarS",0,0,0);
-    
+  m_LogicalVolumes_active[lBarS] = 3;
+  
   // Glue
   G4Box *gGlue = new G4Box("gGlue",fBar[0]/2.,fBar[1]/2.,0.5*gluethickness);
   lGlue = new G4LogicalVolume(gGlue,epotekMaterial,"lGlue",0,0,0);
+  m_LogicalVolumes_active[lGlue] = 4;
 
   int id=0; 
 
@@ -432,6 +441,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   // The Mirror
   G4Box* gMirror = new G4Box("gMirror",fMirror[0]/2.,fMirror[1]/2.,fMirror[2]/2.);
   lMirror = new G4LogicalVolume(gMirror,MirrorMaterial,"lMirror",0,0,0);
+  m_LogicalVolumes_active[lMirror] = 5;
   //wMirror =new G4PVPlacement(0,G4ThreeVector(0,0,0.5*dirclength+fMirror[2]/2.),lMirror,"wMirror", lDirc,false,0,OverlapCheck());
   G4ThreeVector g4vec_lMirror_pos(0, 0, 0.5*dirclength+fMirror[2]/2.);
   assemblySector->AddPlacedVolume(lMirror, g4vec_lMirror_pos, 0);
@@ -449,7 +459,9 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
     G4SubtractionSolid* gLens2 = new G4SubtractionSolid("Fbox-Sphere", gfbox, gsphere,new G4RotationMatrix(),zTrans);
 
     lLens1 = new G4LogicalVolume(gLens1,Nlak33aMaterial,"lLens1",0,0,0); //Nlak33aMaterial  
+    m_LogicalVolumes_active[lLens1] = 6;
     lLens2 = new G4LogicalVolume(gLens2,BarMaterial,"lLens2",0,0,0);
+    m_LogicalVolumes_active[lLens2] = 7;
   }
 
   if(fLensId == 3){ // 3-component spherical lens
@@ -493,8 +505,11 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
     G4SubtractionSolid*  gLens3 = new G4SubtractionSolid("Lens3", gLenst, gsphere2,new G4RotationMatrix(),-zTrans2);
     
     lLens1 = new G4LogicalVolume(gLens1,BarMaterial,"lLens1",0,0,0);
+    m_LogicalVolumes_active[lLens1] = 6;
     lLens2 = new G4LogicalVolume(gLens2,Nlak33aMaterial,"lLens2",0,0,0); //Nlak33aMaterial //PbF2Material //SapphireMaterial
+    m_LogicalVolumes_active[lLens2] = 7;
     lLens3 = new G4LogicalVolume(gLens3,BarMaterial,"lLens3",0,0,0);
+    m_LogicalVolumes_active[lLens3] = 8;
   }
 
   if(fLensId == 6){ // 3-component cylindrical lens
@@ -537,14 +552,18 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
     G4SubtractionSolid*  gLens3 = new G4SubtractionSolid("Lens3", gLenst, gcylinder2c, xRot,zTrans2);
 
     lLens1 = new G4LogicalVolume(gLens1,BarMaterial,"lLens1",0,0,0);
+    m_LogicalVolumes_active[lLens1] = 6;
     lLens2 = new G4LogicalVolume(gLens2,Nlak33aMaterial,"lLens2",0,0,0);
+    m_LogicalVolumes_active[lLens2] = 7;
     lLens3 = new G4LogicalVolume(gLens3,BarMaterial,"lLens3",0,0,0);
+    m_LogicalVolumes_active[lLens3] = 8;
   }  
 
   if(fLensId ==100){
     fLens[2]=200;
     G4Box *gLens3 = new G4Box("gLens1",fBar[0]/2.,0.5*fBoxWidth,100);
     lLens3 = new G4LogicalVolume(gLens3,BarMaterial,"lLens3",0,0,0);
+    m_LogicalVolumes_active[lLens3] = 8;
   }
       
   if(fLensId != 0 && fLensId != 10){
@@ -604,6 +623,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   // The Prizm
   G4Trap* gPrizm = new G4Trap("gPrizm",fPrizm[0],fPrizm[1],fPrizm[2],fPrizm[3]);
   lPrizm = new G4LogicalVolume(gPrizm, BarMaterial,"lPrizm",0,0,0);
+  m_LogicalVolumes_active[lPrizm] = 9;
 
   G4RotationMatrix* xRot = new G4RotationMatrix();
   //xRot->rotateX(-M_PI/2.*rad); // for lDirc
@@ -641,6 +661,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
 
   G4Box* gMcp = new G4Box("gMcp",fMcpTotal[0]/2.,fMcpTotal[1]/2.,fMcpTotal[2]/2.);
   lMcp = new G4LogicalVolume(gMcp,BarMaterial,"lMcp",0,0,0);
+  m_LogicalVolumes_active[lMcp] = 10;
 
   fNpix1 = 16;
   fNpix2 = 16;
@@ -650,13 +671,14 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   // The MCP Pixel
   G4Box* gPixel = new G4Box("gPixel",0.5*fMcpActive[0]/fNpix1,0.5*fMcpActive[1]/fNpix2,fMcpActive[2]/16.);
   lPixel = new G4LogicalVolume(gPixel,BarMaterial,"lPixel",0,0,0);
+  m_LogicalVolumes_active[lPixel] = 11;
 
   for(int i=0; i<fNpix2; i++){
     for(int j=0; j<fNpix1; j++){
       double shiftx = i*(fMcpActive[0]/fNpix1)-fMcpActive[0]/2.+0.5*fMcpActive[0]/fNpix1;
       double shifty = j*(fMcpActive[1]/fNpix2)-fMcpActive[1]/2.+0.5*fMcpActive[1]/fNpix2;
-      phy = new G4PVPlacement(0,G4ThreeVector(shiftx,shifty,0),lPixel,"wPixel", lMcp,false,fNpix2*i+j,OverlapCheck());      
-      m_PhysicalVolumes_active[phy] = 11;
+      G4VPhysicalVolume* phy1 = new G4PVPlacement(0,G4ThreeVector(shiftx,shifty,0),lPixel,"wPixel", lMcp,false,fNpix2*i+j,OverlapCheck());      
+      //m_PhysicalVolumes_active[phy] = 11;
     }
   }
  
@@ -669,8 +691,8 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
       double shiftx = i*(fMcpTotal[0]+gapx)-0.5*(fFd[1]-fMcpTotal[0])+gapx;
       double shifty = j*(fMcpTotal[1]+gapy)-0.5*(fBoxWidth-fMcpTotal[1])+gapy;
       //phy = new G4PVPlacement(0,G4ThreeVector(shiftx,shifty,0),lMcp,"wMcp", lFd,false,mcpId++);
-      phy = new G4PVPlacement(0,G4ThreeVector(shiftx,shifty,0),lMcp,"wMcp", lFd,false,mcpId,OverlapCheck()); 
-      m_PhysicalVolumes_active[phy] = 10;
+      G4VPhysicalVolume* phy2 = new G4PVPlacement(0,G4ThreeVector(shiftx,shifty,0),lMcp,"wMcp", lFd,false,mcpId,OverlapCheck()); 
+      //m_PhysicalVolumes_active[phy] = 10;
       mcpId++;
     }
   }

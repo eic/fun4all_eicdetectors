@@ -179,7 +179,7 @@ void G4EicDircSubsystem::SetDefaultParameters()
   set_default_double_param("Radius", 75.0);
   set_default_double_param("Prizm_width", 38.65);
   set_default_double_param("Prizm_length", 30.0);
-  set_default_double_param("Prizm_height_at_lens", 4.1);
+  set_default_double_param("Prizm_height_at_lens", 5.0);
   set_default_double_param("Bar_thickness", 1.725);
   set_default_double_param("Bar_width", 3.5);
   set_default_double_param("BarL_length", 122.5);
