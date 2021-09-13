@@ -629,7 +629,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
     double dy = fRadius * sin(tphi);
 
     G4RotationMatrix *tRot = new G4RotationMatrix();
-    tRot->rotateZ(-tphi);
+    tRot->rotateZ(tphi);
     G4ThreeVector g4vec_sector_pos(dx, dy, zshift);
     //phy = new G4PVPlacement(tRot,G4ThreeVector(dx,dy,zshift),lDirc,"wDirc",logicWorld,false,i,OverlapCheck());                                     
     assemblySector->MakeImprint(logicWorld, g4vec_sector_pos, tRot, i, OverlapCheck());
