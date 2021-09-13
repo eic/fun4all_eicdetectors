@@ -329,7 +329,7 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
 		}
 	     
 	    }
-	}    
+	}   
   
 
    // save only hits with energy deposit (or geantino)
@@ -437,7 +437,7 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
 
       m_Hit->SetNreflectionsInPrizm(refl);
       m_Hit->SetPathInPrizm(pathId);
-  
+      
       /*for(std::vector<Int_t>::size_type i = 0; i < vector_bar_hit_trackid.size(); i++)
 	{
 	  if(aTrack->GetParentID() == vector_bar_hit_trackid[i])
