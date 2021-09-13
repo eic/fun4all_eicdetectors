@@ -60,13 +60,8 @@ int RawClusterBuilderkV3::InitRun(PHCompositeNode *topNode)
   return Fun4AllReturnCodes::EVENT_OK;
 }
 
-
-
-
-
 int RawClusterBuilderkV3::process_event(PHCompositeNode *topNode)
 {
-  std::cout << "Processing event!" << std::endl;
   string towernodename = "TOWER_CALIB_" + detector;
   // Grab the towers
   RawTowerContainer *towers = findNode::getClass<RawTowerContainer>(topNode, towernodename);
@@ -86,30 +81,28 @@ int RawClusterBuilderkV3::process_event(PHCompositeNode *topNode)
   // towers in the current cluster
   std::vector<towersStrct> cluster_towers;
   int towers_added = 0;
-  if (towers->getCalorimeterID() == 12) { // BECAL calo_id = 12
-    RawTowerContainer::ConstRange begin_end = towers->getTowers();
-    for (RawTowerContainer::ConstIterator itr = begin_end.first; itr != begin_end.second; ++itr) {
-      RawTower *tower = itr->second;
-      RawTowerDefs::keytype towerid = itr->first;
-      if (tower->get_energy() > _agg_e) {   // TODO where are aggE and E_Scaling going to be set?
-        towersStrct tempTower;
-        tempTower.tower_E = tower->get_energy();
-        tempTower.tower_iEta = tower->get_bineta();
-        tempTower.tower_iPhi = tower->get_binphi();
-        tempTower.tower_trueID = towerid; // currently unsigned -> signed, will this matter?
-        tempTower.twr = itr->second;
-        input_towers.push_back(tempTower);
-        towers_added++;
-      }
+  RawTowerContainer::ConstRange begin_end = towers->getTowers();
+  for (RawTowerContainer::ConstIterator itr = begin_end.first; itr != begin_end.second; ++itr) {
+    RawTower *tower = itr->second;
+    RawTowerDefs::keytype towerid = itr->first;
+    if (tower->get_energy() > _agg_e) {
+      towersStrct tempTower;
+      tempTower.tower_E = tower->get_energy();
+      tempTower.tower_iEta = tower->get_bineta();
+      tempTower.tower_iPhi = tower->get_binphi();
+      tempTower.tower_trueID = towerid; // currently unsigned -> signed, will this matter?
+      tempTower.twr = itr->second;
+      input_towers.push_back(tempTower);
+      towers_added++;
     }
   }
-  std::cout << "added " << towers_added << " towers" << std::endl;
 
   // Next we'll sort the towers from most energetic to least
   // This is from https://github.com/FriederikeBock/AnalysisSoftwareEIC/blob/642aeb13b13271820dfee59efe93380e58456289/treeAnalysis/clusterizer.cxx#L281
   std::sort(input_towers.begin(), input_towers.end(), &acompare);
   std::vector<int> clslabels;
   // And run kV3 clustering
+  uint nclusters = 0;
   while (!input_towers.empty()) {
     cluster_towers.clear();
     clslabels.clear();
@@ -117,9 +110,10 @@ int RawClusterBuilderkV3::process_event(PHCompositeNode *topNode)
     if(input_towers.at(0).tower_E > _seed_e){
       RawCluster *cluster = new RawClusterv1();
       _clusters->AddCluster(cluster); // Add cluster to cluster container
+      nclusters++;
       // fill seed cell information into current cluster
       cluster->addTower(input_towers.at(0).twr->get_id(), input_towers.at(0).tower_E);
-      std::cout << "Started new cluster! " << input_towers.at(0).tower_E << std::endl;
+      // std::cout << "Started new cluster! " << input_towers.at(0).tower_E << std::endl;
       cluster_towers.push_back(input_towers.at(0));
       // kV3 Clustering
       input_towers.erase(input_towers.begin());
@@ -131,20 +125,22 @@ int RawClusterBuilderkV3::process_event(PHCompositeNode *topNode)
           int iEtaTwrAgg = input_towers.at(ait).tower_iEta;
           int iPhiTwrAgg = input_towers.at(ait).tower_iPhi;
           
-          if (iPhiTwr < 5 && iPhiTwrAgg > 128-5){  // _caloTowersPhi is the geometry? 128 for BECAL
-            iPhiTwrAgg= iPhiTwrAgg-128;
-          }
-          if (iPhiTwr > 128-5 && iPhiTwrAgg < 5){
-            iPhiTwr= iPhiTwr-128;
+          if (!IsForwardCalorimeter(towers->getCalorimeterID())) {
+            if (iPhiTwr < 5 && iPhiTwrAgg > caloTowersPhi(towers->getCalorimeterID())-5){
+              iPhiTwrAgg= iPhiTwrAgg-caloTowersPhi(towers->getCalorimeterID());
+            }
+            if (iPhiTwr > caloTowersPhi(towers->getCalorimeterID())-5 && iPhiTwrAgg < 5){
+              iPhiTwr= iPhiTwr-caloTowersPhi(towers->getCalorimeterID());
+            }
           }
           int deltaEta = std::abs(iEtaTwrAgg-iEtaTwr);
           int deltaPhi = std::abs(iPhiTwrAgg-iPhiTwr);
 
           if( (deltaEta+deltaPhi) == 1){
             // only aggregate towers with lower energy than current tower
-            if(input_towers.at(ait).tower_E >= (cluster_towers.at(tit).tower_E + aggregation_margin_V3)) continue;
+            if(input_towers.at(ait).tower_E >= (cluster_towers.at(tit).tower_E + _agg_e)) continue;
             cluster->addTower(input_towers.at(ait).twr->get_id(), input_towers.at(ait).tower_E); // Add tower to cluster
-            std::cout << "Added a tower to the cluster! " << input_towers.at(ait).tower_E << std::endl;
+            // std::cout << "Added a tower to the cluster! " << input_towers.at(ait).tower_E << std::endl;
             cluster_towers.push_back(input_towers.at(ait));
             if(!(std::find(clslabels.begin(), clslabels.end(), input_towers.at(ait).tower_trueID) != clslabels.end())){
               clslabels.push_back(input_towers.at(ait).tower_trueID);
@@ -219,6 +215,16 @@ int RawClusterBuilderkV3::process_event(PHCompositeNode *topNode)
 
 
   // The output of the cluster will be in the RawClusterContainer class
+  }
+  if (Verbosity() > 1) {
+    std::cout << "found " << nclusters << " clusters" << std::endl;
+    for (const auto &cluster_pair : _clusters->getClustersMap()) {
+      std::cout << "\n\tnTowers: " << cluster_pair.second->getNTowers() << std::endl;
+      std::cout << "\tE: " << cluster_pair.second->get_energy() << "\tPhi: " << cluster_pair.second->get_phi() << std::endl;
+      std::cout << "\tX: " << cluster_pair.second->get_x();
+      std::cout << "\tY: " << cluster_pair.second->get_y();
+      std::cout << "\tZ: " << cluster_pair.second->get_z() << std::endl;
+    }
   }
 
   
