@@ -16,7 +16,6 @@ typedef struct {
   float tower_E;
   int tower_iEta;
   int tower_iPhi;
-  int tower_iL;
   int tower_trueID;
   RawTower *twr;
 } towersStrct;
@@ -40,7 +39,7 @@ class RawClusterBuilderkV3 : public SubsysReco
 
  private:
   void CreateNodes(PHCompositeNode *topNode);
-  
+
   bool IsForwardCalorimeter(int caloID){
     switch (caloID){
       case RawTowerDefs::DRCALO: return true;
