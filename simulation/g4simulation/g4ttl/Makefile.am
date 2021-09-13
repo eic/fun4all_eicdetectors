@@ -19,17 +19,20 @@ libttl_la_LIBADD = \
   -lfun4all \
   -lphg4hit \
   -lg4detectors \
-  -ltrackbase_historic_io
+  -ltrackbase_historic_io \
+  -ltrack_io
 
 pkginclude_HEADERS = \
   PHG4TTLDetector.h \
-  PHG4TTLSubsystem.h
+  PHG4TTLSubsystem.h \
+  RawDigitBuilderTTL.h
 
 libttl_la_SOURCES = \
   PHG4TTLDetector.cc \
   PHG4TTLDisplayAction.cc \
   PHG4TTLSteppingAction.cc \
-  PHG4TTLSubsystem.cc
+  PHG4TTLSubsystem.cc \
+  RawDigitBuilderTTL.cc
 
 # Rule for generating table CINT dictionaries.
 %_Dict.cc: %.h %LinkDef.h

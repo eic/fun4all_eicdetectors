@@ -64,7 +64,9 @@ PHG4ForwardDualReadoutSteppingAction::PHG4ForwardDualReadoutSteppingAction(PHG4F
   , hitcontainer(nullptr)
   , hit(nullptr)
   , saveshower(nullptr)
+  , _towerdivision(0.0)
   , _tower_size(1.0)
+  , _readout_size(1.0)
   , _detector_size(100)
   , absorbertruth(absorberactive)
   , light_scint_model(1)
@@ -466,8 +468,13 @@ int PHG4ForwardDualReadoutSteppingAction::FindTowerIndexFromPosition(G4StepPoint
 
   // G4VPhysicalVolume* tower = touch->GetVolume(1);  //Get the tower solid
   // ParseG4VolumeName(tower, j_0, k_0);
-  j_0 = (int) ( ( _detector_size + ( prePoint->GetPosition().x() ) ) / _tower_size ); //TODO DRCALO TOWER SIZE
-  k_0 = (int) ( ( _detector_size + ( prePoint->GetPosition().y() ) ) / _tower_size ); //TODO DRCALO TOWER SIZE
+  if(_towerdivision==0.){
+    int maxsubtow = (int) ( (_tower_size) / (_readout_size));
+    _towerdivision = (_tower_size - (maxsubtow * _readout_size))/maxsubtow;
+    _towerdivision+=_readout_size;
+  }
+  j_0 = (int) ( ( _detector_size + ( prePoint->GetPosition().x() ) ) / _towerdivision ); //TODO DRCALO TOWER SIZE
+  k_0 = (int) ( ( _detector_size + ( prePoint->GetPosition().y() ) ) / _towerdivision ); //TODO DRCALO TOWER SIZE
   // if(prePoint->GetPosition().x()>290) cout << prePoint->GetPosition().x() << "\t" << k_0 << endl;
   j = (j_0 * 1);
   k = (k_0 * 1);

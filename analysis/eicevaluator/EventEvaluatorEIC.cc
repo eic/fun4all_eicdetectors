@@ -72,6 +72,7 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   , _do_EEMC(false)
   , _do_EEMCG(false)
   , _do_DRCALO(false)
+  , _do_FOCAL(false)
   , _do_LFHCAL(false)
   , _do_HITS(false)
   , _do_TRACKS(false)
@@ -81,6 +82,7 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   , _do_MCPARTICLES(false)
   , _do_HEPMC(false)
   , _do_GEOMETRY(false)
+  , _do_BLACKHOLE(false)
   , _ievent(0)
   , _cross_section(0)
   , _event_weight(0)
@@ -91,7 +93,11 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   , _hits_x(0)
   , _hits_y(0)
   , _hits_z(0)
+  , _hits_x2(0)
+  , _hits_y2(0)
+  , _hits_z2(0)
   , _hits_t(0)
+  , _hits_edep(0)
 
   , _nTowers_FHCAL(0)
   , _tower_FHCAL_E(0)
@@ -130,6 +136,14 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   , _tower_DRCALO_iEta(0)
   , _tower_DRCALO_iPhi(0)
   , _tower_DRCALO_trueID(0)
+
+  , _nTowers_FOCAL(0)
+  , _tower_FOCAL_E(0)
+  , _tower_FOCAL_NScint(0)
+  , _tower_FOCAL_NCerenkov(0)
+  , _tower_FOCAL_iEta(0)
+  , _tower_FOCAL_iPhi(0)
+  , _tower_FOCAL_trueID(0)
 
   , _nTowers_LFHCAL(0)
   , _tower_LFHCAL_E(0)
@@ -295,6 +309,7 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   , _caloevalstackHCALOUT(nullptr)
   , _caloevalstackEHCAL(nullptr)
   , _caloevalstackDRCALO(nullptr)
+  , _caloevalstackFOCAL(nullptr)
   , _caloevalstackLFHCAL(nullptr)
   , _caloevalstackFEMC(nullptr)
   , _caloevalstackCEMC(nullptr)
@@ -311,6 +326,7 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   _reco_e_threshold[kFHCAL]   = 0.05;
   _reco_e_threshold[kFEMC]    = 0.005;
   _reco_e_threshold[kDRCALO]  = 0.0;
+  _reco_e_threshold[kFOCAL]  = 0.0;
   _reco_e_threshold[kEEMC]    = 0.005;
   _reco_e_threshold[kCEMC]    = 0.01;
   _reco_e_threshold[kEHCAL]   = 0.05;
@@ -325,7 +341,11 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   _hits_x = new float[_maxNHits];
   _hits_y = new float[_maxNHits];
   _hits_z = new float[_maxNHits];
+  _hits_x2 = new float[_maxNHits];
+  _hits_y2 = new float[_maxNHits];
+  _hits_z2 = new float[_maxNHits];
   _hits_t = new float[_maxNHits];
+  _hits_edep = new float[_maxNHits];
 
   _tower_FHCAL_E = new float[_maxNTowers];
   _tower_FHCAL_iEta = new int[_maxNTowers];
@@ -378,6 +398,13 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   _tower_DRCALO_iEta = new int[_maxNTowersDR];
   _tower_DRCALO_iPhi = new int[_maxNTowersDR];
   _tower_DRCALO_trueID = new int[_maxNTowersDR];
+
+  _tower_FOCAL_E = new float[_maxNTowersDR];
+  _tower_FOCAL_NScint = new int[_maxNTowersDR];
+  _tower_FOCAL_NCerenkov = new int[_maxNTowersDR];
+  _tower_FOCAL_iEta = new int[_maxNTowersDR];
+  _tower_FOCAL_iPhi = new int[_maxNTowersDR];
+  _tower_FOCAL_trueID = new int[_maxNTowersDR];
 
   _tower_LFHCAL_E = new float[_maxNTowers];
   _tower_LFHCAL_iEta = new int[_maxNTowers];
@@ -501,7 +528,11 @@ int EventEvaluatorEIC::Init(PHCompositeNode* topNode)
     _event_tree->Branch("hits_x", _hits_x, "hits_x[nHits]/F");
     _event_tree->Branch("hits_y", _hits_y, "hits_y[nHits]/F");
     _event_tree->Branch("hits_z", _hits_z, "hits_z[nHits]/F");
+    _event_tree->Branch("hits_x2", _hits_x2, "hits_x2[nHits]/F");
+    _event_tree->Branch("hits_y2", _hits_y2, "hits_y2[nHits]/F");
+    _event_tree->Branch("hits_z2", _hits_z2, "hits_z2[nHits]/F");
     _event_tree->Branch("hits_t", _hits_t, "hits_t[nHits]/F");
+    _event_tree->Branch("hits_edep", _hits_edep, "hits_edep[nHits]/F");
   }
   if (_do_TRACKS)
   {
@@ -624,6 +655,17 @@ int EventEvaluatorEIC::Init(PHCompositeNode* topNode)
     _event_tree->Branch("tower_DRCALO_iEta", _tower_DRCALO_iEta, "tower_DRCALO_iEta[tower_DRCALO_N]/I");
     _event_tree->Branch("tower_DRCALO_iPhi", _tower_DRCALO_iPhi, "tower_DRCALO_iPhi[tower_DRCALO_N]/I");
     _event_tree->Branch("tower_DRCALO_trueID", _tower_DRCALO_trueID, "tower_DRCALO_trueID[tower_DRCALO_N]/I");
+  }
+  if (_do_FOCAL)
+  {
+    // towers FOCAL
+    _event_tree->Branch("tower_FOCAL_N", &_nTowers_FOCAL, "tower_FOCAL_N/I");
+    _event_tree->Branch("tower_FOCAL_E", _tower_FOCAL_E, "tower_FOCAL_E[tower_FOCAL_N]/F");
+    _event_tree->Branch("tower_FOCAL_NScint", _tower_FOCAL_NScint, "tower_FOCAL_NScint[tower_FOCAL_N]/I");
+    _event_tree->Branch("tower_FOCAL_NCerenkov", _tower_FOCAL_NCerenkov, "tower_FOCAL_NCerenkov[tower_FOCAL_N]/I");
+    _event_tree->Branch("tower_FOCAL_iEta", _tower_FOCAL_iEta, "tower_FOCAL_iEta[tower_FOCAL_N]/I");
+    _event_tree->Branch("tower_FOCAL_iPhi", _tower_FOCAL_iPhi, "tower_FOCAL_iPhi[tower_FOCAL_N]/I");
+    _event_tree->Branch("tower_FOCAL_trueID", _tower_FOCAL_trueID, "tower_FOCAL_trueID[tower_FOCAL_N]/I");
   }
   if (_do_LFHCAL)
   {
@@ -861,6 +903,19 @@ int EventEvaluatorEIC::process_event(PHCompositeNode* topNode)
       _caloevalstackDRCALO->next_event(topNode);
     }
   }
+  if (_do_FOCAL)
+  {
+    if (!_caloevalstackFOCAL)
+    {
+      _caloevalstackFOCAL = new CaloEvalStack(topNode, "FOCAL");
+      _caloevalstackFOCAL->set_strict(_strict);
+      _caloevalstackFOCAL->set_verbosity(Verbosity() + 1);
+    }
+    else
+    {
+      _caloevalstackFOCAL->next_event(topNode);
+    }
+  }
   if (_do_LFHCAL)
   {
     if (!_caloevalstackLFHCAL)
@@ -1066,14 +1121,18 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
     }
     _nHitsLayers = 0;
     PHG4TruthInfoContainer* truthinfocontainerHits = findNode::getClass<PHG4TruthInfoContainer>(topNode, "G4TruthInfo");
-    for (int iIndex = 0; iIndex < 60; ++iIndex)
+    for (int iIndex = 0; iIndex < 100; ++iIndex)
     {
       // you need to add your layer name here to be saved! This has to be done
       // as we do not want to save thousands of calorimeter hits!
       if ((GetProjectionNameFromIndex(iIndex).find("TTL") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("LBLVTX") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("BARREL") != std::string::npos) ||
-          (GetProjectionNameFromIndex(iIndex).find("FST") != std::string::npos)
+          (GetProjectionNameFromIndex(iIndex).find("FST") != std::string::npos) ||
+          (GetProjectionNameFromIndex(iIndex).find("ZDCsurrogate") != std::string::npos) ||
+          (GetProjectionNameFromIndex(iIndex).find("rpTruth") != std::string::npos) ||
+          (GetProjectionNameFromIndex(iIndex).find("b0Truth") != std::string::npos) ||
+          (((GetProjectionNameFromIndex(iIndex).find("BH_1") != std::string::npos) || (GetProjectionNameFromIndex(iIndex).find("BH_FORWARD_PLUS") != std::string::npos) || (GetProjectionNameFromIndex(iIndex).find("BH_FORWARD_NEG") != std::string::npos)) && _do_BLACKHOLE)
       ){
         string nodename = "G4HIT_" + GetProjectionNameFromIndex(iIndex);
         PHG4HitContainer* hits = findNode::getClass<PHG4HitContainer>(topNode, nodename);
@@ -1097,8 +1156,13 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
             _hits_x[_nHitsLayers] = hit_iter->second->get_x(0);
             _hits_y[_nHitsLayers] = hit_iter->second->get_y(0);
             _hits_z[_nHitsLayers] = hit_iter->second->get_z(0);
+            _hits_x2[_nHitsLayers] = hit_iter->second->get_x(1);
+            _hits_y2[_nHitsLayers] = hit_iter->second->get_y(1);
+            _hits_z2[_nHitsLayers] = hit_iter->second->get_z(1);
             _hits_t[_nHitsLayers] = hit_iter->second->get_t(0);
+            _hits_edep[_nHitsLayers] = hit_iter->second->get_edep();
             _hits_layerID[_nHitsLayers] = iIndex;
+            // cout << "i " << hit_iter->second->get_index_i() << "\tj " <<hit_iter->second->get_index_j() << "\tk " <<hit_iter->second->get_index_k() << "\tl " << hit_iter->second->get_index_l() << "\tsens_x "<< hit_iter->second->get_strip_z_index()<< "\tsens_y "<< hit_iter->second->get_strip_y_index()   << endl;
             if (truthinfocontainerHits)
             {
               PHG4Particle* particle = truthinfocontainerHits->GetParticle(hit_iter->second->get_trkid());
@@ -1759,6 +1823,104 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
     }
   }
   //----------------------
+  //    TOWERS FOCAL
+  //----------------------
+  if (_do_FOCAL)
+  {
+    CaloRawTowerEval* towerevalFOCAL = _caloevalstackFOCAL->get_rawtower_eval();
+    _nTowers_FOCAL = 0;
+    string towernodeFOCAL = "TOWER_CALIB_FOCAL";
+    RawTowerContainer* towersFOCAL = findNode::getClass<RawTowerContainer>(topNode, towernodeFOCAL.c_str());
+    if (towersFOCAL)
+    {
+      if (Verbosity() > 0)
+      {
+        cout << "saving FOCAL towers" << endl;
+      }
+      string towergeomnodeFOCAL = "TOWERGEOM_FOCAL";
+      RawTowerGeomContainer* towergeomFOCAL = findNode::getClass<RawTowerGeomContainer>(topNode, towergeomnodeFOCAL.c_str());
+      if (towergeomFOCAL)
+      {
+        if(_do_GEOMETRY && !_geometry_done[kFOCAL]){
+          RawTowerGeomContainer::ConstRange all_towers = towergeomFOCAL->get_tower_geometries();
+          for (RawTowerGeomContainer::ConstIterator it = all_towers.first;
+              it != all_towers.second; ++it)
+          {
+            _calo_ID = kFOCAL;
+            _calo_towers_iEta[_calo_towers_N] = it->second->get_bineta();
+            _calo_towers_iPhi[_calo_towers_N] = it->second->get_binphi();
+            _calo_towers_iL[_calo_towers_N] = -1;
+            _calo_towers_Eta[_calo_towers_N] = it->second->get_eta();
+            _calo_towers_Phi[_calo_towers_N] = it->second->get_phi();
+            _calo_towers_x[_calo_towers_N] = it->second->get_center_x();
+            _calo_towers_y[_calo_towers_N] = it->second->get_center_y();
+            _calo_towers_z[_calo_towers_N] = it->second->get_center_z();
+            _calo_towers_N++;
+          }
+          _geometry_done[kFOCAL] = 1;
+          _geometry_tree->Fill();
+          resetGeometryArrays();
+        }
+        if (Verbosity() > 0)
+        {
+          cout << "found FOCAL geom" << endl;
+        }
+        RawTowerContainer::ConstRange begin_end = towersFOCAL->getTowers();
+        RawTowerContainer::ConstIterator rtiter;
+        for (rtiter = begin_end.first; rtiter != begin_end.second; ++rtiter)
+        {
+          RawTower* tower = rtiter->second;
+          if (tower)
+          {
+            // min energy cut
+            if (tower->get_energy() < _reco_e_threshold[kFOCAL]) continue;
+
+            _tower_FOCAL_iEta[_nTowers_FOCAL] = tower->get_bineta();
+            _tower_FOCAL_iPhi[_nTowers_FOCAL] = tower->get_binphi();
+            _tower_FOCAL_E[_nTowers_FOCAL] = tower->get_energy();
+            _tower_FOCAL_NScint[_nTowers_FOCAL] = tower->get_scint_gammas();
+            _tower_FOCAL_NCerenkov[_nTowers_FOCAL] = tower->get_cerenkov_gammas();
+
+            PHG4Particle* primary = towerevalFOCAL->max_truth_primary_particle_by_energy(tower);
+            if (primary)
+            {
+              _tower_FOCAL_trueID[_nTowers_FOCAL] = primary->get_track_id();
+            }
+            else
+            {
+              _tower_FOCAL_trueID[_nTowers_FOCAL] = -10;
+            }
+            _nTowers_FOCAL++;
+          }
+        }
+        if (Verbosity() > 0)
+        {
+          cout << "finished FOCAL twr loop" << endl;
+        }
+      }
+      else
+      {
+        if (Verbosity() > 0)
+        {
+          cout << PHWHERE << " ERROR: Can't find " << towergeomnodeFOCAL << endl;
+        }
+        // return;
+      }
+      if (Verbosity() > 0)
+      {
+        cout << "saved\t" << _nTowers_FOCAL << "\tFOCAL towers" << endl;
+      }
+    }
+    else
+    {
+      if (Verbosity() > 0)
+      {
+        cout << PHWHERE << " ERROR: Can't find " << towernodeFOCAL << endl;
+      }
+      // return;
+    }
+  }
+  //----------------------
   //    TOWERS LFHCAL
   //----------------------
   if (_do_LFHCAL)
@@ -1802,7 +1964,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
         }
         if (Verbosity() > 0)
         {
-          cout << "found DRCALO geom" << endl;
+          cout << "found LFHCAL geom" << endl;
         }
 
         RawTowerContainer::ConstRange begin_end = towersLFHCAL->getTowers();
@@ -2759,7 +2921,8 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
     // It will only store them if they're available.
     std::vector<std::pair<std::string, TrackSource_t>> trackMapPairs = {
         {"TrackMap", TrackSource_t::all},
-        {"TrackMapInner", TrackSource_t::inner}
+        {"InnerTrackMap", TrackSource_t::inner},
+        {"SiliconTrackMap", TrackSource_t::silicon}
     };
     bool foundAtLeastOneTrackSource = false;
     for (const auto& trackMapInfo : trackMapPairs)
@@ -3103,6 +3266,7 @@ int EventEvaluatorEIC::End(PHCompositeNode* topNode)
   if (_caloevalstackHCALOUT) delete _caloevalstackHCALOUT;
   if (_caloevalstackEHCAL) delete _caloevalstackEHCAL;
   if (_caloevalstackDRCALO) delete _caloevalstackDRCALO;
+  if (_caloevalstackFOCAL) delete _caloevalstackFOCAL;
   if (_caloevalstackLFHCAL) delete _caloevalstackLFHCAL;
   if (_caloevalstackFEMC) delete _caloevalstackFEMC;
   if (_caloevalstackCEMC) delete _caloevalstackCEMC;
@@ -3211,6 +3375,20 @@ int EventEvaluatorEIC::GetProjectionIndex(std::string projname)
   else if (projname.find("LFHCAL") != std::string::npos)
     return 67;
 
+  else if (projname.find("ZDCsurrogate") != std::string::npos)
+    return 70;
+  else if (projname.find("rpTruth") != std::string::npos)
+    return 71;
+  else if (projname.find("b0Truth") != std::string::npos)
+    return 72;
+
+  else if (projname.find("BH_1") != std::string::npos)
+    return 90;
+  else if (projname.find("BH_FORWARD_PLUS") != std::string::npos)
+    return 91;
+  else if (projname.find("BH_FORWARD_NEG") != std::string::npos)
+    return 92;
+
   else
     return -1;
   return -1;
@@ -3317,6 +3495,20 @@ std::string EventEvaluatorEIC::GetProjectionNameFromIndex(int projindex)
   case 67:
     return "LFHCAL";
 
+  case 70:
+    return "ZDCsurrogate";
+  case 71:
+    return "rpTruth";
+  case 72:
+    return "b0Truth";
+
+  case 90:
+    return "BH_1";
+  case 91:
+    return "BH_FORWARD_PLUS";
+  case 92:
+    return "BH_FORWARD_NEG";
+
   default:
     return "NOTHING";
   }
@@ -3368,7 +3560,11 @@ void EventEvaluatorEIC::resetBuffer()
       _hits_x[ihit] = 0;
       _hits_y[ihit] = 0;
       _hits_z[ihit] = 0;
+      _hits_x2[ihit] = 0;
+      _hits_y2[ihit] = 0;
+      _hits_z2[ihit] = 0;
       _hits_t[ihit] = 0;
+      _hits_edep[ihit] = 0;
     }
     if (Verbosity() > 0){ cout << "\t... hit variables reset" << endl;}
   }
@@ -3559,6 +3755,21 @@ void EventEvaluatorEIC::resetBuffer()
       _tower_DRCALO_trueID[itow] = 0;
     }
     if (Verbosity() > 0){ cout << "\t... DRCALO variables reset" << endl;}
+  }
+  if (_do_FOCAL)
+  {
+    if (Verbosity() > 0){ cout << "\t... resetting FOCAL variables" << endl;}
+    _nTowers_FOCAL = 0;
+    for (Int_t itow = 0; itow < _maxNTowersDR; itow++)
+    {
+      _tower_FOCAL_E[itow] = 0;
+      _tower_FOCAL_NScint[itow] = 0;
+      _tower_FOCAL_NCerenkov[itow] = 0;
+      _tower_FOCAL_iEta[itow] = 0;
+      _tower_FOCAL_iPhi[itow] = 0;
+      _tower_FOCAL_trueID[itow] = 0;
+    }
+    if (Verbosity() > 0){ cout << "\t... FOCAL variables reset" << endl;}
   }
   if (_do_LFHCAL)
   {
