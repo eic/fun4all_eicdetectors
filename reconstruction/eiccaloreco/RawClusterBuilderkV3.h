@@ -12,7 +12,8 @@ class PHCompositeNode;
 class RawClusterContainer;
 
 // Basic struct for towers in clusterizer
-typedef struct {
+typedef struct
+{
   float tower_E;
   int tower_iEta;
   int tower_iPhi;
@@ -40,34 +41,56 @@ class RawClusterBuilderkV3 : public SubsysReco
  private:
   void CreateNodes(PHCompositeNode *topNode);
 
-  bool IsForwardCalorimeter(int caloID){
-    switch (caloID){
-      case RawTowerDefs::DRCALO: return true;
-      case RawTowerDefs::FHCAL: return true;
-      case RawTowerDefs::FEMC: return true;
-      case RawTowerDefs::EHCAL: return true;
-      case RawTowerDefs::EEMC: return true;
-      case RawTowerDefs::HCALIN: return false;
-      case RawTowerDefs::HCALOUT: return false;
-      case RawTowerDefs::CEMC: return false;
-      case RawTowerDefs::EEMC_crystal: return true;
-      case RawTowerDefs::EEMC_glass: return true;
-      case RawTowerDefs::LFHCAL: return true;
-      case RawTowerDefs::BECAL: return false;
-      default:
-        std::cout << "IsForwardCalorimeter: caloID " << caloID << " not defined, returning false" << std::endl;
-        return false;
+  bool IsForwardCalorimeter(int caloID)
+  {
+    switch (caloID)
+    {
+    case RawTowerDefs::DRCALO:
+      return true;
+    case RawTowerDefs::FHCAL:
+      return true;
+    case RawTowerDefs::FEMC:
+      return true;
+    case RawTowerDefs::EHCAL:
+      return true;
+    case RawTowerDefs::EEMC:
+      return true;
+    case RawTowerDefs::HCALIN:
+      return false;
+    case RawTowerDefs::HCALOUT:
+      return false;
+    case RawTowerDefs::CEMC:
+      return false;
+    case RawTowerDefs::EEMC_crystal:
+      return true;
+    case RawTowerDefs::EEMC_glass:
+      return true;
+    case RawTowerDefs::LFHCAL:
+      return true;
+    case RawTowerDefs::BECAL:
+      return false;
+    default:
+      std::cout << "IsForwardCalorimeter: caloID " << caloID << " not defined, returning false" << std::endl;
+      return false;
     }
     return false;
   }
-  int caloTowersPhi(int caloID) {
-    switch (caloID) {
-      case RawTowerDefs::CEMC: return 100;
-      case RawTowerDefs::HCALIN: return 64;
-      case RawTowerDefs::HCALOUT: return 64;
-      case RawTowerDefs::EEMC_glass: return -1;
-      case RawTowerDefs::BECAL: return 128;
-      default: return 0;
+  int caloTowersPhi(int caloID)
+  {
+    switch (caloID)
+    {
+    case RawTowerDefs::CEMC:
+      return 100;
+    case RawTowerDefs::HCALIN:
+      return 64;
+    case RawTowerDefs::HCALOUT:
+      return 64;
+    case RawTowerDefs::EEMC_glass:
+      return -1;
+    case RawTowerDefs::BECAL:
+      return 128;
+    default:
+      return 0;
     }
   }
 
