@@ -360,8 +360,8 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   double dirclength = fBarL[2]*(nparts-1) + fBarS[2] + gluethickness*nparts;
 
   // The DIRC
-  G4Box* gDirc = new G4Box("gDirc",205.962, 193.251, 0.5*dirclength+314.565);
-  lDirc = new G4LogicalVolume(gDirc,defaultMaterial,"lDirc",0,0,0);
+  //G4Box* gDirc = new G4Box("gDirc",205.962, 193.251, 0.5*dirclength+314.565);
+  //lDirc = new G4LogicalVolume(gDirc,defaultMaterial,"lDirc",0,0,0);
 
   G4Box* gFd = new G4Box("gFd",0.5*fFd[1],0.5*fFd[0],0.5*fFd[2]);
   lFd = new G4LogicalVolume(gFd,defaultMaterial,"lFd",0,0,0);
@@ -371,7 +371,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
 
   G4AssemblyVolume* assemblySector = new G4AssemblyVolume();
  
-  for(int i=0; i<fNBoxes; i++){
+  /*for(int i=0; i<fNBoxes; i++){
       double tphi = dphi*i; 
       double dx = fRadius * cos(tphi);
       double dy = fRadius * sin(tphi);
@@ -382,7 +382,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
       //phy = new G4PVPlacement(tRot,G4ThreeVector(dx,dy,zshift),lDirc,"wDirc",logicWorld,false,i,OverlapCheck());
       assemblySector->MakeImprint(logicWorld, g4vec_sector_pos, tRot, i, OverlapCheck());
       //m_PhysicalVolumes_active[phy] = 1;
-  }
+      }*/
   
   // The Bar
   G4Box *gBarL = new G4Box("gBarL", fBarL[0]/2., fBarL[1]/2., fBarL[2]/2.);
@@ -606,8 +606,8 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   lPrizm = new G4LogicalVolume(gPrizm, BarMaterial,"lPrizm",0,0,0);
 
   G4RotationMatrix* xRot = new G4RotationMatrix();
-  xRot->rotateX(-M_PI/2.*rad);
-
+  //xRot->rotateX(-M_PI/2.*rad); // for lDirc
+  xRot->rotateX(M_PI/2.*rad);
 
   G4RotationMatrix *fdrot = new G4RotationMatrix();
   double evshiftz = 0.5*dirclength+fPrizm[1]+fMcpActive[2]/2.+fLens[2];
@@ -623,6 +623,20 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   assemblySector->AddPlacedVolume(lFd, g4vec_lFd_pos, fdrot);
   //m_PhysicalVolumes_active[phy] = 2;
   
+  for(int i=0; i<fNBoxes; i++){
+    double tphi = dphi*i;
+    double dx = fRadius * cos(tphi);
+    double dy = fRadius * sin(tphi);
+
+    G4RotationMatrix *tRot = new G4RotationMatrix();
+    tRot->rotateZ(-tphi);
+    G4ThreeVector g4vec_sector_pos(dx, dy, zshift);
+    //phy = new G4PVPlacement(tRot,G4ThreeVector(dx,dy,zshift),lDirc,"wDirc",logicWorld,false,i,OverlapCheck());                                     
+    assemblySector->MakeImprint(logicWorld, g4vec_sector_pos, tRot, i, OverlapCheck());
+    //m_PhysicalVolumes_active[phy] = 1;                                                                                                             
+  }
+
+
   // MCP --
 
   G4Box* gMcp = new G4Box("gMcp",fMcpTotal[0]/2.,fMcpTotal[1]/2.,fMcpTotal[2]/2.);
@@ -1029,11 +1043,11 @@ void G4EicDircDetector::SetVisualization(){
   */
   G4Colour DircColour = G4Colour(1.,1.0,0.);
 
-  G4VisAttributes *waDirc = new G4VisAttributes(DircColour);
+  /*G4VisAttributes *waDirc = new G4VisAttributes(DircColour);
   waDirc->SetForceWireframe(true);
   waDirc->SetVisibility(false);
   lDirc->SetVisAttributes(waDirc);
-  
+  */
   G4VisAttributes *waFd = new G4VisAttributes(DircColour);
   waFd->SetForceWireframe(true);
   lFd->SetVisAttributes(waFd);
