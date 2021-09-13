@@ -11,13 +11,15 @@ AM_LDFLAGS = \
   -L$(OFFLINE_MAIN)/lib64
 
 pkginclude_HEADERS = \
-  RawClusterBuilderkV3.h
+  RawClusterBuilderkV3.h \
+  RawClusterBuilderkMA.h
 
 lib_LTLIBRARIES = \
   libEICCaloReco.la
 
 libEICCaloReco_la_SOURCES = \
-  RawClusterBuilderkV3.cc
+  RawClusterBuilderkV3.cc \
+  RawClusterBuilderkMA.cc
 
 libEICCaloReco_la_LIBADD = \
   -lCLHEP \
