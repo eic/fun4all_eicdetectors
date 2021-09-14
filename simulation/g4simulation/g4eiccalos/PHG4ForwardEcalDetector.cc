@@ -15,6 +15,7 @@
 
 #include <Geant4/G4Box.hh>
 #include <Geant4/G4Cons.hh>
+#include <Geant4/G4SubtractionSolid.hh>
 #include <Geant4/G4LogicalVolume.hh>
 #include <Geant4/G4Material.hh>
 #include <Geant4/G4PVPlacement.hh>
@@ -65,6 +66,9 @@ PHG4ForwardEcalDetector::PHG4ForwardEcalDetector(PHG4Subsystem* subsys, PHCompos
   m_RMax[0] = 2250 * mm;
   m_RMin[1] = 120 * mm;
   m_RMax[1] = 2460 * mm;
+  m_Params->set_double_param("xoffset", 0.);
+  m_Params->set_double_param("yoffset", 0.);
+
   assert(m_GdmlConfig);
 }
 
@@ -104,13 +108,21 @@ void PHG4ForwardEcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
   recoConsts* rc = recoConsts::instance();
   G4Material* WorldMaterial = G4Material::GetMaterial(rc->get_StringFlag("WorldMaterial"));
 
-  G4VSolid* ecal_envelope_solid = new G4Cons("hEcal_envelope_solid",
-                                             m_RMin[0], m_RMax[0],
-                                             m_RMin[1], m_RMax[1],
-                                             m_dZ / 2.,
-                                             0, 2 * M_PI);
+  
+  G4VSolid *beampipe_cutout = new G4Cons("FEMC_beampipe_cutout",
+                                         0, m_RMin[0],
+                                         0, m_RMin[1],
+                                         m_dZ / 2.0,
+                                         0, 2 * M_PI);
+  G4VSolid *ecal_envelope_solid = new G4Cons("FEMC_envelope_solid_cutout",
+                                            0, m_RMax[0],
+                                            0, m_RMax[1],
+                                            m_dZ / 2.0,
+                                            0, 2 * M_PI);
+  ecal_envelope_solid = new G4SubtractionSolid(G4String("hFEMC_envelope_solid"), ecal_envelope_solid, beampipe_cutout, 0, G4ThreeVector(m_Params->get_double_param("xoffset") * cm, m_Params->get_double_param("yoffset") * cm, 0.));
 
-  G4LogicalVolume* ecal_envelope_log = new G4LogicalVolume(ecal_envelope_solid, WorldMaterial, "hEcal_envelope", 0, 0, 0);
+
+  G4LogicalVolume* ecal_envelope_log = new G4LogicalVolume(ecal_envelope_solid, WorldMaterial, "hFEMC_envelope", 0, 0, 0);
 
   /* Define visualization attributes for envelope cone */
   GetDisplayAction()->AddVolume(ecal_envelope_log, "Envelope");
@@ -211,7 +223,7 @@ PHG4ForwardEcalDetector::ConstructTower(int type)
                                            tower_dy / 2.0,
                                            tower_dz / 2.0);
 
-  std::string hEcal_scintillator_plate_logic_name = "hEcal_scintillator_plate_logic_type" + std::to_string(type);
+  std::string hEcal_scintillator_plate_logic_name = "hFEMC_scintillator_plate_logic_type" + std::to_string(type);
 
   G4LogicalVolume* logic_scint = new G4LogicalVolume(solid_scintillator,
                                                      material_scintillator,
@@ -645,6 +657,15 @@ int PHG4ForwardEcalDetector::ParseParametersFromTable()
   {
     m_ZRot = parit->second;
   }
+  parit = m_GlobalParameterMap.find("xoffset");
+  if (parit != m_GlobalParameterMap.end())
+    m_Params->set_double_param("xoffset", parit->second);  
+
+  parit = m_GlobalParameterMap.find("yoffset");
+  if (parit != m_GlobalParameterMap.end())
+    m_Params->set_double_param("yoffset", parit->second);  
+
+  
   return 0;
 }
 

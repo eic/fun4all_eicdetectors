@@ -59,9 +59,9 @@ void PHG4LFHcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
     }
     else if (it.second == "LFHcalEnvelope")
     {
-      // visatt->SetVisibility(false);
-      visatt->SetForceWireframe(true);
-        visatt->SetColour(G4Colour::Red());
+      visatt->SetColour(G4Colour::Magenta());
+      visatt->SetForceSolid(false);
+      visatt->SetVisibility(false);
     }
     else if (it.second == "Scintillator")
     {

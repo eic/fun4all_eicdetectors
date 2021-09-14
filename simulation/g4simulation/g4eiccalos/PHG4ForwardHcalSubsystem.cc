@@ -141,6 +141,8 @@ void PHG4ForwardHcalSubsystem::SetDefaultParameters()
   set_default_double_param("rot_x", 0.);
   set_default_double_param("rot_y", 0.);
   set_default_double_param("rot_z", 0.);
+  set_default_double_param("xoffset", 0.);
+  set_default_double_param("yoffset", 0.);
   set_default_double_param("thickness_absorber", 2.);
   set_default_double_param("thickness_scintillator", 0.231);
   set_default_int_param("absorber_FeTungsten", 0);

@@ -14,6 +14,7 @@
 #include <Geant4/G4LogicalVolume.hh>
 #include <Geant4/G4Material.hh>
 #include <Geant4/G4PVPlacement.hh>
+#include <Geant4/G4SubtractionSolid.hh>
 #include <Geant4/G4RotationMatrix.hh>  // for G4RotationMatrix
 #include <Geant4/G4SystemOfUnits.hh>
 #include <Geant4/G4ThreeVector.hh>      // for G4ThreeVector
@@ -97,15 +98,19 @@ void PHG4ForwardHcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
   recoConsts* rc = recoConsts::instance();
   G4Material* WorldMaterial = G4Material::GetMaterial(rc->get_StringFlag("WorldMaterial"));
 
-  G4VSolid* hcal_envelope_solid = new G4Cons("hHcal_envelope_solid",
-                                             m_Params->get_double_param("rMin1") * cm,
-                                             m_Params->get_double_param("rMax1") * cm,
-                                             m_Params->get_double_param("rMin2") * cm,
-                                             m_Params->get_double_param("rMax2") * cm,
-                                             m_Params->get_double_param("dz") * cm / 2.,
-                                             0., 2. * M_PI);
-
-  G4LogicalVolume* hcal_envelope_log = new G4LogicalVolume(hcal_envelope_solid, WorldMaterial, "hHcal_envelope", 0, 0, 0);
+  G4VSolid *beampipe_cutout = new G4Cons("FHCAL_beampipe_cutout",
+                                         0, m_Params->get_double_param("rMin1") * cm,
+                                         0, m_Params->get_double_param("rMin2") * cm,
+                                         m_Params->get_double_param("dz") * cm / 2.0,
+                                         0, 2 * M_PI);
+  G4VSolid *hcal_envelope_solid = new G4Cons("FHCAL_envelope_solid_cutout",
+                                            0, m_Params->get_double_param("rMax1") * cm,
+                                            0, m_Params->get_double_param("rMax2") * cm,
+                                            m_Params->get_double_param("dz") * cm / 2.0,
+                                            0, 2 * M_PI);
+  hcal_envelope_solid = new G4SubtractionSolid(G4String("FHCAL_envelope_solid"), hcal_envelope_solid, beampipe_cutout, 0, G4ThreeVector(m_Params->get_double_param("xoffset") * cm, m_Params->get_double_param("yoffset") * cm, 0.));
+  
+  G4LogicalVolume* hcal_envelope_log = new G4LogicalVolume(hcal_envelope_solid, WorldMaterial, "hFHCAL_envelope", 0, 0, 0);
 
   m_DisplayAction->AddVolume(hcal_envelope_log, "FHcalEnvelope");
 
@@ -433,7 +438,7 @@ int PHG4ForwardHcalDetector::ParseParametersFromTable()
   parit = m_GlobalParameterMap.find("Gdz");
   if (parit != m_GlobalParameterMap.end())
   {
-    m_Params->set_double_param("dZ", parit->second);
+    m_Params->set_double_param("dz", parit->second);
   }
 
   parit = m_GlobalParameterMap.find("Gx0");
@@ -471,6 +476,15 @@ int PHG4ForwardHcalDetector::ParseParametersFromTable()
   {
     m_Params->set_double_param("rot_z", parit->second * rad / deg);
   }
+
+  parit = m_GlobalParameterMap.find("xoffset");
+  if (parit != m_GlobalParameterMap.end())
+    m_Params->set_double_param("xoffset", parit->second);  
+
+  parit = m_GlobalParameterMap.find("yoffset");
+  if (parit != m_GlobalParameterMap.end())
+    m_Params->set_double_param("yoffset", parit->second);  
+  
 
   return 0;
 }
