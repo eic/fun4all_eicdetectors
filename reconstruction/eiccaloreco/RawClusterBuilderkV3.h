@@ -60,6 +60,7 @@ class RawClusterBuilderkV3 : public SubsysReco
     }
     return false;
   }
+  
   int caloTowersPhi(int caloID) {
     switch (caloID) {
       case RawTowerDefs::CEMC: return 100;
