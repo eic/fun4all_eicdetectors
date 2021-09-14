@@ -181,7 +181,6 @@ PHG4LFHcalDetector::ConstructTower()
                                                           WorldMaterial,
                                                           "miniblock_logic",
                                                           0, 0, 0);
-  
   //**********************************************************************************************
   /* create logical & geometry volumes for scintillator and absorber plates to place inside mini read-out unit */
   //**********************************************************************************************
