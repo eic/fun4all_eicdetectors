@@ -62,7 +62,10 @@ int G4EicDircDetector::IsInDetector(G4VPhysicalVolume *volume) const
     {
       return iter->second;
       }*/
+  if(!volume) return 0;
   std::map<G4LogicalVolume *, int>::const_iterator iter = m_LogicalVolumes_active.find(volume->GetLogicalVolume());
+  
+  //else std::cout << "This object is ok" << std::endl;
   if(iter != m_LogicalVolumes_active.end())
     {
       return iter->second;

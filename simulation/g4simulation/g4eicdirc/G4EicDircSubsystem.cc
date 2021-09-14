@@ -113,6 +113,7 @@ int G4EicDircSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
     m_SteppingAction = tmp;
   }
   m_StackingAction = new G4EicDircStackingAction(m_Detector);
+  m_StackingAction->Verbosity(Verbosity());
   return 0;
 }
 

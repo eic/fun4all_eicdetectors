@@ -352,7 +352,7 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
       //const G4DynamicParticle* dynParticle = aTrack->GetDynamicParticle();
       //G4ParticleDefinition* particle = dynParticle->GetDefinition();  
       //G4String ParticleName = particle->GetParticleName();
-  
+	  
       G4ThreeVector globalpos = aStep->GetPostStepPoint()->GetPosition();
       G4ThreeVector localpos = touchpost->GetHistory()->GetTopTransform().TransformPoint(globalpos);
       G4ThreeVector translation = touchpost->GetHistory()->GetTopTransform().Inverse().TransformPoint(G4ThreeVector(0,0,0));
