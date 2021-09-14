@@ -65,7 +65,6 @@ int G4EicDircDetector::IsInDetector(G4VPhysicalVolume *volume) const
   if(!volume) return 0;
   std::map<G4LogicalVolume *, int>::const_iterator iter = m_LogicalVolumes_active.find(volume->GetLogicalVolume());
   
-  //else std::cout << "This object is ok" << std::endl;
   if(iter != m_LogicalVolumes_active.end())
     {
       return iter->second;
@@ -300,7 +299,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   fLensId = m_Params->get_int_param("Lens_id"); 
   fNBar = m_Params->get_double_param("NBars");
 
-  std::cout << "Nbars = " << fNBar << std::endl;
+  if (Verbosity ()) std::cout << "Nbars = " << fNBar << std::endl;
 
   fNRow = m_Params->get_int_param("MCP_rows");
   fNCol = m_Params->get_int_param("MCP_columns");
@@ -323,8 +322,8 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
 
   fBarsGap = 0.15;
   
-  std::cout << "Nbarboxes = "<< fNBoxes << std::endl;
-  std::cout << "barrel radius = " << fRadius << " mm" << std::endl;
+  if (Verbosity ()) std::cout << "Nbarboxes = "<< fNBoxes << std::endl;
+  if (Verbosity ()) std::cout << "barrel radius = " << fRadius << " mm" << std::endl;
   
   fMirror[0] = m_Params->get_double_param("Mirror_height"); 
   fMirror[1] = fPrizm[0]; fMirror[2] =1;
@@ -480,11 +479,11 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
 
     double cr2 = sqrt(fLens[1]*fLens[1]/4.+fBar[0]*fBar[0]/4.);
     if(cr2 > r2) {
-      std::cout<<"bad lens"<<std::endl;
+      if (Verbosity ()) std::cout<<"bad lens"<<std::endl;
       cr2 = r2;
     }
     fLens[2] = (2*lensMinThikness+r2-sqrt(r2*r2-cr2*cr2)+lensMinThikness);
-    std::cout << "lens thickness ="<< fLens[2] << " mm" << std::endl;
+    if (Verbosity ()) std::cout << "lens thickness ="<< fLens[2] << " mm" << std::endl;
     
     G4ThreeVector zTrans1(0, 0, -r1-fLens[2]/2.+r1-sqrt(r1*r1-cr2*cr2) +lensMinThikness);
     G4ThreeVector zTrans2(0, 0, -r2-fLens[2]/2.+r2-sqrt(r2*r2-cr2*cr2) +lensMinThikness*2);
@@ -669,7 +668,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume *logicWorld)
   fNpix1 = 16;
   fNpix2 = 16;
 
-  std::cout<<"fNpix1="<<fNpix1 << " fNpix2="<<fNpix2 <<std::endl;
+  if (Verbosity ()) std::cout<<"fNpix1="<<fNpix1 << " fNpix2="<<fNpix2 <<std::endl;
         
   // The MCP Pixel
   G4Box* gPixel = new G4Box("gPixel",0.5*fMcpActive[0]/fNpix1,0.5*fMcpActive[1]/fNpix2,fMcpActive[2]/16.);

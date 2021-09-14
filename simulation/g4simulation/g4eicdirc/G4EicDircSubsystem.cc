@@ -64,6 +64,7 @@ int G4EicDircSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
   m_Detector = new G4EicDircDetector(this, topNode, GetParams(), Name());
   m_Detector->SuperDetector(SuperDetector());
   m_Detector->OverlapCheck(CheckOverlap());
+  m_Detector->Verbosity(Verbosity());
 
   std::string detector_suffix = SuperDetector();
   if (detector_suffix == "NONE")
@@ -114,6 +115,7 @@ int G4EicDircSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
   }
   m_StackingAction = new G4EicDircStackingAction(m_Detector);
   m_StackingAction->Verbosity(Verbosity());
+
   return 0;
 }
 
@@ -127,8 +129,8 @@ int G4EicDircSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
       
       G4cout << "dirc boundary process index = " << pmanager->GetProcessIndex(DircBoundary) << G4endl;
       G4cout << "dirc boundary process ordering = " << pmanager->GetProcessOrdering(DircBoundary, idxPostStep) << G4endl;
-    }
-    }*/
+      }
+}*/
 
 //_______________________________________________________________________
 int G4EicDircSubsystem::process_event(PHCompositeNode *topNode)
