@@ -78,7 +78,7 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
   //  < 0 for hits in passive material
   int whichactive_int = m_Detector->IsInDetector(volume);
   int whichactive_int_post = m_Detector->IsInDetector(volume_post);
-  bool whichactive = (whichactive_int > 0 && whichactive_int < 35);
+  bool whichactive = (whichactive_int > 0 && whichactive_int < 12);
   //int whichactive = m_Detector->IsInDetector(volume);
   if (!whichactive)
   {
@@ -102,12 +102,12 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
       }*/
 
 
-  if((whichactive_int == 10 && whichactive_int_post == 1) || (whichactive_int == 2 && whichactive_int_post == 1))
+  /*if((whichactive_int == 10 && whichactive_int_post == 1) || (whichactive_int == 2 && whichactive_int_post == 1))
     {
       G4Track *killtrack = const_cast<G4Track *>(aTrack);
       killtrack->SetTrackStatus(fStopAndKill);
     }
-
+  */
  
   // if this block stops everything, just put all kinetic energy into edep
   if (m_BlackHoleFlag)
@@ -329,7 +329,7 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
 		}
 	     
 	    }
-	}    
+	}   
   
 
    // save only hits with energy deposit (or geantino)
@@ -437,7 +437,7 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
 
       m_Hit->SetNreflectionsInPrizm(refl);
       m_Hit->SetPathInPrizm(pathId);
-  
+      
       /*for(std::vector<Int_t>::size_type i = 0; i < vector_bar_hit_trackid.size(); i++)
 	{
 	  if(aTrack->GetParentID() == vector_bar_hit_trackid[i])

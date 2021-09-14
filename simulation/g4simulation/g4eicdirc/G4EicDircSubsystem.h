@@ -59,7 +59,7 @@ class G4EicDircSubsystem : public PHG4DetectorSubsystem
 
   PHG4DisplayAction* GetDisplayAction() const override { return m_DisplayAction; }
 
-  void AddProcesses(G4ParticleDefinition *particle) override;
+  //void AddProcesses(G4ParticleDefinition *particle) override;
 
  private:
   // \brief Set default parameter values
@@ -81,7 +81,7 @@ class G4EicDircSubsystem : public PHG4DetectorSubsystem
   //! Color setting if we want to override the default
 
   //! Optical photon G4 Process for DIRC boundaries
-  G4VProcess *DircBoundary = nullptr;
+  //G4VProcess *DircBoundary = nullptr;
 
   std::string m_HitNodeName;
   std::string m_AbsorberNodeName;
