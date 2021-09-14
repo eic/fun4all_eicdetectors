@@ -78,10 +78,14 @@ bool PHG4ForwardEcalSteppingAction::UserSteppingAction(const G4Step* aStep, bool
   }
 
   int layer_id = m_Detector->get_Layer();
-  unsigned int icopy = touch->GetVolume(1)->GetCopyNo();
+  unsigned int icopy = touch->GetVolume(2)->GetCopyNo();
   int idx_j = icopy >> 16;
   int idx_k = icopy & 0xFFFF;
 
+  if (Verbosity() > 2)
+    std::cout << "\t" << icopy << "\t idx_j =" << idx_j << ", idx_k =" << idx_k <<"\t id:" << icopy << "\t layer:" << std::endl;
+
+  
   /* Get energy deposited by this step */
   double edep = aStep->GetTotalEnergyDeposit() / GeV;
   double eion = (aStep->GetTotalEnergyDeposit() - aStep->GetNonIonizingEnergyDeposit()) / GeV;
