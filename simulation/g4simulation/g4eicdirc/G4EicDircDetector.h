@@ -115,7 +115,8 @@ class G4EicDircDetector : public PHG4Detector
   G4EicDircDisplayAction *m_DisplayAction;
 
   // active volumes
-  std::map<G4VPhysicalVolume *, int> m_PhysicalVolumes_active;
+  //std::map<G4VPhysicalVolume *, int> m_PhysicalVolumes_active;
+  std::map<G4LogicalVolume *, int> m_LogicalVolumes_active;
 
   std::string m_SuperDetector;
   

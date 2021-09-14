@@ -106,7 +106,15 @@ void PHG4BarrelEcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
   G4double cone2_h  =  m_Params->get_double_param("cone2_h")*cm;
   G4double cone2_dz =  m_Params->get_double_param("cone2_dz")*cm;
 
-  G4double max_radius    = Radius + tower_length + elec_length + support_length;
+  silicon_width_half = m_Params->get_double_param("silicon_width_half")*cm;
+  kapton_width_half = m_Params->get_double_param("kapton_width_half")*cm;
+  SIO2_width_half = m_Params->get_double_param("SIO2_width_half")*cm;
+  Carbon_width_half = m_Params->get_double_param("Carbon_width_half")*cm;
+  support_length = m_Params->get_double_param("support_length")*cm;
+
+  G4double max_radius    = Radius + tower_length + 2*silicon_width_half + 2*kapton_width_half + 2*SIO2_width_half + 2*Carbon_width_half + support_length + 8*overlap;
+
+  //std::cout << Radius << "  " << max_radius << "====================================" << std::endl;
 
   G4double pos_x1 = 0*cm;
   G4double pos_y1 = 0*cm;
@@ -223,7 +231,7 @@ int PHG4BarrelEcalDetector::PlaceTower(G4LogicalVolume* sec)
 
     G4double pTheta   =  iterator->second.pTheta;   
     G4double theta    =  iterator->second.roty - M_PI_2;
-    G4double len      = (tower_length/2) + silicon_width + overlap;
+    G4double len      = (tower_length/2) + silicon_width_half + overlap;
     G4double sci_sr   =  len*tan(pTheta);
     G4double sci_sz   = len;
     G4double sci_mag  = sqrt(sci_sr*sci_sr + sci_sz*sci_sz);
@@ -242,7 +250,7 @@ int PHG4BarrelEcalDetector::PlaceTower(G4LogicalVolume* sec)
     G4LogicalVolume*  block_kapton = ConstructKapton(iterator);
     m_DisplayAction->AddVolume(block_kapton, "Kapton");
 
-    len               += kapton_width + overlap + silicon_width; 
+    len               += kapton_width_half + overlap + silicon_width_half; 
 
     G4double kapton_sr    =  len*tan(pTheta);
     G4double kapton_sz    =  len;
@@ -261,7 +269,7 @@ int PHG4BarrelEcalDetector::PlaceTower(G4LogicalVolume* sec)
     G4LogicalVolume*  block_SIO2 = ConstructSIO2(iterator);
     m_DisplayAction->AddVolume(block_SIO2, "SIO2");
 
-    len              += SIO2_width + overlap + kapton_width; 
+    len              += SIO2_width_half + overlap + kapton_width_half; 
 
     G4double SIO2_sr = len*tan(pTheta);
     G4double SIO2_sz = len;
@@ -287,7 +295,7 @@ int PHG4BarrelEcalDetector::PlaceTower(G4LogicalVolume* sec)
     }
 
 
-    len              += Carbon_width + overlap + SIO2_width; 
+    len              += Carbon_width_half + overlap + SIO2_width_half; 
 
     G4double Carbon_sr = len*tan(pTheta);
     G4double Carbon_sz = len;
@@ -428,6 +436,31 @@ int PHG4BarrelEcalDetector::ParseParametersFromTable()
       {
         m_Params->set_double_param("thickness_wall", parit->second);  // in cm
       }
+       parit = m_GlobalParameterMap.find("silicon_width_half");
+      if (parit != m_GlobalParameterMap.end())
+      {
+        m_Params->set_double_param("silicon_width_half", parit->second);  // in cm
+      }
+      parit = m_GlobalParameterMap.find("kapton_width_half");
+      if (parit != m_GlobalParameterMap.end())
+      {
+        m_Params->set_double_param("kapton_width_half", parit->second);  // in cm
+      }
+      parit = m_GlobalParameterMap.find("SIO2_width_half");
+      if (parit != m_GlobalParameterMap.end())
+      {
+        m_Params->set_double_param("SIO2_width_half", parit->second);  // in cm
+      }
+      parit = m_GlobalParameterMap.find("Carbon_width_half");
+      if (parit != m_GlobalParameterMap.end())
+      {
+        m_Params->set_double_param("Carbon_width_half", parit->second);  // in cm
+      }
+      parit = m_GlobalParameterMap.find("support_length");
+      if (parit != m_GlobalParameterMap.end())
+      {
+        m_Params->set_double_param("support_length", parit->second);  // in cm
+      }
     }
   }
 
@@ -564,7 +597,7 @@ G4Trap* PHG4BarrelEcalDetector::GetSiTrap(std::map<std::string, towerposition>::
   G4double size_x2 = iterator->second.sizex2/2 - overlap; 
   G4double size_y1 = iterator->second.sizey2/2 - overlap;
   G4double size_y2 = iterator->second.sizey2/2 - overlap; 
-  G4double size_z  = silicon_width; 
+  G4double size_z  = silicon_width_half; 
 
   G4Trap* block_si = new G4Trap( "Si",
       size_z,                                                                           // G4double pDz,
@@ -596,7 +629,7 @@ G4Trap* PHG4BarrelEcalDetector::GetKaptonTrap(std::map<std::string, towerpositio
   G4double size_x2 = iterator->second.sizex2/2 - overlap; 
   G4double size_y1 = iterator->second.sizey2/2 - overlap;
   G4double size_y2 = iterator->second.sizey2/2 - overlap; 
-  G4double size_z  = kapton_width; 
+  G4double size_z  = kapton_width_half; 
   G4Trap* block_si = new G4Trap( "Kapton",
       size_z,                                                                           // G4double pDz,
       iterator->second.pTheta,  0,                                                              // G4double pTheta, G4double pPhi,
@@ -627,7 +660,7 @@ G4Trap* PHG4BarrelEcalDetector::GetSIO2Trap(std::map<std::string, towerposition>
   G4double size_x2 = iterator->second.sizex2/2 - overlap; 
   G4double size_y1 = iterator->second.sizey2/2 - overlap;
   G4double size_y2 = iterator->second.sizey2/2 - overlap; 
-  G4double size_z  = SIO2_width; 
+  G4double size_z  = SIO2_width_half; 
 
   G4Trap* block_SIO2 = new G4Trap( "SIO2",
       size_z,                                                                           // G4double pDz,
@@ -659,7 +692,7 @@ G4Trap* PHG4BarrelEcalDetector::GetCarbonTrap(std::map<std::string, towerpositio
   G4double size_x2 = iterator->second.sizex2/2 - overlap; 
   G4double size_y1 = iterator->second.sizey2/2 - overlap;
   G4double size_y2 = iterator->second.sizey2/2 - overlap; 
-  G4double size_z  = Carbon_width; 
+  G4double size_z  = Carbon_width_half; 
 
   G4Trap* block_SIO2 = new G4Trap( "C",
       size_z,                                                                           // G4double pDz,
