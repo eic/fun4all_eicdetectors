@@ -177,8 +177,10 @@ PHG4ForwardEcalDetector::ConstructTower(int type)
   // Call a separate routine to generate Type 2 towers (PbSc)
   // Call a separate routine to generate Type 3-6 towers (E864 Pb-Scifi)
 
-  if (type == 2) return ConstructTowerType2();
-  if ((type == 3) || (type == 4) || (type == 5) || (type == 6)) return ConstructTowerType3_4_5_6(type);
+  if (type == 2) 
+    return ConstructTowerType2();
+  if ((type == 3) || (type == 4) || (type == 5) || (type == 6)) 
+    return ConstructTowerType3_4_5_6(type);
 
   /* create logical volume for single tower */
   recoConsts* rc = recoConsts::instance();
@@ -666,6 +668,12 @@ int PHG4ForwardEcalDetector::ParseParametersFromTable()
   {
     m_ZRot = parit->second;
   }
+  parit = m_GlobalParameterMap.find("tower_type");
+  if (parit != m_GlobalParameterMap.end())
+  {
+    m_TowerType = parit->second;
+  }
+  
   parit = m_GlobalParameterMap.find("xoffset");
   if (parit != m_GlobalParameterMap.end())
     m_Params->set_double_param("xoffset", parit->second);  

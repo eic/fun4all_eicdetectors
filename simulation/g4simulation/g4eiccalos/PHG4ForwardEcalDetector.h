@@ -96,7 +96,8 @@ class PHG4ForwardEcalDetector : public PHG4Detector
   const std::string SuperDetector() const { return m_SuperDetector; }
 
   int get_Layer() const { return m_Layer; }
-
+  int get_TowerType() const { return m_TowerType; }
+  
   PHG4ForwardEcalDisplayAction *GetDisplayAction() { return m_DisplayAction; }
 
  private:
@@ -142,7 +143,8 @@ class PHG4ForwardEcalDetector : public PHG4Detector
   int m_ActiveFlag = 0;
   int m_AbsorberActiveFlag = 0;
   int m_Layer = 0;
-
+  int m_TowerType = 0;
+  
   std::string m_SuperDetector = "NONE";
   std::string m_TowerLogicNamePrefix = "hEcalTower";
 
