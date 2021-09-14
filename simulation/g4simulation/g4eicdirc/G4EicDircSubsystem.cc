@@ -64,6 +64,7 @@ int G4EicDircSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
   m_Detector = new G4EicDircDetector(this, topNode, GetParams(), Name());
   m_Detector->SuperDetector(SuperDetector());
   m_Detector->OverlapCheck(CheckOverlap());
+  m_Detector->Verbosity(Verbosity());
 
   std::string detector_suffix = SuperDetector();
   if (detector_suffix == "NONE")
@@ -113,6 +114,8 @@ int G4EicDircSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
     m_SteppingAction = tmp;
   }
   m_StackingAction = new G4EicDircStackingAction(m_Detector);
+  m_StackingAction->Verbosity(Verbosity());
+
   return 0;
 }
 
@@ -126,8 +129,8 @@ int G4EicDircSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
       
       G4cout << "dirc boundary process index = " << pmanager->GetProcessIndex(DircBoundary) << G4endl;
       G4cout << "dirc boundary process ordering = " << pmanager->GetProcessOrdering(DircBoundary, idxPostStep) << G4endl;
-    }
-    }*/
+      }
+}*/
 
 //_______________________________________________________________________
 int G4EicDircSubsystem::process_event(PHCompositeNode *topNode)
@@ -179,7 +182,7 @@ void G4EicDircSubsystem::SetDefaultParameters()
   set_default_double_param("Radius", 75.0);
   set_default_double_param("Prizm_width", 38.65);
   set_default_double_param("Prizm_length", 30.0);
-  set_default_double_param("Prizm_height_at_lens", 4.1);
+  set_default_double_param("Prizm_height_at_lens", 5.0);
   set_default_double_param("Bar_thickness", 1.725);
   set_default_double_param("Bar_width", 3.5);
   set_default_double_param("BarL_length", 122.5);
