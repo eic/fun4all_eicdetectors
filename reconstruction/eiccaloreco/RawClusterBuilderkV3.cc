@@ -44,13 +44,11 @@ void RawClusterBuilderkV3::cluster(std::vector<towersStrct> &input_towers, uint 
   // Next we'll sort the towers from most energetic to least
   // This is from https://github.com/FriederikeBock/AnalysisSoftwareEIC/blob/642aeb13b13271820dfee59efe93380e58456289/treeAnalysis/clusterizer.cxx#L281
   std::sort(input_towers.begin(), input_towers.end(), &towerECompare);
-  std::vector<int> clslabels;
   std::vector<towersStrct> cluster_towers;
   // And run kV3 clustering
   while (!input_towers.empty())
   {
     cluster_towers.clear();
-    clslabels.clear();
     // always start with highest energetic tower
     if (input_towers.at(0).tower_E > _seed_e)
     {
@@ -93,10 +91,6 @@ void RawClusterBuilderkV3::cluster(std::vector<towersStrct> &input_towers, uint 
             cluster->addTower(input_towers.at(ait).twr->get_id(), input_towers.at(ait).tower_E);  // Add tower to cluster
             // std::cout << "Added a tower to the cluster! " << input_towers.at(ait).tower_E << std::endl;
             cluster_towers.push_back(input_towers.at(ait));
-            if (!(std::find(clslabels.begin(), clslabels.end(), input_towers.at(ait).tower_trueID) != clslabels.end()))
-            {
-              clslabels.push_back(input_towers.at(ait).tower_trueID);
-            }
             input_towers.erase(input_towers.begin() + ait);
             ait--;
           }

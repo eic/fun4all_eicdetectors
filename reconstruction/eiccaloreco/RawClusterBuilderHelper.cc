@@ -89,7 +89,10 @@ int RawClusterBuilderHelper::process_event(PHCompositeNode *topNode)
       tempTower.tower_E = tower->get_energy();
       tempTower.tower_iEta = tower->get_bineta();
       tempTower.tower_iPhi = tower->get_binphi();
-      tempTower.tower_iL = tower->get_binl();
+      tempTower.tower_iL = 0;
+      if (towerid == RawTowerDefs::LFHCAL) {
+        tempTower.tower_iL = tower->get_binl();
+      }
       tempTower.tower_trueID = towerid;  // currently unsigned -> signed, will this matter?
       tempTower.twr = itr->second;
       input_towers.push_back(tempTower);
@@ -155,9 +158,9 @@ int RawClusterBuilderHelper::process_event(PHCompositeNode *topNode)
 
     // The output of the cluster will be in the RawClusterContainer class
   }
-  if (true || Verbosity() > 1)
+  if (Verbosity() > 1)
   {
-    std::cout << "Found " << _clusters->getClustersMap().size() << " clusters in " << towers->getCalorimeterID() << std::endl;
+    std::cout << "Found " << _clusters->getClustersMap().size() << " clusters in " << Name() << std::endl;
     for (const auto &cluster_pair : _clusters->getClustersMap())
     {
       std::cout << "\n\tnTowers: " << cluster_pair.second->getNTowers() << std::endl;

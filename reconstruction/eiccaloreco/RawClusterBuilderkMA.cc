@@ -65,12 +65,15 @@ void RawClusterBuilderkMA::cluster(std::vector<towersStrct> &input_towers, uint 
           int iPhiTwrAgg = input_towers.at(ait).tower_iPhi;
           int iLTwrAgg   = input_towers.at(ait).tower_iL;
           
-          if (!IsForwardCalorimeter(caloId)) {
-            if (iPhiTwr < 5 && iPhiTwrAgg > caloTowersPhi(caloId)-5){
-              iPhiTwrAgg= iPhiTwrAgg-caloTowersPhi(caloId);
+          if (!IsForwardCalorimeter(caloId))
+          {
+            if (iPhiTwr < 5 && iPhiTwrAgg > caloTowersPhi(caloId) - 5)
+            {
+              iPhiTwrAgg = iPhiTwrAgg - caloTowersPhi(caloId);
             }
-            if (iPhiTwr > caloTowersPhi(caloId)-5 && iPhiTwrAgg < 5){
-              iPhiTwr= iPhiTwr-caloTowersPhi(caloId);
+            if (iPhiTwr > caloTowersPhi(caloId) - 5 && iPhiTwrAgg < 5)
+            {
+              iPhiTwr = iPhiTwr - caloTowersPhi(caloId);
             }
           }
           
@@ -86,14 +89,14 @@ void RawClusterBuilderkMA::cluster(std::vector<towersStrct> &input_towers, uint 
           if(neighbor || corner2D ){
 
             // only aggregate towers with lower energy than current tower
-            if(caloId != RawTowerDefs::LFHCAL){  // TODO Why?
+            // if(caloId != RawTowerDefs::LFHCAL){  // TODO Why?
               if(input_towers.at(ait).tower_E >= (cluster_towers.at(tit).tower_E + _agg_e)) continue;
-            } 
+            // } 
             cluster_towers.push_back(input_towers.at(ait));
             // std::cout << "added a tower to the cluster" << std::endl;
             cluster->addTower(input_towers.at(ait).twr->get_id(), input_towers.at(ait).tower_E);  // Add tower to cluster)
-            if (Verbosity() > 2) std::cout << "aggregated: "<< iEtaTwrAgg << "\t" << iPhiTwrAgg << "\t" << iLTwrAgg << "\t E:" << input_towers.at(ait).tower_E << "\t reference: "<< refC << "\t"<< iEtaTwr << "\t" << iPhiTwr << "\t" << iLTwr << "\t cond.: \t"<< neighbor << "\t" << corner2D << "\t  diffs: " << deltaEta << "\t" << deltaPhi << "\t" << deltaL<< std::endl;
             input_towers.erase(input_towers.begin()+ait);
+            if (Verbosity() > 2) std::cout << "aggregated: "<< iEtaTwrAgg << "\t" << iPhiTwrAgg << "\t" << iLTwrAgg << "\t E:" << input_towers.at(ait).tower_E << "\t reference: "<< refC << "\t"<< iEtaTwr << "\t" << iPhiTwr << "\t" << iLTwr << "\t cond.: \t"<< neighbor << "\t" << corner2D << "\t  diffs: " << deltaEta << "\t" << deltaPhi << "\t" << deltaL<< std::endl;
             ait--;
             refC++;
           }
