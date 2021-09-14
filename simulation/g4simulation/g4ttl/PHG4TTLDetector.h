@@ -23,6 +23,8 @@
 #include <Geant4/G4Types.hh>  // for G4int
 #include <Geant4/globals.hh>  // for G4Exception
 
+#include "PHG4TTLSteppingAction.h"
+
 #include <map>
 #include <set>
 #include <utility>
@@ -36,6 +38,7 @@ class G4LogicalVolume;
 class G4VPhysicalVolume;
 class PHCompositeNode;
 class PHG4TTLDisplayAction;
+// class PHG4TTLSteppingAction;
 class PHG4Subsystem;
 class PHParameters;
 
@@ -60,6 +63,7 @@ class PHG4TTLDetector : public PHG4Detector
 
   void SuperDetector(const std::string &name) { superdetector = name; }
   const std::string SuperDetector() const { return superdetector; }
+  void SetSteppingAction(PHG4TTLSteppingAction *stpact) { m_SteppingAction = stpact; }
 
   // void OverlapCheck(const bool chk = true) override
   // {
@@ -81,6 +85,7 @@ class PHG4TTLDetector : public PHG4Detector
 
  private:
   PHG4TTLDisplayAction *m_DisplayAction;
+  PHG4TTLSteppingAction *m_SteppingAction;
   int m_Verbosity;
   std::string superdetector;
   PHParameters *m_Params = nullptr;
