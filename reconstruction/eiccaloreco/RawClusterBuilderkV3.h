@@ -16,13 +16,10 @@ class RawClusterContainer;
 class RawClusterBuilderkV3 : public RawClusterBuilderHelper
 {
   public:
-    RawClusterBuilderkV3(const std::string &name = "RawClusterBuilderkV3");
-    ~RawClusterBuilderkV3() override {}
+    RawClusterBuilderkV3(const std::string &name);
 
-    // int process_event(PHCompositeNode *topNode) override;
-  
   protected:
-    void cluster(std::vector<RawClusterBuilderHelper::towersStrct> &input_towers, uint caloId) override;
+    void cluster(std::vector<towersStrct> &input_towers, uint caloId) override;
 };
 
 #endif

@@ -19,6 +19,7 @@ class RawClusterBuilderHelper : public SubsysReco
         float tower_E;
         int tower_iEta;
         int tower_iPhi;
+        int tower_iL;
         int tower_trueID;
         RawTower *twr;
         } towersStrct;
@@ -28,7 +29,7 @@ class RawClusterBuilderHelper : public SubsysReco
         ~RawClusterBuilderHelper() override {};
 
         int InitRun(PHCompositeNode *topNode) override;
------>  int process_event(PHCompositeNode *topNode) override;
+        int process_event(PHCompositeNode *topNode) override;
         int End(PHCompositeNode *topNode) override;
 
         void Detector(const std::string &d) { detector = d; }
@@ -43,7 +44,7 @@ class RawClusterBuilderHelper : public SubsysReco
 
         RawClusterContainer *_clusters;
 
------>  void cluster(std::vector<towersStrct> &input_towers, uint caloId);
+        virtual void cluster(std::vector<towersStrct> &input_towers, uint caloId) { return; };
         
         int caloTowersPhi(int caloID);
         bool IsForwardCalorimeter(int caloID);

@@ -39,7 +39,7 @@ RawClusterBuilderkV3::RawClusterBuilderkV3(const std::string &name)
 {
 }
 
-void RawClusterBuilderkV3::cluster(std::vector<RawClusterBuilderHelper::towersStrct> &input_towers, uint caloId)
+void RawClusterBuilderkV3::cluster(std::vector<towersStrct> &input_towers, uint caloId)
 {
   // Next we'll sort the towers from most energetic to least
   // This is from https://github.com/FriederikeBock/AnalysisSoftwareEIC/blob/642aeb13b13271820dfee59efe93380e58456289/treeAnalysis/clusterizer.cxx#L281

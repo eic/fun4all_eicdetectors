@@ -12,14 +12,16 @@ AM_LDFLAGS = \
 
 pkginclude_HEADERS = \
   RawClusterBuilderHelper.h \
-  RawClusterBuilderkV3.h 
+  RawClusterBuilderkV3.h \
+  RawClusterBuilderkMA.h
 
 lib_LTLIBRARIES = \
   libEICCaloReco.la
 
 libEICCaloReco_la_SOURCES = \
   RawClusterBuilderHelper.cc \
-  RawClusterBuilderkV3.cc 
+  RawClusterBuilderkV3.cc \
+  RawClusterBuilderkMA.cc
 
 libEICCaloReco_la_LIBADD = \
   -lCLHEP \

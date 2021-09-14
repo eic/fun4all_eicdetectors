@@ -34,10 +34,10 @@
 
 RawClusterBuilderHelper::RawClusterBuilderHelper(const std::string &name)
   : SubsysReco(name)
-  // , _clusters(nullptr)
-  // , _seed_e(0.5)
+  , _seed_e(0.5)
   , _agg_e(0.1)
   , detector("NONE")
+  , _clusters(nullptr)
 {
 }
 
@@ -75,7 +75,7 @@ int RawClusterBuilderHelper::process_event(PHCompositeNode *topNode)
   }
 
   // make the list of towers above threshold
-  std::vector<RawClusterBuilderHelper::towersStrct> input_towers;
+  std::vector<towersStrct> input_towers;
   // towers in the current cluster
   int towers_added = 0;
   RawTowerContainer::ConstRange begin_end = towers->getTowers();
@@ -85,10 +85,11 @@ int RawClusterBuilderHelper::process_event(PHCompositeNode *topNode)
     RawTowerDefs::keytype towerid = itr->first;
     if (tower->get_energy() > _agg_e)
     {
-      RawClusterBuilderHelper::towersStrct tempTower;
+      towersStrct tempTower;
       tempTower.tower_E = tower->get_energy();
       tempTower.tower_iEta = tower->get_bineta();
       tempTower.tower_iPhi = tower->get_binphi();
+      tempTower.tower_iL = tower->get_binl();
       tempTower.tower_trueID = towerid;  // currently unsigned -> signed, will this matter?
       tempTower.twr = itr->second;
       input_towers.push_back(tempTower);
@@ -156,6 +157,7 @@ int RawClusterBuilderHelper::process_event(PHCompositeNode *topNode)
   }
   if (true || Verbosity() > 1)
   {
+    std::cout << "Found " << _clusters->getClustersMap().size() << " clusters in " << towers->getCalorimeterID() << std::endl;
     for (const auto &cluster_pair : _clusters->getClustersMap())
     {
       std::cout << "\n\tnTowers: " << cluster_pair.second->getNTowers() << std::endl;
