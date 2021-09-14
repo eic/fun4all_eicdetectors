@@ -30,6 +30,7 @@
 #include <stdexcept>
 #include <utility>
 #include <vector>
+#include <string>
 
 RawClusterBuilderHelper::RawClusterBuilderHelper(const std::string &name)
   : SubsysReco(name)
@@ -54,9 +55,117 @@ int RawClusterBuilderHelper::InitRun(PHCompositeNode *topNode)
 
   return Fun4AllReturnCodes::EVENT_OK;
 }
-
-int RawClusterBuilderHelper::process_event(PHCompositeNode *topNode) 
+int RawClusterBuilderHelper::process_event(PHCompositeNode *topNode)
 {
+
+  std::string towernodename = "TOWER_CALIB_" + detector;
+  // Grab the towers
+  RawTowerContainer *towers = findNode::getClass<RawTowerContainer>(topNode, towernodename);
+  if (!towers)
+  {
+    std::cout << PHWHERE << ": Could not find node " << towernodename << std::endl;
+    return Fun4AllReturnCodes::DISCARDEVENT;
+  }
+  std::string towergeomnodename = "TOWERGEOM_" + detector;
+  RawTowerGeomContainer *towergeom = findNode::getClass<RawTowerGeomContainer>(topNode, towergeomnodename);
+  if (!towergeom)
+  {
+    std::cout << PHWHERE << ": Could not find node " << towergeomnodename << std::endl;
+    return Fun4AllReturnCodes::ABORTEVENT;
+  }
+
+  // make the list of towers above threshold
+  std::vector<RawClusterBuilderHelper::towersStrct> input_towers;
+  // towers in the current cluster
+  int towers_added = 0;
+  RawTowerContainer::ConstRange begin_end = towers->getTowers();
+  for (RawTowerContainer::ConstIterator itr = begin_end.first; itr != begin_end.second; ++itr)
+  {
+    RawTower *tower = itr->second;
+    RawTowerDefs::keytype towerid = itr->first;
+    if (tower->get_energy() > _agg_e)
+    {
+      RawClusterBuilderHelper::towersStrct tempTower;
+      tempTower.tower_E = tower->get_energy();
+      tempTower.tower_iEta = tower->get_bineta();
+      tempTower.tower_iPhi = tower->get_binphi();
+      tempTower.tower_trueID = towerid;  // currently unsigned -> signed, will this matter?
+      tempTower.twr = itr->second;
+      input_towers.push_back(tempTower);
+      towers_added++;
+    }
+  }
+
+  cluster(input_towers, towers->getCalorimeterID());
+
+  // Sum x, y, z, e
+  // from https://github.com/ECCE-EIC/coresoftware/blob/ae0526adf82f49cb8906d447411b90287de6a56e/offline/packages/CaloReco/RawClusterBuilderGraph.cc#L202
+  for (const auto &cluster_pair : _clusters->getClustersMap())
+  {
+    RawClusterDefs::keytype clusterid = cluster_pair.first;
+    RawCluster *cluster = cluster_pair.second;
+
+    assert(cluster);
+    assert(cluster->get_id() == clusterid);
+
+    double sum_x(0);
+    double sum_y(0);
+    double sum_z(0);
+    double sum_e(0);
+
+    for (const auto tower_pair : cluster->get_towermap())
+    {
+      const RawTower *rawtower = towers->getTower(tower_pair.first);
+      const RawTowerGeom *rawtowergeom = towergeom->get_tower_geometry(tower_pair.first);
+
+      assert(rawtower);
+      assert(rawtowergeom);
+      const double e = rawtower->get_energy();
+
+      sum_e += e;
+
+      if (e > 0)
+      {
+        sum_x += e * rawtowergeom->get_center_x();
+        sum_y += e * rawtowergeom->get_center_y();
+        sum_z += e * rawtowergeom->get_center_z();
+      }
+    }  //     for (const auto tower_pair : cluster->get_towermap())
+
+    cluster->set_energy(sum_e);
+
+    if (sum_e > 0)
+    {
+      sum_x /= sum_e;
+      sum_y /= sum_e;
+      sum_z /= sum_e;
+
+      cluster->set_r(sqrt(sum_y * sum_y + sum_x * sum_x));
+      cluster->set_phi(atan2(sum_y, sum_x));
+
+      cluster->set_z(sum_z);
+    }
+
+    if (Verbosity() > 1)
+    {
+      std::cout << "RawClusterBuilderGraph constucted ";
+      cluster->identify();
+    }  //  for (const auto & cluster_pair : _clusters->getClustersMap())
+
+    // The output of the cluster will be in the RawClusterContainer class
+  }
+  if (true || Verbosity() > 1)
+  {
+    for (const auto &cluster_pair : _clusters->getClustersMap())
+    {
+      std::cout << "\n\tnTowers: " << cluster_pair.second->getNTowers() << std::endl;
+      std::cout << "\tE: " << cluster_pair.second->get_energy() << "\tPhi: " << cluster_pair.second->get_phi() << std::endl;
+      std::cout << "\tX: " << cluster_pair.second->get_x();
+      std::cout << "\tY: " << cluster_pair.second->get_y();
+      std::cout << "\tZ: " << cluster_pair.second->get_z() << std::endl;
+    }
+  }
+
   return Fun4AllReturnCodes::EVENT_OK;
 }
 
@@ -89,7 +198,7 @@ bool RawClusterBuilderHelper::IsForwardCalorimeter(int caloID)
   return false;
 }
 
-int caloTowersPhi(int caloID)
+int RawClusterBuilderHelper::caloTowersPhi(int caloID)
 {
     switch (caloID)
     {
@@ -127,3 +236,4 @@ void RawClusterBuilderHelper::CreateNodes(PHCompositeNode *topNode)
   PHIODataNode<PHObject> *clusterNode = new PHIODataNode<PHObject>(_clusters, ClusterNodeName, "PHObject");
   DetNode->addNode(clusterNode);
 }
+
