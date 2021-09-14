@@ -57,15 +57,16 @@ class PHG4BarrelEcalDetector : public PHG4Detector
   G4double tower_length = 45.5*cm; // Length of the Tower
 
   const int nTowers_layer = 128.; //Number of towers per phi tower
-  const double elec_length  = 2*cm; //electronics width
-  const double support_length = 7*cm;  //support width
   const double becal_length = 415*cm;  //support width
   const double th = 1.;
   const double overlap = 0.1;
-  const double silicon_width = 2.;
-  const double kapton_width = 2.;
-  const double SIO2_width = 2;
-  const double Carbon_width = 10.;
+
+  G4double silicon_width_half;
+  G4double kapton_width_half;
+  G4double SIO2_width_half;
+  G4double Carbon_width_half;
+  G4double support_length;
+  
 
   
   int PlaceTower(G4LogicalVolume *envelope);
