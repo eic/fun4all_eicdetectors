@@ -431,7 +431,7 @@ int PHG4LFHcalDetector::ParseParametersFromTable()
   parit = m_GlobalParameterMap.find("Gdz");
   if (parit != m_GlobalParameterMap.end())
   {
-    m_Params->set_double_param("dZ", parit->second);
+    m_Params->set_double_param("dz", parit->second);
   }
 
   parit = m_GlobalParameterMap.find("Gx0");
