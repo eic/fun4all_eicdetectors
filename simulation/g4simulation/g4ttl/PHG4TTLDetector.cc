@@ -21,6 +21,7 @@
 #include <Geant4/G4Trd.hh>
 #include <Geant4/G4Tubs.hh>
 #include <Geant4/G4Types.hh>  // for G4double, G4int
+#include <Geant4/G4AssemblyVolume.hh>  // for G4double, G4int
 
 #include <algorithm>  // for max
 #include <cassert>
@@ -119,21 +120,11 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
   G4double rMin = m_Params->get_double_param("rMin");  // center location of Al support plate
   G4double det_height = 2.0 * cm;
   G4double place_z = m_Params->get_double_param("place_z");
+  G4ThreeVector detzvec(0, 0, place_z);
   G4double detlength = m_Params->get_double_param("length");
 
   //Create the envelope = 'world volume' for the calorimeter
-  G4VSolid *ttl_envelope_solid = new G4Cons("ttl_envelope_solid",
-                                            rMin - det_height / 2 - 2 * cm, rMin + det_height / 2 + 2 * cm,
-                                            rMin - det_height / 2 - 2 * cm, rMin + det_height / 2 + 2 * cm,
-                                            detlength / 2.0,
-                                            0, 2 * M_PI);
-
-  G4LogicalVolume *DetectorLog_Det = new G4LogicalVolume(ttl_envelope_solid, Air, name_base + "_Log");
-  RegisterLogicalVolume(DetectorLog_Det);
-  m_DisplayAction->AddVolume(DetectorLog_Det, "FullEnvelope");
-
-  RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(0, 0, place_z), DetectorLog_Det,
-                                           name_base + "_Physical", logicWorld, false, 0, overlapcheck_sector));
+  G4AssemblyVolume* assemblyDetector = new G4AssemblyVolume();
 
   // Single module with length based on readout (contains 14 LGADs [counting across both sides] in x-direction and 6 in z-direction)
   G4double baseplate_length = 43.1 * mm;
@@ -378,12 +369,14 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
                                              "physical_sensor_ladder_t9", log_module_envelope, false, 0, overlapcheck_sector),
                            false);
   }
-  if (rMin > 85 * cm)
+  if (rMin > 82 * cm)
   {
-
     RegisterPhysicalVolume(new G4PVPlacement(rotationSensor, G4ThreeVector(-leftedge + 14 * baseplate_width + baseplate_width / 2, 0, offsety), log_sensor_ladder,
                                              "physical_sensor_ladder_t10", log_module_envelope, false, 0, overlapcheck_sector),
                            false);
+  }
+  if (rMin > 85 * cm)
+  {
     RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(-leftedge + 15 * baseplate_width + baseplate_width / 2, 0, offsety), log_sensor_ladder,
                                              "physical_sensor_ladder_t11", log_module_envelope, false, 0, overlapcheck_sector),
                            false);
@@ -604,7 +597,7 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
                                              "physical_SH_ladder_b9", log_module_envelope, false, 0, overlapcheck_sector),
                            false);
   }
-  if (rMin > 85 * cm)
+  if (rMin > 83 * cm)
   {
     RegisterPhysicalVolume(new G4PVPlacement(rotationSensorDown, G4ThreeVector(-leftedge + 10 * baseplate_width + 9 * baseSH_width + baseSH_width / 2, 0, -offsetyDown_SH), log_SH_ladder,
                                              "physical_SH_ladder_b10", log_module_envelope, false, 0, overlapcheck_sector),
@@ -685,41 +678,41 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
     // if(isec!=3)continue; // NOTE REMOVE
     G4RotationMatrix *motherrot = new G4RotationMatrix();
     motherrot->rotateX(M_PI / 2);
-    motherrot->rotateY((isec - 3) * 2 * M_PI / 12.);
+    motherrot->rotateY(M_PI);
+    motherrot->rotateZ(M_PI + (isec - 3) * 2 * M_PI / 12.);
     // // central segments
-    RegisterPhysicalVolume(new G4PVPlacement(motherrot, G4ThreeVector((rMin - det_height / 2 + moduleShift) * cos(isec * 2 * M_PI / 12.), (rMin - det_height / 2 + moduleShift) * sin(isec * 2 * M_PI / 12.), 0 * modulesep), log_module_envelope,
-                                             "Mother_Segment_Raw_Physical_Center_" + std::to_string(isec), DetectorLog_Det, false, 0, overlapcheck_sector),
-                           false);
+    G4ThreeVector vec_central_transl((rMin - det_height / 2 + moduleShift) * cos(isec * 2 * M_PI / 12.), (rMin - det_height / 2 + moduleShift) * sin(isec * 2 * M_PI / 12.), 0 * modulesep);
+    assemblyDetector->AddPlacedVolume( log_module_envelope,vec_central_transl,motherrot);
     for (int ilen = 1; ilen < ((detlength / 2 - segmentlength / 2) / segmentlength); ilen++)
     {
       if(doSupport){
         G4RotationMatrix *supfinalrot = new G4RotationMatrix();
         // supfinalrot->rotateX(M_PI/2);
         supfinalrot->rotateX(M_PI / 2);
-        supfinalrot->rotateY((isec - 3) * 2 * M_PI / 12.);
+        supfinalrot->rotateZ(M_PI+(isec - 3) * 2 * M_PI / 12.);
         if (ilen == 2 || (ilen == 7))
         {
           if (rMin < 85 * cm)
           {
-            RegisterPhysicalVolume(new G4PVPlacement(supfinalrot, G4ThreeVector((rMin - support_height / 2 - det_height / 2 - cooling_plate_height / 2 + moduleShift) * cos(isec * 2 * M_PI / 12.), (rMin - support_height / 2 - det_height / 2 - cooling_plate_height / 2 + moduleShift) * sin(isec * 2 * M_PI / 12.), ilen * segmentlength + segmentlength / 2 + ilen * modulesep), Log_End_Support,
-                                                    "Front_Support_Physical_1_" + std::to_string(isec) + "_" + std::to_string(ilen), DetectorLog_Det, false, 0, overlapcheck_sector),
-                                  false);
-            RegisterPhysicalVolume(new G4PVPlacement(supfinalrot, G4ThreeVector((rMin - support_height / 2 - det_height / 2 - cooling_plate_height / 2 + moduleShift) * cos(isec * 2 * M_PI / 12.), (rMin - support_height / 2 - det_height / 2 - cooling_plate_height / 2 + moduleShift) * sin(isec * 2 * M_PI / 12.), -(ilen * segmentlength + segmentlength / 2 + ilen * modulesep)), Log_End_Support,
-                                                    "Front_Support_Physical_2_" + std::to_string(isec) + "_" + std::to_string(ilen), DetectorLog_Det, false, 0, overlapcheck_sector),
-                                  false);
+            G4ThreeVector vec_supp1_transl((rMin - support_height / 2 - det_height / 2 - cooling_plate_height / 2 + moduleShift) * cos(isec * 2 * M_PI / 12.), (rMin - support_height / 2 - det_height / 2 - cooling_plate_height / 2 + moduleShift) * sin(isec * 2 * M_PI / 12.), ilen * segmentlength + segmentlength / 2 + ilen * modulesep);
+            assemblyDetector->AddPlacedVolume(Log_End_Support,vec_supp1_transl,supfinalrot);
+            G4ThreeVector vec_supp2_transl((rMin - support_height / 2 - det_height / 2 - cooling_plate_height / 2 + moduleShift) * cos(isec * 2 * M_PI / 12.), (rMin - support_height / 2 - det_height / 2 - cooling_plate_height / 2 + moduleShift) * sin(isec * 2 * M_PI / 12.), -(ilen * segmentlength + segmentlength / 2 + ilen * modulesep));
+            assemblyDetector->AddPlacedVolume(Log_End_Support,vec_supp2_transl,supfinalrot);
           }
         }
       }
       // forward segments
-      RegisterPhysicalVolume(new G4PVPlacement(motherrot, G4ThreeVector((rMin - det_height / 2 + moduleShift) * cos(isec * 2 * M_PI / 12.), (rMin - det_height / 2 + moduleShift) * sin(isec * 2 * M_PI / 12.), ilen * segmentlength + ilen * modulesep), log_module_envelope,
-                                               "Mother_Segment_Raw_Physical_Fwd_" + std::to_string(isec) + "_" + std::to_string(ilen), DetectorLog_Det, false, 0, overlapcheck_sector),
-                             false);
+      G4ThreeVector vec_det_fwdlayers_transl((rMin - det_height / 2 + moduleShift) * cos(isec * 2 * M_PI / 12.), (rMin - det_height / 2 + moduleShift) * sin(isec * 2 * M_PI / 12.), ilen * segmentlength + ilen * modulesep);
+      assemblyDetector->AddPlacedVolume(log_module_envelope, vec_det_fwdlayers_transl, motherrot);
       // backward segments
-      RegisterPhysicalVolume(new G4PVPlacement(motherrot, G4ThreeVector((rMin - det_height / 2 + moduleShift) * cos(isec * 2 * M_PI / 12.), (rMin - det_height / 2 + moduleShift) * sin(isec * 2 * M_PI / 12.), -ilen * segmentlength - ilen * modulesep), log_module_envelope,
-                                               "Mother_Segment_Raw_Physical_Bwd_" + std::to_string(isec) + "_" + std::to_string(ilen), DetectorLog_Det, false, 0, overlapcheck_sector),
-                             false);
+      G4ThreeVector vec_det_bcklayers_transl((rMin - det_height / 2 + moduleShift) * cos(isec * 2 * M_PI / 12.), (rMin - det_height / 2 + moduleShift) * sin(isec * 2 * M_PI / 12.), -ilen * segmentlength - ilen * modulesep);
+      assemblyDetector->AddPlacedVolume(log_module_envelope, vec_det_bcklayers_transl, motherrot);
     }
   }
+  assemblyDetector->MakeImprint( logicWorld, detzvec,0 );
+
+  // RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(0, 0, place_z), DetectorLog_Det,
+  //                                          name_base + "_Physical", logicWorld, false, 0, overlapcheck_sector));
 }
 
 void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
