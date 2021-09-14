@@ -1,31 +1,6 @@
 #include "PHG4TTLSteppingAction.h"
 #include "PHG4TTLDetector.h"
 
-#include <g4main/PHG4Hit.h>
-#include <g4main/PHG4HitContainer.h>
-#include <g4main/PHG4Hitv1.h>
-#include <g4main/PHG4Shower.h>
-#include <g4main/PHG4SteppingAction.h>  // for PHG4SteppingAction
-#include <g4main/PHG4TrackUserInfoV1.h>
-
-#include <phool/getClass.h>
-
-#include <Geant4/G4ParticleDefinition.hh>  // for G4ParticleDefinition
-#include <Geant4/G4Step.hh>
-#include <Geant4/G4StepPoint.hh>              // for G4StepPoint
-#include <Geant4/G4StepStatus.hh>             // for fGeomBoundary, fAtRestD...
-#include <Geant4/G4String.hh>                 // for G4String
-#include <Geant4/G4SystemOfUnits.hh>          // for cm, GeV, nanosecond
-#include <Geant4/G4ThreeVector.hh>            // for G4ThreeVector
-#include <Geant4/G4TouchableHandle.hh>        // for G4TouchableHandle
-#include <Geant4/G4Track.hh>                  // for G4Track
-#include <Geant4/G4TrackStatus.hh>            // for fStopAndKill
-#include <Geant4/G4Types.hh>                  // for G4double
-#include <Geant4/G4VTouchable.hh>             // for G4VTouchable
-#include <Geant4/G4VUserTrackInformation.hh>  // for G4VUserTrackInformation
-
-#include <iostream>
-#include <string>  // for string, operator+, oper...
 
 class G4VPhysicalVolume;
 class PHCompositeNode;
@@ -37,6 +12,11 @@ PHG4TTLSteppingAction::PHG4TTLSteppingAction(PHG4TTLDetector* detector)
   , hit(nullptr)
   , saveshower(nullptr)
   , layer_id(-1)
+  , _isFwd_TTL(false)
+  , _N_phi_modules(0)
+  , _z_pos_TTL(0)
+  , _sensor_resolution_x(0)
+  , _sensor_resolution_y(0)
 {
 }
 
@@ -56,16 +36,25 @@ bool PHG4TTLSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
   G4VPhysicalVolume* volume =
       aStep->GetPreStepPoint()->GetTouchableHandle()->GetVolume();
 
+  G4TouchableHandle touch = aStep->GetPreStepPoint()->GetTouchableHandle();
   // collect energy and track length step by step
   G4double edep = aStep->GetTotalEnergyDeposit() / GeV;
   G4double eion = (aStep->GetTotalEnergyDeposit() - aStep->GetNonIonizingEnergyDeposit()) / GeV;
 
   const G4Track* aTrack = aStep->GetTrack();
 
+  TVector3 sensorPosition;
   // make sure we are in a volume
   if (detector_->IsInSectorActive(volume))
   {
     bool geantino = false;
+
+    int moduleID = -1;
+    int layer = -1;
+    int sensor0 = -1;
+    int sensor1 = -1;
+    int idx_j = -1;
+    int idx_k = -1;
     // the check for the pdg code speeds things up, I do not want to make
     // an expensive string compare for every track when we know
     // geantino or chargedgeantino has pid=0
@@ -105,10 +94,24 @@ bool PHG4TTLSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
         }
       }
 
+      // std::cout << std::endl;
+      CalculateSensorHitIndices(prePoint, moduleID,layer,sensor0,sensor1,idx_j, idx_k,sensorPosition);
+      hit->set_index_i(moduleID);
+      hit->set_index_j(layer);
+      hit->set_index_k(sensor0);
+      hit->set_index_l(sensor1);
+      hit->set_strip_z_index(idx_j);
+      hit->set_strip_y_index(idx_k);
+
+      hit->set_local_x(0, sensorPosition.X());
+      hit->set_local_y(0, sensorPosition.Y());
+      hit->set_local_z(0, sensorPosition.Z());
+
       //set the initial energy deposit
       hit->set_edep(0);
       hit->set_eion(0);  // only implemented for v5 otherwise empty
-      layer_id = aStep->GetPreStepPoint()->GetTouchable()->GetReplicaNumber(1);
+      layer_id = 0;//aStep->GetPreStepPoint()->GetTouchable()->GetReplicaNumber(2);
+      // std::cout << "layerid: " << layer_id << std::endl;
       //        hit->set_light_yield(0);
 
       break;
@@ -125,6 +128,7 @@ bool PHG4TTLSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
     hit->set_t(1, postPoint->GetGlobalTime() / nanosecond);
     //sum up the energy to get total deposited
     hit->set_edep(hit->get_edep() + edep);
+    // std::cout << "energy: " << hit->get_edep() + edep << std::endl;
     hit->set_eion(hit->get_eion() + eion);
     hit->set_path_length(aTrack->GetTrackLength() / cm);
     if (geantino)
@@ -183,6 +187,77 @@ bool PHG4TTLSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
     return false;
   }
 }
+
+
+void PHG4TTLSteppingAction::CalculateSensorHitIndices(G4StepPoint* prePoint, int& module_ret, int& layer, int& sensor_0, int& sensor_1, int& j, int& k, TVector3 &sensorposition)
+{
+  int module_ID = -1;  //The j and k indices for the scintillator / tower
+  int layer_ID = -1;  //The j and k indices for the scintillator / tower
+  int sensor_ID_0 = -1;  //The j and k indices for the scintillator / tower
+  int sensor_ID_1 = -1;  //The j and k indices for the scintillator / tower
+  int hit_j_0 = 0;  //The j and k indices for the scintillator / tower
+  int hit_k_0 = 0;  //The j and k indices for the scintillator / tower
+
+
+  G4double baseplate_length = 43.1 * mm;
+  G4double baseplate_width = 56.5 * mm / 2;
+  G4double baseSH_width = baseplate_width / 2;
+  G4double _module_x_dimension = baseplate_length;
+  G4double _module_y_dimension = baseplate_width + baseSH_width;
+
+  G4double sensor_y_dimension = 21.2 * mm;
+  G4double sensor_x_dimension = 42.0 * mm;
+
+  _sensor_resolution_x = (500e-4 / sqrt(12)) * cm; // in mm
+  _sensor_resolution_y = (500e-4 / sqrt(12)) * cm; // in mm
+
+  TVector3 prePointVec(prePoint->GetPosition().x(),prePoint->GetPosition().y(),prePoint->GetPosition().z());
+  if(_N_phi_modules>0){
+    float prePoint_Phi = prePointVec.Phi()+M_PI;
+    module_ID = (int) prePoint_Phi/(2*M_PI/_N_phi_modules);
+  }
+  if(prePoint->GetPosition().z()>0){
+    layer_ID = prePoint->GetPosition().z()>_z_pos_TTL ? 1 : 0;
+  } else {
+    layer_ID = prePoint->GetPosition().z()<_z_pos_TTL ? 1 : 0;
+  }
+  if(_isFwd_TTL){
+    // front face starts with sensors
+    sensor_ID_0 = (int) ( ( ( prePoint->GetPosition().x() + (prePoint->GetPosition().x()<0 ? -_module_x_dimension /2 : _module_x_dimension/2) ) ) / _module_x_dimension );
+    sensor_ID_1 = (int) ( ( ( prePoint->GetPosition().y() + (prePoint->GetPosition().y()<0 ? -_module_y_dimension /2 : _module_y_dimension/2) ) ) / _module_y_dimension );
+    // calculate x and y position of bottom left corner of sensor
+    float sensorcorner_x = sensor_ID_0*_module_x_dimension - sensor_x_dimension/2;
+    float sensorcorner_y = 0;
+    if((sensor_ID_1%2==0 && layer_ID==0) || (sensor_ID_1%2!=0 && layer_ID==1) ){
+    // even sensor counts are located at the bottom of the module
+      sensorcorner_y = sensor_ID_1*_module_y_dimension - _module_y_dimension/2 + (0.1 * mm / 2);
+    } else {
+    // odd sensor counts are located at the top of the module
+      sensorcorner_y = sensor_ID_1*_module_y_dimension + _module_y_dimension/2 - sensor_y_dimension - (0.1 * mm / 2);
+    }
+    // std::cout << "\tcorner_x " << sensorcorner_x << "\tposition_x " <<  prePoint->GetPosition().x() << "\treso " << _sensor_resolution_x << std::endl;
+    // std::cout << "\tcorner_y " << sensorcorner_y << "\tposition_y " <<  prePoint->GetPosition().y() << "\treso " << _sensor_resolution_y << std::endl;
+    hit_j_0 = (int) ( ( prePoint->GetPosition().x() - sensorcorner_x)  / _sensor_resolution_x );
+    sensorposition.SetX( (hit_j_0 * _sensor_resolution_x) + sensorcorner_x );
+    hit_k_0 = (int) ( ( prePoint->GetPosition().y() - sensorcorner_y)  / _sensor_resolution_y );
+    sensorposition.SetY( (hit_k_0 * _sensor_resolution_y) + sensorcorner_y );
+
+    sensorposition.SetZ( prePoint->GetPosition().z() );
+  }
+
+
+  module_ret = module_ID;
+  layer = layer_ID;
+  sensor_0 = sensor_ID_0;
+  sensor_1 = sensor_ID_1;
+  j = hit_j_0;
+  k = hit_k_0;
+  // if(_isFwd_TTL){
+  // std::cout << "module " << module_ID << "\tlayer " << layer_ID << "\tsensor0 " << sensor_ID_0 << "\tsensor1 " << sensor_ID_1 << "\tj " << j << "\tk " << k << std::endl;
+  // }
+  return;
+}
+
 
 //____________________________________________________________________________..
 void PHG4TTLSteppingAction::SetInterfacePointers(PHCompositeNode* topNode)

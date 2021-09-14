@@ -5,7 +5,7 @@
 
 #include <g4main/PHG4SteppingAction.h>
 
-#include <string>                       // for string
+#include <string>  // for string
 
 class G4Step;
 class G4VPhysicalVolume;
@@ -18,11 +18,9 @@ class PHG4Shower;
 
 class PHG4mRICHSteppingAction : public PHG4SteppingAction
 {
-
-  public:
-
+ public:
   //! constructor
-  PHG4mRICHSteppingAction(PHG4mRICHDetector* detector,PHParameters* params );
+  PHG4mRICHSteppingAction(PHG4mRICHDetector* detector, PHParameters* params);
 
   //! destroctor
   virtual ~PHG4mRICHSteppingAction();
@@ -31,10 +29,9 @@ class PHG4mRICHSteppingAction : public PHG4SteppingAction
   virtual bool UserSteppingAction(const G4Step*, bool);
 
   //! reimplemented from base class
-  virtual void SetInterfacePointers( PHCompositeNode* );
+  virtual void SetInterfacePointers(PHCompositeNode*);
 
-  private:
-
+ private:
   //! pointer to the detector
   PHG4mRICHDetector* detector_;
 
@@ -49,13 +46,12 @@ class PHG4mRICHSteppingAction : public PHG4SteppingAction
   PHG4HitContainer* hits_;
   PHG4HitContainer* absorberhits_;
   PHG4Hit* hit;
-  PHG4HitContainer *savehitcontainer;
-  PHG4Shower *saveshower;
+  PHG4HitContainer* savehitcontainer;
+  PHG4Shower* saveshower;
   int savetrackid;
   int savepoststepstatus;
 
   int GetModuleID(G4VPhysicalVolume* volume);
 };
 
-
-#endif // PHG4mRICHSteppingAction_h
+#endif  // PHG4mRICHSteppingAction_h

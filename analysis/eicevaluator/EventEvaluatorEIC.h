@@ -34,7 +34,8 @@ class EventEvaluatorEIC : public SubsysReco
   enum class TrackSource_t : unsigned short
   {
     all = 0,
-    inner = 1
+    inner = 1,
+    silicon = 2
   };
 
   EventEvaluatorEIC(const std::string& name = "EventEvaluatorEIC",
@@ -58,6 +59,7 @@ class EventEvaluatorEIC : public SubsysReco
   void set_do_EEMC(bool b) { _do_EEMC = b; }
   void set_do_EEMCG(bool b) { _do_EEMCG = b; }
   void set_do_DRCALO(bool b) { _do_DRCALO = b; }
+  void set_do_FOCAL(bool b) { _do_FOCAL = b; }
   void set_do_LFHCAL(bool b) { _do_LFHCAL = b; }
   void set_do_HITS(bool b) { _do_HITS = b; }
   void set_do_TRACKS(bool b) { _do_TRACKS = b; }
@@ -67,6 +69,7 @@ class EventEvaluatorEIC : public SubsysReco
   void set_do_MCPARTICLES(bool b) { _do_MCPARTICLES = b; }
   void set_do_HEPMC(bool b) { _do_HEPMC = b; }
   void set_do_GEOMETRY(bool b) { _do_GEOMETRY = b; }
+  void set_do_BLACKHOLE(bool b) { _do_BLACKHOLE = b; }
 
   // limit the tracing of towers and clusters back to the truth particles
   // to only those reconstructed objects above a particular energy
@@ -98,6 +101,7 @@ class EventEvaluatorEIC : public SubsysReco
   bool _do_EEMC;
   bool _do_EEMCG;
   bool _do_DRCALO;
+  bool _do_FOCAL;
   bool _do_LFHCAL;
   bool _do_HITS;
   bool _do_TRACKS;
@@ -107,6 +111,7 @@ class EventEvaluatorEIC : public SubsysReco
   bool _do_MCPARTICLES;
   bool _do_HEPMC;
   bool _do_GEOMETRY;
+  bool _do_BLACKHOLE;
   unsigned int _ievent;
 
   // Event level info
@@ -121,7 +126,11 @@ class EventEvaluatorEIC : public SubsysReco
   float* _hits_x;
   float* _hits_y;
   float* _hits_z;
+  float* _hits_x2;
+  float* _hits_y2;
+  float* _hits_z2;
   float* _hits_t;
+  float* _hits_edep;
 
   // towers
   int _nTowers_FHCAL;
@@ -164,6 +173,14 @@ class EventEvaluatorEIC : public SubsysReco
   int* _tower_DRCALO_iEta;
   int* _tower_DRCALO_iPhi;
   int* _tower_DRCALO_trueID;
+
+  int _nTowers_FOCAL;
+  float* _tower_FOCAL_E;
+  int* _tower_FOCAL_NScint;
+  int* _tower_FOCAL_NCerenkov;
+  int* _tower_FOCAL_iEta;
+  int* _tower_FOCAL_iPhi;
+  int* _tower_FOCAL_trueID;
 
   int _nTowers_LFHCAL;
   float* _tower_LFHCAL_E;
@@ -336,6 +353,7 @@ class EventEvaluatorEIC : public SubsysReco
   CaloEvalStack* _caloevalstackHCALOUT;
   CaloEvalStack* _caloevalstackEHCAL;
   CaloEvalStack* _caloevalstackDRCALO;
+  CaloEvalStack* _caloevalstackFOCAL;
   CaloEvalStack* _caloevalstackLFHCAL;
   CaloEvalStack* _caloevalstackFEMC;
   CaloEvalStack* _caloevalstackCEMC;
@@ -386,7 +404,8 @@ class EventEvaluatorEIC : public SubsysReco
       kHCALOUT       = 7,
       kLFHCAL        = 8,
       kEEMCG         = 9,
-      kBECAL         = 10
+      kBECAL         = 10,
+      kFOCAL         = 11
   };
 
 };

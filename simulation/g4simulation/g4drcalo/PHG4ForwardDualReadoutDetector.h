@@ -129,6 +129,7 @@ class PHG4ForwardDualReadoutDetector : public PHG4Detector
 
   /* DRCALO tower geometry */
   int _tower_type;
+  G4double _tower_readout;
   G4double _tower_dx;
   G4double _tower_dy;
   G4double _tower_dz;
