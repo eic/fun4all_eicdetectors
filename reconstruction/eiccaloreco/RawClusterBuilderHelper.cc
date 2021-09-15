@@ -1,9 +1,9 @@
 #include <RawClusterBuilderHelper.h>
 
-#include <calobase/RawClusterContainer.h>
 #include <calobase/RawCluster.h>
-#include <calobase/RawClusterv1.h>
+#include <calobase/RawClusterContainer.h>
 #include <calobase/RawClusterDefs.h>
+#include <calobase/RawClusterv1.h>
 #include <calobase/RawTower.h>
 #include <calobase/RawTowerContainer.h>
 #include <calobase/RawTowerDefs.h>
@@ -13,12 +13,12 @@
 #include <fun4all/Fun4AllReturnCodes.h>
 #include <fun4all/SubsysReco.h>
 
-#include <phool/getClass.h>
 #include <phool/PHCompositeNode.h>
 #include <phool/PHIODataNode.h>
 #include <phool/PHNode.h>
 #include <phool/PHNodeIterator.h>
 #include <phool/PHObject.h>
+#include <phool/getClass.h>
 #include <phool/phool.h>
 
 #include <algorithm>
@@ -28,9 +28,9 @@
 #include <iostream>
 #include <map>
 #include <stdexcept>
+#include <string>
 #include <utility>
 #include <vector>
-#include <string>
 
 RawClusterBuilderHelper::RawClusterBuilderHelper(const std::string &name)
   : SubsysReco(name)
@@ -57,7 +57,6 @@ int RawClusterBuilderHelper::InitRun(PHCompositeNode *topNode)
 }
 int RawClusterBuilderHelper::process_event(PHCompositeNode *topNode)
 {
-
   std::string towernodename = "TOWER_CALIB_" + detector;
   // Grab the towers
   RawTowerContainer *towers = findNode::getClass<RawTowerContainer>(topNode, towernodename);
@@ -90,7 +89,8 @@ int RawClusterBuilderHelper::process_event(PHCompositeNode *topNode)
       tempTower.tower_iEta = tower->get_bineta();
       tempTower.tower_iPhi = tower->get_binphi();
       tempTower.tower_iL = 0;
-      if (towerid == RawTowerDefs::LFHCAL) {
+      if (towerid == RawTowerDefs::LFHCAL)
+      {
         tempTower.tower_iL = tower->get_binl();
       }
       tempTower.tower_trueID = towerid;  // currently unsigned -> signed, will this matter?
@@ -174,8 +174,7 @@ int RawClusterBuilderHelper::process_event(PHCompositeNode *topNode)
   return Fun4AllReturnCodes::EVENT_OK;
 }
 
-
-int RawClusterBuilderHelper::End(PHCompositeNode */*topNode*/)
+int RawClusterBuilderHelper::End(PHCompositeNode * /*topNode*/)
 {
   return Fun4AllReturnCodes::EVENT_OK;
 }
@@ -184,37 +183,55 @@ bool RawClusterBuilderHelper::IsForwardCalorimeter(int caloID)
 {
   switch (caloID)
   {
-    case RawTowerDefs::DRCALO: return true;
-    case RawTowerDefs::FHCAL: return true;
-    case RawTowerDefs::FEMC: return true;
-    case RawTowerDefs::EHCAL: return true;
-    case RawTowerDefs::EEMC: return true;
-    case RawTowerDefs::HCALIN: return false;
-    case RawTowerDefs::HCALOUT: return false;
-    case RawTowerDefs::CEMC: return false;
-    case RawTowerDefs::EEMC_crystal: return true;
-    case RawTowerDefs::EEMC_glass: return true;
-    case RawTowerDefs::LFHCAL: return true;
-    case RawTowerDefs::BECAL: return false;
-    default:
-      std::cout << "IsForwardCalorimeter: caloID " << caloID << " not defined, returning false" << std::endl;
-      return false;
+  case RawTowerDefs::DRCALO:
+    return true;
+  case RawTowerDefs::FHCAL:
+    return true;
+  case RawTowerDefs::FEMC:
+    return true;
+  case RawTowerDefs::EHCAL:
+    return true;
+  case RawTowerDefs::EEMC:
+    return true;
+  case RawTowerDefs::HCALIN:
+    return false;
+  case RawTowerDefs::HCALOUT:
+    return false;
+  case RawTowerDefs::CEMC:
+    return false;
+  case RawTowerDefs::EEMC_crystal:
+    return true;
+  case RawTowerDefs::EEMC_glass:
+    return true;
+  case RawTowerDefs::LFHCAL:
+    return true;
+  case RawTowerDefs::BECAL:
+    return false;
+  default:
+    std::cout << "IsForwardCalorimeter: caloID " << caloID << " not defined, returning false" << std::endl;
+    return false;
   }
   return false;
 }
 
 int RawClusterBuilderHelper::caloTowersPhi(int caloID)
 {
-    switch (caloID)
-    {
-      case RawTowerDefs::CEMC: return 100;
-      case RawTowerDefs::HCALIN: return 64;
-      case RawTowerDefs::HCALOUT: return 64;
-      case RawTowerDefs::EEMC_glass: return -1;
-      case RawTowerDefs::BECAL: return 128;
-      default: return 0;
-    }
+  switch (caloID)
+  {
+  case RawTowerDefs::CEMC:
+    return 100;
+  case RawTowerDefs::HCALIN:
+    return 64;
+  case RawTowerDefs::HCALOUT:
+    return 64;
+  case RawTowerDefs::EEMC_glass:
+    return -1;
+  case RawTowerDefs::BECAL:
+    return 128;
+  default:
+    return 0;
   }
+}
 
 void RawClusterBuilderHelper::CreateNodes(PHCompositeNode *topNode)
 {
@@ -241,4 +258,3 @@ void RawClusterBuilderHelper::CreateNodes(PHCompositeNode *topNode)
   PHIODataNode<PHObject> *clusterNode = new PHIODataNode<PHObject>(_clusters, ClusterNodeName, "PHObject");
   DetNode->addNode(clusterNode);
 }
-

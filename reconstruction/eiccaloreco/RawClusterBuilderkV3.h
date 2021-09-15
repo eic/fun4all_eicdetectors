@@ -15,11 +15,11 @@ class RawClusterContainer;
 
 class RawClusterBuilderkV3 : public RawClusterBuilderHelper
 {
-  public:
-    RawClusterBuilderkV3(const std::string &name);
+ public:
+  RawClusterBuilderkV3(const std::string &name);
 
-  protected:
-    void cluster(std::vector<towersStrct> &input_towers, uint caloId) override;
+ protected:
+  void cluster(std::vector<towersStrct> &input_towers, uint caloId) override;
 };
 
 #endif
