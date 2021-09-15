@@ -1,5 +1,5 @@
-#include "RawClusterBuilderkV3.h"
-#include "RawClusterBuilderHelper.h"
+#include <RawClusterBuilderHelper.h>
+#include <RawClusterBuilderkMA.h>
 
 #include <calobase/RawCluster.h>
 #include <calobase/RawClusterContainer.h>
@@ -22,53 +22,51 @@
 #include <phool/getClass.h>
 #include <phool/phool.h>
 
+#include <TMath.h>
+
 #include <algorithm>
 #include <cassert>
-#include <cmath>
-#include <exception>
-#include <iostream>
-#include <map>
-#include <stdexcept>
+#include <string>
 #include <utility>
-#include <vector>
 
-using namespace std;
-
-RawClusterBuilderkV3::RawClusterBuilderkV3(const std::string &name)
+RawClusterBuilderkMA::RawClusterBuilderkMA(const std::string &name)
   : RawClusterBuilderHelper(name)
 {
 }
 
-void RawClusterBuilderkV3::cluster(std::vector<towersStrct> &input_towers, uint caloId)
+void RawClusterBuilderkMA::cluster(std::vector<towersStrct> &input_towers, uint caloId)
 {
-  // Next we'll sort the towers from most energetic to least
-  // This is from https://github.com/FriederikeBock/AnalysisSoftwareEIC/blob/642aeb13b13271820dfee59efe93380e58456289/treeAnalysis/clusterizer.cxx#L281
   std::sort(input_towers.begin(), input_towers.end(), &towerECompare);
   std::vector<towersStrct> cluster_towers;
-  // And run kV3 clustering
   while (!input_towers.empty())
   {
     cluster_towers.clear();
+
     // always start with highest energetic tower
     if (input_towers.at(0).tower_E > _seed_e)
     {
-      RawCluster *cluster = new RawClusterv1();
-      _clusters->AddCluster(cluster);  // Add cluster to cluster container
+      // std::cout << "new cluster" << std::endl;
       // fill seed cell information into current cluster
-      cluster->addTower(input_towers.at(0).twr->get_id(), input_towers.at(0).tower_E);
-      // std::cout << "Started new cluster! " << input_towers.at(0).tower_E << std::endl;
       cluster_towers.push_back(input_towers.at(0));
-      // kV3 Clustering
+      RawCluster *cluster = new RawClusterv1();
+      _clusters->AddCluster(cluster);
+      cluster->addTower(input_towers.at(0).twr->get_id(), input_towers.at(0).tower_E);
+      // std::cout << "running MA" << std::endl;
+      // remove seed tower from sample
       input_towers.erase(input_towers.begin());
       for (int tit = 0; tit < (int) cluster_towers.size(); tit++)
       {
-        // Now go recursively to the next 4 neighbours and add them to the cluster if they fulfill the conditions
+        // std::cout << "recurse" << std::endl;
+        // Now go recursively to all neighbours and add them to the cluster if they fulfill the conditions
         int iEtaTwr = cluster_towers.at(tit).tower_iEta;
         int iPhiTwr = cluster_towers.at(tit).tower_iPhi;
+        int iLTwr = cluster_towers.at(tit).tower_iL;
+        int refC = 0;
         for (int ait = 0; ait < (int) input_towers.size(); ait++)
         {
           int iEtaTwrAgg = input_towers.at(ait).tower_iEta;
           int iPhiTwrAgg = input_towers.at(ait).tower_iPhi;
+          int iLTwrAgg = input_towers.at(ait).tower_iL;
 
           if (!IsForwardCalorimeter(caloId))
           {
@@ -81,18 +79,29 @@ void RawClusterBuilderkV3::cluster(std::vector<towersStrct> &input_towers, uint 
               iPhiTwr = iPhiTwr - caloTowersPhi(caloId);
             }
           }
-          int deltaEta = std::abs(iEtaTwrAgg - iEtaTwr);
-          int deltaPhi = std::abs(iPhiTwrAgg - iPhiTwr);
 
-          if ((deltaEta + deltaPhi) == 1)
+          int deltaL = TMath::Abs(iLTwrAgg - iLTwr);
+          int deltaPhi = TMath::Abs(iPhiTwrAgg - iPhiTwr);
+          int deltaEta = TMath::Abs(iEtaTwrAgg - iEtaTwr);
+          // std::cout << "DeltaL: " << deltaL;
+          // std::cout << "\tDeltaPhi: " << deltaPhi;
+          // std::cout << "\tDeltaEta: " << deltaEta << std::endl;
+          bool neighbor = (deltaL + deltaPhi + deltaEta == 1);
+          bool corner2D = (deltaL == 0 && deltaPhi == 1 && deltaEta == 1) || (deltaL == 1 && deltaPhi == 0 && deltaEta == 1) || (deltaL == 1 && deltaPhi == 1 && deltaEta == 0);
+          // first condition asks for V3-like neighbors, while second condition also checks diagonally attached towers
+          if (neighbor || corner2D)
           {
             // only aggregate towers with lower energy than current tower
+            // if(caloId != RawTowerDefs::LFHCAL){  // TODO Why?
             if (input_towers.at(ait).tower_E >= (cluster_towers.at(tit).tower_E + _agg_e)) continue;
-            cluster->addTower(input_towers.at(ait).twr->get_id(), input_towers.at(ait).tower_E);  // Add tower to cluster
-            // std::cout << "Added a tower to the cluster! " << input_towers.at(ait).tower_E << std::endl;
+            // }
             cluster_towers.push_back(input_towers.at(ait));
+            // std::cout << "added a tower to the cluster" << std::endl;
+            cluster->addTower(input_towers.at(ait).twr->get_id(), input_towers.at(ait).tower_E);  // Add tower to cluster)
             input_towers.erase(input_towers.begin() + ait);
+            if (Verbosity() > 2) std::cout << "aggregated: " << iEtaTwrAgg << "\t" << iPhiTwrAgg << "\t" << iLTwrAgg << "\t E:" << input_towers.at(ait).tower_E << "\t reference: " << refC << "\t" << iEtaTwr << "\t" << iPhiTwr << "\t" << iLTwr << "\t cond.: \t" << neighbor << "\t" << corner2D << "\t  diffs: " << deltaEta << "\t" << deltaPhi << "\t" << deltaL << std::endl;
             ait--;
+            refC++;
           }
         }
       }
