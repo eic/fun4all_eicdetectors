@@ -55,11 +55,11 @@ class EICG4B0Subsystem : public PHG4DetectorSubsystem
  private:
   //! detector construction
   /*! derives from PHG4Detector */
-  EICG4B0Detector  *m_Detector;
+  EICG4B0Detector* m_Detector;
 
   //! particle tracking "stepping" action
   /*! derives from PHG4SteppingActions */
-  PHG4SteppingAction *m_SteppingAction;
+  PHG4SteppingAction* m_SteppingAction;
 };
 
-#endif // EICG4B0SUBSYSTEM_H
+#endif  // EICG4B0SUBSYSTEM_H

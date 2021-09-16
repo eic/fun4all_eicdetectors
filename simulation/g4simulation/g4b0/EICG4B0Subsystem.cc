@@ -104,23 +104,23 @@ void EICG4B0Subsystem::SetDefaultParameters()
   // angles are in deg
   // units should be converted to G4 units when used
   //implement your own here//
-  set_default_double_param("place_x", 0.); //subdetector position
-  set_default_double_param("place_y", 0.); //subdetector position
-  set_default_double_param("place_z", 0.); //subdetector position
-  set_default_double_param("pipe_ir", 2.8); //beam pipe inner radius (for future implementation)
-  set_default_double_param("pipe_or", 3.05); //beam pipe outer raidus (for future implementation)
-  set_default_double_param("pipe_hole", 5.0); //beam pipe cut off radius in the detector volume
-  set_default_double_param("pipe_x", -3.4); //beam pipe position
-  set_default_double_param("pipe_y", 0.); //beam pipe position
-  set_default_double_param("pipe_z", 0.); //beam pipe position
-  set_default_double_param("rot_y", 0.); //subdetector rotation
-  set_default_double_param("outer_radius", 2.); //detector outer radiues
-  set_default_double_param("d_radius", 5.); //packman cutoff size
-  set_default_double_param("length", 10.); //detector length
-  set_default_double_param("startAngle", 0.); //start Angle for packman cutoff
-  set_default_double_param("spanningAngle", 360.); //spanning Angle of the detector (for packman cutoff)
-  set_default_double_param("detid", 0.); //detector id
-  set_default_int_param("ispipe", 0); //pipe or detector (for future implementation)
+  set_default_double_param("place_x", 0.);          //subdetector position
+  set_default_double_param("place_y", 0.);          //subdetector position
+  set_default_double_param("place_z", 0.);          //subdetector position
+  set_default_double_param("pipe_ir", 2.8);         //beam pipe inner radius (for future implementation)
+  set_default_double_param("pipe_or", 3.05);        //beam pipe outer raidus (for future implementation)
+  set_default_double_param("pipe_hole", 5.0);       //beam pipe cut off radius in the detector volume
+  set_default_double_param("pipe_x", -3.4);         //beam pipe position
+  set_default_double_param("pipe_y", 0.);           //beam pipe position
+  set_default_double_param("pipe_z", 0.);           //beam pipe position
+  set_default_double_param("rot_y", 0.);            //subdetector rotation
+  set_default_double_param("outer_radius", 2.);     //detector outer radiues
+  set_default_double_param("d_radius", 5.);         //packman cutoff size
+  set_default_double_param("length", 10.);          //detector length
+  set_default_double_param("startAngle", 0.);       //start Angle for packman cutoff
+  set_default_double_param("spanningAngle", 360.);  //spanning Angle of the detector (for packman cutoff)
+  set_default_double_param("detid", 0.);            //detector id
+  set_default_int_param("ispipe", 0);               //pipe or detector (for future implementation)
 
-  set_default_string_param("material", "G4_PbWO4"); //detector material
+  set_default_string_param("material", "G4_PbWO4");  //detector material
 }

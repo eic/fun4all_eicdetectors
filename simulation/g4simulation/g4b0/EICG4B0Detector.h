@@ -33,23 +33,23 @@ class EICG4B0Detector : public PHG4Detector
   int IsInDetector(G4VPhysicalVolume *) const;
   //@}
 
-  int GetDetId(G4VPhysicalVolume*) const;
+  int GetDetId(G4VPhysicalVolume *) const;
 
   void SuperDetector(const std::string &name) { m_SuperDetector = name; }
   const std::string SuperDetector() const { return m_SuperDetector; }
-  int get_Layer() const {return m_Layer;}
-  PHParameters * getParams();
+  int get_Layer() const { return m_Layer; }
+  PHParameters *getParams();
 
  private:
   PHParameters *m_Params;
 
   // active volumes
   std::set<G4VPhysicalVolume *> m_PhysicalVolumesSet;
-//  std::set<G4LogicalVolume *>   m_LogicalVolumesSet;
+  //  std::set<G4LogicalVolume *>   m_LogicalVolumesSet;
   std::map<G4VPhysicalVolume *, int> m_PhysicalVolumesDet;
-//  std::map<G4LogicalVolume *, int>   m_LogicalVolumesDet;
+  //  std::map<G4LogicalVolume *, int>   m_LogicalVolumesDet;
   int m_Layer;
   std::string m_SuperDetector;
 };
 
-#endif // EICG4B0DETECTOR_H
+#endif  // EICG4B0DETECTOR_H

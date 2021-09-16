@@ -49,4 +49,4 @@ class EICG4B0SteppingAction : public PHG4SteppingAction
   double m_EionSum;
 };
 
-#endif // EICG4B0STEPPINGACTION_H
+#endif  // EICG4B0STEPPINGACTION_H
