@@ -22,6 +22,8 @@
 
 #include <Geant4/G4ParticleTable.hh>
 #include <Geant4/G4ProcessManager.hh>
+#include <Geant4/G4ios.hh>
+#include <Geant4/G4SystemOfUnits.hh>
 
 #include <cmath>  // for isfinite
 
@@ -48,7 +50,7 @@ int G4EicDircSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
 {
   PHNodeIterator iter(topNode);
   PHCompositeNode *dstNode = dynamic_cast<PHCompositeNode *>(iter.findFirst("PHCompositeNode", "DST"));
-  DircBoundary = new G4EicDircOpBoundaryProcess();
+  //DircBoundary = new G4EicDircOpBoundaryProcess();
   // G4EicDircDisplayAction *disp_action = new G4EicDircDisplayAction(Name(), GetParams());
   // if (isfinite(m_ColorArray[0]) &&
   //     isfinite(m_ColorArray[1]) &&
@@ -63,6 +65,7 @@ int G4EicDircSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
   m_Detector = new G4EicDircDetector(this, topNode, GetParams(), Name());
   m_Detector->SuperDetector(SuperDetector());
   m_Detector->OverlapCheck(CheckOverlap());
+  m_Detector->Verbosity(Verbosity());
 
   std::string detector_suffix = SuperDetector();
   if (detector_suffix == "NONE")
@@ -112,17 +115,23 @@ int G4EicDircSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
     m_SteppingAction = tmp;
   }
   m_StackingAction = new G4EicDircStackingAction(m_Detector);
+  m_StackingAction->Verbosity(Verbosity());
+
   return 0;
 }
 
-void G4EicDircSubsystem::AddProcesses(G4ParticleDefinition *particle)
+/*void G4EicDircSubsystem::AddProcesses(G4ParticleDefinition *particle)
 {
     G4ProcessManager* pmanager = particle->GetProcessManager();
     if (DircBoundary->IsApplicable(*particle))
     {
       pmanager->AddDiscreteProcess(DircBoundary);
-    }
-}
+      pmanager->SetProcessOrderingToFirst(DircBoundary, idxPostStep);
+      
+      G4cout << "dirc boundary process index = " << pmanager->GetProcessIndex(DircBoundary) << G4endl;
+      G4cout << "dirc boundary process ordering = " << pmanager->GetProcessOrdering(DircBoundary, idxPostStep) << G4endl;
+      }
+}*/
 
 //_______________________________________________________________________
 int G4EicDircSubsystem::process_event(PHCompositeNode *topNode)
@@ -171,16 +180,16 @@ void G4EicDircSubsystem::SetDefaultParameters()
   set_default_double_param("length", 287 + 168);
 
   set_default_double_param("NBars", 11);
-  set_default_double_param("Radius", 75.0);
-  set_default_double_param("Prizm_width", 38.65);
-  set_default_double_param("Prizm_length", 30.0);
-  set_default_double_param("Prizm_height_at_lens", 3.7);
-  set_default_double_param("Bar_thickness", 1.7);
-  set_default_double_param("Bar_width", 3.5);
-  set_default_double_param("BarL_length", 122.5);
-  set_default_double_param("BarS_length", 56.0);
-  set_default_double_param("Mirror_height", 2.0);
-  set_default_double_param("z_shift", 0);
+  set_default_double_param("Radius", 75.0*cm);
+  set_default_double_param("Prizm_width", 38.65*cm);
+  set_default_double_param("Prizm_length", 30.0*cm);
+  set_default_double_param("Prizm_height_at_lens", 5.0*cm);
+  set_default_double_param("Bar_thickness", 1.725*cm);
+  set_default_double_param("Bar_width", 3.5*cm);
+  set_default_double_param("BarL_length", 122.5*cm);
+  set_default_double_param("BarS_length", 56.0*cm);
+  set_default_double_param("Mirror_height", 2.0*cm);
+  set_default_double_param("z_shift", -43.75*cm);
   set_default_int_param("Geom_type", 0); // 0-whole DIRC, 1-one bar box
   set_default_int_param("Lens_id", 3); // 3- 3-layer spherical lens
   set_default_int_param("MCP_rows", 6);

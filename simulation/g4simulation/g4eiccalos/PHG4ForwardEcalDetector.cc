@@ -15,9 +15,11 @@
 
 #include <Geant4/G4Box.hh>
 #include <Geant4/G4Cons.hh>
+#include <Geant4/G4SubtractionSolid.hh>
 #include <Geant4/G4LogicalVolume.hh>
 #include <Geant4/G4Material.hh>
 #include <Geant4/G4PVPlacement.hh>
+#include <Geant4/G4PVReplica.hh>
 #include <Geant4/G4PhysicalConstants.hh>
 #include <Geant4/G4RotationMatrix.hh>  // for G4RotationMatrix
 #include <Geant4/G4String.hh>          // for G4String
@@ -65,6 +67,9 @@ PHG4ForwardEcalDetector::PHG4ForwardEcalDetector(PHG4Subsystem* subsys, PHCompos
   m_RMax[0] = 2250 * mm;
   m_RMin[1] = 120 * mm;
   m_RMax[1] = 2460 * mm;
+  m_Params->set_double_param("xoffset", 0.);
+  m_Params->set_double_param("yoffset", 0.);
+
   assert(m_GdmlConfig);
 }
 
@@ -104,13 +109,21 @@ void PHG4ForwardEcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
   recoConsts* rc = recoConsts::instance();
   G4Material* WorldMaterial = G4Material::GetMaterial(rc->get_StringFlag("WorldMaterial"));
 
-  G4VSolid* ecal_envelope_solid = new G4Cons("hEcal_envelope_solid",
-                                             m_RMin[0], m_RMax[0],
-                                             m_RMin[1], m_RMax[1],
-                                             m_dZ / 2.,
-                                             0, 2 * M_PI);
+  
+  G4VSolid *beampipe_cutout = new G4Cons("FEMC_beampipe_cutout",
+                                         0, m_RMin[0],
+                                         0, m_RMin[1],
+                                         m_dZ / 2.0,
+                                         0, 2 * M_PI);
+  G4VSolid *ecal_envelope_solid = new G4Cons("FEMC_envelope_solid_cutout",
+                                            0, m_RMax[0],
+                                            0, m_RMax[1],
+                                            m_dZ / 2.0,
+                                            0, 2 * M_PI);
+  ecal_envelope_solid = new G4SubtractionSolid(G4String("hFEMC_envelope_solid"), ecal_envelope_solid, beampipe_cutout, 0, G4ThreeVector(m_Params->get_double_param("xoffset") * cm, m_Params->get_double_param("yoffset") * cm, 0.));
 
-  G4LogicalVolume* ecal_envelope_log = new G4LogicalVolume(ecal_envelope_solid, WorldMaterial, "hEcal_envelope", 0, 0, 0);
+
+  G4LogicalVolume* ecal_envelope_log = new G4LogicalVolume(ecal_envelope_solid, WorldMaterial, "hFEMC_envelope", 0, 0, 0);
 
   /* Define visualization attributes for envelope cone */
   GetDisplayAction()->AddVolume(ecal_envelope_log, "Envelope");
@@ -164,8 +177,10 @@ PHG4ForwardEcalDetector::ConstructTower(int type)
   // Call a separate routine to generate Type 2 towers (PbSc)
   // Call a separate routine to generate Type 3-6 towers (E864 Pb-Scifi)
 
-  if (type == 2) return ConstructTowerType2();
-  if ((type == 3) || (type == 4) || (type == 5) || (type == 6)) return ConstructTowerType3_4_5_6(type);
+  if (type == 2) 
+    return ConstructTowerType2();
+  if ((type == 3) || (type == 4) || (type == 5) || (type == 6)) 
+    return ConstructTowerType3_4_5_6(type);
 
   /* create logical volume for single tower */
   recoConsts* rc = recoConsts::instance();
@@ -211,7 +226,7 @@ PHG4ForwardEcalDetector::ConstructTower(int type)
                                            tower_dy / 2.0,
                                            tower_dz / 2.0);
 
-  std::string hEcal_scintillator_plate_logic_name = "hEcal_scintillator_plate_logic_type" + std::to_string(type);
+  std::string hEcal_scintillator_plate_logic_name = "hFEMC_scintillator_plate_logic_type" + std::to_string(type);
 
   G4LogicalVolume* logic_scint = new G4LogicalVolume(solid_scintillator,
                                                      material_scintillator,
@@ -263,12 +278,31 @@ PHG4ForwardEcalDetector::ConstructTowerType2()
 
   /* create geometry volumes for scintillator and absorber plates to place inside single_tower */
   // PHENIX EMCal JGL 3/27/2016
-  G4int nlayers = 66;
-  G4double thickness_layer = m_TowerDz[2] / (float) nlayers;
+  G4int nlayers                   = 66;
+  G4double thickness_layer        = m_TowerDz[2] / (float) nlayers;
   // update layer thickness with https://doi.org/10.1016/S0168-9002(02)01954-X
-  G4double thickness_absorber = thickness_layer * (1.5 / 5.6);      // 1.5mm absorber
+  G4double thickness_absorber     = thickness_layer * (1.5 / 5.6);      // 1.5mm absorber
   G4double thickness_scintillator = thickness_layer * (4.0 / 5.6);  // 4mm scintillator
+  G4Material* material_scintillator = G4Material::GetMaterial("G4_POLYSTYRENE");
+  G4Material* material_absorber     = G4Material::GetMaterial("G4_Pb");
 
+  
+  
+  //**********************************************************************************************
+  /* create logical and geometry volumes for minitower read-out unit */
+  //**********************************************************************************************
+  G4VSolid* miniblock_solid         = new G4Box("miniblock_solid",
+                                                m_TowerDx[2] / 2.0,
+                                                m_TowerDy[2] / 2.0,
+                                                (thickness_absorber + thickness_scintillator) / 2.0);
+  G4LogicalVolume* miniblock_logic  = new G4LogicalVolume(miniblock_solid,
+                                                          WorldMaterial,
+                                                          "miniblock_logic",
+                                                          0, 0, 0);
+  GetDisplayAction()->AddVolume(miniblock_logic, "miniblock");
+  //**********************************************************************************************
+  /* create logical & geometry volumes for scintillator and absorber plates to place inside mini read-out unit */
+  //**********************************************************************************************  
   G4VSolid* solid_absorber = new G4Box("single_plate_absorber_solid2",
                                        m_TowerDx[2] / 2.0,
                                        m_TowerDy[2] / 2.0,
@@ -279,50 +313,39 @@ PHG4ForwardEcalDetector::ConstructTowerType2()
                                            m_TowerDy[2] / 2.0,
                                            thickness_scintillator / 2.0);
 
-  /* create logical volumes for scintillator and absorber plates to place inside single_tower */
-  G4Material* material_scintillator = G4Material::GetMaterial("G4_POLYSTYRENE");
-  G4Material* material_absorber = G4Material::GetMaterial("G4_Pb");
-
   G4LogicalVolume* logic_absorber = new G4LogicalVolume(solid_absorber,
                                                         material_absorber,
                                                         "single_plate_absorber_logic2",
                                                         0, 0, 0);
-
+  m_AbsorberLogicalVolSet.insert(logic_absorber);
   G4LogicalVolume* logic_scint = new G4LogicalVolume(solid_scintillator,
                                                      material_scintillator,
                                                      "hEcal_scintillator_plate_logic2",
                                                      0, 0, 0);
-
-  m_AbsorberLogicalVolSet.insert(logic_absorber);
   m_ScintiLogicalVolSet.insert(logic_scint);
+  
   GetDisplayAction()->AddVolume(logic_absorber, "Absorber");
   GetDisplayAction()->AddVolume(logic_scint, "Scintillator");
 
-  /* place physical volumes for absorber and scintillator plates */
-  G4double xpos_i = 0;
-  G4double ypos_i = 0;
-  G4double zpos_i = (-1 * m_TowerDz[2] / 2.0) + thickness_absorber / 2.0;
-
   std::string name_absorber = m_TowerLogicNamePrefix + "_single_plate_absorber2";
   std::string name_scintillator = m_TowerLogicNamePrefix + "_single_plate_scintillator2";
-  for (int i = 1; i <= nlayers; i++)
-  {
-    new G4PVPlacement(0, G4ThreeVector(xpos_i, ypos_i, zpos_i),
-                      logic_absorber,
-                      name_absorber,
-                      single_tower_logic,
-                      0, 0, OverlapCheck());
 
-    zpos_i += (thickness_absorber / 2. + thickness_scintillator / 2.);
+  new G4PVPlacement(0, G4ThreeVector(0, 0, -thickness_scintillator/2),
+                    logic_absorber,
+                    name_absorber,
+                    miniblock_logic,
+                    0, 0, OverlapCheck());
 
-    new G4PVPlacement(0, G4ThreeVector(xpos_i, ypos_i, zpos_i),
-                      logic_scint,
-                      name_scintillator,
-                      single_tower_logic,
-                      0, 0, OverlapCheck());
+  new G4PVPlacement(0, G4ThreeVector(0, 0, (thickness_absorber)/ 2.),
+                    logic_scint,
+                    name_scintillator,
+                    miniblock_logic,
+                    0, 0, OverlapCheck());
 
-    zpos_i += (thickness_absorber / 2. + thickness_scintillator / 2.);
-  }
+  /* create replica within tower */
+  std::string name_tower = m_TowerLogicNamePrefix;
+  new G4PVReplica(name_tower,miniblock_logic,single_tower_logic,
+                      kZAxis,nlayers, thickness_absorber+thickness_scintillator,0);
 
   GetDisplayAction()->AddVolume(single_tower_logic, "SingleTower");
 
@@ -645,6 +668,21 @@ int PHG4ForwardEcalDetector::ParseParametersFromTable()
   {
     m_ZRot = parit->second;
   }
+  parit = m_GlobalParameterMap.find("tower_type");
+  if (parit != m_GlobalParameterMap.end())
+  {
+    m_TowerType = parit->second;
+  }
+  
+  parit = m_GlobalParameterMap.find("xoffset");
+  if (parit != m_GlobalParameterMap.end())
+    m_Params->set_double_param("xoffset", parit->second);  
+
+  parit = m_GlobalParameterMap.find("yoffset");
+  if (parit != m_GlobalParameterMap.end())
+    m_Params->set_double_param("yoffset", parit->second);  
+
+  
   return 0;
 }
 

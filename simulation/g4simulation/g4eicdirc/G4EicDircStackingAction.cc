@@ -79,7 +79,9 @@ G4ClassificationOfNewTrack G4EicDircStackingAction::ClassifyNewTrack(const G4Tra
     }
   }
 
-  int whichactive = m_Detector->IsInDetector(volume);
+  int whichactive_int = m_Detector->IsInDetector(volume);
+  bool whichactive = (whichactive_int > 0 && whichactive_int < 12);
+  //int whichactive = m_Detector->IsInDetector(volume);
   if (!whichactive)
   {
     return fUrgent;
@@ -108,7 +110,7 @@ G4ClassificationOfNewTrack G4EicDircStackingAction::ClassifyNewTrack(const G4Tra
 
 void G4EicDircStackingAction::PrepareNewEvent()
 {
-  G4cout << "Number of Cerenkov photons produced in this event : " << fCerenkovCounter << G4endl;
+  if (Verbosity ()) G4cout << "Number of Cerenkov photons produced in this event : " << fCerenkovCounter << G4endl;
   //  std::cout << "calling prepare new event" << std::endl;
   fCerenkovCounter = 0;
   fScintillationCounter = 0;

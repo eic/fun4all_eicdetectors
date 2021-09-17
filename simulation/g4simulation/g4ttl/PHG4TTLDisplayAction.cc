@@ -59,11 +59,26 @@ void PHG4TTLDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
       // visatt->SetForceWireframe(true);
       PHG4Utils::SetColour(visatt, it.first->GetMaterial()->GetName());
       // if(it.first->GetMaterial()->GetName()=="CarbonFiberSupport") visatt->SetColour(G4Colour(21./255, 27./255, 31./255));
-      if (it.first->GetMaterial()->GetName() == "CarbonFiberSupport") visatt->SetColour(G4Colour(4 * 21. / 255, 4 * 27. / 255, 4 * 31. / 255));
-      if (it.first->GetMaterial()->GetName() == "G4_Al") visatt->SetColour(G4Colour(132. / 255, 135. / 255, 137. / 255));
-      if (it.first->GetMaterial()->GetName() == "G4_GRAPHITE") visatt->SetColour(G4Colour(2 * 21. / 255, 2 * 27. / 255, 2 * 31. / 255));
-      if (it.first->GetMaterial()->GetName() == "AluminiumNitrate") visatt->SetColour(G4Colour(0.8 * 138, 0.8 * 115, 0.8 * 115));
-      if (it.first->GetMaterial()->GetName() == "G4_PLEXIGLASS") visatt->SetColour(G4Colour(68, 131, 157));
+      if (it.first->GetMaterial()->GetName() == "CarbonFiberSupport"){
+        visatt->SetVisibility(false);
+        visatt->SetColour(G4Colour(4 * 21. / 255, 4 * 27. / 255, 4 * 31. / 255));
+      }
+      if (it.first->GetMaterial()->GetName() == "G4_Al"){
+        visatt->SetVisibility(false);
+        visatt->SetColour(G4Colour(132. / 255, 135. / 255, 137. / 255));
+      }
+      if (it.first->GetMaterial()->GetName() == "G4_GRAPHITE"){
+        visatt->SetVisibility(false);
+        visatt->SetColour(G4Colour(2 * 21. / 255, 2 * 27. / 255, 2 * 31. / 255));
+      }
+      if (it.first->GetMaterial()->GetName() == "AluminiumNitrate"){
+        visatt->SetVisibility(false);
+        visatt->SetColour(G4Colour(0.8 * 138, 0.8 * 115, 0.8 * 115));
+      }
+      if (it.first->GetMaterial()->GetName() == "G4_PLEXIGLASS"){
+        visatt->SetVisibility(false);
+        visatt->SetColour(G4Colour(68, 131, 157));
+      }
     }
     else if (it.second == "SHLayers")
     {
@@ -121,7 +136,7 @@ void PHG4TTLDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
     }
     else if (it.second == "ModuleEnvelope")
     {
-      visatt->SetVisibility(false);
+      // visatt->SetVisibility(false);
       visatt->SetColour(G4Colour::Red());
       // visatt->SetForceSolid(true);
       visatt->SetForceWireframe(true);

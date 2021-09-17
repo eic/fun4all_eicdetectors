@@ -13,6 +13,7 @@
 #include <Geant4/G4Trap.hh>
 #include <Geant4/G4Cons.hh>
 #include <Geant4/G4LogicalVolume.hh>
+#include <Geant4/G4SubtractionSolid.hh>
 #include <Geant4/G4Material.hh>
 #include <Geant4/G4PVPlacement.hh>
 #include <Geant4/G4PVReplica.hh>
@@ -92,15 +93,19 @@ void PHG4LFHcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
   recoConsts* rc = recoConsts::instance();
   G4Material* WorldMaterial = G4Material::GetMaterial(rc->get_StringFlag("WorldMaterial"));
 
-  G4VSolid* hcal_envelope_solid = new G4Cons("hHcal_envelope_solid",
-                                             m_Params->get_double_param("rMin1") * cm,
-                                             m_Params->get_double_param("rMax1") * cm,
-                                             m_Params->get_double_param("rMin2") * cm,
-                                             m_Params->get_double_param("rMax2") * cm,
-                                             m_Params->get_double_param("dz") * cm / 2.,
-                                             0., 2. * M_PI);
-
-  G4LogicalVolume* hcal_envelope_log = new G4LogicalVolume(hcal_envelope_solid, WorldMaterial, "hHcal_envelope", 0, 0, 0);
+  G4VSolid *beampipe_cutout = new G4Cons("LFHCAL_beampipe_cutout",
+                                         0, m_Params->get_double_param("rMin1") * cm,
+                                         0, m_Params->get_double_param("rMin2") * cm,
+                                         m_Params->get_double_param("dz") * cm / 2.0,
+                                         0, 2 * M_PI);
+  G4VSolid *hcal_envelope_solid = new G4Cons("LFHCAL_envelope_solid_cutout",
+                                            0, m_Params->get_double_param("rMax1") * cm,
+                                            0, m_Params->get_double_param("rMax2") * cm,
+                                            m_Params->get_double_param("dz") * cm / 2.0,
+                                            0, 2 * M_PI);
+  hcal_envelope_solid = new G4SubtractionSolid(G4String("LFHCAL_envelope_solid"), hcal_envelope_solid, beampipe_cutout, 0, G4ThreeVector(m_Params->get_double_param("xoffset") * cm, m_Params->get_double_param("yoffset") * cm, 0.));
+  
+  G4LogicalVolume* hcal_envelope_log = new G4LogicalVolume(hcal_envelope_solid, WorldMaterial, "hLFHCAL_envelope", 0, 0, 0);
 
   m_DisplayAction->AddVolume(hcal_envelope_log, "LFHcalEnvelope");
 
@@ -176,7 +181,6 @@ PHG4LFHcalDetector::ConstructTower()
                                                           WorldMaterial,
                                                           "miniblock_logic",
                                                           0, 0, 0);
-  
   //**********************************************************************************************
   /* create logical & geometry volumes for scintillator and absorber plates to place inside mini read-out unit */
   //**********************************************************************************************
@@ -196,7 +200,7 @@ PHG4LFHcalDetector::ConstructTower()
   m_AbsorberLogicalVolSet.insert(logic_absorber);
   G4LogicalVolume* logic_scint = new G4LogicalVolume(solid_scintillator,
                                                      material_scintillator,
-                                                     "hHcal_scintillator_plate_logic",
+                                                     "hLFHCAL_scintillator_plate_logic",
                                                      0, 0, 0);
   m_ScintiLogicalVolSet.insert(logic_scint);
   m_DisplayAction->AddVolume(logic_absorber, "Absorber");
@@ -228,7 +232,7 @@ PHG4LFHcalDetector::ConstructTower()
                                           WlsDw, TowerDz, TowerDx,  WlsDw);
   G4LogicalVolume* logic_wls = new G4LogicalVolume(solid_WLS_plate,
                                                    material_wls,
-                                                   "hHcal_wls_plate_logic",
+                                                   "hLFHCAL_wls_plate_logic",
                                                    0, 0, 0);  
   m_DisplayAction->AddVolume(logic_wls, "WLSplate");
   G4RotationMatrix wls_rotm;
@@ -431,7 +435,7 @@ int PHG4LFHcalDetector::ParseParametersFromTable()
   parit = m_GlobalParameterMap.find("Gdz");
   if (parit != m_GlobalParameterMap.end())
   {
-    m_Params->set_double_param("dZ", parit->second);
+    m_Params->set_double_param("dz", parit->second);
   }
 
   parit = m_GlobalParameterMap.find("Gx0");
@@ -482,6 +486,15 @@ int PHG4LFHcalDetector::ParseParametersFromTable()
   if (parit != m_GlobalParameterMap.end())
     m_Params->set_int_param("nlayerspertowerseg", (int)parit->second);  
 
+  parit = m_GlobalParameterMap.find("xoffset");
+  if (parit != m_GlobalParameterMap.end())
+    m_Params->set_double_param("xoffset", parit->second);  
+
+  parit = m_GlobalParameterMap.find("yoffset");
+  if (parit != m_GlobalParameterMap.end())
+    m_Params->set_double_param("yoffset", parit->second);  
+  
+  
   if (Verbosity() > 1){
     std::cout << "PHG4 detector LFHCal - Absorber: " << m_Params->get_double_param("thickness_absorber") << " cm\t Scintilator: "<< m_Params->get_double_param("thickness_scintillator") << " cm\t layers per segment: " << m_Params->get_int_param("nlayerspertowerseg") << std::endl;
   }

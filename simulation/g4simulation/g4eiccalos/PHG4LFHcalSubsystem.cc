@@ -142,9 +142,12 @@ void PHG4LFHcalSubsystem::SetDefaultParameters()
   set_default_double_param("rot_x", 0.);
   set_default_double_param("rot_y", 0.);
   set_default_double_param("rot_z", 0.);
+  set_default_double_param("xoffset", 0.);
+  set_default_double_param("yoffset", 0.);
   set_default_double_param("thickness_absorber", 1.6);
   set_default_double_param("thickness_scintillator", 0.4);
   set_default_int_param("nlayerspertowerseg", 10);
+  
 
   std::ostringstream mappingfilename;
   const char* calibroot = getenv("CALIBRATIONROOT");

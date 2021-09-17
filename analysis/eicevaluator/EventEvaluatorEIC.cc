@@ -1172,6 +1172,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
             _hits_t[_nHitsLayers] = hit_iter->second->get_t(0);
             _hits_edep[_nHitsLayers] = hit_iter->second->get_edep();
             _hits_layerID[_nHitsLayers] = iIndex;
+            // cout << "i " << hit_iter->second->get_index_i() << "\tj " <<hit_iter->second->get_index_j() << "\tk " <<hit_iter->second->get_index_k() << "\tl " << hit_iter->second->get_index_l() << "\tsens_x "<< hit_iter->second->get_strip_z_index()<< "\tsens_y "<< hit_iter->second->get_strip_y_index()   << endl;
             if (truthinfocontainerHits)
             {
               PHG4Particle* particle = truthinfocontainerHits->GetParticle(hit_iter->second->get_trkid());
@@ -2930,7 +2931,8 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
     // It will only store them if they're available.
     std::vector<std::pair<std::string, TrackSource_t>> trackMapPairs = {
         {"TrackMap", TrackSource_t::all},
-        {"TrackMapInner", TrackSource_t::inner}
+        {"InnerTrackMap", TrackSource_t::inner},
+        {"SiliconTrackMap", TrackSource_t::silicon}
     };
     bool foundAtLeastOneTrackSource = false;
     for (const auto& trackMapInfo : trackMapPairs)

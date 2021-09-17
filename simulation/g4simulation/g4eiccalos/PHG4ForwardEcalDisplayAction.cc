@@ -85,6 +85,12 @@ void PHG4ForwardEcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol
       else 
         visatt->SetVisibility(true);
     }
+    else if (it.second == "miniblock")
+    {
+      visatt->SetVisibility(false);
+      visatt->SetColour(G4Colour::Red());
+      visatt->SetForceSolid(false);
+    }
     else
     {
       std::cout << "unknown logical volume " << it.second << std::endl;
