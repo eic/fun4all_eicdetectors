@@ -1161,7 +1161,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
               break;
             }
 
-	    if (hit_iter->second->get_edep()<0.1) continue; // FIXME
+	    if (hit_iter->second->get_edep()<0.01) continue; // FIXME
 
             _hits_x[_nHitsLayers] = hit_iter->second->get_x(0);
             _hits_y[_nHitsLayers] = hit_iter->second->get_y(0);
