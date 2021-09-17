@@ -281,6 +281,7 @@ class EventEvaluatorEIC : public SubsysReco
   // tracks
   int _nTracks;
   float* _track_ID;
+  short* _track_charge;
   float* _track_px;
   float* _track_py;
   float* _track_pz;
