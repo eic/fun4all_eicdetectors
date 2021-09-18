@@ -1,15 +1,18 @@
 #include "EICPIDDefs.h"
 
-#include <tr1/functional>
+#include <boost/algorithm/string.hpp>
+#include <string>
 
 namespace EICPIDDefs
 {
-
-  int get_volume_id(const std::string & nodename)
+PIDDetector getPIDDetector(const std::string& name)
+{
+  for (auto pair : PIDDetectorNameMap)
   {
-    return std::tr1::hash<std::string>()(nodename);
+    if (boost::iequals(pair.first, name))
+      return pair.second;
   }
-
+  return InvalidDetector;
 }
 
-
+}  // namespace EICPIDDefs

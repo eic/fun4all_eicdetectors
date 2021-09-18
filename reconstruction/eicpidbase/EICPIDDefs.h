@@ -1,22 +1,56 @@
 // Tell emacs that this is a C++ source
 //  -*- C++ -*-.
-#ifndef G4MAIN_EICPIDDefs_H
-#define G4MAIN_EICPIDDefs_H
+#ifndef EICPID_EICPIDDefs_H
+#define EICPID_EICPIDDefs_H
 
+#include <map>
 #include <string>
+#include <climits>
 
 namespace EICPIDDefs
 {
-  typedef unsigned long long keytype;
-  static const unsigned int keybits = 32;
-  static const unsigned int hit_idbits = sizeof(keytype)*8-keybits;
+// sync PID particle keys to the key of tracks
+typedef unsigned int keytype;
+static const keytype INVALID_KEY = UINT_MAX;
 
-  //! convert EICPIDParticleContainer node names in to ID number for the container.
-  //! used in indexing volume ID in PHG4Shower
-  int get_volume_id(const std::string & nodename);
+enum PIDDetector
+{
+  PIDAll = 0,
+  mRICH = 1,
+  DIRC = 2,
+  dRICH = 3,
+  GasRICH = 4,
+  ETTL = 11,
+  CTTL = 12,
+  FTTL = 13,
+  InvalidDetector = -1
+};
 
-}
+const std::map<std::string, PIDDetector> PIDDetectorNameMap = {
+    {"PIDAll", PIDAll},
+    {"mRICH", mRICH},
+    {"DIRC", DIRC},
+    {"dRICH", dRICH},
+    {"GasRICH", GasRICH},
+    {"ETTL", ETTL},
+    {"CTTL", CTTL},
+    {"FTTL", FTTL}};
+
+// consistent with PDG encoding
+enum PIDCandidate
+{
+  ElectronCandiate = 11,
+  MuonCandiate = 13,
+  PionCandiate = 211,
+  KaonCandiate = 321,
+  ProtonCandiate = 2212,
+  InvalidCandiate = 0
+};
+
+//! convert EICPIDParticleContainer node names in to ID number for the container.
+//! used in indexing volume ID in PHG4Shower
+PIDDetector getPIDDetector(const std::string& name);
+
+}  // namespace EICPIDDefs
 
 #endif
-
-
