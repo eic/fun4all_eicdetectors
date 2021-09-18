@@ -3,9 +3,9 @@
 #ifndef EICPID_EICPIDDefs_H
 #define EICPID_EICPIDDefs_H
 
+#include <climits>
 #include <map>
 #include <string>
-#include <climits>
 
 namespace EICPIDDefs
 {
@@ -47,9 +47,10 @@ enum PIDCandidate
   InvalidCandiate = 0
 };
 
-//! convert EICPIDParticleContainer node names in to ID number for the container.
-//! used in indexing volume ID in PHG4Shower
+//! convert PID detector node names in to ID number for the container.
 PIDDetector getPIDDetector(const std::string& name);
+
+const std::string& getPIDDetectorName(const PIDDetector det);
 
 }  // namespace EICPIDDefs
 

@@ -20,6 +20,44 @@ void EICPIDParticlev1::Reset()
 {
   m_id = -1;
   prop_map.clear();
+  m_LogLikelyhoodMap.clear();
+}
+
+void EICPIDParticlev1::identify(ostream& os) const
+{
+  os << "Class " << this->ClassName();
+  os << " id: " << m_id << endl;
+  for (const auto& pair : m_LogLikelyhoodMap)
+  {
+    const auto& key = pair.first;
+    const auto& LL = pair.second;
+
+    os << "\t"
+       << "PID Candidate " << key.first << " from detector ID " << key.second
+       << " " << EICPIDDefs::getPIDDetectorName(key.second);
+    os << " :\t LogLikelyhood = " << LL << endl;
+  }
+  for (prop_map_t::const_iterator i = prop_map.begin(); i != prop_map.end(); ++i)
+  {
+    PROPERTY prop_id = static_cast<PROPERTY>(i->first);
+    pair<const string, PROPERTY_TYPE> property_info = get_property_info(prop_id);
+    os << "\t" << prop_id << ":\t" << property_info.first << " = \t";
+    switch (property_info.second)
+    {
+    case type_int:
+      os << get_property_int(prop_id);
+      break;
+    case type_uint:
+      os << get_property_uint(prop_id);
+      break;
+    case type_float:
+      os << get_property_float(prop_id);
+      break;
+    default:
+      os << " unknown type ";
+    }
+    os << endl;
+  }
 }
 
 float EICPIDParticlev1::get_SumLogLikelyhood(EICPIDDefs::PIDCandidate pid) const
@@ -158,31 +196,4 @@ EICPIDParticlev1::get_property_nocheck(const PROPERTY prop_id) const
     return iter->second;
   }
   return UINT_MAX;
-}
-
-void EICPIDParticlev1::identify(ostream& os) const
-{
-  os << "Class " << this->ClassName();
-  os << " id: " << m_id << endl;
-  for (prop_map_t::const_iterator i = prop_map.begin(); i != prop_map.end(); ++i)
-  {
-    PROPERTY prop_id = static_cast<PROPERTY>(i->first);
-    pair<const string, PROPERTY_TYPE> property_info = get_property_info(prop_id);
-    os << "\t" << prop_id << ":\t" << property_info.first << " = \t";
-    switch (property_info.second)
-    {
-    case type_int:
-      os << get_property_int(prop_id);
-      break;
-    case type_uint:
-      os << get_property_uint(prop_id);
-      break;
-    case type_float:
-      os << get_property_float(prop_id);
-      break;
-    default:
-      os << " unknown type ";
-    }
-    os << endl;
-  }
 }
