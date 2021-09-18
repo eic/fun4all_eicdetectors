@@ -22,6 +22,36 @@ void EICPIDParticlev1::Reset()
   prop_map.clear();
 }
 
+float EICPIDParticlev1::get_SumLogLikelyhood(EICPIDDefs::PIDCandidate pid) const
+{
+  float LL = 0;
+  for (const auto& pair : m_LogLikelyhoodMap)
+  {
+    if (pair.first.first == pid) LL += pair.second;
+  }
+  return LL;
+}
+
+float EICPIDParticlev1::get_LogLikelyhood(EICPIDDefs::PIDCandidate pid, EICPIDDefs::PIDDetector det) const
+{
+  if (det == EICPIDDefs::PIDAll) return get_SumLogLikelyhood(pid);
+
+  const LogLikelyhoodMapKey_t key(pid, det);
+  const auto iter = m_LogLikelyhoodMap.find(key);
+
+  if (iter == m_LogLikelyhoodMap.end())
+    return 0;
+  else
+    return iter->second;
+}
+
+void EICPIDParticlev1::set_LogLikelyhood(EICPIDDefs::PIDCandidate pid, EICPIDDefs::PIDDetector det, float LogLikelyhood)
+{
+  const LogLikelyhoodMapKey_t key(pid, det);
+
+  m_LogLikelyhoodMap[key] = LogLikelyhood;
+}
+
 bool EICPIDParticlev1::has_property(const PROPERTY prop_id) const
 {
   prop_map_t::const_iterator i = prop_map.find(prop_id);

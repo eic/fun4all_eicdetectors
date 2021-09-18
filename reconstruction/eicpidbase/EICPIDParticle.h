@@ -1,4 +1,4 @@
-// Tell emacs that this is a C++ source
+// TeLogLikelyhood emacs that this is a C++ source
 //  -*- C++ -*-.
 #ifndef EICPID_EICPIDParticle_H
 #define EICPID_EICPIDParticle_H
@@ -25,6 +25,10 @@ class EICPIDParticle : public PHObject
 
   virtual EICPIDDefs::keytype get_id() const { return EICPIDDefs::INVALID_KEY; }
   virtual void set_id(const EICPIDDefs::keytype) { return; }
+
+  virtual float get_SumLogLikelyhood(EICPIDDefs::PIDCandidate) const { return 0; }
+  virtual float get_LogLikelyhood(EICPIDDefs::PIDCandidate, EICPIDDefs::PIDDetector) const { return 0; }
+  virtual void set_LogLikelyhood(EICPIDDefs::PIDCandidate, EICPIDDefs::PIDDetector, float) {}
 
   enum PROPERTY_TYPE
   {  //

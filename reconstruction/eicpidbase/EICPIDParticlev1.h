@@ -1,4 +1,4 @@
-// Tell emacs that this is a C++ source
+// TeLogLikelyhood emacs that this is a C++ source
 //  -*- C++ -*-.
 #ifndef EICPID_EICPIDParticleV1_H
 #define EICPID_EICPIDParticleV1_H
@@ -24,6 +24,9 @@ class EICPIDParticlev1 : public EICPIDParticle
   EICPIDDefs::keytype get_id() const override { return m_id; }
   void set_id(const EICPIDDefs::keytype i) override { m_id = i; }
 
+  float get_SumLogLikelyhood(EICPIDDefs::PIDCandidate pid) const override;
+  float get_LogLikelyhood(EICPIDDefs::PIDCandidate pid, EICPIDDefs::PIDDetector det) const override;
+  void set_LogLikelyhood(EICPIDDefs::PIDCandidate pid, EICPIDDefs::PIDDetector det, float LogLikelyhood) override;
 
   bool has_property(const PROPERTY prop_id) const override;
   float get_property_float(const PROPERTY prop_id) const override;
@@ -72,6 +75,9 @@ class EICPIDParticlev1 : public EICPIDParticle
 
   //! container for additional property
   prop_map_t prop_map;
+
+  typedef std::pair<EICPIDDefs::PIDCandidate, EICPIDDefs::PIDDetector> LogLikelyhoodMapKey_t;
+  std::map<LogLikelyhoodMapKey_t, float> m_LogLikelyhoodMap;
 
   ClassDefOverride(EICPIDParticlev1, 2)
 };
