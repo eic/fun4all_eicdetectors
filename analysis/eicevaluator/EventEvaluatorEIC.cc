@@ -242,6 +242,7 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
 
   , _nTracks(0)
   , _track_ID(0)
+  , _track_charge(0)
   , _track_px(0)
   , _track_py(0)
   , _track_pz(0)
@@ -453,6 +454,7 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   _cluster_EEMCG_trueID = new int[_maxNclusters];
   
   _track_ID = new float[_maxNTracks];
+  _track_charge = new short[_maxNTracks];
   _track_trueID = new float[_maxNTracks];
   _track_px = new float[_maxNTracks];
   _track_py = new float[_maxNTracks];
@@ -534,10 +536,12 @@ int EventEvaluatorEIC::Init(PHCompositeNode* topNode)
     _event_tree->Branch("hits_t", _hits_t, "hits_t[nHits]/F");
     _event_tree->Branch("hits_edep", _hits_edep, "hits_edep[nHits]/F");
   }
+
   if (_do_TRACKS)
   {
     _event_tree->Branch("nTracks", &_nTracks, "nTracks/I");
     _event_tree->Branch("tracks_ID", _track_ID, "tracks_ID[nTracks]/F");
+    _event_tree->Branch("tracks_charge", _track_charge, "tracks_charge[nTracks]/S");
     _event_tree->Branch("tracks_px", _track_px, "tracks_px[nTracks]/F");
     _event_tree->Branch("tracks_py", _track_py, "tracks_py[nTracks]/F");
     _event_tree->Branch("tracks_pz", _track_pz, "tracks_pz[nTracks]/F");
@@ -1125,15 +1129,18 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
     {
       // you need to add your layer name here to be saved! This has to be done
       // as we do not want to save thousands of calorimeter hits!
-      if ((GetProjectionNameFromIndex(iIndex).find("TTL") != std::string::npos) ||
+      if (
+	  (GetProjectionNameFromIndex(iIndex).find("TTL") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("LBLVTX") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("BARREL") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("FST") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("ZDCsurrogate") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("rpTruth") != std::string::npos) ||
+          (GetProjectionNameFromIndex(iIndex).find("rpTruth2") != std::string::npos) || // needed for IP8
+          (GetProjectionNameFromIndex(iIndex).find("offMomTruth") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("b0Truth") != std::string::npos) ||
           (((GetProjectionNameFromIndex(iIndex).find("BH_1") != std::string::npos) || (GetProjectionNameFromIndex(iIndex).find("BH_FORWARD_PLUS") != std::string::npos) || (GetProjectionNameFromIndex(iIndex).find("BH_FORWARD_NEG") != std::string::npos)) && _do_BLACKHOLE)
-      ){
+	  ){
         string nodename = "G4HIT_" + GetProjectionNameFromIndex(iIndex);
         PHG4HitContainer* hits = findNode::getClass<PHG4HitContainer>(topNode, nodename);
         if (hits)
@@ -1153,6 +1160,9 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
               cout << __PRETTY_FUNCTION__ << " exceededed maximum hit array size! Please check where these hits come from!" << endl;
               break;
             }
+
+	    if (hit_iter->second->get_edep()<0.01) continue; // FIXME
+
             _hits_x[_nHitsLayers] = hit_iter->second->get_x(0);
             _hits_y[_nHitsLayers] = hit_iter->second->get_y(0);
             _hits_z[_nHitsLayers] = hit_iter->second->get_z(0);
@@ -2942,6 +2952,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
           if (track)
           {
             _track_ID[_nTracks] = track->get_id();
+            _track_charge[_nTracks] = track->get_charge();
             _track_px[_nTracks] = track->get_px();
             _track_py[_nTracks] = track->get_py();
             _track_pz[_nTracks] = track->get_pz();
@@ -3381,6 +3392,10 @@ int EventEvaluatorEIC::GetProjectionIndex(std::string projname)
     return 71;
   else if (projname.find("b0Truth") != std::string::npos)
     return 72;
+  else if (projname.find("rpTruth2") != std::string::npos)
+    return 73;
+  else if (projname.find("offMomTruth") != std::string::npos)
+    return 74;
 
   else if (projname.find("BH_1") != std::string::npos)
     return 90;
@@ -3501,6 +3516,10 @@ std::string EventEvaluatorEIC::GetProjectionNameFromIndex(int projindex)
     return "rpTruth";
   case 72:
     return "b0Truth";
+  case 73:
+    return "rpTruth2";
+  case 74:
+    return "offMomTruth";
 
   case 90:
     return "BH_1";
@@ -3792,6 +3811,7 @@ void EventEvaluatorEIC::resetBuffer()
     for (Int_t itrk = 0; itrk < _maxNTracks; itrk++)
     {
       _track_ID[itrk] = 0;
+      _track_charge[itrk] = 0;
       _track_trueID[itrk] = 0;
       _track_px[itrk] = 0;
       _track_py[itrk] = 0;
