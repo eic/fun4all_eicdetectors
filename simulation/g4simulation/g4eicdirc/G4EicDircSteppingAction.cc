@@ -205,6 +205,10 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
     m_Hit->set_y(1, postPoint->GetPosition().y() / cm);
     m_Hit->set_z(1, postPoint->GetPosition().z() / cm);
 
+    m_Hit->set_px(0, prePoint->GetMomentum().x() / GeV);
+    m_Hit->set_py(0, prePoint->GetMomentum().y() / GeV);
+    m_Hit->set_pz(0, prePoint->GetMomentum().z() / GeV);
+
     m_Hit->set_t(1, postPoint->GetGlobalTime() / nanosecond);
     //sum up the energy to get total deposited
     m_Hit->set_edep(m_Hit->get_edep() + edep);
