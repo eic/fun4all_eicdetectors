@@ -42,8 +42,11 @@ class EICPIDParticle : public PHObject
   //! 1.add new tag below with unique value,
   //! 2.add a short name to EICPIDParticle::m_propertyInfo
   enum PROPERTY
-  {  //
-    CTTL_beta = 1,
+  {
+    Truth_PID = 0,
+
+    //
+    CTTL_beta = 10,
     ETTL_beta,
     FTTL_beta,
 

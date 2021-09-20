@@ -11,6 +11,7 @@ using namespace std;
 const std::map<EICPIDParticle::PROPERTY,
                std::pair<const std::string, EICPIDParticle::PROPERTY_TYPE> >
     EICPIDParticle::m_propertyInfo = {
+        {Truth_PID, {"Truth PID", type_int}},
         {CTTL_beta, {"Beta on CTTL", type_float}},
         {ETTL_beta, {"Beta on ETTL", type_float}},
         {FTTL_beta, {"Beta on FTTL", type_float}}  //
