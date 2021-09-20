@@ -81,7 +81,7 @@ float EICPIDParticlev1::get_LogLikelyhood(EICPIDDefs::PIDCandidate pid, EICPIDDe
   const auto iter = m_LogLikelyhoodMap.find(key);
 
   if (iter == m_LogLikelyhoodMap.end())
-    return 0;
+    return m_minLogLikelihood;
   else
     return iter->second;
 }

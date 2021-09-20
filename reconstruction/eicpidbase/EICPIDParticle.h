@@ -27,7 +27,7 @@ class EICPIDParticle : public PHObject
   virtual void set_id(const EICPIDDefs::keytype) { return; }
 
   virtual float get_SumLogLikelyhood(EICPIDDefs::PIDCandidate) const { return 0; }
-  virtual float get_LogLikelyhood(EICPIDDefs::PIDCandidate, EICPIDDefs::PIDDetector) const { return 0; }
+  virtual float get_LogLikelyhood(EICPIDDefs::PIDCandidate, EICPIDDefs::PIDDetector) const { return m_minLogLikelihood; }
   virtual void set_LogLikelyhood(EICPIDDefs::PIDCandidate, EICPIDDefs::PIDDetector, float) {}
 
   enum PROPERTY_TYPE
@@ -71,6 +71,9 @@ class EICPIDParticle : public PHObject
   static std::string get_property_type(const PROPERTY_TYPE prop_type);
 
  protected:
+
+  static constexpr float m_minLogLikelihood = -100;
+
   virtual unsigned int get_property_nocheck(const PROPERTY /*prop_id*/) const { return UINT_MAX; }
   virtual void set_property_nocheck(const PROPERTY /*prop_id*/, const unsigned int) { return; }
   ClassDefOverride(EICPIDParticle, 1)
