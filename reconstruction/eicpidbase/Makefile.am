@@ -29,7 +29,6 @@ libeicpidbase_la_SOURCES = \ \
 libeicpidbase_la_LIBADD = \
   -lphool  
 
-
 ROOTDICTS = \
   EICPIDParticle_Dict.cc \
   EICPIDParticleContainer_Dict.cc \

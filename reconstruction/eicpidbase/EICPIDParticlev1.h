@@ -79,7 +79,7 @@ class EICPIDParticlev1 : public EICPIDParticle
   typedef std::pair<EICPIDDefs::PIDCandidate, EICPIDDefs::PIDDetector> LogLikelyhoodMapKey_t;
   std::map<LogLikelyhoodMapKey_t, float> m_LogLikelyhoodMap;
 
-  ClassDefOverride(EICPIDParticlev1, 2)
+  ClassDefOverride(EICPIDParticlev1, 1)
 };
 
 #endif

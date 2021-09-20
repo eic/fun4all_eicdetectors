@@ -26,7 +26,10 @@ void EICPIDParticlev1::Reset()
 void EICPIDParticlev1::identify(ostream& os) const
 {
   os << "Class " << this->ClassName();
-  os << " id: " << m_id << endl;
+  os << " id: " << m_id
+      <<", m_LogLikelyhoodMap.size() = "<<m_LogLikelyhoodMap.size()
+      <<", prop_map.size() = "<<prop_map.size()
+      << endl;
   for (const auto& pair : m_LogLikelyhoodMap)
   {
     const auto& key = pair.first;
