@@ -12,6 +12,8 @@ const std::map<EICPIDParticle::PROPERTY,
                std::pair<const std::string, EICPIDParticle::PROPERTY_TYPE> >
     EICPIDParticle::m_propertyInfo = {
         {Truth_PID, {"Truth PID", type_int}},
+        {Truth_momentum, {"Truth Momentum", type_float}},
+        {Truth_eta, {"Truth eta", type_float}},
         {CTTL_beta, {"Beta on CTTL", type_float}},
         {ETTL_beta, {"Beta on ETTL", type_float}},
         {FTTL_beta, {"Beta on FTTL", type_float}}  //

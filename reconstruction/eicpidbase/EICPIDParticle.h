@@ -44,6 +44,8 @@ class EICPIDParticle : public PHObject
   enum PROPERTY
   {
     Truth_PID = 0,
+    Truth_momentum ,
+    Truth_eta,
 
     //
     CTTL_beta = 10,
