@@ -20,7 +20,6 @@ class G4EicDircStackingAction : public PHG4StackingAction
   G4ClassificationOfNewTrack ClassifyNewTrack(const G4Track* aTrack) override;
   void PrepareNewEvent() override;
 
-
  private:
   gsl_rng* m_RandomGenerator = nullptr;
   G4EicDircDetector* m_Detector = nullptr;

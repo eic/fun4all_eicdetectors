@@ -1,26 +1,24 @@
 #ifndef PrtOpBoundaryProcess_h
 #define PrtOpBoundaryProcess_h
 
-#include <Geant4/globals.hh>
 #include <Geant4/G4OpBoundaryProcess.hh>
+#include <Geant4/globals.hh>
 
 class G4EicDircDetector;
 
 class PrtOpBoundaryProcess : public G4OpBoundaryProcess
 {
-public:
+ public:
   PrtOpBoundaryProcess();
-  ~PrtOpBoundaryProcess() override {};
+  ~PrtOpBoundaryProcess() override{};
 
-public:
+ public:
   G4VParticleChange* PostStepDoIt(const G4Track& aTrack, const G4Step& aStep) override;
 
   G4EicDircDetector* m_Detector;
 
-//private:
+  //private:
   //int fLensId;
-
 };
-
 
 #endif /*PrtOpBoundaryProcess_h*/

@@ -26,17 +26,17 @@
 #include <Geant4/G4StepStatus.hh>  // for fGeomBoundary, fAtRest...
 #include <Geant4/G4String.hh>      // for G4String
 #include <Geant4/G4SystemOfUnits.hh>
-#include <Geant4/G4ThreeVector.hh>            // for G4ThreeVector
-#include <Geant4/G4TouchableHandle.hh>        // for G4TouchableHandle
-#include <Geant4/G4Track.hh>                  // for G4Track
-#include <Geant4/G4TrackStatus.hh>            // for fStopAndKill
-#include <Geant4/G4Types.hh>                  // for G4double
-#include <Geant4/G4VPhysicalVolume.hh>        // for G4VPhysicalVolume
+#include <Geant4/G4ThreeVector.hh>      // for G4ThreeVector
+#include <Geant4/G4TouchableHandle.hh>  // for G4TouchableHandle
+#include <Geant4/G4Track.hh>            // for G4Track
+#include <Geant4/G4TrackStatus.hh>      // for fStopAndKill
+#include <Geant4/G4TransportationManager.hh>
+#include <Geant4/G4Types.hh>            // for G4double
+#include <Geant4/G4VPhysicalVolume.hh>  // for G4VPhysicalVolume
+#include <Geant4/G4VProcess.hh>
 #include <Geant4/G4VTouchable.hh>             // for G4VTouchable
 #include <Geant4/G4VUserTrackInformation.hh>  // for G4VUserTrackInformation
-#include <Geant4/G4TransportationManager.hh>
 #include <Geant4/Randomize.hh>
-#include <Geant4/G4VProcess.hh>
 
 #include <cmath>  // for isfinite
 #include <iostream>
@@ -45,7 +45,7 @@
 class PHCompositeNode;
 //____________________________________________________________________________..
 G4EicDircSteppingAction::G4EicDircSteppingAction(
-    G4EicDircDetector *detector, const PHParameters *parameters)
+    G4EicDircDetector* detector, const PHParameters* parameters)
   : PHG4SteppingAction(detector->GetName())
   , m_Detector(detector)
   , m_Params(parameters)
@@ -63,22 +63,21 @@ G4EicDircSteppingAction::~G4EicDircSteppingAction()
   delete m_Hit;
 }
 
-
 //____________________________________________________________________________..
-bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
+bool G4EicDircSteppingAction::UserSteppingAction(const G4Step* aStep,
                                                  bool was_used)
 {
   G4TouchableHandle touch = aStep->GetPreStepPoint()->GetTouchableHandle();
   G4TouchableHandle touchpost = aStep->GetPostStepPoint()->GetTouchableHandle();
   // get volume of the current step
-  G4VPhysicalVolume *volume = touch->GetVolume();
-  G4VPhysicalVolume *volume_post = touchpost->GetVolume();
+  G4VPhysicalVolume* volume = touch->GetVolume();
+  //G4VPhysicalVolume* volume_post = touchpost->GetVolume();
   // IsInDetector(volume) returns
   //  == 0 outside of detector
   //   > 0 for hits in active volume
   //  < 0 for hits in passive material
   int whichactive_int = m_Detector->IsInDetector(volume);
-  int whichactive_int_post = m_Detector->IsInDetector(volume_post);
+  //int whichactive_int_post = m_Detector->IsInDetector(volume_post);
   bool whichactive = (whichactive_int > 0 && whichactive_int < 12);
 
   //int whichactive = m_Detector->IsInDetector(volume);
@@ -86,7 +85,6 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
   {
     return false;
   }
-
 
   // collect energy and track length step by step
   const G4Track* aTrack = aStep->GetTrack();
@@ -121,21 +119,21 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
     int prepointstatus = prePoint->GetStepStatus();
     if (prepointstatus == fGeomBoundary ||
         prepointstatus == fUndefined ||
-        (prepointstatus == fPostStepDoItProc && m_SavePostStepStatus == fGeomBoundary) )
+        (prepointstatus == fPostStepDoItProc && m_SavePostStepStatus == fGeomBoundary))
     {
       if (prepointstatus == fPostStepDoItProc && m_SavePostStepStatus == fGeomBoundary)
       {
         std::cout << GetName() << ": New Hit for  " << std::endl;
         std::cout << "prestep status: " << PHG4StepStatusDecode::GetStepStatus(prePoint->GetStepStatus())
-             << ", poststep status: " << PHG4StepStatusDecode::GetStepStatus(postPoint->GetStepStatus())
-             << ", last pre step status: " << PHG4StepStatusDecode::GetStepStatus(m_SavePreStepStatus)
-             << ", last post step status: " << PHG4StepStatusDecode::GetStepStatus(m_SavePostStepStatus) << std::endl;
+                  << ", poststep status: " << PHG4StepStatusDecode::GetStepStatus(postPoint->GetStepStatus())
+                  << ", last pre step status: " << PHG4StepStatusDecode::GetStepStatus(m_SavePreStepStatus)
+                  << ", last post step status: " << PHG4StepStatusDecode::GetStepStatus(m_SavePostStepStatus) << std::endl;
         std::cout << "last track: " << m_SaveTrackId
-             << ", current trackid: " << aTrack->GetTrackID() << std::endl;
+                  << ", current trackid: " << aTrack->GetTrackID() << std::endl;
         std::cout << "phys pre vol: " << volume->GetName()
-             << " post vol : " << touchpost->GetVolume()->GetName() << std::endl;
+                  << " post vol : " << touchpost->GetVolume()->GetName() << std::endl;
         std::cout << " previous phys pre vol: " << m_SaveVolPre->GetName()
-             << " previous phys post vol: " << m_SaveVolPost->GetName() << std::endl;
+                  << " previous phys post vol: " << m_SaveVolPost->GetName() << std::endl;
       }
       if (!m_Hit)
       {
@@ -177,15 +175,15 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
     {
       std::cout << GetName() << ": hit was not created" << std::endl;
       std::cout << "prestep status: " << PHG4StepStatusDecode::GetStepStatus(prePoint->GetStepStatus())
-           << ", poststep status: " << PHG4StepStatusDecode::GetStepStatus(postPoint->GetStepStatus())
-           << ", last pre step status: " << PHG4StepStatusDecode::GetStepStatus(m_SavePreStepStatus)
-           << ", last post step status: " << PHG4StepStatusDecode::GetStepStatus(m_SavePostStepStatus) << std::endl;
+                << ", poststep status: " << PHG4StepStatusDecode::GetStepStatus(postPoint->GetStepStatus())
+                << ", last pre step status: " << PHG4StepStatusDecode::GetStepStatus(m_SavePreStepStatus)
+                << ", last post step status: " << PHG4StepStatusDecode::GetStepStatus(m_SavePostStepStatus) << std::endl;
       std::cout << "last track: " << m_SaveTrackId
-           << ", current trackid: " << aTrack->GetTrackID() << std::endl;
+                << ", current trackid: " << aTrack->GetTrackID() << std::endl;
       std::cout << "phys pre vol: " << volume->GetName()
-           << " post vol : " << touchpost->GetVolume()->GetName() << std::endl;
+                << " post vol : " << touchpost->GetVolume()->GetName() << std::endl;
       std::cout << " previous phys pre vol: " << m_SaveVolPre->GetName()
-           << " previous phys post vol: " << m_SaveVolPost->GetName() << std::endl;
+                << " previous phys post vol: " << m_SaveVolPost->GetName() << std::endl;
       exit(1);
     }
     m_SavePostStepStatus = postPoint->GetStepStatus();
@@ -194,8 +192,8 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
     {
       std::cout << "hits do not belong to the same track" << std::endl;
       std::cout << "saved track: " << m_SaveTrackId
-           << ", current trackid: " << aTrack->GetTrackID()
-           << std::endl;
+                << ", current trackid: " << aTrack->GetTrackID()
+                << std::endl;
       exit(1);
     }
     m_SavePreStepStatus = prePoint->GetStepStatus();
@@ -249,7 +247,7 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
     if (postPoint->GetStepStatus() == fGeomBoundary ||
         postPoint->GetStepStatus() == fWorldBoundary ||
         postPoint->GetStepStatus() == fAtRestDoItProc ||
-        aTrack->GetTrackStatus() == fStopAndKill )
+        aTrack->GetTrackStatus() == fStopAndKill)
     {
       // save only hits with energy deposit (or -1 for geantino)
       if (m_Hit->get_edep())
@@ -277,7 +275,7 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
 }
 
 //____________________________________________________________________________..
-void G4EicDircSteppingAction::SetInterfacePointers(PHCompositeNode *topNode)
+void G4EicDircSteppingAction::SetInterfacePointers(PHCompositeNode* topNode)
 {
   if (!m_HitNodeName.empty())
   {
@@ -290,29 +288,23 @@ void G4EicDircSteppingAction::SetInterfacePointers(PHCompositeNode *topNode)
     {
       if (Verbosity() > 0)
       {
-	std::cout << "G4EicDircSteppingAction::SetTopNode - unable to find " << m_AbsorberNodeName << std::endl;
+        std::cout << "G4EicDircSteppingAction::SetTopNode - unable to find " << m_AbsorberNodeName << std::endl;
       }
     }
   }
-  if (! m_SupportNodeName.empty())
+  if (!m_SupportNodeName.empty())
   {
     m_SupportHitContainer = findNode::getClass<PHG4HitContainer>(topNode, m_SupportNodeName);
     if (!m_SupportHitContainer)
     {
       if (Verbosity() > 0)
       {
-	std::cout << "G4EicDircSteppingAction::SetTopNode - unable to find " << m_SupportNodeName << std::endl;
+        std::cout << "G4EicDircSteppingAction::SetTopNode - unable to find " << m_SupportNodeName << std::endl;
       }
     }
-
   }
   if (!m_HitContainer)
   {
     std::cout << "G4EicDircSteppingAction::SetTopNode - unable to find " << m_HitNodeName << std::endl;
   }
-
 }
-
-
-
-

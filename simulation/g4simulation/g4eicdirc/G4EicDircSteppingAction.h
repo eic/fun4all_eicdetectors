@@ -3,10 +3,10 @@
 #ifndef G4EICDIRCSTEPPINGACTION_H
 #define G4EICDIRCSTEPPINGACTION_H
 
-#include <g4main/PHG4SteppingAction.h>
-#include <vector>
 #include <Rtypes.h>
 #include <TVector3.h>
+#include <g4main/PHG4SteppingAction.h>
+#include <vector>
 
 class G4Step;
 class G4VPhysicalVolume;
@@ -38,7 +38,6 @@ class G4EicDircSteppingAction : public PHG4SteppingAction
   void SetAbsorberNodeName(const std::string& nam) { m_AbsorberNodeName = nam; }
   void SetSupportNodeName(const std::string& nam) { m_SupportNodeName = nam; }
 
-  
   std::vector<Int_t> vector_nid;
   std::vector<Int_t> vector_trackid;
 
@@ -55,8 +54,8 @@ class G4EicDircSteppingAction : public PHG4SteppingAction
   PHG4HitContainer* m_AbsorberHitContainer = nullptr;
   PHG4HitContainer* m_SupportHitContainer = nullptr;
   PHG4Hit* m_Hit = nullptr;
-//  PrtHit* m_Hit = nullptr;
-  PHG4HitContainer* m_SaveHitContainer = nullptr;
+  //  PrtHit* m_Hit = nullptr;
+  //PHG4HitContainer* m_SaveHitContainer = nullptr;
 
   G4VPhysicalVolume* m_SaveVolPre = nullptr;
   G4VPhysicalVolume* m_SaveVolPost = nullptr;
@@ -65,8 +64,8 @@ class G4EicDircSteppingAction : public PHG4SteppingAction
   int m_SavePostStepStatus = -1;
   int m_ActiveFlag = 0;
   int m_BlackHoleFlag = 0;
-  double m_EdepSum = 0.;
-  double m_EionSum = 0.;
+  //double m_EdepSum = 0.;
+  //double m_EionSum = 0.;
 
   std::string m_HitNodeName;
   std::string m_AbsorberNodeName;

@@ -64,18 +64,17 @@ G4EicDircStackingAction::~G4EicDircStackingAction()
 
 G4ClassificationOfNewTrack G4EicDircStackingAction::ClassifyNewTrack(const G4Track* aTrack)
 {
-//  std::cout << "calling stacking action" << std::endl;
+  //  std::cout << "calling stacking action" << std::endl;
   G4VPhysicalVolume* volume = aTrack->GetVolume();
 
-
-  if(aTrack->GetDefinition() == G4OpticalPhoton::OpticalPhotonDefinition())
-  { // particle is optical photon
-    if(aTrack->GetParentID()>0)
-    { // particle is secondary
-      if(aTrack->GetCreatorProcess()->GetProcessName() == "Scintillation")
+  if (aTrack->GetDefinition() == G4OpticalPhoton::OpticalPhotonDefinition())
+  {  // particle is optical photon
+    if (aTrack->GetParentID() > 0)
+    {  // particle is secondary
+      if (aTrack->GetCreatorProcess()->GetProcessName() == "Scintillation")
         fScintillationCounter++;
-      if(aTrack->GetCreatorProcess()->GetProcessName() == "Cerenkov")
-      fCerenkovCounter++;
+      if (aTrack->GetCreatorProcess()->GetProcessName() == "Cerenkov")
+        fCerenkovCounter++;
     }
   }
 
@@ -87,7 +86,6 @@ G4ClassificationOfNewTrack G4EicDircStackingAction::ClassifyNewTrack(const G4Tra
     return fUrgent;
   }
 
-
   std::string particlename = aTrack->GetDefinition()->GetParticleName();
   if (particlename == "opticalphoton")
   {
@@ -98,22 +96,19 @@ G4ClassificationOfNewTrack G4EicDircStackingAction::ClassifyNewTrack(const G4Tra
     Double_t lambda = 197.0 * 2.0 * M_PI / (aTrack->GetMomentum().mag() * 1.0E6);
     Double_t ra = gsl_rng_uniform(m_RandomGenerator);
     if (ra > fDetEff[1]->Eval(lambda))
-    {      
+    {
       return fKill;
     }
   }
 
   return fUrgent;
-
 }
-
 
 void G4EicDircStackingAction::PrepareNewEvent()
 {
-  if (Verbosity ()) G4cout << "Number of Cerenkov photons produced in this event : " << fCerenkovCounter << G4endl;
+  if (Verbosity()) G4cout << "Number of Cerenkov photons produced in this event : " << fCerenkovCounter << G4endl;
   //  std::cout << "calling prepare new event" << std::endl;
   fCerenkovCounter = 0;
   fScintillationCounter = 0;
   return;
 }
-

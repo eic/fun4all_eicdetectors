@@ -1,5 +1,5 @@
 #ifdef __CINT__
 
-#pragma link C++ class EICPIDParticleContainer+;
+#pragma link C++ class EICPIDParticleContainer + ;
 
 #endif /* __CINT__ */

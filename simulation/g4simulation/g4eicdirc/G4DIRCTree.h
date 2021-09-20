@@ -5,10 +5,10 @@
 
 #include <fun4all/SubsysReco.h>
 
+#include <TVector3.h>
 #include <map>
 #include <set>
 #include <string>
-#include <TVector3.h>
 
 // Forward declarations
 class PHCompositeNode;

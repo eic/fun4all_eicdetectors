@@ -44,7 +44,7 @@ class EICPIDParticle : public PHObject
   enum PROPERTY
   {
     Truth_PID = 0,
-    Truth_momentum ,
+    Truth_momentum,
     Truth_eta,
 
     //
@@ -73,7 +73,6 @@ class EICPIDParticle : public PHObject
   static std::string get_property_type(const PROPERTY_TYPE prop_type);
 
  protected:
-
   static constexpr float m_minLogLikelihood = -100;
 
   virtual unsigned int get_property_nocheck(const PROPERTY /*prop_id*/) const { return UINT_MAX; }

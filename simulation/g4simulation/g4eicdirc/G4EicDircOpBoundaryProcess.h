@@ -7,10 +7,12 @@
 
 class G4EicDircOpBoundaryProcess : public G4OpBoundaryProcess
 {
-public:
+ public:
   explicit G4EicDircOpBoundaryProcess(const G4String& processName = "G4EicDircOpBoundary",
-				    G4ProcessType type = fOptical) : G4OpBoundaryProcess()
-{}
+                                      G4ProcessType type = fOptical)
+    : G4OpBoundaryProcess()
+  {
+  }
 
   virtual ~G4EicDircOpBoundaryProcess() override {}
 
@@ -18,13 +20,11 @@ public:
 
   G4VParticleChange* PostStepDoIt(const G4Track& aTrack, const G4Step& aStep) override;
 
-private:
-
+ private:
 };
 
-inline
-G4bool G4EicDircOpBoundaryProcess::IsApplicable(const G4ParticleDefinition&
-                                                       aParticleType)
+inline G4bool G4EicDircOpBoundaryProcess::IsApplicable(const G4ParticleDefinition&
+                                                           aParticleType)
 {
   return (&aParticleType == G4OpticalPhoton::OpticalPhoton());
 }
