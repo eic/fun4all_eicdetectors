@@ -18,11 +18,14 @@ enum PIDDetector
   PIDAll = 0,
   mRICH = 1,
   DIRC = 2,
-  dRICH = 3,
-  GasRICH = 4,
+  dRICH_AeroGel = 3,
+  dRICH_Gas = 4,
+  GasRICH = 5,
+
   ETTL = 11,
   CTTL = 12,
   FTTL = 13,
+
   InvalidDetector = -1
 };
 
@@ -30,7 +33,8 @@ const std::map<std::string, PIDDetector> PIDDetectorNameMap = {
     {"PIDAll", PIDAll},
     {"mRICH", mRICH},
     {"DIRC", DIRC},
-    {"dRICH", dRICH},
+    {"dRICH_AeroGel", dRICH_AeroGel},
+    {"dRICH_Gas", dRICH_Gas},
     {"GasRICH", GasRICH},
     {"ETTL", ETTL},
     {"CTTL", CTTL},
