@@ -990,55 +990,67 @@ void G4EicDircDetector::DefineMaterials()
 
   /* ASSIGNING REFRACTIVE AND ABSORPTION PROPERTIES TO THE GIVEN MATERIALS */
 
-  // Quartz material => Si02
-  G4MaterialPropertiesTable* QuartzMPT = new G4MaterialPropertiesTable();
-  QuartzMPT->AddProperty("RINDEX",       PhotonEnergy, QuartzRefractiveIndex,num);
-  QuartzMPT->AddProperty("ABSLENGTH",    PhotonEnergy, QuartzAbsorption,           num);
+  if (m_Params->get_int_param("disable_photon_sim") == 0)
+  {
+    // option disable photon simulation if explicitly set via macro
+    static bool once = true;
+    if (once)
+    {
+      once = false;
+      std::cout <<__PRETTY_FUNCTION__<<" : warning parameter disable_photon_sim = "<<
+          m_Params->get_int_param("disable_photon_sim")
+          <<" and photon simulation is disabled in DIRC!"<<std::endl;
+    }
 
-  // assign this parameter table to BAR material
-  BarMaterial->SetMaterialPropertiesTable(QuartzMPT);
+    // Quartz material => Si02
+    G4MaterialPropertiesTable* QuartzMPT = new G4MaterialPropertiesTable();
+    QuartzMPT->AddProperty("RINDEX",       PhotonEnergy, QuartzRefractiveIndex,num);
+    QuartzMPT->AddProperty("ABSLENGTH",    PhotonEnergy, QuartzAbsorption,           num);
 
-  // Air
-  G4MaterialPropertiesTable* AirMPT = new G4MaterialPropertiesTable();
-  AirMPT->AddProperty("RINDEX",    PhotonEnergy, AirRefractiveIndex, num);
-  AirMPT->AddProperty("ABSLENGTH", PhotonEnergy, AirAbsorption,      num);
-  //  assign this parameter table to the air 
-  defaultMaterial->SetMaterialPropertiesTable(AirMPT);
+    // assign this parameter table to BAR material
+    BarMaterial->SetMaterialPropertiesTable(QuartzMPT);
+
+    // Air
+    G4MaterialPropertiesTable* AirMPT = new G4MaterialPropertiesTable();
+    AirMPT->AddProperty("RINDEX",    PhotonEnergy, AirRefractiveIndex, num);
+    AirMPT->AddProperty("ABSLENGTH", PhotonEnergy, AirAbsorption,      num);
+    //  assign this parameter table to the air
+    defaultMaterial->SetMaterialPropertiesTable(AirMPT);
 
 
-  // KamLandOil                                                
-  G4MaterialPropertiesTable* KamLandOilMPT = new G4MaterialPropertiesTable();
-  KamLandOilMPT->AddProperty("RINDEX", PhotonEnergy, KamLandOilRefractiveIndex, num);
-  KamLandOilMPT->AddProperty("ABSLENGTH", PhotonEnergy, KamLandOilAbsorption, num);
-  // assing this parameter table  to the KamLandOil
-  OilMaterial->SetMaterialPropertiesTable(KamLandOilMPT);  
+    // KamLandOil
+    G4MaterialPropertiesTable* KamLandOilMPT = new G4MaterialPropertiesTable();
+    KamLandOilMPT->AddProperty("RINDEX", PhotonEnergy, KamLandOilRefractiveIndex, num);
+    KamLandOilMPT->AddProperty("ABSLENGTH", PhotonEnergy, KamLandOilAbsorption, num);
+    // assing this parameter table  to the KamLandOil
+    OilMaterial->SetMaterialPropertiesTable(KamLandOilMPT);
 
-  // N-Lak 33a                                                
-  G4MaterialPropertiesTable* Nlak33aMPT = new G4MaterialPropertiesTable();
-  Nlak33aMPT->AddProperty("RINDEX", PhotonEnergyNlak33a, Nlak33aRefractiveIndex, 76);
-  Nlak33aMPT->AddProperty("ABSLENGTH",PhotonEnergyNlak33a, Nlak33aAbsorption, 76);
-  Nlak33aMaterial->SetMaterialPropertiesTable(Nlak33aMPT);
+    // N-Lak 33a
+    G4MaterialPropertiesTable* Nlak33aMPT = new G4MaterialPropertiesTable();
+    Nlak33aMPT->AddProperty("RINDEX", PhotonEnergyNlak33a, Nlak33aRefractiveIndex, 76);
+    Nlak33aMPT->AddProperty("ABSLENGTH",PhotonEnergyNlak33a, Nlak33aAbsorption, 76);
+    Nlak33aMaterial->SetMaterialPropertiesTable(Nlak33aMPT);
 
-  // PbF2
-  G4MaterialPropertiesTable* PbF2MPT = new G4MaterialPropertiesTable();
-  PbF2MPT->AddProperty("RINDEX", en_PbF2, ref_PbF2, n_PbF2);
-  PbF2MPT->AddProperty("ABSLENGTH",en_PbF2, ab_PbF2, n_PbF2);
-  PbF2Material->SetMaterialPropertiesTable(PbF2MPT);
+    // PbF2
+    G4MaterialPropertiesTable* PbF2MPT = new G4MaterialPropertiesTable();
+    PbF2MPT->AddProperty("RINDEX", en_PbF2, ref_PbF2, n_PbF2);
+    PbF2MPT->AddProperty("ABSLENGTH",en_PbF2, ab_PbF2, n_PbF2);
+    PbF2Material->SetMaterialPropertiesTable(PbF2MPT);
 
-  // Sapphire
-  G4MaterialPropertiesTable* SapphireMPT = new G4MaterialPropertiesTable();
-  SapphireMPT->AddProperty("RINDEX", en_Sapphire, ref_Sapphire, n_Sapphire);
-  SapphireMPT->AddProperty("ABSLENGTH",en_Sapphire, ab_Sapphire, n_Sapphire);
-  SapphireMaterial->SetMaterialPropertiesTable(SapphireMPT);
-
+    // Sapphire
+    G4MaterialPropertiesTable* SapphireMPT = new G4MaterialPropertiesTable();
+    SapphireMPT->AddProperty("RINDEX", en_Sapphire, ref_Sapphire, n_Sapphire);
+    SapphireMPT->AddProperty("ABSLENGTH",en_Sapphire, ab_Sapphire, n_Sapphire);
+    SapphireMaterial->SetMaterialPropertiesTable(SapphireMPT);
   
-  // Epotek Glue                                        
-  G4MaterialPropertiesTable* EpotekMPT = new G4MaterialPropertiesTable();
-  EpotekMPT->AddProperty("RINDEX", PhotonEnergy, EpotekRefractiveIndex, num);
-  EpotekMPT->AddProperty("ABSLENGTH", PhotonEnergy, EpotekAbsorption, num);
-  // assign this parameter table to the epotek
-  epotekMaterial->SetMaterialPropertiesTable(EpotekMPT);
 
+    // Epotek Glue
+    G4MaterialPropertiesTable* EpotekMPT = new G4MaterialPropertiesTable();
+    EpotekMPT->AddProperty("RINDEX", PhotonEnergy, EpotekRefractiveIndex, num);
+    EpotekMPT->AddProperty("ABSLENGTH", PhotonEnergy, EpotekAbsorption, num);
+    // assign this parameter table to the epotek
+    epotekMaterial->SetMaterialPropertiesTable(EpotekMPT);
+  }
 }
 
 

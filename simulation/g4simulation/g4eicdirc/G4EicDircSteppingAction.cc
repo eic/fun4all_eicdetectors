@@ -36,6 +36,7 @@
 #include <Geant4/G4VUserTrackInformation.hh>  // for G4VUserTrackInformation
 #include <Geant4/G4TransportationManager.hh>
 #include <Geant4/Randomize.hh>
+#include <Geant4/G4VProcess.hh>
 
 #include <cmath>  // for isfinite
 #include <iostream>
@@ -88,9 +89,9 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
 
 
   // collect energy and track length step by step
+  const G4Track* aTrack = aStep->GetTrack();
   G4double edep = aStep->GetTotalEnergyDeposit() / GeV;
   G4double eion = (aStep->GetTotalEnergyDeposit() - aStep->GetNonIonizingEnergyDeposit()) / GeV;
-  const G4Track* aTrack = aStep->GetTrack();
 
   // if this block stops everything, just put all kinetic energy into edep
   if (m_BlackHoleFlag)
@@ -144,6 +145,10 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
       m_Hit->set_x(0, prePoint->GetPosition().x() / cm);
       m_Hit->set_y(0, prePoint->GetPosition().y() / cm);
       m_Hit->set_z(0, prePoint->GetPosition().z() / cm);
+
+      m_Hit->set_px(0, prePoint->GetMomentum().x() / GeV);
+      m_Hit->set_py(0, prePoint->GetMomentum().y() / GeV);
+      m_Hit->set_pz(0, prePoint->GetMomentum().z() / GeV);
       // time in ns
       m_Hit->set_t(0, prePoint->GetGlobalTime() / nanosecond);
       //set the track ID
@@ -205,9 +210,9 @@ bool G4EicDircSteppingAction::UserSteppingAction(const G4Step *aStep,
     m_Hit->set_y(1, postPoint->GetPosition().y() / cm);
     m_Hit->set_z(1, postPoint->GetPosition().z() / cm);
 
-    m_Hit->set_px(0, prePoint->GetMomentum().x() / GeV);
-    m_Hit->set_py(0, prePoint->GetMomentum().y() / GeV);
-    m_Hit->set_pz(0, prePoint->GetMomentum().z() / GeV);
+    m_Hit->set_px(1, postPoint->GetMomentum().x() / GeV);
+    m_Hit->set_py(1, postPoint->GetMomentum().y() / GeV);
+    m_Hit->set_pz(1, postPoint->GetMomentum().z() / GeV);
 
     m_Hit->set_t(1, postPoint->GetGlobalTime() / nanosecond);
     //sum up the energy to get total deposited

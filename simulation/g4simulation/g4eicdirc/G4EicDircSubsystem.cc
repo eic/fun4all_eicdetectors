@@ -197,5 +197,7 @@ void G4EicDircSubsystem::SetDefaultParameters()
   set_default_int_param("NBoxes",12);
   set_default_int_param("Bar_pieces", 4);
 
+  set_default_int_param("disable_photon_sim", 0); // if true, disable photon simulations
+
   set_default_string_param("material", "G4_Galactic");
 }
