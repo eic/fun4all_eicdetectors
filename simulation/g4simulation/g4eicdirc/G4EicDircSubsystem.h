@@ -86,7 +86,6 @@ class G4EicDircSubsystem : public PHG4DetectorSubsystem
   std::string m_HitNodeName;
   std::string m_AbsorberNodeName;
   std::string m_SupportNodeName;
-
 };
 
 #endif  // G4EICDIRCSUBSYSTEM_H

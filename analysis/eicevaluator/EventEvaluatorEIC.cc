@@ -30,6 +30,9 @@
 #include <calobase/RawTowerGeomContainer.h>
 #include <calobase/RawTowerv2.h>
 
+#include <eicpidbase/EICPIDParticle.h>
+#include <eicpidbase/EICPIDParticleContainer.h>
+
 #include <HepMC/GenEvent.h>
 #include <HepMC/GenVertex.h>
 #include <phhepmc/PHHepMCGenEvent.h>
@@ -472,6 +475,9 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   _track_TLP_true_y = new float[_maxNProjections];
   _track_TLP_true_z = new float[_maxNProjections];
   _track_TLP_true_t = new float[_maxNProjections];
+  _track_pion_LL.resize(_maxNTracks, -100);
+  _track_kaon_LL.resize(_maxNTracks, -100);
+  _track_proton_LL.resize(_maxNTracks, -100);
 
   _mcpart_ID = new int[_maxNMCPart];
   _mcpart_ID_parent = new int[_maxNMCPart];
@@ -549,6 +555,14 @@ int EventEvaluatorEIC::Init(PHCompositeNode* topNode)
     _event_tree->Branch("tracks_dca_2d", _track_dca_2d, "tracks_dca_2d[nTracks]/F");
     _event_tree->Branch("tracks_trueID", _track_trueID, "tracks_trueID[nTracks]/F");
     _event_tree->Branch("tracks_source", _track_source, "tracks_source[nTracks]/s");
+
+    if (_do_PID_LogLikelihood)
+    {
+        // save hadron PID log likelihood
+      _event_tree->Branch("track_pion_LL", _track_pion_LL.data(), "track_pion_LL[nTracks]/F");
+      _event_tree->Branch("track_kaon_LL", _track_kaon_LL.data(), "track_kaon_LL[nTracks]/F");
+      _event_tree->Branch("track_proton_LL", _track_proton_LL.data(), "track_proton_LL[nTracks]/F");
+    }
   }
   if (_do_PROJECTIONS)
   {
@@ -2926,6 +2940,19 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
   {
     _nTracks = 0;
     _nProjections = 0;
+
+    EICPIDParticleContainer * pidcontainer (nullptr);
+
+    if (_do_PID_LogLikelihood )
+    {
+      pidcontainer = findNode::getClass<EICPIDParticleContainer>(topNode, "EICPIDParticleMap");
+      if (pidcontainer==nullptr)
+      {
+        cout << __PRETTY_FUNCTION__ << " Error: missing EICPIDParticleMap while _do_PID_LogLikelihood = "
+            << _do_PID_LogLikelihood << endl;
+      }
+    }
+
     // Loop over track maps, identifiy each source.
     // Although this configuration is fixed here, it doesn't require multiple sources.
     // It will only store them if they're available.
@@ -2937,6 +2964,8 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
     bool foundAtLeastOneTrackSource = false;
     for (const auto& trackMapInfo : trackMapPairs)
     {
+      if (_nTracks>=_maxNTracks) break;
+
       SvtxTrackMap* trackmap = findNode::getClass<SvtxTrackMap>(topNode, trackMapInfo.first);
       if (trackmap)
       {
@@ -2948,6 +2977,8 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
         }
         for (SvtxTrackMap::ConstIter track_itr = trackmap->begin(); track_itr != trackmap->end(); track_itr++)
         {
+          if (_nTracks>=_maxNTracks) break;
+
           SvtxTrack_FastSim* track = dynamic_cast<SvtxTrack_FastSim*>(track_itr->second);
           if (track)
           {
@@ -3029,7 +3060,36 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
                   _nProjections++;
                 }
               }
-            }
+            } //             if (_do_PROJECTIONS)
+
+            if (_do_PID_LogLikelihood )
+            {
+              // perform PID matching
+              if (trackMapInfo.second == TrackSource_t::all and pidcontainer != nullptr)
+              {
+                // only do so for the TrackSource_t::all
+                const EICPIDParticle* pid_particle =
+                pidcontainer->findEICPIDParticle(track->get_id());
+
+                if (pid_particle)
+                {
+                  if((unsigned int)_nTracks>= _track_pion_LL.size())
+                  {
+                    cout << __PRETTY_FUNCTION__
+                        << " logical error _nTracks = " << _nTracks
+                        << " logical error _track_pion_LL.size() = " << _track_pion_LL.size()
+                        << endl;
+                    exit(1);
+                  }
+
+                  _track_pion_LL[_nTracks] = pid_particle->get_SumLogLikelyhood(EICPIDDefs::PionCandiate);
+                  _track_kaon_LL[_nTracks] =  pid_particle->get_SumLogLikelyhood(EICPIDDefs::KaonCandiate);
+                  _track_proton_LL[_nTracks] =  pid_particle->get_SumLogLikelyhood(EICPIDDefs::ProtonCandiate);
+                }
+
+              }
+            } // if (_do_PID_LogLikelihood )
+
             _nTracks++;
             nTracksInASource++;
           }
@@ -3819,6 +3879,11 @@ void EventEvaluatorEIC::resetBuffer()
       _track_dca[itrk] = 0;
       _track_dca_2d[itrk] = 0;
       _track_source[itrk] = 0;
+
+      // Default to not performing PID matching. Set default LL to same value for all PIDs
+      _track_pion_LL[itrk] = -100;
+      _track_kaon_LL[itrk] = -100;
+      _track_proton_LL[itrk] = -100;
     }
     if (_do_PROJECTIONS)
     {

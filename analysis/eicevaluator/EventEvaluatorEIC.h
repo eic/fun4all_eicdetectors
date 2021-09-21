@@ -11,6 +11,7 @@
 
 #include <set>
 #include <string>
+#include <vector>
 
 class CaloEvalStack;
 class PHCompositeNode;
@@ -63,6 +64,7 @@ class EventEvaluatorEIC : public SubsysReco
   void set_do_LFHCAL(bool b) { _do_LFHCAL = b; }
   void set_do_HITS(bool b) { _do_HITS = b; }
   void set_do_TRACKS(bool b) { _do_TRACKS = b; }
+  void set_do_PID_LogLikelihood(bool b) { _do_PID_LogLikelihood = b; }
   void set_do_CLUSTERS(bool b) { _do_CLUSTERS = b; }
   void set_do_VERTEX(bool b) { _do_VERTEX = b; }
   void set_do_PROJECTIONS(bool b) { _do_PROJECTIONS = b; }
@@ -108,6 +110,7 @@ class EventEvaluatorEIC : public SubsysReco
   bool _do_CLUSTERS;
   bool _do_VERTEX;
   bool _do_PROJECTIONS;
+  bool _do_PID_LogLikelihood = false;
   bool _do_MCPARTICLES;
   bool _do_HEPMC;
   bool _do_GEOMETRY;
@@ -291,6 +294,11 @@ class EventEvaluatorEIC : public SubsysReco
   float* _track_trueID;
   unsigned short* _track_source;
 
+  // log likelihood summary for PID detectors, per track information
+  std::vector<float> _track_pion_LL;
+  std::vector<float> _track_kaon_LL;
+  std::vector<float> _track_proton_LL;
+
   int _nProjections;
   float* _track_ProjTrackID;
   int* _track_ProjLayer;
@@ -392,7 +400,7 @@ class EventEvaluatorEIC : public SubsysReco
   const int _maxNProjections = 2000;
   const int _maxNMCPart = 100000;
   const int _maxNHepmcp = 1000;
-  const int _maxNCalo = 11;
+  const int _maxNCalo = 15;
   
   enum calotype {
       kFHCAL         = 0,

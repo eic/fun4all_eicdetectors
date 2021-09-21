@@ -29,7 +29,8 @@ libeiceval_la_LIBADD = \
   -lmvtx_io \
   -lphhepmc_io \
   -lphg4hit \
-  -lg4eval
+  -lg4eval \
+  -leicpidbase
 
 pkginclude_HEADERS = \
   EventEvaluatorEIC.h \

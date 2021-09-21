@@ -5,8 +5,8 @@
 
 #include <g4main/PHG4DisplayAction.h>
 
-#include <string>  // for string
 #include <map>
+#include <string>  // for string
 
 class G4Colour;
 class G4VisAttributes;

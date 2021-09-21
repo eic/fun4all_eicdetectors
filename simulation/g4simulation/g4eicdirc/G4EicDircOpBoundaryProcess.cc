@@ -1,16 +1,16 @@
 #include "G4EicDircOpBoundaryProcess.h"
 
 #include <Geant4/G4Step.hh>
-#include <Geant4/G4Track.hh>
 #include <Geant4/G4TouchableHistory.hh>
+#include <Geant4/G4Track.hh>
 
 #include <set>
 
 G4VParticleChange* G4EicDircOpBoundaryProcess::PostStepDoIt(const G4Track& aTrack, const G4Step& aStep)
-{  
-  G4StepPoint* pPreStepPoint  = aStep.GetPreStepPoint();
+{
+  G4StepPoint* pPreStepPoint = aStep.GetPreStepPoint();
   G4StepPoint* pPostStepPoint = aStep.GetPostStepPoint();
-  G4VParticleChange *pParticleChange = G4OpBoundaryProcess::PostStepDoIt(aTrack, aStep);
+  G4VParticleChange* pParticleChange = G4OpBoundaryProcess::PostStepDoIt(aTrack, aStep);
   // static std::set<std::string> prevol;
   // static std::set<std::string> postvol;
   // std::string prevolnam = pPreStepPoint->GetPhysicalVolume()->GetName();
@@ -59,21 +59,20 @@ G4VParticleChange* G4EicDircOpBoundaryProcess::PostStepDoIt(const G4Track& aTrac
     pParticleChange->ProposeTrackStatus(fStopAndKill);
     }*/
 
-  if(aStep.GetPreStepPoint()->GetPhysicalVolume()->GetName()=="wLens3" && pPostStepPoint->GetPosition().z()>pPreStepPoint->GetPosition().z()){
+  if (aStep.GetPreStepPoint()->GetPhysicalVolume()->GetName() == "wLens3" && pPostStepPoint->GetPosition().z() > pPreStepPoint->GetPosition().z())
+  {
     pParticleChange->ProposeTrackStatus(fStopAndKill);
   }
-  
-  
+
   // kill photons outside bar and prizm
 
-  if(GetStatus() == FresnelRefraction 
-     && aStep.GetPostStepPoint()->GetPhysicalVolume()->GetName()=="wDirc"){
+  if (GetStatus() == FresnelRefraction && aStep.GetPostStepPoint()->GetPhysicalVolume()->GetName() == "wDirc")
+  {
     pParticleChange->ProposeTrackStatus(fStopAndKill);
-    }
+  }
 
-  if((aStep.GetPreStepPoint()->GetPhysicalVolume()->GetName()=="wLens1" 
-      || aStep.GetPreStepPoint()->GetPhysicalVolume()->GetName()=="wLens2")
-     &&  aStep.GetPostStepPoint()->GetPhysicalVolume()->GetName()=="wDirc"){
+  if ((aStep.GetPreStepPoint()->GetPhysicalVolume()->GetName() == "wLens1" || aStep.GetPreStepPoint()->GetPhysicalVolume()->GetName() == "wLens2") && aStep.GetPostStepPoint()->GetPhysicalVolume()->GetName() == "wDirc")
+  {
     pParticleChange->ProposeTrackStatus(fStopAndKill);
   }
 
@@ -84,18 +83,15 @@ G4VParticleChange* G4EicDircOpBoundaryProcess::PostStepDoIt(const G4Track& aTrac
   // 	 &&  aStep.GetPostStepPoint()->GetPhysicalVolume()->GetName()=="wLens3")){
   //   pParticleChange->ProposeTrackStatus(fStopAndKill);
   // }
-  
-  
-  if(aStep.GetPreStepPoint()->GetPhysicalVolume()->GetName()=="wLens1" 
-     && aStep.GetPostStepPoint()->GetPhysicalVolume()->GetName()=="wLens1"){
+
+  if (aStep.GetPreStepPoint()->GetPhysicalVolume()->GetName() == "wLens1" && aStep.GetPostStepPoint()->GetPhysicalVolume()->GetName() == "wLens1")
+  {
     pParticleChange->ProposeTrackStatus(fStopAndKill);
   }
-  if(aStep.GetPreStepPoint()->GetPhysicalVolume()->GetName()=="wLens2" 
-     && aStep.GetPostStepPoint()->GetPhysicalVolume()->GetName()=="wLens2"){
+  if (aStep.GetPreStepPoint()->GetPhysicalVolume()->GetName() == "wLens2" && aStep.GetPostStepPoint()->GetPhysicalVolume()->GetName() == "wLens2")
+  {
     pParticleChange->ProposeTrackStatus(fStopAndKill);
-    }
-  
+  }
 
   return pParticleChange;
-
 }

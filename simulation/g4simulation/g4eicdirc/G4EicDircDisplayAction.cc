@@ -22,7 +22,6 @@ G4EicDircDisplayAction::G4EicDircDisplayAction(const std::string &name, PHParame
 
 G4EicDircDisplayAction::~G4EicDircDisplayAction()
 {
-  
   delete m_VisAtt;
   delete m_Colour;
 }
