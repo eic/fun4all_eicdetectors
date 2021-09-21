@@ -475,9 +475,9 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   _track_TLP_true_y = new float[_maxNProjections];
   _track_TLP_true_z = new float[_maxNProjections];
   _track_TLP_true_t = new float[_maxNProjections];
-  _track_pion_LL.resize(_maxNTracks);
-  _track_kaon_LL.resize(_maxNTracks);
-  _track_proton_LL.resize(_maxNTracks);
+  _track_pion_LL.resize(_maxNTracks, -100);
+  _track_kaon_LL.resize(_maxNTracks, -100);
+  _track_proton_LL.resize(_maxNTracks, -100);
 
   _mcpart_ID = new int[_maxNMCPart];
   _mcpart_ID_parent = new int[_maxNMCPart];
