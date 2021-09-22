@@ -147,7 +147,7 @@ void PHG4ForwardEcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
   {
     for (int i = 0; i < 7; i++)
     {
-      if (iterator->second.type == i)
+      if (iterator->second.type == i && singletower[i] == nullptr)
       {
         singletower[i] = ConstructTower(i);
       }
