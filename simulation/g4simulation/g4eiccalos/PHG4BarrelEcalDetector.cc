@@ -26,6 +26,9 @@
 #include <Geant4/G4SubtractionSolid.hh>
 #include <TSystem.h>
 
+#include <g4gdml/PHG4GDMLConfig.hh>
+#include <g4gdml/PHG4GDMLUtility.hh>
+
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
@@ -49,6 +52,8 @@ PHG4BarrelEcalDetector::PHG4BarrelEcalDetector(PHG4Subsystem* subsys, PHComposit
   , m_TowerLogicNamePrefix("bcalTower")
   , m_SuperDetector("NONE")
 {
+  gdml_config = PHG4GDMLUtility::GetOrMakeConfigNode(Node);
+  assert(gdml_config);
 }
 //_______________________________________________________________________
 int PHG4BarrelEcalDetector::IsInBarrelEcal(G4VPhysicalVolume* volume) const
@@ -162,9 +167,11 @@ void PHG4BarrelEcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
   
   std::string name_envelope = m_TowerLogicNamePrefix + "_envelope";
 
-  new G4PVPlacement(0, G4ThreeVector(pos_x1, pos_y1, pos_z1), cylinder_logic, name_envelope,
+  G4PVPlacement * phys_envelope=
+      new G4PVPlacement(0, G4ThreeVector(pos_x1, pos_y1, pos_z1), cylinder_logic, name_envelope,
                                      logicWorld, false, 0, OverlapCheck());
 
+  gdml_config->exclude_physical_vol(phys_envelope);
   PlaceTower(cylinder_logic);
 
   return;
