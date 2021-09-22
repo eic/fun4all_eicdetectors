@@ -296,8 +296,8 @@ PHG4ForwardEcalDetector::ConstructTowerType2()
   {
     std::cout<<__PRETTY_FUNCTION__
         <<"Tower size z (m_TowerDz[2) from database is too thin. "
-        <<"It does not fit the layer structure as described in https://doi.org/10.1016/S0168-9002(02)01954-X !"
-        <<"Abort";
+        <<"It does not fit the layer structure as described in https://doi.org/10.1016/S0168-9002(02)01954-X !"<<std::endl
+        <<"Abort"<<std::endl;
     std::cout <<" m_TowerDz[2] = "<< m_TowerDz[2]<<" i.e. nlayers "<<nlayers<< " * thickness_layer "<<thickness_layer<<" <= thickness_cell "<<thickness_cell<<std::endl;
     exit(1);
   }
