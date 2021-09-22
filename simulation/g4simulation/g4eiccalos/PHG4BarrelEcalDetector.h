@@ -22,6 +22,7 @@ class PHCompositeNode;
 class PHG4BarrelEcalDisplayAction;
 class PHG4Subsystem;
 class PHParameters;
+class PHG4GDMLConfig;
 
 /**
  * \file ${file_name}
@@ -129,6 +130,9 @@ class PHG4BarrelEcalDetector : public PHG4Detector
   std::set<G4LogicalVolume *> m_AbsorberLogicalVolSet;
   std::set<G4LogicalVolume *> m_ScintiLogicalVolSet;
   std::set<G4LogicalVolume *> m_SupportLogicalVolSet;
+
+  //! registry for volumes that should not be exported, i.e. fibers
+  PHG4GDMLConfig* gdml_config = nullptr;
 };
 
 #endif
