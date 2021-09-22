@@ -281,11 +281,26 @@ PHG4ForwardEcalDetector::ConstructTowerType2()
   G4int nlayers                   = 66;
   G4double thickness_layer        = m_TowerDz[2] / (float) nlayers;
   // update layer thickness with https://doi.org/10.1016/S0168-9002(02)01954-X
-  G4double thickness_absorber     = thickness_layer * (1.5 / 5.6);      // 1.5mm absorber
-  G4double thickness_scintillator = thickness_layer * (4.0 / 5.6);  // 4mm scintillator
+  G4double thickness_cell = 5.6 * mm;
+  G4double thickness_absorber     = 1.5 * mm;      // 1.5mm absorber
+  G4double thickness_scintillator = 4.0 * mm;  // 4mm scintillator
   G4Material* material_scintillator = G4Material::GetMaterial("G4_POLYSTYRENE");
   G4Material* material_absorber     = G4Material::GetMaterial("G4_Pb");
 
+  if (Verbosity())
+  {
+    std::cout <<" m_TowerDz[2] = "<< m_TowerDz[2]<< " thickness_layer = "<<thickness_layer<<" thickness_cell = "<<thickness_cell<<std::endl;
+  }
+
+  if (thickness_layer<=thickness_cell)
+  {
+    std::cout<<__PRETTY_FUNCTION__
+        <<"Tower size z (m_TowerDz[2) from database is too thin. "
+        <<"It does not fit the layer structure as described in https://doi.org/10.1016/S0168-9002(02)01954-X !"<<std::endl
+        <<"Abort"<<std::endl;
+    std::cout <<" m_TowerDz[2] = "<< m_TowerDz[2]<<" i.e. nlayers "<<nlayers<< " * thickness_layer "<<thickness_layer<<" <= thickness_cell "<<thickness_cell<<std::endl;
+    exit(1);
+  }
   
   
   //**********************************************************************************************
@@ -294,7 +309,7 @@ PHG4ForwardEcalDetector::ConstructTowerType2()
   G4VSolid* miniblock_solid         = new G4Box("miniblock_solid",
                                                 m_TowerDx[2] / 2.0,
                                                 m_TowerDy[2] / 2.0,
-                                                (thickness_absorber + thickness_scintillator) / 2.0);
+                                                thickness_cell / 2.0);
   G4LogicalVolume* miniblock_logic  = new G4LogicalVolume(miniblock_solid,
                                                           WorldMaterial,
                                                           "miniblock_logic",
@@ -345,7 +360,7 @@ PHG4ForwardEcalDetector::ConstructTowerType2()
   /* create replica within tower */
   std::string name_tower = m_TowerLogicNamePrefix;
   new G4PVReplica(name_tower,miniblock_logic,single_tower_logic,
-                      kZAxis,nlayers, thickness_absorber+thickness_scintillator,0);
+                      kZAxis,nlayers, thickness_layer,0);
 
   GetDisplayAction()->AddVolume(single_tower_logic, "SingleTower");
 
