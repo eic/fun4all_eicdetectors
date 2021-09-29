@@ -8,7 +8,7 @@
 #include <calobase/RawTowerGeom.h>             // for RawTowerGeom
 #include <calobase/RawTowerGeomv4.h>
 #include <calobase/RawTowerGeomContainer.h>    // for RawTowerGeomContainer
-#include <calobase/RawTowerGeomContainerv1.h>
+#include <calobase/RawTowerGeomContainer_Cylinderv1.h>
 
 #include <g4main/PHG4Hit.h>
 #include <g4main/PHG4HitContainer.h>
@@ -180,7 +180,8 @@ void RawTowerBuilderByHitIndexBECAL::CreateNodes(PHCompositeNode *topNode)
   }
 
   // Create the tower geometry node on the tree
-  m_Geoms = new RawTowerGeomContainerv1(RawTowerDefs::convert_name_to_caloid(m_Detector));
+  m_Geoms = new RawTowerGeomContainer_Cylinderv1(RawTowerDefs::convert_name_to_caloid(m_Detector));
+  m_Geoms->set_radius(); 
   string NodeNameTowerGeometries = "TOWERGEOM_" + m_Detector;
 
   PHIODataNode<PHObject> *geomNode = new PHIODataNode<PHObject>(m_Geoms, NodeNameTowerGeometries, "PHObject");
