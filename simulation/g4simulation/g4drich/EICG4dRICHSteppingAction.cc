@@ -149,15 +149,15 @@ bool EICG4dRICHSteppingAction::UserSteppingAction(const G4Step *aStep,
   //hitSubtype = -1;
 
   // classify hit type
-  if (prePointVolName.contains("DRICHpetal") && postPointVolName.contains("DRICHpsst"))
+  if (prePointVolName.contains("dRICHpetal") && postPointVolName.contains("dRICHpsst"))
   {
     hitType = hPSST;
   }
-  else if (prePointVolName.contains("World") && postPointVolName.contains("DRICHvessel"))
+  else if (prePointVolName.contains("World") && postPointVolName.contains("dRICHvessel"))
   {
     hitType = hEntrance;
   }
-  else if (prePointVolName.contains("DRICHvessel") && postPointVolName.contains("World"))
+  else if (prePointVolName.contains("dRICHvessel") && postPointVolName.contains("World"))
   {
     hitType = hExit;
   }
@@ -296,7 +296,7 @@ bool EICG4dRICHSteppingAction::UserSteppingAction(const G4Step *aStep,
       else
         std::cout << "UNKNOWN!";
       std::cout << std::endl;
-      if (aTrack->GetTrackID() > 1)
+      if (aTrack->GetTrackID() > 1 && aTrack->GetCreatorProcess())
       {
         std::cout << "[-] secondary track, creator process="
                   << aTrack->GetCreatorProcess()->GetProcessName();
@@ -446,8 +446,9 @@ bool EICG4dRICHSteppingAction::UserSteppingAction(const G4Step *aStep,
           m_Hit->set_process("postStep");
         else if (hitSubtype == entPrimary)
           m_Hit->set_process("primary");
-        else
-          m_Hit->set_process(aTrack->GetCreatorProcess()->GetProcessName());
+	else if (aTrack->GetCreatorProcess())
+	  m_Hit->set_process(aTrack->GetCreatorProcess()->GetProcessName());
+        else m_Hit->set_process("primary");
         break;
       case hExit:
         m_Hit->set_process("exitProcess");
