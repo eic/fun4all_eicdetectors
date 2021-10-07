@@ -30,8 +30,8 @@ using namespace std;
 //_______________________________________________________________________
 EICG4B0Subsystem::EICG4B0Subsystem(const std::string &name, const int lyr)
   : PHG4DetectorSubsystem(name, lyr)
-  , m_Detector(nullptr)
-  , m_SteppingAction(nullptr)
+//  , m_Detector(nullptr)
+//  , m_SteppingAction(nullptr)
 {
   // call base class method which will set up parameter infrastructure
   // and call our SetDefaultParameters() method
@@ -40,34 +40,56 @@ EICG4B0Subsystem::EICG4B0Subsystem(const std::string &name, const int lyr)
 //_______________________________________________________________________
 int EICG4B0Subsystem::InitRunSubsystem(PHCompositeNode *topNode)
 {
-  PHNodeIterator iter(topNode);
-  PHCompositeNode *dstNode = dynamic_cast<PHCompositeNode *>(iter.findFirst("PHCompositeNode", "DST"));
-  PHNodeIterator dstIter(dstNode);
-  if (GetParams()->get_int_param("active"))
-  {
-    PHCompositeNode *DetNode = dynamic_cast<PHCompositeNode *>(dstIter.findFirst("PHCompositeNode", Name()));
-    if (!DetNode)
-    {
-      DetNode = new PHCompositeNode(Name());
-      dstNode->addNode(DetNode);
-    }
-    std::string g4hitnodename = "G4HIT_" + Name();
-    PHG4HitContainer *g4_hits = findNode::getClass<PHG4HitContainer>(DetNode, g4hitnodename);
-    if (!g4_hits)
-    {
-      g4_hits = new PHG4HitContainer(g4hitnodename);
-      DetNode->addNode(new PHIODataNode<PHObject>(g4_hits, g4hitnodename, "PHObject"));
-    }
-  }
   // create detector
   m_Detector = new EICG4B0Detector(this, topNode, GetParams(), Name(), GetLayer());
   m_Detector->SuperDetector(SuperDetector());
   m_Detector->OverlapCheck(CheckOverlap());
-  // create stepping action if detector is active
+ 
   if (GetParams()->get_int_param("active"))
   {
-    m_SteppingAction = new EICG4B0SteppingAction(m_Detector, GetParams());
-  }
+    PHNodeIterator iter(topNode);
+    PHCompositeNode *dstNode = dynamic_cast<PHCompositeNode *>(iter.findFirst("PHCompositeNode", "DST"));
+  
+    string nodename;
+    string geonode;
+
+    if (SuperDetector() != "NONE")
+    {
+    // create super detector subnodes
+       PHNodeIterator iter_dst(dstNode);
+       PHCompositeNode *superSubNode = dynamic_cast<PHCompositeNode *>(iter_dst.findFirst("PHCompositeNode", SuperDetector()));
+       if (!superSubNode)
+       {
+         superSubNode = new PHCompositeNode(SuperDetector());
+         dstNode->addNode(superSubNode);
+       }
+       dstNode = superSubNode;
+   
+       nodename = "G4HIT_" + SuperDetector();
+    }
+ 
+    else
+    {
+       nodename = "G4HIT_" + Name();
+    }
+    PHG4HitContainer *b0_hits = findNode::getClass<PHG4HitContainer>(topNode, nodename);
+    if (!b0_hits)
+    {
+       dstNode->addNode(new PHIODataNode<PHObject>(b0_hits = new PHG4HitContainer(nodename), nodename, "PHObject"));
+    }
+    b0_hits->AddLayer(GetLayer());
+    auto *tmp = new EICG4B0SteppingAction(this, m_Detector, GetParams());
+    tmp->HitNodeName(nodename);
+    m_SteppingAction = tmp;
+   }
+   else if (GetParams()->get_int_param("blackhole"))
+   {
+     m_SteppingAction = new EICG4B0SteppingAction(this, m_Detector, GetParams());
+   }
+   if (m_SteppingAction)
+   {
+      (dynamic_cast<EICG4B0SteppingAction *>(m_SteppingAction))->SaveAllHits(m_SaveAllHitsFlag);
+   }
   return 0;
 }
 //_______________________________________________________________________
@@ -121,6 +143,9 @@ void EICG4B0Subsystem::SetDefaultParameters()
   set_default_double_param("spanningAngle", 360.);  //spanning Angle of the detector (for packman cutoff)
   set_default_double_param("detid", 0.);            //detector id
   set_default_int_param("ispipe", 0);               //pipe or detector (for future implementation)
-
+  set_default_int_param("lightyield", 0);
+  set_default_int_param("use_g4steps", 0);
+  set_default_double_param("tmin", NAN);
+  set_default_double_param("tmax", NAN);
   set_default_string_param("material", "G4_PbWO4");  //detector material
 }
