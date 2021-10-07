@@ -140,7 +140,8 @@ bool EICG4B0SteppingAction::UserSteppingAction(const G4Step *aStep, bool was_use
   // hits can easily be analyzed later according to their detector id
   int layer_id = m_Detector->get_Layer();
 // no hits for dead material
-  if (layer_id % 2 == 1) 
+  //if (layer_id % 2 == 1) //Proper implementation for several layer configurations
+  if (m_Params->get_string_param("material") == "G4_Cu") 
   {
 	return false;
   }
