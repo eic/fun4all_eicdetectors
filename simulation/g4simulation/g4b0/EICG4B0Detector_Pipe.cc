@@ -42,8 +42,6 @@
 class G4VSolid;
 class PHCompositeNode;
 
-using namespace std;
-
 //____________________________________________________________________________..
 EICG4B0Detector::EICG4B0Detector(PHG4Subsystem *subsys,
                                  PHCompositeNode *Node,
