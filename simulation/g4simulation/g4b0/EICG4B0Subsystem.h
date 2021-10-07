@@ -48,6 +48,10 @@ class EICG4B0Subsystem : public PHG4DetectorSubsystem
   //! Print info (from SubsysReco)
   void Print(const std::string& what = "ALL") const override;
 
+  bool CanBeMotherSubsystem() const override { return true; }
+
+  void SaveAllHits(bool i = true) { m_SaveAllHitsFlag = i; }
+
  protected:
   // \brief Set default parameter values
   void SetDefaultParameters() override;
@@ -60,6 +64,8 @@ class EICG4B0Subsystem : public PHG4DetectorSubsystem
   //! particle tracking "stepping" action
   /*! derives from PHG4SteppingActions */
   PHG4SteppingAction* m_SteppingAction;
+
+  bool m_SaveAllHitsFlag = false;
 };
 
 #endif  // EICG4B0SUBSYSTEM_H
