@@ -1,7 +1,6 @@
 #ifndef G4DETECTORS_PHG4TRDSUBSYSTEM_H
 #define G4DETECTORS_PHG4TRDSUBSYSTEM_H
 
-
 #include <g4detectors/PHG4DetectorSubsystem.h>
 
 #include <array>   // for array
@@ -14,49 +13,45 @@ class PHG4SteppingAction;
 
 class PHG4TRDSubsystem : public PHG4DetectorSubsystem
 {
-public:
-//! constructor
-PHG4TRDSubsystem(const std::string& name = "TRD", const int layer = 0);
-  
-//! destructor
-~PHG4TRDSubsystem(void) override;
-  
-  
-int InitRunSubsystem(PHCompositeNode*) override ;
-  
-//! event processing
-/*!
+ public:
+  //! constructor
+  PHG4TRDSubsystem(const std::string& name = "TRD", const int layer = 0);
+
+  //! destructor
+  ~PHG4TRDSubsystem(void) override;
+
+  int InitRunSubsystem(PHCompositeNode*) override;
+
+  //! event processing
+  /*!
   get all relevant nodes from top nodes (namely hit list)
   and pass that to the stepping action
 */
-int process_event(PHCompositeNode*) override;
-  
-//! Print info (from SubsysReco)
-void Print(const std::string& what = "ALL") const override;
+  int process_event(PHCompositeNode*) override;
 
-//! accessors (reimplemented)
-PHG4Detector* GetDetector(void) const override;
-PHG4SteppingAction* GetSteppingAction(void) const override { return m_SteppingAction; }
+  //! Print info (from SubsysReco)
+  void Print(const std::string& what = "ALL") const override;
 
-// this method is used to check if it can be used as mothervolume
-// Subsystems which can be mothervolume need to implement this
-// and return true
-//bool CanBeMotherSubsystem() const override { return true; }
+  //! accessors (reimplemented)
+  PHG4Detector* GetDetector(void) const override;
+  PHG4SteppingAction* GetSteppingAction(void) const override { return m_SteppingAction; }
 
-private:
-void SetDefaultParameters() override ;
-  
-//! detector geometry
-/*! derives from PHG4Detector */
+  // this method is used to check if it can be used as mothervolume
+  // Subsystems which can be mothervolume need to implement this
+  // and return true
+  //bool CanBeMotherSubsystem() const override { return true; }
+
+ private:
+  void SetDefaultParameters() override;
+
+  //! detector geometry
+  /*! derives from PHG4Detector */
   PHG4TRDDetector* m_Detector /*= nullptr*/;
 
-//! particle tracking "stepping" action
-/*! derives from PHG4SteppingActions */
+  //! particle tracking "stepping" action
+  /*! derives from PHG4SteppingActions */
   PHG4SteppingAction* m_SteppingAction /*= nullptr*/;
 
-  
   //bool m_SaveAllHitsFlag = false;
-  
-  
 };
 #endif  // G4DETECTORS_PHG4TRDSUBSYSTEM_H

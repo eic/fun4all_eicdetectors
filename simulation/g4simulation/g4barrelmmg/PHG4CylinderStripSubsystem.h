@@ -6,7 +6,7 @@
 #include <g4detectors/PHG4DetectorSubsystem.h>
 
 #if !defined(__CINT__) || defined(__CLING__)
-#include <array>   // for array
+#include <array>  // for array
 #endif
 
 #include <string>  // for string
@@ -48,10 +48,10 @@ class PHG4CylinderStripSubsystem : public PHG4DetectorSubsystem
   PHG4Detector* GetDetector(void) const;
   PHG4SteppingAction* GetSteppingAction(void) const { return m_SteppingAction; }
 
-// this method is used to check if it can be used as mothervolume
-// Subsystems which can be mothervolume need to implement this 
-// and return true
-  virtual bool CanBeMotherSubsystem() const {return true;}
+  // this method is used to check if it can be used as mothervolume
+  // Subsystems which can be mothervolume need to implement this
+  // and return true
+  virtual bool CanBeMotherSubsystem() const { return true; }
 
  private:
   void SetDefaultParameters();
@@ -63,7 +63,6 @@ class PHG4CylinderStripSubsystem : public PHG4DetectorSubsystem
   //! particle tracking "stepping" action
   /*! derives from PHG4SteppingActions */
   PHG4SteppingAction* m_SteppingAction;
-
 };
 
 #endif  // G4DETECTORS_PHG4CYLINDERSUBSYSTEM_H

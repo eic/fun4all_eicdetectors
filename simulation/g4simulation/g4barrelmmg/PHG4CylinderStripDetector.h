@@ -40,14 +40,14 @@ class PHG4CylinderStripDetector : public PHG4Detector
   PHParameters *m_Params;
 
   G4VPhysicalVolume *m_CylinderPhysicalVolume;
-  std::set<G4VPhysicalVolume*> m_CylinderCPhysicalVolume;
-  std::set<G4VPhysicalVolume*> m_CylinderZPhysicalVolume;
-  
+  std::set<G4VPhysicalVolume *> m_CylinderCPhysicalVolume;
+  std::set<G4VPhysicalVolume *> m_CylinderZPhysicalVolume;
+
   //std::set<G4VPhysicalVolume*> m_PhysicalVolumesSet;
 
   int m_Layer;
   std::string m_SuperDetector;
-  G4VSolid* GetHollowBar();
+  G4VSolid *GetHollowBar();
   double thickness;
   double barwidth;
 };

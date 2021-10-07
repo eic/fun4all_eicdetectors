@@ -15,20 +15,20 @@ class CreateCZHitContainer : public SubsysReco
 {
  public:
   //! constructor
-  CreateCZHitContainer(const std::string &name = "BMT");
+  CreateCZHitContainer(const std::string& name = "BMT");
 
   //! destructor
   virtual ~CreateCZHitContainer();
 
   //! full initialization
-  int InitRun(PHCompositeNode *);
+  int InitRun(PHCompositeNode*);
 
   //! event processing method
-  int process_event(PHCompositeNode *);
+  int process_event(PHCompositeNode*);
 
   //! end of run method
   //int End(PHCompositeNode *);
-  
+
   PHG4Hit* merge_hits(PHG4Hit*, PHG4Hit*);
 
  private:
