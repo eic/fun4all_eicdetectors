@@ -88,6 +88,7 @@ FarForwardEvaluator::FarForwardEvaluator(const std::string& name, const std::str
   , h1_E_dep(nullptr)
   , h1_B0_E_dep(nullptr)
   , h1_B0_E_abs(nullptr)
+  , h1_B0_E(nullptr)
   , h1_RP_E_dep(nullptr)
   , h1_RP_E_abs(nullptr)
 {
