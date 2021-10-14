@@ -21,7 +21,7 @@ class EICG4B0SteppingAction : public PHG4SteppingAction
 {
  public:
   //! constructor
-  EICG4B0SteppingAction(EICG4B0Subsystem* subsys, EICG4B0Detector* detector, const PHParameters* parameters);
+  EICG4B0SteppingAction(EICG4B0Subsystem *subsys, EICG4B0Detector *detector, const PHParameters* parameters);
 
   //! destructor
   virtual ~EICG4B0SteppingAction() override;
@@ -32,13 +32,13 @@ class EICG4B0SteppingAction : public PHG4SteppingAction
   //! reimplemented from base class
   virtual void SetInterfacePointers(PHCompositeNode*) override;
 
-  virtual void SaveLightYield(const int i = 1) { m_SaveLightYieldFlag = i; }
+  virtual void SaveLightYield(const int i = 1) { m_SaveLightYieldFlag = i;}
 
   virtual bool hasMotherSubsystem() const;
 
-  virtual void SaveAllHits(bool i = true) { m_SaveAllHitsFlag = i; }
+  virtual void SaveAllHits(bool i = true){ m_SaveAllHitsFlag = i;}
 
-  virtual void HitNodeName(const std::string& name) { m_HitNodeName = name; }
+  virtual void HitNodeName(const std::string &name) {m_HitNodeName=name;}
 
  private:
   //! pointer to the detector
@@ -49,12 +49,12 @@ class EICG4B0SteppingAction : public PHG4SteppingAction
   //! pointer to hit container
   PHG4HitContainer* m_HitContainer;
   PHG4Hit* m_Hit;
-  //  PHG4HitContainer* m_SaveHitContainer;
+//  PHG4HitContainer* m_SaveHitContainer;
   PHG4Shower* m_SaveShower;
   G4VPhysicalVolume* m_SaveVolPre;
   G4VPhysicalVolume* m_SaveVolPost;
 
-  bool m_SaveAllHitsFlag = false;
+  bool m_SaveAllHitsFlag = true;
   int m_SaveLightYieldFlag;
   int m_SaveTrackId;
   int m_SavePreStepStatus;
@@ -67,6 +67,8 @@ class EICG4B0SteppingAction : public PHG4SteppingAction
   double m_Tmin;
   double m_Tmax;
   double m_EdepSum;
+  double m_EabsSum;
+  double m_EionSum;
   std::string m_HitNodeName;
 };
 

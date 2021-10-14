@@ -17,8 +17,11 @@
 #include <sstream>
 #include <utility>
 
+using namespace std;
+
 EICG4B0HitTree::EICG4B0HitTree(const std::string &name, const std::string &filename)
   : SubsysReco(name)
+  , hm(nullptr)
   , _filename(filename)
   , tree(nullptr)
   , outfile(nullptr)
@@ -28,18 +31,17 @@ EICG4B0HitTree::EICG4B0HitTree(const std::string &name, const std::string &filen
 
 EICG4B0HitTree::~EICG4B0HitTree()
 {
+	delete hm;
 }
 
 int EICG4B0HitTree::Init(PHCompositeNode *)
 {
+  hm = new Fun4AllHistoManager(Name());
   outfile = new TFile(_filename.c_str(), "RECREATE");
   tree = new TTree("b0hit", "Collection of EICG4 B0 G4Hits");
 
   tree->Branch("Nhit", &Nhit, "Nhit/I");
-  tree->Branch("layerType", &layerType);
   tree->Branch("layerID", &layerID);
-  tree->Branch("xID", &xID);
-  tree->Branch("yID", &yID);
   tree->Branch("x0", &x0);
   tree->Branch("y0", &y0);
   tree->Branch("z0", &z0);
@@ -55,8 +57,8 @@ int EICG4B0HitTree::Init(PHCompositeNode *)
 
 int EICG4B0HitTree::process_event(PHCompositeNode *topNode)
 {
-  std::ostringstream nodename;
-  std::set<std::string>::const_iterator iter;
+  ostringstream nodename;
+  set<string>::const_iterator iter;
   for (iter = _node_postfix.begin(); iter != _node_postfix.end(); ++iter)
   {
     nodename.str("");
@@ -74,10 +76,7 @@ int EICG4B0HitTree::process_event(PHCompositeNode *topNode)
       //            hit_iter->second->print();
       if (hit_iter->second->get_hit_type() < 0) continue;
 
-      layerType.push_back(hit_iter->second->get_hit_type());
       layerID.push_back(hit_iter->second->get_layer());
-      xID.push_back(hit_iter->second->get_index_i());
-      yID.push_back(hit_iter->second->get_index_j());
       x0.push_back(hit_iter->second->get_x(0));
       y0.push_back(hit_iter->second->get_y(0));
       z0.push_back(hit_iter->second->get_z(0));
@@ -91,10 +90,7 @@ int EICG4B0HitTree::process_event(PHCompositeNode *topNode)
 
     tree->Fill();
 
-    layerType.clear();
     layerID.clear();
-    xID.clear();
-    yID.clear();
     x0.clear();
     y0.clear();
     z0.clear();
@@ -115,6 +111,7 @@ int EICG4B0HitTree::End(PHCompositeNode *topNode)
   outfile->Write();
   outfile->Close();
   delete outfile;
+  hm->dumpHistos(_filename, "UPDATE");
   return 0;
 }
 

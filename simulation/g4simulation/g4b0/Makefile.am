@@ -16,6 +16,7 @@ AM_CPPFLAGS = \
 
 pkginclude_HEADERS = \
   EICG4B0HitTree.h \
+  EICG4B0Ntuple.h \
   EICG4B0Subsystem.h
 
 libEICG4B0_la_SOURCES = \
@@ -23,6 +24,7 @@ libEICG4B0_la_SOURCES = \
   EICG4B0Subsystem.cc \
   EICG4B0Detector.cc \
   EICG4B0HitTree.cc \
+  EICG4B0Ntuple.cc \
   EICG4B0SteppingAction.cc
 
 libEICG4B0_la_LDFLAGS  = \
