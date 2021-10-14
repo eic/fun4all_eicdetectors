@@ -52,6 +52,8 @@ class FarForwardEvaluator : public SubsysReco
   //  std::string outfilename;
 
   TNtuple *g4hitntuple;
+  TNtuple *g4b0hitntuple; // added by Sasha Bylinkin
+  TNtuple *g4rphitntuple; // added by Sasha Bylinkin
   //TNtuple *clusterntuple;
 
   TH2F *h2_ZDC_XY;
@@ -112,6 +114,11 @@ class FarForwardEvaluator : public SubsysReco
 
   TH1F *h1_E_dep_smeared;
   TH1F *h1_E_dep;
+  TH1F *h1_B0_E_dep;
+  TH1F *h1_B0_E;
+  TH1F *h1_B0_E_abs;
+  TH1F *h1_RP_E_dep;
+  TH1F *h1_RP_E_abs;
 };
 
 #endif  // G4EVAL_FARFORWARDEVALUATOR_H

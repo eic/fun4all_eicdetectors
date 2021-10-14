@@ -47,6 +47,8 @@ FarForwardEvaluator::FarForwardEvaluator(const std::string& name, const std::str
   , _ffrname(ffrname)
   , _ip_str(ip_str)
   , g4hitntuple(nullptr)
+  , g4b0hitntuple(nullptr)
+  , g4rphitntuple(nullptr)
   , h2_ZDC_XY(nullptr)
   , h2_ZDC_XY_double(nullptr)
   , h2_B0_XY(nullptr)
@@ -84,6 +86,10 @@ FarForwardEvaluator::FarForwardEvaluator(const std::string& name, const std::str
   , _tfile(nullptr)
   , h1_E_dep_smeared(nullptr)
   , h1_E_dep(nullptr)
+  , h1_B0_E_dep(nullptr)
+  , h1_B0_E_abs(nullptr)
+  , h1_RP_E_dep(nullptr)
+  , h1_RP_E_abs(nullptr)
 {
 }
 
@@ -137,6 +143,8 @@ int FarForwardEvaluator::Init(PHCompositeNode* topNode)
   hm = new Fun4AllHistoManager(Name());
 
   g4hitntuple = new TNtuple("hitntup", "G4Hits", "x0:y0:z0:x1:y1:z1:edep");
+  g4b0hitntuple = new TNtuple("b0hit", "B0 Hits", "layer:type:x0:y0:z0:x1:y1:z1:t0:t1:edep");
+  g4rphitntuple = new TNtuple("rphit", "RP Hits", "layer:type:x0:y0:z0:x1:y1:z1:t0:t1:edep");
 
   std::cout << "diff_tagg_ana::Init(PHCompositeNode *topNode) Initializing" << std::endl;
 
@@ -166,6 +174,10 @@ int FarForwardEvaluator::Init(PHCompositeNode* topNode)
 
   h2_B0_XY = new TH2F("B0_XY", "B0 XY", 400, -200, 200, 200, -50, 50);
 
+  h1_B0_E_dep = new TH1F("B0_E_dep", "E Dependence", 120, 0.0, 60.0);
+  h1_B0_E_abs = new TH1F("B0_E_abs", "E Absorbed", 120, 0.0, 60.0);
+  h1_B0_E = new TH1F("B0_E", "E layer", 10, 0.0, 10.0);
+
   gDirectory->cd("/");
 
   //----------------------------
@@ -175,6 +187,8 @@ int FarForwardEvaluator::Init(PHCompositeNode* topNode)
   gDirectory->cd("RP");
 
   h2_RP_XY = new TH2F("RP_XY", "RP XY", 400, -200, 200, 200, -50, 50);
+  h1_RP_E_dep = new TH1F("RP_E_dep", "E Dependence", 120, 0.0, 60.0);
+  h1_RP_E_abs = new TH1F("RP_E_abs", "E Absorbed", 120, 0.0, 60.0);
 
   gDirectory->cd("/");
 
@@ -286,6 +300,19 @@ int FarForwardEvaluator::process_g4hits_RomanPots(PHCompositeNode* topNode)
     for (PHG4HitContainer::ConstIterator hit_iter = hit_range.first; hit_iter != hit_range.second; hit_iter++)
     {
       h2_RP_XY->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
+      g4rphitntuple->Fill(hit_iter->second->get_layer(),
+                  hit_iter->second->get_hit_type(),
+                  hit_iter->second->get_x(0),
+                  hit_iter->second->get_y(0),
+                  hit_iter->second->get_z(0),
+                  hit_iter->second->get_x(1),
+                  hit_iter->second->get_y(1),
+                  hit_iter->second->get_z(1),
+                  hit_iter->second->get_t(0),
+                  hit_iter->second->get_t(1),
+                  hit_iter->second->get_edep());
+        if (hit_iter->second->get_hit_type())h1_RP_E_dep->Fill(hit_iter->second->get_edep());
+        else h1_RP_E_abs->Fill(hit_iter->second->get_edep());
     }
   }
 
@@ -295,7 +322,7 @@ int FarForwardEvaluator::process_g4hits_RomanPots(PHCompositeNode* topNode)
 //-----------------------------------
 
 //***************************************************
-// Getting the RomanPots hits
+// Getting the B0 hits
 
 int FarForwardEvaluator::process_g4hits_B0(PHCompositeNode* topNode)
 {
@@ -318,6 +345,20 @@ int FarForwardEvaluator::process_g4hits_B0(PHCompositeNode* topNode)
       //	cout << "This is where you can fill your loop " << endl;
 
       h2_B0_XY->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
+      g4b0hitntuple->Fill(hit_iter->second->get_layer(),
+                  hit_iter->second->get_hit_type(),
+                  hit_iter->second->get_x(0),
+                  hit_iter->second->get_y(0),
+                  hit_iter->second->get_z(0),
+                  hit_iter->second->get_x(1),
+                  hit_iter->second->get_y(1),
+                  hit_iter->second->get_z(1),
+                  hit_iter->second->get_t(0),
+                  hit_iter->second->get_t(1),
+                  hit_iter->second->get_edep());
+        if (hit_iter->second->get_hit_type())h1_B0_E_dep->Fill(hit_iter->second->get_edep());
+        else h1_B0_E_abs->Fill(hit_iter->second->get_edep());
+        h1_B0_E->Fill(hit_iter->second->get_layer(),hit_iter->second->get_edep());
     }
   }
 
@@ -331,6 +372,8 @@ int FarForwardEvaluator::End(PHCompositeNode* topNode)
   _tfile->cd();
 
   g4hitntuple->Write();
+  g4b0hitntuple->Write();
+  g4rphitntuple->Write();
   _tfile->Write();
   _tfile->Close();
   delete _tfile;
