@@ -21,7 +21,8 @@ class PHG4TRDSteppingAction : public PHG4SteppingAction
 {
  public:
   //! constructor
-  PHG4TRDSteppingAction(PHG4TRDSubsystem *subsys, PHG4TRDDetector *detector, const PHParameters *parameters);
+  // PHG4TRDSteppingAction(PHG4TRDSubsystem *subsys, PHG4TRDDetector *detector, const PHParameters *parameters);
+  PHG4TRDSteppingAction(PHG4TRDDetector *detector, const PHParameters *parameters);
 
   //! destructor
   ~PHG4TRDSteppingAction() override;
@@ -36,20 +37,22 @@ class PHG4TRDSteppingAction : public PHG4SteppingAction
   // another volume the absolut hit coordinates in our G4Hits and
   // the local coordinates differ, so checking against our place in z
   // goes wrong
-  bool hasMotherSubsystem() const;
+  //bool hasMotherSubsystem() const;
 
-  void HitNodeName(const std::string &name) { m_HitNodeName = name; }
+  //void HitNodeName(const std::string &name) {m_HitNodeName = name;}
 
  private:
   //! Pointer to subsystem
-  PHG4TRDSubsystem *m_Subsystem;
+  //PHG4TRDSubsystem *m_Subsystem;
   //! pointer to the detector
   PHG4TRDDetector *m_Detector;
   const PHParameters *m_Params;
 
   //! pointer to hit container
   PHG4HitContainer *m_HitContainer;
+  PHG4HitContainer *m_ActiveGasHits;
   PHG4Hit *m_Hit;
+  PHG4HitContainer *m_SaveHitContainer;
   PHG4Shower *m_SaveShower;
 
   G4VPhysicalVolume *m_SaveVolPre;
@@ -64,7 +67,7 @@ class PHG4TRDSteppingAction : public PHG4SteppingAction
   double m_Zmin;
   double m_Zmax;
   //double m_EdepSum;
-  std::string m_HitNodeName;
+  //std::string m_HitNodeName;
 };
 
 #endif

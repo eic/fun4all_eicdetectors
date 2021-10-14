@@ -39,18 +39,18 @@ class PHG4TRDSubsystem : public PHG4DetectorSubsystem
   // this method is used to check if it can be used as mothervolume
   // Subsystems which can be mothervolume need to implement this
   // and return true
-  bool CanBeMotherSubsystem() const override { return true; }
+  //bool CanBeMotherSubsystem() const override { return true; }
 
  private:
   void SetDefaultParameters() override;
 
   //! detector geometry
   /*! derives from PHG4Detector */
-  PHG4TRDDetector* m_Detector = nullptr;
+  PHG4TRDDetector* m_Detector /*= nullptr*/;
 
   //! particle tracking "stepping" action
   /*! derives from PHG4SteppingActions */
-  PHG4SteppingAction* m_SteppingAction = nullptr;
+  PHG4SteppingAction* m_SteppingAction /*= nullptr*/;
 
   //bool m_SaveAllHitsFlag = false;
 };
