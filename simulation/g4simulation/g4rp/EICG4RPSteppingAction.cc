@@ -84,6 +84,7 @@ EICG4RPSteppingAction::EICG4RPSteppingAction(EICG4RPSubsystem *subsys, EICG4RPDe
   , m_Tmin(m_Params->get_double_param("tmin") * ns)
   , m_Tmax(m_Params->get_double_param("tmax") * ns)
   , m_EdepSum(0)
+  , m_EabsSum(0)
   , m_EionSum(0)
 {
 // G4 seems to have issues in the um range
@@ -139,12 +140,15 @@ bool EICG4RPSteppingAction::UserSteppingAction(const G4Step *aStep, bool was_use
   // the detector id can be used to distinguish between them
   // hits can easily be analyzed later according to their detector id
   int layer_id = m_Detector->get_Layer();
+ int layer_type = 0;
+  if (m_Params->get_string_param("material") == "G4_Cu") layer_type=0;
+  else layer_type = 1; 
 // no hits for dead material
   //if (layer_id % 2 == 1) //Proper implementation for several layer configurations
-  if (m_Params->get_string_param("material") == "G4_Cu") 
-  {
-	return false;
-  }
+//  if (m_Params->get_string_param("material") == "G4_Cu") 
+//  {
+//	return false;
+//  }
   if (!m_ActiveFlag)
   {
 	return false;
@@ -228,6 +232,7 @@ bool EICG4RPSteppingAction::UserSteppingAction(const G4Step *aStep, bool was_use
     m_SaveTrackId = aTrack->GetTrackID();
     // set the initial energy deposit
     m_EdepSum = 0;
+    m_EabsSum = 0;
 
     m_Hit->set_edep(0);
     if (!geantino && !m_BlackHoleFlag)
@@ -332,6 +337,7 @@ bool EICG4RPSteppingAction::UserSteppingAction(const G4Step *aStep, bool was_use
   m_Hit->set_t(1, postPoint->GetGlobalTime() / nanosecond);
   //sum up the energy to get total deposited
   m_Hit->set_edep(m_Hit->get_edep() + edep);
+  if (layer_type==0) m_EabsSum += edep; 
   if (!hasMotherSubsystem() && (m_Hit->get_z(1) * cm > m_Zmax || m_Hit->get_z(1) * cm < m_Zmin))
   {
     std::cout << m_Detector->SuperDetector() << std::setprecision(9)
@@ -394,6 +400,9 @@ bool EICG4RPSteppingAction::UserSteppingAction(const G4Step *aStep, bool was_use
     {
       // update values at exit coordinates and set keep flag
       // of track to keep
+	m_Hit->set_layer(layer_id);
+	m_Hit->set_hit_type(layer_type);
+	m_Hit->set_eion(m_EionSum);
       m_HitContainer->AddHit(layer_id, m_Hit);
       if (m_SaveShower)
       {

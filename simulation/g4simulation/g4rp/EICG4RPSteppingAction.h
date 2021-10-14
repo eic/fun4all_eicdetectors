@@ -67,6 +67,7 @@ class EICG4RPSteppingAction : public PHG4SteppingAction
   double m_Tmin;
   double m_Tmax;
   double m_EdepSum;
+  double m_EabsSum;
   double m_EionSum;
   std::string m_HitNodeName;
 };
