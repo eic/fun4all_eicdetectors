@@ -81,7 +81,7 @@ void EICG4B0Detector::ConstructMe(G4LogicalVolume *logicWorld)
   if (Verbosity() >= 1) std::cout << " !!! length = " << m_Params->get_double_param("length") << std::endl;
   if (m_Params->get_double_param("spanningAngle") >= 360)
   {
-    if (Verbosity() >= 0)std::cout << " !!! No PACKMAN" << std::endl;
+    if (Verbosity() >= 0) std::cout << " !!! No PACKMAN" << std::endl;
     return;
   }
   G4VSolid *solid0 = new G4Tubs("EICG4B0Solid0",
@@ -102,7 +102,7 @@ void EICG4B0Detector::ConstructMe(G4LogicalVolume *logicWorld)
                                 (m_Params->get_double_param("startAngle") + m_Params->get_double_param("spanningAngle")) * degree,
                                 (360 - m_Params->get_double_param("spanningAngle")) * degree);
   G4UnionSolid *solid10 = new G4UnionSolid("EICG4B0Solid10", solid0, solid1);
-  G4SubtractionSolid *solidB0 = new G4SubtractionSolid("EICG4B0Solid", solid10, solidPipeHole, 0, 
+  G4SubtractionSolid *solidB0 = new G4SubtractionSolid("EICG4B0Solid", solid10, solidPipeHole, 0,
                                                        G4ThreeVector(m_Params->get_double_param("pipe_x") * cm, m_Params->get_double_param("pipe_y") * cm, m_Params->get_double_param("pipe_z") * cm));
   G4LogicalVolume *logical = new G4LogicalVolume(solidB0,
                                                  G4Material::GetMaterial(m_Params->get_string_param("material")),

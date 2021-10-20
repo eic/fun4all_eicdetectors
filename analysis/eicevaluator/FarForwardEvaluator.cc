@@ -87,8 +87,8 @@ FarForwardEvaluator::FarForwardEvaluator(const std::string& name, const std::str
   , h1_E_dep_smeared(nullptr)
   , h1_E_dep(nullptr)
   , h1_B0_E_dep(nullptr)
-  , h1_B0_E_abs(nullptr)
   , h1_B0_E(nullptr)
+  , h1_B0_E_abs(nullptr)
   , h1_RP_E_dep(nullptr)
   , h1_RP_E_abs(nullptr)
 {
@@ -226,7 +226,6 @@ int FarForwardEvaluator::process_g4hits_ZDC(PHCompositeNode* topNode)
 
   PHG4HitContainer* hits = findNode::getClass<PHG4HitContainer>(topNode, nodename.str().c_str());
 
-
   if (hits)
   {
     PHG4HitContainer::ConstRange hit_range = hits->getHits();
@@ -302,18 +301,20 @@ int FarForwardEvaluator::process_g4hits_RomanPots(PHCompositeNode* topNode)
     {
       h2_RP_XY->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
       g4rphitntuple->Fill(hit_iter->second->get_layer(),
-                  hit_iter->second->get_hit_type(),
-                  hit_iter->second->get_x(0),
-                  hit_iter->second->get_y(0),
-                  hit_iter->second->get_z(0),
-                  hit_iter->second->get_x(1),
-                  hit_iter->second->get_y(1),
-                  hit_iter->second->get_z(1),
-                  hit_iter->second->get_t(0),
-                  hit_iter->second->get_t(1),
-                  hit_iter->second->get_edep());
-        if (hit_iter->second->get_hit_type())h1_RP_E_dep->Fill(hit_iter->second->get_edep());
-        else h1_RP_E_abs->Fill(hit_iter->second->get_edep());
+                          hit_iter->second->get_hit_type(),
+                          hit_iter->second->get_x(0),
+                          hit_iter->second->get_y(0),
+                          hit_iter->second->get_z(0),
+                          hit_iter->second->get_x(1),
+                          hit_iter->second->get_y(1),
+                          hit_iter->second->get_z(1),
+                          hit_iter->second->get_t(0),
+                          hit_iter->second->get_t(1),
+                          hit_iter->second->get_edep());
+      if (hit_iter->second->get_hit_type())
+        h1_RP_E_dep->Fill(hit_iter->second->get_edep());
+      else
+        h1_RP_E_abs->Fill(hit_iter->second->get_edep());
     }
   }
 
@@ -347,19 +348,21 @@ int FarForwardEvaluator::process_g4hits_B0(PHCompositeNode* topNode)
 
       h2_B0_XY->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
       g4b0hitntuple->Fill(hit_iter->second->get_layer(),
-                  hit_iter->second->get_hit_type(),
-                  hit_iter->second->get_x(0),
-                  hit_iter->second->get_y(0),
-                  hit_iter->second->get_z(0),
-                  hit_iter->second->get_x(1),
-                  hit_iter->second->get_y(1),
-                  hit_iter->second->get_z(1),
-                  hit_iter->second->get_t(0),
-                  hit_iter->second->get_t(1),
-                  hit_iter->second->get_edep());
-        if (hit_iter->second->get_hit_type())h1_B0_E_dep->Fill(hit_iter->second->get_edep());
-        else h1_B0_E_abs->Fill(hit_iter->second->get_edep());
-        h1_B0_E->Fill(hit_iter->second->get_layer(),hit_iter->second->get_edep());
+                          hit_iter->second->get_hit_type(),
+                          hit_iter->second->get_x(0),
+                          hit_iter->second->get_y(0),
+                          hit_iter->second->get_z(0),
+                          hit_iter->second->get_x(1),
+                          hit_iter->second->get_y(1),
+                          hit_iter->second->get_z(1),
+                          hit_iter->second->get_t(0),
+                          hit_iter->second->get_t(1),
+                          hit_iter->second->get_edep());
+      if (hit_iter->second->get_hit_type())
+        h1_B0_E_dep->Fill(hit_iter->second->get_edep());
+      else
+        h1_B0_E_abs->Fill(hit_iter->second->get_edep());
+      h1_B0_E->Fill(hit_iter->second->get_layer(), hit_iter->second->get_edep());
     }
   }
 

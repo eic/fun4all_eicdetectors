@@ -1,4 +1,4 @@
-// - 08/10/2021 TTree production for RP G4 hits     
+// - 08/10/2021 TTree production for RP G4 hits
 //
 #include "EICG4RPHitTree.h"
 
@@ -16,8 +16,6 @@
 
 #include <sstream>
 #include <utility>
-
-using namespace std;
 
 EICG4RPHitTree::EICG4RPHitTree(const std::string &name, const std::string &filename)
   : SubsysReco(name)

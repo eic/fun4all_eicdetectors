@@ -52,8 +52,8 @@ class FarForwardEvaluator : public SubsysReco
   //  std::string outfilename;
 
   TNtuple *g4hitntuple;
-  TNtuple *g4b0hitntuple; // added by Sasha Bylinkin
-  TNtuple *g4rphitntuple; // added by Sasha Bylinkin
+  TNtuple *g4b0hitntuple;  // added by Sasha Bylinkin
+  TNtuple *g4rphitntuple;  // added by Sasha Bylinkin
   //TNtuple *clusterntuple;
 
   TH2F *h2_ZDC_XY;

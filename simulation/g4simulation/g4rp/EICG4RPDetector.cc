@@ -26,13 +26,13 @@
 
 #include <g4main/PHG4Detector.h>
 
+#include <Geant4/G4Box.hh>
 #include <Geant4/G4Color.hh>
 #include <Geant4/G4LogicalVolume.hh>
 #include <Geant4/G4Material.hh>
 #include <Geant4/G4PVPlacement.hh>
 #include <Geant4/G4SubtractionSolid.hh>
 #include <Geant4/G4SystemOfUnits.hh>
-#include <Geant4/G4Box.hh>
 #include <Geant4/G4UnionSolid.hh>
 #include <Geant4/G4VisAttributes.hh>
 
@@ -41,8 +41,6 @@
 
 class G4VSolid;
 class PHCompositeNode;
-
-using namespace std;
 
 //____________________________________________________________________________..
 EICG4RPDetector::EICG4RPDetector(PHG4Subsystem *subsys,
@@ -58,7 +56,7 @@ EICG4RPDetector::EICG4RPDetector(PHG4Subsystem *subsys,
 //_______________________________________________________________
 int EICG4RPDetector::IsInDetector(G4VPhysicalVolume *volume) const
 {
-  set<G4VPhysicalVolume *>::const_iterator iter = m_PhysicalVolumesSet.find(volume);
+  std::set<G4VPhysicalVolume *>::const_iterator iter = m_PhysicalVolumesSet.find(volume);
   if (iter != m_PhysicalVolumesSet.end())
   {
     return 1;
@@ -80,15 +78,15 @@ void EICG4RPDetector::ConstructMe(G4LogicalVolume *logicWorld)
 {
   //begin implement your own here://
   // Do not forget to multiply the parameters with their respective CLHEP/G4 unit !
-  cout << " !!! length = " << m_Params->get_double_param("length");
+  if (Verbosity() > 1) std::cout << " !!! length = " << m_Params->get_double_param("length");
   G4VSolid *solid0 = new G4Box("EICG4RPSolid0",
-                                m_Params->get_double_param("rp_x") / 2. * cm,
-                                m_Params->get_double_param("rp_y") / 2. * cm,
-                                m_Params->get_double_param("length") / 2. * cm);
+                               m_Params->get_double_param("rp_x") / 2. * cm,
+                               m_Params->get_double_param("rp_y") / 2. * cm,
+                               m_Params->get_double_param("length") / 2. * cm);
   G4VSolid *solidPipeHole = new G4Box("EICG4RPIonPipeSolid",
-                                m_Params->get_double_param("hole_x") / 2. * cm,
-                                m_Params->get_double_param("hole_y") / 2. * cm,
-                                m_Params->get_double_param("length") * cm);
+                                      m_Params->get_double_param("hole_x") / 2. * cm,
+                                      m_Params->get_double_param("hole_y") / 2. * cm,
+                                      m_Params->get_double_param("length") * cm);
   G4SubtractionSolid *solidRP = new G4SubtractionSolid("EICG4RPSolid", solid0, solidPipeHole, 0, G4ThreeVector(m_Params->get_double_param("pipe_x") * cm, m_Params->get_double_param("pipe_y") * cm, m_Params->get_double_param("pipe_z") * cm));
   G4LogicalVolume *logical = new G4LogicalVolume(solidRP,
                                                  G4Material::GetMaterial(m_Params->get_string_param("material")),

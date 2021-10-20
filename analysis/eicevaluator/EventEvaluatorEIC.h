@@ -40,7 +40,7 @@ class EventEvaluatorEIC : public SubsysReco
   };
 
   EventEvaluatorEIC(const std::string& name = "EventEvaluatorEIC",
-                 const std::string& filename = "g4eval_cemc.root");
+                    const std::string& filename = "g4eval_cemc.root");
   ~EventEvaluatorEIC() override{};
 
   int Init(PHCompositeNode* topNode) override;
@@ -84,7 +84,7 @@ class EventEvaluatorEIC : public SubsysReco
   {
     _reco_e_thresholdMC = thresh;
   }
-  
+
   //! max depth/generation of the MC_particle/PHG4Particle that would be saved.
   void set_depth_MCstack(int d)
   {
@@ -209,7 +209,7 @@ class EventEvaluatorEIC : public SubsysReco
   int* _tower_EEMCG_iEta;
   int* _tower_EEMCG_iPhi;
   int* _tower_EEMCG_trueID;
-  
+
   int _nTowers_CEMC;
   float* _tower_CEMC_E;
   int* _tower_CEMC_iEta;
@@ -272,7 +272,7 @@ class EventEvaluatorEIC : public SubsysReco
   float* _cluster_EEMCG_Phi;
   int* _cluster_EEMCG_NTower;
   int* _cluster_EEMCG_trueID;
-  
+
   // vertex
   float _vertex_x;
   float _vertex_y;
@@ -339,7 +339,6 @@ class EventEvaluatorEIC : public SubsysReco
   int* _hepmcp_m2;
   int* _hepmcp_BCID;
 
-
   int _calo_ID;
   int _calo_towers_N;
   int* _calo_towers_iEta;
@@ -368,13 +367,13 @@ class EventEvaluatorEIC : public SubsysReco
   CaloEvalStack* _caloevalstackCEMC;
   CaloEvalStack* _caloevalstackEEMC;
   CaloEvalStack* _caloevalstackEEMCG;
-  
+
   //----------------------------------
   // evaluator output ntuples
 
   bool _strict;
 
-  TTree* _event_tree;  //Added by Barak
+  TTree* _event_tree;     //Added by Barak
   TTree* _geometry_tree;  //Added by Barak
 
   // evaluator output file
@@ -401,22 +400,22 @@ class EventEvaluatorEIC : public SubsysReco
   const int _maxNMCPart = 100000;
   const int _maxNHepmcp = 1000;
   const int _maxNCalo = 15;
-  
-  enum calotype {
-      kFHCAL         = 0,
-      kFEMC         = 1,
-      kDRCALO        = 2,
-      kEEMC         = 3,
-      kCEMC         = 4,
-      kEHCAL         = 5,
-      kHCALIN       = 6,
-      kHCALOUT       = 7,
-      kLFHCAL        = 8,
-      kEEMCG         = 9,
-      kBECAL         = 10,
-      kFOCAL         = 11
-  };
 
+  enum calotype
+  {
+    kFHCAL = 0,
+    kFEMC = 1,
+    kDRCALO = 2,
+    kEEMC = 3,
+    kCEMC = 4,
+    kEHCAL = 5,
+    kHCALIN = 6,
+    kHCALOUT = 7,
+    kLFHCAL = 8,
+    kEEMCG = 9,
+    kBECAL = 10,
+    kFOCAL = 11
+  };
 };
 
 #endif  // G4EVAL_EVENTEVALUATOR_H

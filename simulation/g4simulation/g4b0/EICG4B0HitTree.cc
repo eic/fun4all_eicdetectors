@@ -17,8 +17,6 @@
 #include <sstream>
 #include <utility>
 
-using namespace std;
-
 EICG4B0HitTree::EICG4B0HitTree(const std::string &name, const std::string &filename)
   : SubsysReco(name)
   , hm(nullptr)
@@ -31,7 +29,7 @@ EICG4B0HitTree::EICG4B0HitTree(const std::string &name, const std::string &filen
 
 EICG4B0HitTree::~EICG4B0HitTree()
 {
-	delete hm;
+  delete hm;
 }
 
 int EICG4B0HitTree::Init(PHCompositeNode *)
@@ -57,8 +55,8 @@ int EICG4B0HitTree::Init(PHCompositeNode *)
 
 int EICG4B0HitTree::process_event(PHCompositeNode *topNode)
 {
-  ostringstream nodename;
-  set<string>::const_iterator iter;
+  std::ostringstream nodename;
+  std::set<std::string>::const_iterator iter;
   for (iter = _node_postfix.begin(); iter != _node_postfix.end(); ++iter)
   {
     nodename.str("");
