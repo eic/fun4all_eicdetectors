@@ -2959,7 +2959,8 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
     std::vector<std::pair<std::string, TrackSource_t>> trackMapPairs = {
         {"TrackMap", TrackSource_t::all},
         {"InnerTrackMap", TrackSource_t::inner},
-        {"SiliconTrackMap", TrackSource_t::silicon}
+        {"SiliconTrackMap", TrackSource_t::silicon},
+        {"TTLTrackMap", TrackSource_t::ttl}
     };
     bool foundAtLeastOneTrackSource = false;
     for (const auto& trackMapInfo : trackMapPairs)
