@@ -3415,10 +3415,6 @@ int EventEvaluatorEIC::GetProjectionIndex(std::string projname)
     return 44;
   else if (projname.find("BARREL_5") != std::string::npos)
     return 45;
-  else if (projname.find("BARR") != std::string::npos)
-    return 46;
-  else if (projname.find("SVTX") != std::string::npos)
-    return 47;
 
   else if (projname.find("FST_0") != std::string::npos)
     return 50;
@@ -3501,7 +3497,50 @@ int EventEvaluatorEIC::GetProjectionIndex(std::string projname)
     return 130;
   else if (projname.find("EGEM_1") != std::string::npos)
     return 131;
-  
+
+
+  else if (projname.find("LFHCAL_0") != std::string::npos)
+    return 140;
+  else if (projname.find("LFHCAL_1") != std::string::npos)
+    return 141;
+  else if (projname.find("LFHCAL_2") != std::string::npos)
+    return 142;
+  else if (projname.find("LFHCAL_3") != std::string::npos)
+    return 143;
+  else if (projname.find("LFHCAL_4") != std::string::npos)
+    return 144;
+  else if (projname.find("LFHCAL_5") != std::string::npos)
+    return 145;
+  else if (projname.find("LFHCAL_6") != std::string::npos)
+    return 146;
+  else if (projname.find("LFHCAL_7") != std::string::npos)
+    return 147;
+
+  else if (projname.find("BARR_0") != std::string::npos)
+    return 150;
+  else if (projname.find("BARR_1") != std::string::npos)
+    return 151;
+  else if (projname.find("BARR_2") != std::string::npos)
+    return 152;
+  else if (projname.find("BARR_3") != std::string::npos)
+    return 153;
+  else if (projname.find("BARR_4") != std::string::npos)
+    return 154;
+  else if (projname.find("SVTX_0") != std::string::npos)
+    return 155;
+  else if (projname.find("SVTX_1") != std::string::npos)
+    return 156;
+  else if (projname.find("SVTX_2") != std::string::npos)
+    return 157;
+  else if (projname.find("SVTX_3") != std::string::npos)
+    return 158;
+  else if (projname.find("SVTX_4") != std::string::npos)
+    return 159;
+
+  else if (projname.find("BARR") != std::string::npos)
+    return 160;
+  else if (projname.find("SVTX") != std::string::npos)
+    return 161;
   else
     return -1;
   return -1;
@@ -3577,10 +3616,6 @@ std::string EventEvaluatorEIC::GetProjectionNameFromIndex(int projindex)
     return "BARREL_4";
   case 45:
     return "BARREL_5";
-  case 46:
-    return "BARR";
-  case 47:
-    return "SVTX";
 
   case 50:
     return "FST_0";
@@ -3656,12 +3691,55 @@ std::string EventEvaluatorEIC::GetProjectionNameFromIndex(int projindex)
     return "FGEM_0";
   case 121:
     return "FGEM_1";
-    
+
   case 130:
     return "EGEM_0";
   case 131:
     return "EGEM_1";
-    
+
+
+  case 140:
+    return "LFHCAL_0";
+  case 141:
+    return "LFHCAL_1";
+  case 142:
+    return "LFHCAL_2";
+  case 143:
+    return "LFHCAL_3";
+  case 144:
+    return "LFHCAL_4";
+  case 145:
+    return "LFHCAL_5";
+  case 146:
+    return "LFHCAL_6";
+  case 147:
+    return "LFHCAL_7";
+
+  case 150:
+    return "BARR_0";
+  case 151:
+    return "BARR_1";
+  case 152:
+    return "BARR_2";
+  case 153:
+    return "BARR_3";
+  case 154:
+    return "BARR_4";
+  case 155:
+    return "SVTX_0";
+  case 156:
+    return "SVTX_1";
+  case 157:
+    return "SVTX_2";
+  case 158:
+    return "SVTX_3";
+  case 159:
+    return "SVTX_4";
+
+  case 160:
+    return "BARR";
+  case 161:
+    return "SVTX";
   default:
     return "NOTHING";
   }
