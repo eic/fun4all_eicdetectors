@@ -1180,8 +1180,6 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
               break;
             }
 
-            if (hit_iter->second->get_edep() < 0.01) continue;  // FIXME
-
             _hits_x[_nHitsLayers] = hit_iter->second->get_x(0);
             _hits_y[_nHitsLayers] = hit_iter->second->get_y(0);
             _hits_z[_nHitsLayers] = hit_iter->second->get_z(0);
@@ -3017,7 +3015,9 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
     std::vector<std::pair<std::string, TrackSource_t>> trackMapPairs = {
         {"TrackMap", TrackSource_t::all},
         {"InnerTrackMap", TrackSource_t::inner},
-        {"SiliconTrackMap", TrackSource_t::silicon}};
+        {"SiliconTrackMap", TrackSource_t::silicon},
+        {"TTLTrackMap", TrackSource_t::ttl}
+    };
     bool foundAtLeastOneTrackSource = false;
     for (const auto& trackMapInfo : trackMapPairs)
     {
@@ -3489,6 +3489,8 @@ int EventEvaluatorEIC::GetProjectionIndex(std::string projname)
     return 54;
   else if (projname.find("FST_5") != std::string::npos)
     return 55;
+  else if (projname.find("FST_6") != std::string::npos)
+    return 56;
 
   else if (projname.find("EHCAL") != std::string::npos)
     return 60;
@@ -3525,6 +3527,81 @@ int EventEvaluatorEIC::GetProjectionIndex(std::string projname)
   else if (projname.find("BH_FORWARD_NEG") != std::string::npos)
     return 92;
 
+  else if (projname.find("EFST_0") != std::string::npos)
+    return 100;
+  else if (projname.find("EFST_1") != std::string::npos)
+    return 101;
+  else if (projname.find("EFST_2") != std::string::npos)
+    return 102;
+  else if (projname.find("EFST_3") != std::string::npos)
+    return 103;
+  else if (projname.find("EFST_4") != std::string::npos)
+    return 104;
+  else if (projname.find("EFST_5") != std::string::npos)
+    return 105;
+  else if (projname.find("EFST_6") != std::string::npos)
+    return 106;
+ 
+  else if (projname.find("RWELL_1") != std::string::npos)
+    return 110;
+  else if (projname.find("RWELL_2") != std::string::npos)
+    return 111;
+  else if (projname.find("RWELL_3") != std::string::npos)
+    return 112;
+
+  else if (projname.find("FGEM_0") != std::string::npos)
+    return 120;
+  else if (projname.find("FGEM_1") != std::string::npos)
+    return 121;
+
+  else if (projname.find("EGEM_0") != std::string::npos)
+    return 130;
+  else if (projname.find("EGEM_1") != std::string::npos)
+    return 131;
+
+
+  else if (projname.find("LFHCAL_0") != std::string::npos)
+    return 140;
+  else if (projname.find("LFHCAL_1") != std::string::npos)
+    return 141;
+  else if (projname.find("LFHCAL_2") != std::string::npos)
+    return 142;
+  else if (projname.find("LFHCAL_3") != std::string::npos)
+    return 143;
+  else if (projname.find("LFHCAL_4") != std::string::npos)
+    return 144;
+  else if (projname.find("LFHCAL_5") != std::string::npos)
+    return 145;
+  else if (projname.find("LFHCAL_6") != std::string::npos)
+    return 146;
+  else if (projname.find("LFHCAL_7") != std::string::npos)
+    return 147;
+
+  else if (projname.find("BARR_0") != std::string::npos)
+    return 150;
+  else if (projname.find("BARR_1") != std::string::npos)
+    return 151;
+  else if (projname.find("BARR_2") != std::string::npos)
+    return 152;
+  else if (projname.find("BARR_3") != std::string::npos)
+    return 153;
+  else if (projname.find("BARR_4") != std::string::npos)
+    return 154;
+  else if (projname.find("SVTX_0") != std::string::npos)
+    return 155;
+  else if (projname.find("SVTX_1") != std::string::npos)
+    return 156;
+  else if (projname.find("SVTX_2") != std::string::npos)
+    return 157;
+  else if (projname.find("SVTX_3") != std::string::npos)
+    return 158;
+  else if (projname.find("SVTX_4") != std::string::npos)
+    return 159;
+
+  else if (projname.find("BARR") != std::string::npos)
+    return 160;
+  else if (projname.find("SVTX") != std::string::npos)
+    return 161;
   else
     return -1;
   return -1;
@@ -3613,6 +3690,8 @@ std::string EventEvaluatorEIC::GetProjectionNameFromIndex(int projindex)
     return "FST_4";
   case 55:
     return "FST_5";
+  case 56 :
+    return "FST_6";
 
   case 60:
     return "EHCAL";
@@ -3649,6 +3728,79 @@ std::string EventEvaluatorEIC::GetProjectionNameFromIndex(int projindex)
   case 92:
     return "BH_FORWARD_NEG";
 
+  case 100:
+    return "EFST_0";
+  case 101:
+    return "EFST_1";
+  case 102:
+    return "EFST_2";
+  case 103:
+    return "EFST_3";
+  case 104:
+    return "EFST_4";
+  case 105:
+    return "EFST_5";
+
+  case 110:
+    return "RWELL_1";
+  case 111:
+    return "RWELL_2";
+  case 112:
+    return "RWELL_2";
+
+  case 120:
+    return "FGEM_0";
+  case 121:
+    return "FGEM_1";
+
+  case 130:
+    return "EGEM_0";
+  case 131:
+    return "EGEM_1";
+
+
+  case 140:
+    return "LFHCAL_0";
+  case 141:
+    return "LFHCAL_1";
+  case 142:
+    return "LFHCAL_2";
+  case 143:
+    return "LFHCAL_3";
+  case 144:
+    return "LFHCAL_4";
+  case 145:
+    return "LFHCAL_5";
+  case 146:
+    return "LFHCAL_6";
+  case 147:
+    return "LFHCAL_7";
+
+  case 150:
+    return "BARR_0";
+  case 151:
+    return "BARR_1";
+  case 152:
+    return "BARR_2";
+  case 153:
+    return "BARR_3";
+  case 154:
+    return "BARR_4";
+  case 155:
+    return "SVTX_0";
+  case 156:
+    return "SVTX_1";
+  case 157:
+    return "SVTX_2";
+  case 158:
+    return "SVTX_3";
+  case 159:
+    return "SVTX_4";
+
+  case 160:
+    return "BARR";
+  case 161:
+    return "SVTX";
   default:
     return "NOTHING";
   }
