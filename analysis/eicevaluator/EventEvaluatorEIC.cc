@@ -1139,14 +1139,14 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
     }
     _nHitsLayers = 0;
     PHG4TruthInfoContainer* truthinfocontainerHits = findNode::getClass<PHG4TruthInfoContainer>(topNode, "G4TruthInfo");
-    for (int iIndex = 0; iIndex < 100; ++iIndex)
+    for (int iIndex = 0; iIndex < 200; ++iIndex)
     {
       // you need to add your layer name here to be saved! This has to be done
       // as we do not want to save thousands of calorimeter hits!
       if (
 	  (GetProjectionNameFromIndex(iIndex).find("TTL") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("LBLVTX") != std::string::npos) ||
-          (GetProjectionNameFromIndex(iIndex).find("BARREL") != std::string::npos) ||
+          (GetProjectionNameFromIndex(iIndex).find("BARR") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("FST") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("ZDCsurrogate") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("rpTruth") != std::string::npos) ||
