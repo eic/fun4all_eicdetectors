@@ -3014,10 +3014,10 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
                 if (trackStateIndex > -1)
                 {
                   // save true projection info to given branch
-                  _track_TLP_true_x[_nProjections] = trkstates->second->get_pos(0);
-                  _track_TLP_true_y[_nProjections] = trkstates->second->get_pos(1);
-                  _track_TLP_true_z[_nProjections] = trkstates->second->get_pos(2);
-                  _track_TLP_true_t[_nProjections] = trkstates->first;
+                  _track_TLP_x[_nProjections] = trkstates->second->get_pos(0);
+                  _track_TLP_y[_nProjections] = trkstates->second->get_pos(1);
+                  _track_TLP_z[_nProjections] = trkstates->second->get_pos(2);
+                  _track_TLP_t[_nProjections] = trkstates->first;
                   _track_ProjLayer[_nProjections] = trackStateIndex;
                   _track_ProjTrackID[_nProjections] = _nTracks;
 
@@ -3043,10 +3043,10 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
                           cout << __PRETTY_FUNCTION__ << " found hit with id " << hit_iter->second->get_trkid() << endl;
                         }
                         // save reco projection info to given branch
-                        _track_TLP_x[_nProjections] = hit_iter->second->get_x(0);
-                        _track_TLP_y[_nProjections] = hit_iter->second->get_y(0);
-                        _track_TLP_z[_nProjections] = hit_iter->second->get_z(0);
-                        _track_TLP_t[_nProjections] = hit_iter->second->get_t(0);
+                        _track_TLP_true_x[_nProjections] = hit_iter->second->get_x(0);
+                        _track_TLP_true_y[_nProjections] = hit_iter->second->get_y(0);
+                        _track_TLP_true_z[_nProjections] = hit_iter->second->get_z(0);
+                        _track_TLP_true_t[_nProjections] = hit_iter->second->get_t(0);
                       }
                     }
                   }
@@ -3056,7 +3056,10 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
                     {
                       cout << __PRETTY_FUNCTION__ << " could not find " << nodename << endl;
                     }
-                    continue;
+                    _track_TLP_true_x[_nProjections] = -10000;
+                    _track_TLP_true_y[_nProjections] = -10000;
+                    _track_TLP_true_z[_nProjections] = -10000;
+                    _track_TLP_true_t[_nProjections] = -10000;
                   }
                   _nProjections++;
                 }
