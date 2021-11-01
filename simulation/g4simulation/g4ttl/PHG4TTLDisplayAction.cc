@@ -136,7 +136,7 @@ void PHG4TTLDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
     }
     else if (it.second == "ModuleEnvelope")
     {
-      // visatt->SetVisibility(false);
+      visatt->SetVisibility(false);
       visatt->SetColour(G4Colour::Red());
       // visatt->SetForceSolid(true);
       visatt->SetForceWireframe(true);
@@ -155,7 +155,7 @@ void PHG4TTLDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
       visatt->SetForceSolid(true);
       // visatt->SetForceWireframe(true);
     }
-    else if (it.second == "Cooling_Support")
+    else if (it.second == "Cooling_Support" || it.second == "Carbon_Support")
     {
       // visatt->SetColour(G4Colour(21./255, 27./255, 31./255,0.5));
       visatt->SetColour(G4Colour(4 * 21. / 255, 4 * 27. / 255, 4 * 31. / 255));

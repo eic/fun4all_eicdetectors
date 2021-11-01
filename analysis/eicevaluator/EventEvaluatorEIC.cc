@@ -1139,20 +1139,23 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
     }
     _nHitsLayers = 0;
     PHG4TruthInfoContainer* truthinfocontainerHits = findNode::getClass<PHG4TruthInfoContainer>(topNode, "G4TruthInfo");
-    for (int iIndex = 0; iIndex < 100; ++iIndex)
+    for (int iIndex = 0; iIndex < 200; ++iIndex)
     {
       // you need to add your layer name here to be saved! This has to be done
       // as we do not want to save thousands of calorimeter hits!
       if (
 	  (GetProjectionNameFromIndex(iIndex).find("TTL") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("LBLVTX") != std::string::npos) ||
-          (GetProjectionNameFromIndex(iIndex).find("BARREL") != std::string::npos) ||
+          (GetProjectionNameFromIndex(iIndex).find("BARR") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("FST") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("ZDCsurrogate") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("rpTruth") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("rpTruth2") != std::string::npos) || // needed for IP8
           (GetProjectionNameFromIndex(iIndex).find("offMomTruth") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("b0Truth") != std::string::npos) ||
+          (GetProjectionNameFromIndex(iIndex).find("EGEM") != std::string::npos) ||
+          (GetProjectionNameFromIndex(iIndex).find("FGEM") != std::string::npos) ||
+          (GetProjectionNameFromIndex(iIndex).find("RWELL") != std::string::npos) ||
           (((GetProjectionNameFromIndex(iIndex).find("BH_1") != std::string::npos) || (GetProjectionNameFromIndex(iIndex).find("BH_FORWARD_PLUS") != std::string::npos) || (GetProjectionNameFromIndex(iIndex).find("BH_FORWARD_NEG") != std::string::npos)) && _do_BLACKHOLE)
 	  ){
         string nodename = "G4HIT_" + GetProjectionNameFromIndex(iIndex);
@@ -3014,10 +3017,10 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
                 if (trackStateIndex > -1)
                 {
                   // save true projection info to given branch
-                  _track_TLP_true_x[_nProjections] = trkstates->second->get_pos(0);
-                  _track_TLP_true_y[_nProjections] = trkstates->second->get_pos(1);
-                  _track_TLP_true_z[_nProjections] = trkstates->second->get_pos(2);
-                  _track_TLP_true_t[_nProjections] = trkstates->first;
+                  _track_TLP_x[_nProjections] = trkstates->second->get_pos(0);
+                  _track_TLP_y[_nProjections] = trkstates->second->get_pos(1);
+                  _track_TLP_z[_nProjections] = trkstates->second->get_pos(2);
+                  _track_TLP_t[_nProjections] = trkstates->first;
                   _track_ProjLayer[_nProjections] = trackStateIndex;
                   _track_ProjTrackID[_nProjections] = _nTracks;
 
@@ -3043,10 +3046,10 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
                           cout << __PRETTY_FUNCTION__ << " found hit with id " << hit_iter->second->get_trkid() << endl;
                         }
                         // save reco projection info to given branch
-                        _track_TLP_x[_nProjections] = hit_iter->second->get_x(0);
-                        _track_TLP_y[_nProjections] = hit_iter->second->get_y(0);
-                        _track_TLP_z[_nProjections] = hit_iter->second->get_z(0);
-                        _track_TLP_t[_nProjections] = hit_iter->second->get_t(0);
+                        _track_TLP_true_x[_nProjections] = hit_iter->second->get_x(0);
+                        _track_TLP_true_y[_nProjections] = hit_iter->second->get_y(0);
+                        _track_TLP_true_z[_nProjections] = hit_iter->second->get_z(0);
+                        _track_TLP_true_t[_nProjections] = hit_iter->second->get_t(0);
                       }
                     }
                   }
@@ -3056,7 +3059,10 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
                     {
                       cout << __PRETTY_FUNCTION__ << " could not find " << nodename << endl;
                     }
-                    continue;
+                    _track_TLP_true_x[_nProjections] = -10000;
+                    _track_TLP_true_y[_nProjections] = -10000;
+                    _track_TLP_true_z[_nProjections] = -10000;
+                    _track_TLP_true_t[_nProjections] = -10000;
                   }
                   _nProjections++;
                 }
