@@ -406,7 +406,7 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
   G4Material *materialLayer_SH[nLayers_SH] = {
       G4Material::GetMaterial("G4_GRAPHITE"),
       G4Material::GetMaterial("G4_POLYSTYRENE"),
-      G4Material::GetMaterial("G4_GRAPHITE"),
+      G4Material::GetMaterial("G4_AIR"),
       G4Material::GetMaterial("G4_POLYSTYRENE")};
   G4double thicknessLayer_SH[nLayers_SH] = {
       0.25 * mm,
@@ -527,7 +527,7 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
 
   for (int isec = 0; isec < 12; isec++)
   {
-    if(isec!=3 && isec!=4)continue; // NOTE REMOVE
+    // if(isec!=3 && isec!=4)continue; // NOTE REMOVE
     // if(isec!=3)continue; // NOTE REMOVE
     G4RotationMatrix *motherrot = new G4RotationMatrix();
     motherrot->rotateX(M_PI / 2);
@@ -539,11 +539,11 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
     for (int ilen = 1; ilen < ((detlength / 2 - segmentlength / 2) / segmentlength); ilen++)
     {
       // forward segments
-      // G4ThreeVector vec_det_fwdlayers_transl((rCenter*cos(M_PI / 12.)+moduleShift) * cos(isec * 2 * M_PI / 12.), (rCenter*cos(M_PI / 12.)+moduleShift) * sin(isec * 2 * M_PI / 12.), place_z + ilen * segmentlength);
-      // assemblyDetector->AddPlacedVolume(log_module_envelope, vec_det_fwdlayers_transl, motherrot);
+      G4ThreeVector vec_det_fwdlayers_transl((rCenter*cos(M_PI / 12.)+moduleShift) * cos(isec * 2 * M_PI / 12.), (rCenter*cos(M_PI / 12.)+moduleShift) * sin(isec * 2 * M_PI / 12.), place_z + ilen * segmentlength);
+      assemblyDetector->AddPlacedVolume(log_module_envelope, vec_det_fwdlayers_transl, motherrot);
       // backward segments
-      // G4ThreeVector vec_det_bcklayers_transl((rCenter*cos(M_PI / 12.)+moduleShift) * cos(isec * 2 * M_PI / 12.), (rCenter*cos(M_PI / 12.)+moduleShift) * sin(isec * 2 * M_PI / 12.), place_z -ilen * segmentlength);
-      // assemblyDetector->AddPlacedVolume(log_module_envelope, vec_det_bcklayers_transl, motherrot);
+      G4ThreeVector vec_det_bcklayers_transl((rCenter*cos(M_PI / 12.)+moduleShift) * cos(isec * 2 * M_PI / 12.), (rCenter*cos(M_PI / 12.)+moduleShift) * sin(isec * 2 * M_PI / 12.), place_z -ilen * segmentlength);
+      assemblyDetector->AddPlacedVolume(log_module_envelope, vec_det_bcklayers_transl, motherrot);
 
 
     }
@@ -772,7 +772,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
   G4Material *materialLayer_SH[nLayers_SH] = {
       G4Material::GetMaterial("G4_GRAPHITE"),
       G4Material::GetMaterial("G4_POLYSTYRENE"),
-      G4Material::GetMaterial("G4_GRAPHITE"),
+      G4Material::GetMaterial("G4_AIR"),
       G4Material::GetMaterial("G4_POLYSTYRENE")};
   G4double thicknessLayer_SH[nLayers_SH] = {
       0.25 * mm,
