@@ -3366,7 +3366,7 @@ int EventEvaluatorEIC::GetProjectionIndex(std::string projname)
     return 3;
   else if (projname.find("ETTL_1") != std::string::npos)
     return 4;
-  else if (projname.find("FHCAL") != std::string::npos)
+  else if (projname.find("LFHCAL") != std::string::npos)
     return 5;
   else if (projname.find("FEMC") != std::string::npos)
     return 6;
@@ -3452,8 +3452,8 @@ int EventEvaluatorEIC::GetProjectionIndex(std::string projname)
     return 65;
   else if (projname.find("BECAL") != std::string::npos)
     return 66;
-  else if (projname.find("LFHCAL") != std::string::npos)
-    return 67;
+  // else if (projname.find("FHCAL") != std::string::npos)
+  //   return 67;
 
   else if (projname.find("ZDCsurrogate") != std::string::npos)
     return 70;
@@ -3568,7 +3568,7 @@ std::string EventEvaluatorEIC::GetProjectionNameFromIndex(int projindex)
   case 4:
     return "ETTL_1";
   case 5:
-    return "FHCAL";
+    return "LFHCAL";
   case 6:
     return "FEMC";
   case 7:
@@ -3653,8 +3653,8 @@ std::string EventEvaluatorEIC::GetProjectionNameFromIndex(int projindex)
     return "EEMC_glass";
   case 66:
     return "BECAL";
-  case 67:
-    return "LFHCAL";
+  // case 67:
+  //   return "LFHCAL";
 
   case 70:
     return "ZDCsurrogate";
