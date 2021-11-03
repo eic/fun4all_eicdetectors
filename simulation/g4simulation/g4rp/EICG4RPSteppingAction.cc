@@ -16,10 +16,10 @@
 //
 //____________________________________________________________________________..
 
-#include "EICG4B0SteppingAction.h"
+#include "EICG4RPSteppingAction.h"
 
-#include "EICG4B0Detector.h"
-#include "EICG4B0Subsystem.h"
+#include "EICG4RPDetector.h"
+#include "EICG4RPSubsystem.h"
 
 #include <phparameter/PHParameters.h>
 
@@ -62,7 +62,7 @@
 class PHCompositeNode;
 
 //____________________________________________________________________________..
-EICG4B0SteppingAction::EICG4B0SteppingAction(EICG4B0Subsystem *subsys, EICG4B0Detector *detector, const PHParameters *parameters)
+EICG4RPSteppingAction::EICG4RPSteppingAction(EICG4RPSubsystem *subsys, EICG4RPDetector *detector, const PHParameters *parameters)
   : PHG4SteppingAction(detector->GetName())
   , m_Subsystem(subsys)
   , m_Detector(detector)
@@ -93,7 +93,7 @@ EICG4B0SteppingAction::EICG4B0SteppingAction(EICG4B0Subsystem *subsys, EICG4B0De
 }
 
 //____________________________________________________________________________..
-EICG4B0SteppingAction::~EICG4B0SteppingAction()
+EICG4RPSteppingAction::~EICG4RPSteppingAction()
 {
   // if the last hit was a zero energie deposit hit, it is just reset
   // and the memory is still allocated, so we need to delete it here
@@ -104,7 +104,7 @@ EICG4B0SteppingAction::~EICG4B0SteppingAction()
 
 //____________________________________________________________________________..
 // This is the implementation of the G4 UserSteppingAction
-bool EICG4B0SteppingAction::UserSteppingAction(const G4Step *aStep, bool was_used)
+bool EICG4RPSteppingAction::UserSteppingAction(const G4Step *aStep, bool was_used)
 {
   G4TouchableHandle touch = aStep->GetPreStepPoint()->GetTouchableHandle();
   G4TouchableHandle touchpost = aStep->GetPostStepPoint()->GetTouchableHandle();
@@ -140,19 +140,17 @@ bool EICG4B0SteppingAction::UserSteppingAction(const G4Step *aStep, bool was_use
   // the detector id can be used to distinguish between them
   // hits can easily be analyzed later according to their detector id
   int layer_id = m_Detector->get_Layer();
-  // deadhits for dead material
   int layer_type = 0;
   if (m_Params->get_string_param("material") == "G4_Cu")
     layer_type = 0;
   else
     layer_type = 1;
+  // no hits for dead material
   //if (layer_id % 2 == 1) //Proper implementation for several layer configurations
-  /*
-   if (m_Params->get_string_param("material") == "G4_Cu") 
-  {
-	return false;
-  }
-*/
+  //  if (m_Params->get_string_param("material") == "G4_Cu")
+  //  {
+  //	return false;
+  //  }
   if (!m_ActiveFlag)
   {
     return false;
@@ -343,7 +341,6 @@ bool EICG4B0SteppingAction::UserSteppingAction(const G4Step *aStep, bool was_use
   //sum up the energy to get total deposited
   m_Hit->set_edep(m_Hit->get_edep() + edep);
   if (layer_type == 0) m_EabsSum += edep;
-  m_EdepSum += edep;
   if (!hasMotherSubsystem() && (m_Hit->get_z(1) * cm > m_Zmax || m_Hit->get_z(1) * cm < m_Zmin))
   {
     std::cout << m_Detector->SuperDetector() << std::setprecision(9)
@@ -404,11 +401,11 @@ bool EICG4B0SteppingAction::UserSteppingAction(const G4Step *aStep, bool was_use
     // save only hits with energy deposit (or geantino)
     if (m_Hit->get_edep() || m_SaveAllHitsFlag)
     {
+      // update values at exit coordinates and set keep flag
+      // of track to keep
       m_Hit->set_layer(layer_id);
       m_Hit->set_hit_type(layer_type);
       m_Hit->set_eion(m_EionSum);
-      // update values at exit coordinates and set keep flag
-      // of track to keep
       m_HitContainer->AddHit(layer_id, m_Hit);
       if (m_SaveShower)
       {
@@ -429,7 +426,7 @@ bool EICG4B0SteppingAction::UserSteppingAction(const G4Step *aStep, bool was_use
 }
 
 //____________________________________________________________________________..
-void EICG4B0SteppingAction::SetInterfacePointers(PHCompositeNode *topNode)
+void EICG4RPSteppingAction::SetInterfacePointers(PHCompositeNode *topNode)
 {
   //std::string hitnodename = "G4HIT_" + m_Detector->GetName();
   //  std::cout << " ---> !!! hitnodename: " << hitnodename << std::endl;
@@ -438,11 +435,11 @@ void EICG4B0SteppingAction::SetInterfacePointers(PHCompositeNode *topNode)
   // if we do not find the node we need to make it.
   if (!m_HitContainer)
   {
-    std::cout << "EICG4B0SteppingAction::SetTopNode - unable to find "
+    std::cout << "EICG4RPSteppingAction::SetTopNode - unable to find "
               << m_HitNodeName << std::endl;
   }
 }
-bool EICG4B0SteppingAction::hasMotherSubsystem() const
+bool EICG4RPSteppingAction::hasMotherSubsystem() const
 {
   if (m_Subsystem->GetMotherSubsystem())
   {

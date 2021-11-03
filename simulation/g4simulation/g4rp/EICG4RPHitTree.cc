@@ -1,6 +1,6 @@
-// - 1/June/2021 TTree production for B0 G4 hits     Shima Shimizu
+// - 08/10/2021 TTree production for RP G4 hits
 //
-#include "EICG4B0HitTree.h"
+#include "EICG4RPHitTree.h"
 
 #include <g4main/PHG4Hit.h>
 #include <g4main/PHG4HitContainer.h>
@@ -17,9 +17,8 @@
 #include <sstream>
 #include <utility>
 
-EICG4B0HitTree::EICG4B0HitTree(const std::string &name, const std::string &filename)
+EICG4RPHitTree::EICG4RPHitTree(const std::string &name, const std::string &filename)
   : SubsysReco(name)
-  , hm(nullptr)
   , _filename(filename)
   , tree(nullptr)
   , outfile(nullptr)
@@ -27,19 +26,20 @@ EICG4B0HitTree::EICG4B0HitTree(const std::string &name, const std::string &filen
 {
 }
 
-EICG4B0HitTree::~EICG4B0HitTree()
+EICG4RPHitTree::~EICG4RPHitTree()
 {
-  delete hm;
 }
 
-int EICG4B0HitTree::Init(PHCompositeNode *)
+int EICG4RPHitTree::Init(PHCompositeNode *)
 {
-  hm = new Fun4AllHistoManager(Name());
   outfile = new TFile(_filename.c_str(), "RECREATE");
-  tree = new TTree("b0hit", "Collection of EICG4 B0 G4Hits");
+  tree = new TTree("rphit", "Collection of EICG4 RP G4Hits");
 
   tree->Branch("Nhit", &Nhit, "Nhit/I");
+  tree->Branch("layerType", &layerType);
   tree->Branch("layerID", &layerID);
+  tree->Branch("xID", &xID);
+  tree->Branch("yID", &yID);
   tree->Branch("x0", &x0);
   tree->Branch("y0", &y0);
   tree->Branch("z0", &z0);
@@ -53,7 +53,7 @@ int EICG4B0HitTree::Init(PHCompositeNode *)
   return 0;
 }
 
-int EICG4B0HitTree::process_event(PHCompositeNode *topNode)
+int EICG4RPHitTree::process_event(PHCompositeNode *topNode)
 {
   std::ostringstream nodename;
   std::set<std::string>::const_iterator iter;
@@ -74,7 +74,10 @@ int EICG4B0HitTree::process_event(PHCompositeNode *topNode)
       //            hit_iter->second->print();
       if (hit_iter->second->get_hit_type() < 0) continue;
 
+      layerType.push_back(hit_iter->second->get_hit_type());
       layerID.push_back(hit_iter->second->get_layer());
+      xID.push_back(hit_iter->second->get_index_i());
+      yID.push_back(hit_iter->second->get_index_j());
       x0.push_back(hit_iter->second->get_x(0));
       y0.push_back(hit_iter->second->get_y(0));
       z0.push_back(hit_iter->second->get_z(0));
@@ -88,7 +91,10 @@ int EICG4B0HitTree::process_event(PHCompositeNode *topNode)
 
     tree->Fill();
 
+    layerType.clear();
     layerID.clear();
+    xID.clear();
+    yID.clear();
     x0.clear();
     y0.clear();
     z0.clear();
@@ -102,18 +108,17 @@ int EICG4B0HitTree::process_event(PHCompositeNode *topNode)
   return 0;
 }
 
-int EICG4B0HitTree::End(PHCompositeNode *topNode)
+int EICG4RPHitTree::End(PHCompositeNode *topNode)
 {
   outfile->cd();
   tree->Write();
   outfile->Write();
   outfile->Close();
   delete outfile;
-  hm->dumpHistos(_filename, "UPDATE");
   return 0;
 }
 
-void EICG4B0HitTree::AddNode(const std::string &name, const int detid)
+void EICG4RPHitTree::AddNode(const std::string &name, const int detid)
 {
   _node_postfix.insert(name);
   _detid[name] = detid;

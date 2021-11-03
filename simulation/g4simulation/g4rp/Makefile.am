@@ -1,7 +1,7 @@
 AUTOMAKE_OPTIONS = foreign
 
 lib_LTLIBRARIES = \
-    libEICG4B0.la
+    libEICG4RP.la
 
 AM_LDFLAGS = \
   -L$(libdir) \
@@ -15,19 +15,17 @@ AM_CPPFLAGS = \
   -isystem ${G4_MAIN}/include
 
 pkginclude_HEADERS = \
-  EICG4B0HitTree.h \
-  EICG4B0Ntuple.h \
-  EICG4B0Subsystem.h
+  EICG4RPHitTree.h \
+  EICG4RPSubsystem.h
 
-libEICG4B0_la_SOURCES = \
+libEICG4RP_la_SOURCES = \
   $(ROOT5_DICTS) \
-  EICG4B0Subsystem.cc \
-  EICG4B0Detector.cc \
-  EICG4B0HitTree.cc \
-  EICG4B0Ntuple.cc \
-  EICG4B0SteppingAction.cc
+  EICG4RPSubsystem.cc \
+  EICG4RPDetector.cc \
+  EICG4RPHitTree.cc \
+  EICG4RPSteppingAction.cc
 
-libEICG4B0_la_LDFLAGS  = \
+libEICG4RP_la_LDFLAGS  = \
   -L$(libdir) \
   -L$(OFFLINE_MAIN)/lib \
   -lcalo_io \
@@ -40,7 +38,7 @@ libEICG4B0_la_LDFLAGS  = \
   -lg4eval \
   -leiceval
 
-libEICG4B0_la_LIBADD = \
+libEICG4RP_la_LIBADD = \
   -lphool \
   -lSubsysReco\
   -lg4detectors\
@@ -55,7 +53,7 @@ noinst_PROGRAMS = \
   testexternals
 
 testexternals_SOURCES = testexternals.C
-testexternals_LDADD   = libEICG4B0.la
+testexternals_LDADD   = libEICG4RP.la
 
 
 testexternals.C:

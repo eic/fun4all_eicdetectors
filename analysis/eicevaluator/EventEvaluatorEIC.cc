@@ -35,17 +35,17 @@
 
 #include <HepMC/GenEvent.h>
 #include <HepMC/GenVertex.h>
+#include <phhepmc/PHGenIntegral.h>
 #include <phhepmc/PHHepMCGenEvent.h>
 #include <phhepmc/PHHepMCGenEventMap.h>
-#include <phhepmc/PHGenIntegral.h>
 
 #include <fun4all/Fun4AllReturnCodes.h>
 #include <fun4all/SubsysReco.h>
 
+#include <phool/PHCompositeNode.h>
+#include <phool/PHNodeIterator.h>  // for PHNodeIterator
 #include <phool/getClass.h>
 #include <phool/phool.h>
-#include <phool/PHNodeIterator.h>  // for PHNodeIterator
-#include <phool/PHCompositeNode.h>
 
 #include <TFile.h>
 #include <TNtuple.h>
@@ -154,7 +154,7 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   , _tower_LFHCAL_iPhi(0)
   , _tower_LFHCAL_iL(0)
   , _tower_LFHCAL_trueID(0)
- 
+
   , _nTowers_FEMC(0)
   , _tower_FEMC_E(0)
   , _tower_FEMC_iEta(0)
@@ -172,7 +172,7 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   , _tower_EEMCG_iEta(0)
   , _tower_EEMCG_iPhi(0)
   , _tower_EEMCG_trueID(0)
-  
+
   , _nTowers_CEMC(0)
   , _tower_CEMC_E(0)
   , _tower_CEMC_iEta(0)
@@ -327,18 +327,18 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   , _tfile_geometry(nullptr)
 {
   _reco_e_threshold = new float[_maxNCalo];
-  _reco_e_threshold[kFHCAL]   = 0.05;
-  _reco_e_threshold[kFEMC]    = 0.005;
-  _reco_e_threshold[kDRCALO]  = 0.0;
-  _reco_e_threshold[kFOCAL]  = 0.0;
-  _reco_e_threshold[kEEMC]    = 0.005;
-  _reco_e_threshold[kCEMC]    = 0.01;
-  _reco_e_threshold[kEHCAL]   = 0.05;
-  _reco_e_threshold[kHCALIN]  = 0.01;
+  _reco_e_threshold[kFHCAL] = 0.05;
+  _reco_e_threshold[kFEMC] = 0.005;
+  _reco_e_threshold[kDRCALO] = 0.0;
+  _reco_e_threshold[kFOCAL] = 0.0;
+  _reco_e_threshold[kEEMC] = 0.005;
+  _reco_e_threshold[kCEMC] = 0.01;
+  _reco_e_threshold[kEHCAL] = 0.05;
+  _reco_e_threshold[kHCALIN] = 0.01;
   _reco_e_threshold[kHCALOUT] = 0.05;
-  _reco_e_threshold[kLFHCAL]  = 0.001;
-  _reco_e_threshold[kEEMCG]   = 0.005;
-  _reco_e_threshold[kBECAL]   = 0.001;
+  _reco_e_threshold[kLFHCAL] = 0.001;
+  _reco_e_threshold[kEEMCG] = 0.005;
+  _reco_e_threshold[kBECAL] = 0.001;
 
   _hits_layerID = new int[_maxNHits];
   _hits_trueID = new int[_maxNHits];
@@ -367,7 +367,7 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   _tower_BECAL_trueID = new int[_maxNTowers];
 
   _tower_HCALIN_E = new float[_maxNTowersCentral];
-  _tower_HCALIN_iEta  = new int[_maxNTowersCentral];
+  _tower_HCALIN_iEta = new int[_maxNTowersCentral];
   _tower_HCALIN_iPhi = new int[_maxNTowersCentral];
   _tower_HCALIN_trueID = new int[_maxNTowersCentral];
   _cluster_HCALIN_E = new float[_maxNclusters];
@@ -377,7 +377,7 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   _cluster_HCALIN_trueID = new int[_maxNclusters];
 
   _tower_HCALOUT_E = new float[_maxNTowersCentral];
-  _tower_HCALOUT_iEta  = new int[_maxNTowersCentral];
+  _tower_HCALOUT_iEta = new int[_maxNTowersCentral];
   _tower_HCALOUT_iPhi = new int[_maxNTowersCentral];
   _tower_HCALOUT_trueID = new int[_maxNTowersCentral];
   _cluster_HCALOUT_E = new float[_maxNclusters];
@@ -415,7 +415,7 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   _tower_LFHCAL_iPhi = new int[_maxNTowers];
   _tower_LFHCAL_iL = new int[_maxNTowers];
   _tower_LFHCAL_trueID = new int[_maxNTowers];
-  
+
   _tower_FEMC_E = new float[_maxNTowers];
   _tower_FEMC_iEta = new int[_maxNTowers];
   _tower_FEMC_iPhi = new int[_maxNTowers];
@@ -455,7 +455,7 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   _cluster_EEMCG_Phi = new float[_maxNclusters];
   _cluster_EEMCG_NTower = new int[_maxNclusters];
   _cluster_EEMCG_trueID = new int[_maxNclusters];
-  
+
   _track_ID = new float[_maxNTracks];
   _track_charge = new short[_maxNTracks];
   _track_trueID = new float[_maxNTracks];
@@ -508,8 +508,7 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   _calo_towers_y = new float[_maxNTowersCalo];
   _calo_towers_z = new float[_maxNTowersCalo];
   _geometry_done = new int[20];
-  for(int igem=0;igem<20;igem++) _geometry_done[igem] = 0;
-
+  for (int igem = 0; igem < 20; igem++) _geometry_done[igem] = 0;
 }
 
 int EventEvaluatorEIC::Init(PHCompositeNode* topNode)
@@ -558,7 +557,7 @@ int EventEvaluatorEIC::Init(PHCompositeNode* topNode)
 
     if (_do_PID_LogLikelihood)
     {
-        // save hadron PID log likelihood
+      // save hadron PID log likelihood
       _event_tree->Branch("track_pion_LL", _track_pion_LL.data(), "track_pion_LL[nTracks]/F");
       _event_tree->Branch("track_kaon_LL", _track_kaon_LL.data(), "track_kaon_LL[nTracks]/F");
       _event_tree->Branch("track_proton_LL", _track_proton_LL.data(), "track_proton_LL[nTracks]/F");
@@ -816,14 +815,14 @@ int EventEvaluatorEIC::Init(PHCompositeNode* topNode)
     _event_tree->Branch("hepmcp_m2", _hepmcp_m2, "hepmcp_m2[nHepmcp]/I");
   }
 
-
-  if(_do_GEOMETRY){
+  if (_do_GEOMETRY)
+  {
     _tfile_geometry = new TFile("geometry.root", "RECREATE");
 
     _geometry_tree = new TTree("geometry_tree", "geometry_tree");
     // tracks and hits
     _geometry_tree->Branch("calo", &_calo_ID, "nHits/I");
-    _geometry_tree->Branch("calo_towers_N",  &_calo_towers_N,"calo_towers_N/I");
+    _geometry_tree->Branch("calo_towers_N", &_calo_towers_N, "calo_towers_N/I");
     _geometry_tree->Branch("calo_towers_iEta", _calo_towers_iEta, "calo_towers_iEta[calo_towers_N]/I");
     _geometry_tree->Branch("calo_towers_iPhi", _calo_towers_iPhi, "calo_towers_iPhi[calo_towers_N]/I");
     _geometry_tree->Branch("calo_towers_iL", _calo_towers_iL, "calo_towers_iL[calo_towers_N]/I");
@@ -868,7 +867,7 @@ int EventEvaluatorEIC::process_event(PHCompositeNode* topNode)
     {
       _caloevalstackBECAL->next_event(topNode);
     }
-  }  
+  }
   if (_do_HCALIN)
   {
     if (!_caloevalstackHCALIN)
@@ -1030,7 +1029,8 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
   // Event level info
   //---------------------
   // Extract weight info from the stored HepMC event.
-  if (_do_store_event_info) {
+  if (_do_store_event_info)
+  {
     PHHepMCGenEventMap* hepmceventmap = findNode::getClass<PHHepMCGenEventMap>(topNode, "PHHepMCGenEventMap");
     if (hepmceventmap)
     {
@@ -1057,14 +1057,16 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
           }
 
           auto xsec = truthevent->cross_section();
-          if (xsec) {
-              _cross_section = xsec->cross_section();
+          if (xsec)
+          {
+            _cross_section = xsec->cross_section();
           }
           // Only fill the event weight if available.
           // The overall event weight will be stored in the last entry in the vector.
           auto weights = truthevent->weights();
-          if (weights.size() > 0) {
-              _event_weight = weights[weights.size() - 1];
+          if (weights.size() > 0)
+          {
+            _event_weight = weights[weights.size() - 1];
           }
         }
       }
@@ -1081,13 +1083,13 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
     // Retrieve the number of generator accepted events
     // Following how this was implemented in PHPythia8
     PHNodeIterator iter(topNode);
-    PHCompositeNode *sumNode = dynamic_cast<PHCompositeNode *>(iter.findFirst("PHCompositeNode", "RUN"));
+    PHCompositeNode* sumNode = dynamic_cast<PHCompositeNode*>(iter.findFirst("PHCompositeNode", "RUN"));
     if (!sumNode)
     {
       cout << PHWHERE << "RUN Node missing doing nothing" << endl;
       return;
     }
-    auto * integralNode = findNode::getClass<PHGenIntegral>(sumNode, "PHGenIntegral");
+    auto* integralNode = findNode::getClass<PHGenIntegral>(sumNode, "PHGenIntegral");
     if (integralNode)
     {
       _n_generator_accepted = integralNode->get_N_Generator_Accepted_Event();
@@ -1120,7 +1122,9 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
         _vertex_y = vertex->get_y();
         _vertex_z = vertex->get_z();
         _vertex_NCont = vertex->size_tracks();
-      } else {
+      }
+      else
+      {
         _vertex_x = 0.;
         _vertex_y = 0.;
         _vertex_z = 0.;
@@ -1144,20 +1148,18 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       // you need to add your layer name here to be saved! This has to be done
       // as we do not want to save thousands of calorimeter hits!
       if (
-	  (GetProjectionNameFromIndex(iIndex).find("TTL") != std::string::npos) ||
+          (GetProjectionNameFromIndex(iIndex).find("TTL") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("LBLVTX") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("BARR") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("FST") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("ZDCsurrogate") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("rpTruth") != std::string::npos) ||
-          (GetProjectionNameFromIndex(iIndex).find("rpTruth2") != std::string::npos) || // needed for IP8
+          (GetProjectionNameFromIndex(iIndex).find("rpTruth2") != std::string::npos) ||  // needed for IP8
           (GetProjectionNameFromIndex(iIndex).find("offMomTruth") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("b0Truth") != std::string::npos) ||
-          (GetProjectionNameFromIndex(iIndex).find("EGEM") != std::string::npos) ||
-          (GetProjectionNameFromIndex(iIndex).find("FGEM") != std::string::npos) ||
-          (GetProjectionNameFromIndex(iIndex).find("RWELL") != std::string::npos) ||
-          (((GetProjectionNameFromIndex(iIndex).find("BH_1") != std::string::npos) || (GetProjectionNameFromIndex(iIndex).find("BH_FORWARD_PLUS") != std::string::npos) || (GetProjectionNameFromIndex(iIndex).find("BH_FORWARD_NEG") != std::string::npos)) && _do_BLACKHOLE)
-	  ){
+          (((GetProjectionNameFromIndex(iIndex).find("BH_1") != std::string::npos) || (GetProjectionNameFromIndex(iIndex).find("BH_FORWARD_PLUS") != std::string::npos) || (GetProjectionNameFromIndex(iIndex).find("BH_FORWARD_NEG") != std::string::npos)) && _do_BLACKHOLE))
+      {
+
         string nodename = "G4HIT_" + GetProjectionNameFromIndex(iIndex);
         PHG4HitContainer* hits = findNode::getClass<PHG4HitContainer>(topNode, nodename);
         if (hits)
@@ -1173,12 +1175,11 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
             {
               cout << __PRETTY_FUNCTION__ << " found hit with id " << hit_iter->second->get_trkid() << endl;
             }
-            if(_nHitsLayers > _maxNHits){
+            if (_nHitsLayers > _maxNHits)
+            {
               cout << __PRETTY_FUNCTION__ << " exceededed maximum hit array size! Please check where these hits come from!" << endl;
               break;
             }
-
-	    //if (hit_iter->second->get_edep()<0.01) continue; // FIXME
 
             _hits_x[_nHitsLayers] = hit_iter->second->get_x(0);
             _hits_y[_nHitsLayers] = hit_iter->second->get_y(0);
@@ -1215,9 +1216,12 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
                   while (g4particleMother2->get_parent_id() != 0 && (mcSteps2 < (mcSteps - _depth_MCstack + 1)))
                   {
                     g4particleMother2 = truthinfocontainerHits->GetParticle(g4particleMother2->get_parent_id());
-                    if (g4particleMother2 == NULL){
+                    if (g4particleMother2 == NULL)
+                    {
                       break;
-                    } else {
+                    }
+                    else
+                    {
                       _hits_trueID[_nHitsLayers] = g4particleMother2->get_parent_id();
                       mcSteps2 += 1;
                     }
@@ -1230,7 +1234,6 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
               }
             }
             _nHitsLayers++;
-
           }
           if (Verbosity() > 0)
           {
@@ -1267,10 +1270,11 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       RawTowerGeomContainer* towergeomFHCAL = findNode::getClass<RawTowerGeomContainer>(topNode, towergeomnodeFHCAL.c_str());
       if (towergeomFHCAL)
       {
-        if(_do_GEOMETRY && !_geometry_done[kFHCAL]){
+        if (_do_GEOMETRY && !_geometry_done[kFHCAL])
+        {
           RawTowerGeomContainer::ConstRange all_towers = towergeomFHCAL->get_tower_geometries();
           for (RawTowerGeomContainer::ConstIterator it = all_towers.first;
-              it != all_towers.second; ++it)
+               it != all_towers.second; ++it)
           {
             _calo_ID = kFHCAL;
             _calo_towers_iEta[_calo_towers_N] = it->second->get_bineta();
@@ -1329,7 +1333,6 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
             //   // }
             // }
 
-
             PHG4Particle* primary = towerevalFHCAL->max_truth_primary_particle_by_energy(tower);
             if (primary)
             {
@@ -1376,7 +1379,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
     _nTowers_BECAL = 0;
     string towernodeBECAL = "TOWER_CALIB_BECAL";
     RawTowerContainer* towersBECAL = findNode::getClass<RawTowerContainer>(topNode, towernodeBECAL.c_str());
-    
+
     if (Verbosity() > 0)
     {
       RawTowerContainer* towersBECAL1 = findNode::getClass<RawTowerContainer>(topNode, "TOWER_RAW_BECAL");
@@ -1395,14 +1398,15 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       RawTowerGeomContainer* towergeomBECAL = findNode::getClass<RawTowerGeomContainer>(topNode, towergeomnodeBECAL.c_str());
       if (towergeomBECAL)
       {
-        if(_do_GEOMETRY && !_geometry_done[kBECAL]){
+        if (_do_GEOMETRY && !_geometry_done[kBECAL])
+        {
           // std::ostream *fout= new ofstream("test.list");
           RawTowerGeomContainer::ConstRange all_towers = towergeomBECAL->get_tower_geometries();
           // *fout << "Calorimeter ID: " << towergeomBECAL->get_calorimeter_id() << endl;
           // *fout << "size: " << towergeomBECAL->size() << endl;
           // towergeomBECAL->identify(*fout);
           for (RawTowerGeomContainer::ConstIterator it = all_towers.first;
-              it != all_towers.second; ++it)
+               it != all_towers.second; ++it)
           {
             _calo_ID = kBECAL;
             _calo_towers_iEta[_calo_towers_N] = it->second->get_bineta();
@@ -1419,8 +1423,8 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
           _geometry_done[kBECAL] = 1;
           _geometry_tree->Fill();
           resetGeometryArrays();
-        // _calo_ID = kBECAL;
-        // _calo_ID = kBECAL;
+          // _calo_ID = kBECAL;
+          // _calo_ID = kBECAL;
         }
 
         RawTowerContainer::ConstRange begin_end = towersBECAL->getTowers();
@@ -1492,10 +1496,11 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       RawTowerGeomContainer* towergeomHCALIN = findNode::getClass<RawTowerGeomContainer>(topNode, towergeomnodeHCALIN.c_str());
       if (towergeomHCALIN)
       {
-        if(_do_GEOMETRY && !_geometry_done[kHCALIN]){
+        if (_do_GEOMETRY && !_geometry_done[kHCALIN])
+        {
           RawTowerGeomContainer::ConstRange all_towers = towergeomHCALIN->get_tower_geometries();
           for (RawTowerGeomContainer::ConstIterator it = all_towers.first;
-              it != all_towers.second; ++it)
+               it != all_towers.second; ++it)
           {
             _calo_ID = kHCALIN;
             _calo_towers_iEta[_calo_towers_N] = it->second->get_bineta();
@@ -1581,10 +1586,11 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       RawTowerGeomContainer* towergeomHCALOUT = findNode::getClass<RawTowerGeomContainer>(topNode, towergeomnodeHCALOUT.c_str());
       if (towergeomHCALOUT)
       {
-        if(_do_GEOMETRY && !_geometry_done[kHCALOUT]){
+        if (_do_GEOMETRY && !_geometry_done[kHCALOUT])
+        {
           RawTowerGeomContainer::ConstRange all_towers = towergeomHCALOUT->get_tower_geometries();
           for (RawTowerGeomContainer::ConstIterator it = all_towers.first;
-              it != all_towers.second; ++it)
+               it != all_towers.second; ++it)
           {
             _calo_ID = kHCALOUT;
             _calo_towers_iEta[_calo_towers_N] = it->second->get_bineta();
@@ -1670,10 +1676,11 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       RawTowerGeomContainer* towergeomEHCAL = findNode::getClass<RawTowerGeomContainer>(topNode, towergeomnodeEHCAL.c_str());
       if (towergeomEHCAL)
       {
-        if(_do_GEOMETRY && !_geometry_done[kEHCAL]){
+        if (_do_GEOMETRY && !_geometry_done[kEHCAL])
+        {
           RawTowerGeomContainer::ConstRange all_towers = towergeomEHCAL->get_tower_geometries();
           for (RawTowerGeomContainer::ConstIterator it = all_towers.first;
-              it != all_towers.second; ++it)
+               it != all_towers.second; ++it)
           {
             _calo_ID = kEHCAL;
             _calo_towers_iEta[_calo_towers_N] = it->second->get_bineta();
@@ -1759,10 +1766,11 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       RawTowerGeomContainer* towergeomDRCALO = findNode::getClass<RawTowerGeomContainer>(topNode, towergeomnodeDRCALO.c_str());
       if (towergeomDRCALO)
       {
-        if(_do_GEOMETRY && !_geometry_done[kDRCALO]){
+        if (_do_GEOMETRY && !_geometry_done[kDRCALO])
+        {
           RawTowerGeomContainer::ConstRange all_towers = towergeomDRCALO->get_tower_geometries();
           for (RawTowerGeomContainer::ConstIterator it = all_towers.first;
-              it != all_towers.second; ++it)
+               it != all_towers.second; ++it)
           {
             _calo_ID = kDRCALO;
             _calo_towers_iEta[_calo_towers_N] = it->second->get_bineta();
@@ -1868,10 +1876,11 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       RawTowerGeomContainer* towergeomFOCAL = findNode::getClass<RawTowerGeomContainer>(topNode, towergeomnodeFOCAL.c_str());
       if (towergeomFOCAL)
       {
-        if(_do_GEOMETRY && !_geometry_done[kFOCAL]){
+        if (_do_GEOMETRY && !_geometry_done[kFOCAL])
+        {
           RawTowerGeomContainer::ConstRange all_towers = towergeomFOCAL->get_tower_geometries();
           for (RawTowerGeomContainer::ConstIterator it = all_towers.first;
-              it != all_towers.second; ++it)
+               it != all_towers.second; ++it)
           {
             _calo_ID = kFOCAL;
             _calo_towers_iEta[_calo_towers_N] = it->second->get_bineta();
@@ -1956,8 +1965,8 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
     _nTowers_LFHCAL = 0;
     string towernodeLFHCAL = "TOWER_CALIB_LFHCAL";
     RawTowerContainer* towersLFHCAL = findNode::getClass<RawTowerContainer>(topNode, towernodeLFHCAL.c_str());
-    if (Verbosity() > 1) 
-      std::cout << "reading towers: "<< towersLFHCAL->size() << std::endl;
+    if (Verbosity() > 1)
+      std::cout << "reading towers: " << towersLFHCAL->size() << std::endl;
     if (towersLFHCAL)
     {
       if (Verbosity() > 0)
@@ -1968,11 +1977,11 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       RawTowerGeomContainer* towergeomLFHCAL = findNode::getClass<RawTowerGeomContainer>(topNode, towergeomnodeLFHCAL.c_str());
       if (towergeomLFHCAL)
       {
-        
-        if(_do_GEOMETRY && !_geometry_done[kLFHCAL]){
+        if (_do_GEOMETRY && !_geometry_done[kLFHCAL])
+        {
           RawTowerGeomContainer::ConstRange all_towers = towergeomLFHCAL->get_tower_geometries();
           for (RawTowerGeomContainer::ConstIterator it = all_towers.first;
-              it != all_towers.second; ++it)
+               it != all_towers.second; ++it)
           {
             _calo_ID = kLFHCAL;
             _calo_towers_iEta[_calo_towers_N] = it->second->get_bineta();
@@ -1996,15 +2005,15 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
 
         RawTowerContainer::ConstRange begin_end = towersLFHCAL->getTowers();
         RawTowerContainer::ConstIterator rtiter;
-        
+
         for (rtiter = begin_end.first; rtiter != begin_end.second; ++rtiter)
         {
           RawTower* tower = rtiter->second;
           if (tower)
           {
-            // min energy cut            
-            if (tower->get_energy() < _reco_e_threshold[kLFHCAL]) continue; 
-            if (Verbosity() > 1) cout << "\n event eval: \t" << tower->get_energy()<< "\t ieta: " << tower->get_bineta()<< "\t iphi: " << tower->get_binphi() << "\t iZ: " << tower->get_binl()<< endl;
+            // min energy cut
+            if (tower->get_energy() < _reco_e_threshold[kLFHCAL]) continue;
+            if (Verbosity() > 1) cout << "\n event eval: \t" << tower->get_energy() << "\t ieta: " << tower->get_bineta() << "\t iphi: " << tower->get_binphi() << "\t iZ: " << tower->get_binl() << endl;
             _tower_LFHCAL_iEta[_nTowers_LFHCAL] = tower->get_bineta();
             _tower_LFHCAL_iPhi[_nTowers_LFHCAL] = tower->get_binphi();
             _tower_LFHCAL_iL[_nTowers_LFHCAL] = tower->get_binl();
@@ -2066,10 +2075,11 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       RawTowerGeomContainer* towergeom = findNode::getClass<RawTowerGeomContainer>(topNode, towergeomnodeFEMC.c_str());
       if (towergeom)
       {
-        if(_do_GEOMETRY && !_geometry_done[kFEMC]){
+        if (_do_GEOMETRY && !_geometry_done[kFEMC])
+        {
           RawTowerGeomContainer::ConstRange all_towers = towergeom->get_tower_geometries();
           for (RawTowerGeomContainer::ConstIterator it = all_towers.first;
-              it != all_towers.second; ++it)
+               it != all_towers.second; ++it)
           {
             _calo_ID = kFEMC;
             _calo_towers_iEta[_calo_towers_N] = it->second->get_bineta();
@@ -2101,7 +2111,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
             _tower_FEMC_E[_nTowers_FEMC] = tower->get_energy();
 
             // cout << "\tnew FEMC tower " << tower->get_energy() << endl;
-            
+
             PHG4Particle* primary = towerevalFEMC->max_truth_primary_particle_by_energy(tower);
             if (primary)
             {
@@ -2185,10 +2195,11 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       RawTowerGeomContainer* towergeom = findNode::getClass<RawTowerGeomContainer>(topNode, towergeomnodeCEMC.c_str());
       if (towergeom)
       {
-        if(_do_GEOMETRY && !_geometry_done[kCEMC]){
+        if (_do_GEOMETRY && !_geometry_done[kCEMC])
+        {
           RawTowerGeomContainer::ConstRange all_towers = towergeom->get_tower_geometries();
           for (RawTowerGeomContainer::ConstIterator it = all_towers.first;
-              it != all_towers.second; ++it)
+               it != all_towers.second; ++it)
           {
             _calo_ID = kCEMC;
             _calo_towers_iEta[_calo_towers_N] = it->second->get_bineta();
@@ -2275,10 +2286,11 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       RawTowerGeomContainer* towergeom = findNode::getClass<RawTowerGeomContainer>(topNode, towergeomnodeEEMC.c_str());
       if (towergeom)
       {
-        if(_do_GEOMETRY && !_geometry_done[kEEMC]){
+        if (_do_GEOMETRY && !_geometry_done[kEEMC])
+        {
           RawTowerGeomContainer::ConstRange all_towers = towergeom->get_tower_geometries();
           for (RawTowerGeomContainer::ConstIterator it = all_towers.first;
-              it != all_towers.second; ++it)
+               it != all_towers.second; ++it)
           {
             _calo_ID = kEEMC;
             _calo_towers_iEta[_calo_towers_N] = it->second->get_bineta();
@@ -2366,10 +2378,11 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       RawTowerGeomContainer* towergeom = findNode::getClass<RawTowerGeomContainer>(topNode, towergeomnodeEEMCG.c_str());
       if (towergeom)
       {
-        if(_do_GEOMETRY && !_geometry_done[kEEMCG]){
+        if (_do_GEOMETRY && !_geometry_done[kEEMCG])
+        {
           RawTowerGeomContainer::ConstRange all_towers = towergeom->get_tower_geometries();
           for (RawTowerGeomContainer::ConstIterator it = all_towers.first;
-              it != all_towers.second; ++it)
+               it != all_towers.second; ++it)
           {
             _calo_ID = kEEMCG;
             _calo_towers_iEta[_calo_towers_N] = it->second->get_bineta();
@@ -2437,12 +2450,16 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       // return;
     }
   }
-  
+
   //------------------------
   // CLUSTERS FHCAL
   //------------------------
-  if (Verbosity() > 0){ cout << "saving clusters" << endl;}
-  if(_do_FHCAL && _do_CLUSTERS){
+  if (Verbosity() > 0)
+  {
+    cout << "saving clusters" << endl;
+  }
+  if (_do_FHCAL && _do_CLUSTERS)
+  {
     CaloRawClusterEval* clusterevalFHCAL = _caloevalstackFHCAL->get_rawcluster_eval();
     _nclusters_FHCAL = 0;
     if (Verbosity() > 1)
@@ -2477,7 +2494,8 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
             _cluster_FHCAL_Eta[_nclusters_FHCAL] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));
         }
         else
-          _cluster_FHCAL_Eta[_nclusters_FHCAL] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));;
+          _cluster_FHCAL_Eta[_nclusters_FHCAL] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));
+        ;
 
         PHG4Particle* primary = clusterevalFHCAL->max_truth_primary_particle_by_energy(cluster);
 
@@ -2498,7 +2516,10 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       cerr << PHWHERE << " ERROR: Can't find " << clusternodeFHCAL << endl;
       // return;
     }
-    if (Verbosity() > 0){ cout << "saved\t" << _nclusters_FHCAL << "\tFHCAL clusters" << endl;}
+    if (Verbosity() > 0)
+    {
+      cout << "saved\t" << _nclusters_FHCAL << "\tFHCAL clusters" << endl;
+    }
   }
   //------------------------
   // CLUSTERS HCALIN
@@ -2536,10 +2557,12 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
             _cluster_HCALIN_Eta[_nclusters_HCALIN] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(vertex->get_x(), vertex->get_y(), vertex->get_z()));
           }
           else
-            _cluster_HCALIN_Eta[_nclusters_HCALIN] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));;
+            _cluster_HCALIN_Eta[_nclusters_HCALIN] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));
+          ;
         }
         else
-          _cluster_HCALIN_Eta[_nclusters_HCALIN] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));;
+          _cluster_HCALIN_Eta[_nclusters_HCALIN] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));
+        ;
 
         PHG4Particle* primary = clusterevalHCALIN->max_truth_primary_particle_by_energy(cluster);
 
@@ -2560,7 +2583,10 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       cerr << PHWHERE << " ERROR: Can't find " << clusternodeHCALIN << endl;
       // return;
     }
-    if (Verbosity() > 0){ cout << "saved\t" << _nclusters_HCALIN << "\tHCALIN clusters" << endl;}
+    if (Verbosity() > 0)
+    {
+      cout << "saved\t" << _nclusters_HCALIN << "\tHCALIN clusters" << endl;
+    }
   }
   //------------------------
   // CLUSTERS HCALOUT
@@ -2598,10 +2624,12 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
             _cluster_HCALOUT_Eta[_nclusters_HCALOUT] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(vertex->get_x(), vertex->get_y(), vertex->get_z()));
           }
           else
-            _cluster_HCALOUT_Eta[_nclusters_HCALOUT] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));;
+            _cluster_HCALOUT_Eta[_nclusters_HCALOUT] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));
+          ;
         }
         else
-          _cluster_HCALOUT_Eta[_nclusters_HCALOUT] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));;
+          _cluster_HCALOUT_Eta[_nclusters_HCALOUT] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));
+        ;
 
         PHG4Particle* primary = clusterevalHCALOUT->max_truth_primary_particle_by_energy(cluster);
 
@@ -2622,7 +2650,10 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       cerr << PHWHERE << " ERROR: Can't find " << clusternodeHCALOUT << endl;
       // return;
     }
-    if (Verbosity() > 0){ cout << "saved\t" << _nclusters_HCALOUT << "\tHCALOUT clusters" << endl;}
+    if (Verbosity() > 0)
+    {
+      cout << "saved\t" << _nclusters_HCALOUT << "\tHCALOUT clusters" << endl;
+    }
   }
   //------------------------
   // CLUSTERS EHCAL
@@ -2660,10 +2691,12 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
             _cluster_EHCAL_Eta[_nclusters_EHCAL] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(vertex->get_x(), vertex->get_y(), vertex->get_z()));
           }
           else
-            _cluster_EHCAL_Eta[_nclusters_EHCAL] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));;
+            _cluster_EHCAL_Eta[_nclusters_EHCAL] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));
+          ;
         }
         else
-          _cluster_EHCAL_Eta[_nclusters_EHCAL] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));;
+          _cluster_EHCAL_Eta[_nclusters_EHCAL] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));
+        ;
 
         PHG4Particle* primary = clusterevalEHCAL->max_truth_primary_particle_by_energy(cluster);
 
@@ -2684,7 +2717,10 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       cerr << PHWHERE << " ERROR: Can't find " << clusternodeEHCAL << endl;
       // return;
     }
-    if (Verbosity() > 0){ cout << "saved\t" << _nclusters_EHCAL << "\tEHCAL clusters" << endl;}
+    if (Verbosity() > 0)
+    {
+      cout << "saved\t" << _nclusters_EHCAL << "\tEHCAL clusters" << endl;
+    }
   }
 
   //------------------------
@@ -2723,10 +2759,12 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
             _cluster_FEMC_Eta[_nclusters_FEMC] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(vertex->get_x(), vertex->get_y(), vertex->get_z()));
           }
           else
-            _cluster_FEMC_Eta[_nclusters_FEMC] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));;
+            _cluster_FEMC_Eta[_nclusters_FEMC] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));
+          ;
         }
         else
-          _cluster_FEMC_Eta[_nclusters_FEMC] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));;
+          _cluster_FEMC_Eta[_nclusters_FEMC] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));
+        ;
 
         PHG4Particle* primary = clusterevalFEMC->max_truth_primary_particle_by_energy(cluster);
 
@@ -2747,7 +2785,10 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       cerr << PHWHERE << " ERROR: Can't find " << clusternodeFEMC << endl;
       // return;
     }
-    if (Verbosity() > 0){ cout << "saved\t" << _nclusters_FEMC << "\tFEMC clusters" << endl;}
+    if (Verbosity() > 0)
+    {
+      cout << "saved\t" << _nclusters_FEMC << "\tFEMC clusters" << endl;
+    }
   }
   //------------------------
   // CLUSTERS CEMC
@@ -2785,10 +2826,12 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
             _cluster_CEMC_Eta[_nclusters_CEMC] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(vertex->get_x(), vertex->get_y(), vertex->get_z()));
           }
           else
-            _cluster_CEMC_Eta[_nclusters_CEMC] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));;
+            _cluster_CEMC_Eta[_nclusters_CEMC] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));
+          ;
         }
         else
-          _cluster_CEMC_Eta[_nclusters_CEMC] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));;
+          _cluster_CEMC_Eta[_nclusters_CEMC] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));
+        ;
 
         PHG4Particle* primary = clusterevalCEMC->max_truth_primary_particle_by_energy(cluster);
 
@@ -2809,7 +2852,10 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       cerr << PHWHERE << " ERROR: Can't find " << clusternodeCEMC << endl;
       // return;
     }
-    if (Verbosity() > 0){ cout << "saved\t" << _nclusters_CEMC << "\tCEMC clusters" << endl;}
+    if (Verbosity() > 0)
+    {
+      cout << "saved\t" << _nclusters_CEMC << "\tCEMC clusters" << endl;
+    }
   }
   //------------------------
   // CLUSTERS EEMC
@@ -2847,10 +2893,12 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
             _cluster_EEMC_Eta[_nclusters_EEMC] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(vertex->get_x(), vertex->get_y(), vertex->get_z()));
           }
           else
-            _cluster_EEMC_Eta[_nclusters_EEMC] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));;
+            _cluster_EEMC_Eta[_nclusters_EEMC] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));
+          ;
         }
         else
-          _cluster_EEMC_Eta[_nclusters_EEMC] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));;
+          _cluster_EEMC_Eta[_nclusters_EEMC] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));
+        ;
 
         PHG4Particle* primary = clusterevalEEMC->max_truth_primary_particle_by_energy(cluster);
 
@@ -2871,7 +2919,10 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       cerr << PHWHERE << " ERROR: Can't find " << clusternodeEEMC << endl;
       // return;
     }
-    if (Verbosity() > 0){ cout << "saved\t" << _nclusters_EEMC << "\tEEMC clusters" << endl;}
+    if (Verbosity() > 0)
+    {
+      cout << "saved\t" << _nclusters_EEMC << "\tEEMC clusters" << endl;
+    }
   }
   //------------------------
   // CLUSTERS EEMCG
@@ -2933,7 +2984,10 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       cerr << PHWHERE << " ERROR: Can't find " << clusternodeEEMCG << endl;
       // return;
     }
-    if (Verbosity() > 0){ cout << "saved\t" << _nclusters_EEMCG << "\tEEMCG clusters" << endl;}
+    if (Verbosity() > 0)
+    {
+      cout << "saved\t" << _nclusters_EEMCG << "\tEEMCG clusters" << endl;
+    }
   }
 
   //------------------------
@@ -2944,15 +2998,15 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
     _nTracks = 0;
     _nProjections = 0;
 
-    EICPIDParticleContainer * pidcontainer (nullptr);
+    EICPIDParticleContainer* pidcontainer(nullptr);
 
-    if (_do_PID_LogLikelihood )
+    if (_do_PID_LogLikelihood)
     {
       pidcontainer = findNode::getClass<EICPIDParticleContainer>(topNode, "EICPIDParticleMap");
-      if (pidcontainer==nullptr)
+      if (pidcontainer == nullptr)
       {
         cout << __PRETTY_FUNCTION__ << " Error: missing EICPIDParticleMap while _do_PID_LogLikelihood = "
-            << _do_PID_LogLikelihood << endl;
+             << _do_PID_LogLikelihood << endl;
       }
     }
 
@@ -2968,7 +3022,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
     bool foundAtLeastOneTrackSource = false;
     for (const auto& trackMapInfo : trackMapPairs)
     {
-      if (_nTracks>=_maxNTracks) break;
+      if (_nTracks >= _maxNTracks) break;
 
       SvtxTrackMap* trackmap = findNode::getClass<SvtxTrackMap>(topNode, trackMapInfo.first);
       if (trackmap)
@@ -2981,7 +3035,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
         }
         for (SvtxTrackMap::ConstIter track_itr = trackmap->begin(); track_itr != trackmap->end(); track_itr++)
         {
-          if (_nTracks>=_maxNTracks) break;
+          if (_nTracks >= _maxNTracks) break;
 
           SvtxTrack_FastSim* track = dynamic_cast<SvtxTrack_FastSim*>(track_itr->second);
           if (track)
@@ -3067,35 +3121,34 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
                   _nProjections++;
                 }
               }
-            } //             if (_do_PROJECTIONS)
+            }  //             if (_do_PROJECTIONS)
 
-            if (_do_PID_LogLikelihood )
+            if (_do_PID_LogLikelihood)
             {
               // perform PID matching
               if (trackMapInfo.second == TrackSource_t::all and pidcontainer != nullptr)
               {
                 // only do so for the TrackSource_t::all
                 const EICPIDParticle* pid_particle =
-                pidcontainer->findEICPIDParticle(track->get_id());
+                    pidcontainer->findEICPIDParticle(track->get_id());
 
                 if (pid_particle)
                 {
-                  if((unsigned int)_nTracks>= _track_pion_LL.size())
+                  if ((unsigned int) _nTracks >= _track_pion_LL.size())
                   {
                     cout << __PRETTY_FUNCTION__
-                        << " logical error _nTracks = " << _nTracks
-                        << " logical error _track_pion_LL.size() = " << _track_pion_LL.size()
-                        << endl;
+                         << " logical error _nTracks = " << _nTracks
+                         << " logical error _track_pion_LL.size() = " << _track_pion_LL.size()
+                         << endl;
                     exit(1);
                   }
 
                   _track_pion_LL[_nTracks] = pid_particle->get_SumLogLikelyhood(EICPIDDefs::PionCandiate);
-                  _track_kaon_LL[_nTracks] =  pid_particle->get_SumLogLikelyhood(EICPIDDefs::KaonCandiate);
-                  _track_proton_LL[_nTracks] =  pid_particle->get_SumLogLikelyhood(EICPIDDefs::ProtonCandiate);
+                  _track_kaon_LL[_nTracks] = pid_particle->get_SumLogLikelyhood(EICPIDDefs::KaonCandiate);
+                  _track_proton_LL[_nTracks] = pid_particle->get_SumLogLikelyhood(EICPIDDefs::ProtonCandiate);
                 }
-
               }
-            } // if (_do_PID_LogLikelihood )
+            }  // if (_do_PID_LogLikelihood )
 
             _nTracks++;
             nTracksInASource++;
@@ -3123,7 +3176,8 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
         }
       }
     }
-    if (foundAtLeastOneTrackSource == false) {
+    if (foundAtLeastOneTrackSource == false)
+    {
       cout << PHWHERE << "Requested tracks, but found no sources on node tree. Returning" << endl;
       return;
     }
@@ -3285,7 +3339,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
                   _hepmcp_m1[_nHepmcp] = (*mother)->barcode();
               }
             }
-            if (Verbosity() > 2) cout << "nHepmcp " << _nHepmcp << "\tPDG " << _hepmcp_PDG[_nHepmcp] << "\tEnergy " << _hepmcp_E[_nHepmcp] << "\tbarcode " << _hepmcp_BCID[_nHepmcp] << "\tMother1 " << _hepmcp_m1[_nHepmcp]<< "\tMother2 " << _hepmcp_m2[_nHepmcp] << endl;
+            if (Verbosity() > 2) cout << "nHepmcp " << _nHepmcp << "\tPDG " << _hepmcp_PDG[_nHepmcp] << "\tEnergy " << _hepmcp_E[_nHepmcp] << "\tbarcode " << _hepmcp_BCID[_nHepmcp] << "\tMother1 " << _hepmcp_m1[_nHepmcp] << "\tMother2 " << _hepmcp_m2[_nHepmcp] << endl;
             _nHepmcp++;
           }
         }
@@ -3303,7 +3357,10 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
 
   _event_tree->Fill();
 
-  if (Verbosity() > 0){ cout << "Resetting buffer ..." << endl;}
+  if (Verbosity() > 0)
+  {
+    cout << "Resetting buffer ..." << endl;
+  }
   resetBuffer();
   if (Verbosity() > 0)
   {
@@ -3322,7 +3379,8 @@ int EventEvaluatorEIC::End(PHCompositeNode* topNode)
 
   delete _tfile;
 
-  if(_do_GEOMETRY){
+  if (_do_GEOMETRY)
+  {
     _tfile_geometry->cd();
 
     _geometry_tree->Write();
@@ -3755,18 +3813,18 @@ std::string EventEvaluatorEIC::GetProjectionNameFromIndex(int projindex)
 void EventEvaluatorEIC::resetGeometryArrays()
 {
   for (Int_t igeo = 0; igeo < _calo_towers_N; igeo++)
-    {
-      _calo_towers_iEta[_calo_towers_N] = -10000;
-      _calo_towers_iPhi[_calo_towers_N] = -10000;
-      _calo_towers_iL[_calo_towers_N] = -10000;
-      _calo_towers_Eta[_calo_towers_N] = -10000;
-      _calo_towers_Phi[_calo_towers_N] = -10000;
-      _calo_towers_x[_calo_towers_N] = -10000;
-      _calo_towers_y[_calo_towers_N] = -10000;
-      _calo_towers_z[_calo_towers_N] = -10000;
-    }
-    _calo_ID = -1;
-    _calo_towers_N = 0;
+  {
+    _calo_towers_iEta[_calo_towers_N] = -10000;
+    _calo_towers_iPhi[_calo_towers_N] = -10000;
+    _calo_towers_iL[_calo_towers_N] = -10000;
+    _calo_towers_Eta[_calo_towers_N] = -10000;
+    _calo_towers_Phi[_calo_towers_N] = -10000;
+    _calo_towers_x[_calo_towers_N] = -10000;
+    _calo_towers_y[_calo_towers_N] = -10000;
+    _calo_towers_z[_calo_towers_N] = -10000;
+  }
+  _calo_ID = -1;
+  _calo_towers_N = 0;
 }
 void EventEvaluatorEIC::resetBuffer()
 {
@@ -3775,7 +3833,10 @@ void EventEvaluatorEIC::resetBuffer()
     _cross_section = 0;
     _event_weight = 0;
     _n_generator_accepted = 0;
-    if (Verbosity() > 0){ cout << "\t... event info variables reset" << endl;}
+    if (Verbosity() > 0)
+    {
+      cout << "\t... event info variables reset" << endl;
+    }
   }
   if (_do_VERTEX)
   {
@@ -3786,7 +3847,10 @@ void EventEvaluatorEIC::resetBuffer()
     _vertex_true_x = -1000;
     _vertex_true_y = -1000;
     _vertex_true_z = -1000;
-    if (Verbosity() > 0){ cout << "\t... vertex variables reset" << endl;}
+    if (Verbosity() > 0)
+    {
+      cout << "\t... vertex variables reset" << endl;
+    }
   }
   if (_do_HITS)
   {
@@ -3804,7 +3868,10 @@ void EventEvaluatorEIC::resetBuffer()
       _hits_t[ihit] = 0;
       _hits_edep[ihit] = 0;
     }
-    if (Verbosity() > 0){ cout << "\t... hit variables reset" << endl;}
+    if (Verbosity() > 0)
+    {
+      cout << "\t... hit variables reset" << endl;
+    }
   }
   if (_do_FHCAL)
   {
@@ -3828,7 +3895,10 @@ void EventEvaluatorEIC::resetBuffer()
         _cluster_FHCAL_trueID[itow] = 0;
       }
     }
-    if (Verbosity() > 0){ cout << "\t... FHCAL variables reset" << endl;}
+    if (Verbosity() > 0)
+    {
+      cout << "\t... FHCAL variables reset" << endl;
+    }
   }
   if (_do_BECAL)
   {
@@ -3840,7 +3910,10 @@ void EventEvaluatorEIC::resetBuffer()
       _tower_BECAL_iPhi[itow] = 0;
       _tower_BECAL_trueID[itow] = 0;
     }
-    if (Verbosity() > 0){ cout << "\t... BECAL variables reset" << endl;}
+    if (Verbosity() > 0)
+    {
+      cout << "\t... BECAL variables reset" << endl;
+    }
   }
   if (_do_FEMC)
   {
@@ -3864,9 +3937,13 @@ void EventEvaluatorEIC::resetBuffer()
         _cluster_FEMC_trueID[itow] = 0;
       }
     }
-    if (Verbosity() > 0){ cout << "\t... FEMC variables reset" << endl;}
+    if (Verbosity() > 0)
+    {
+      cout << "\t... FEMC variables reset" << endl;
+    }
   }
-  if(_do_CEMC){
+  if (_do_CEMC)
+  {
     _nTowers_CEMC = 0;
     for (Int_t itow = 0; itow < _maxNTowersCentral; itow++)
     {
@@ -3875,7 +3952,8 @@ void EventEvaluatorEIC::resetBuffer()
       _tower_CEMC_iPhi[itow] = 0;
       _tower_CEMC_trueID[itow] = 0;
     }
-    if(_do_CLUSTERS){
+    if (_do_CLUSTERS)
+    {
       _nclusters_CEMC = 0;
       for (Int_t itow = 0; itow < _maxNclustersCentral; itow++)
       {
@@ -3886,9 +3964,13 @@ void EventEvaluatorEIC::resetBuffer()
         _cluster_CEMC_trueID[itow] = 0;
       }
     }
-    if (Verbosity() > 0){ cout << "\t... CEMC variables reset" << endl;}
+    if (Verbosity() > 0)
+    {
+      cout << "\t... CEMC variables reset" << endl;
+    }
   }
-  if(_do_HCALIN){
+  if (_do_HCALIN)
+  {
     _nTowers_HCALIN = 0;
     for (Int_t itow = 0; itow < _maxNTowersCentral; itow++)
     {
@@ -3897,7 +3979,8 @@ void EventEvaluatorEIC::resetBuffer()
       _tower_HCALIN_iPhi[itow] = 0;
       _tower_HCALIN_trueID[itow] = 0;
     }
-    if(_do_CLUSTERS){
+    if (_do_CLUSTERS)
+    {
       _nclusters_HCALIN = 0;
       for (Int_t itow = 0; itow < _maxNclusters; itow++)
       {
@@ -3908,10 +3991,17 @@ void EventEvaluatorEIC::resetBuffer()
         _cluster_HCALIN_trueID[itow] = 0;
       }
     }
-    if (Verbosity() > 0){ cout << "\t... HCALIN variables reset" << endl;}
+    if (Verbosity() > 0)
+    {
+      cout << "\t... HCALIN variables reset" << endl;
+    }
   }
-  if(_do_HCALOUT){
-    if (Verbosity() > 0){ cout << "\t... resetting HCALOUT variables" << endl;}
+  if (_do_HCALOUT)
+  {
+    if (Verbosity() > 0)
+    {
+      cout << "\t... resetting HCALOUT variables" << endl;
+    }
     _nTowers_HCALOUT = 0;
     for (Int_t itow = 0; itow < _maxNTowersCentral; itow++)
     {
@@ -3920,7 +4010,8 @@ void EventEvaluatorEIC::resetBuffer()
       _tower_HCALOUT_iPhi[itow] = 0;
       _tower_HCALOUT_trueID[itow] = 0;
     }
-    if(_do_CLUSTERS){
+    if (_do_CLUSTERS)
+    {
       _nclusters_HCALOUT = 0;
       for (Int_t itow = 0; itow < _maxNclusters; itow++)
       {
@@ -3931,10 +4022,17 @@ void EventEvaluatorEIC::resetBuffer()
         _cluster_HCALOUT_trueID[itow] = 0;
       }
     }
-    if (Verbosity() > 0){ cout << "\t... HCALOUT variables reset" << endl;}
+    if (Verbosity() > 0)
+    {
+      cout << "\t... HCALOUT variables reset" << endl;
+    }
   }
-  if(_do_EEMC){
-    if (Verbosity() > 0){ cout << "\t... resetting EEMC variables" << endl;}
+  if (_do_EEMC)
+  {
+    if (Verbosity() > 0)
+    {
+      cout << "\t... resetting EEMC variables" << endl;
+    }
     _nTowers_EEMC = 0;
     for (Int_t itow = 0; itow < _maxNTowers; itow++)
     {
@@ -3943,7 +4041,8 @@ void EventEvaluatorEIC::resetBuffer()
       _tower_EEMC_iPhi[itow] = 0;
       _tower_EEMC_trueID[itow] = 0;
     }
-    if(_do_CLUSTERS){
+    if (_do_CLUSTERS)
+    {
       _nclusters_EEMC = 0;
       for (Int_t itow = 0; itow < _maxNclusters; itow++)
       {
@@ -3954,10 +4053,17 @@ void EventEvaluatorEIC::resetBuffer()
         _cluster_EEMC_trueID[itow] = 0;
       }
     }
-    if (Verbosity() > 0){ cout << "\t... EEMC variables reset" << endl;}
+    if (Verbosity() > 0)
+    {
+      cout << "\t... EEMC variables reset" << endl;
+    }
   }
-  if(_do_EEMCG){
-    if (Verbosity() > 0){ cout << "\t... resetting EEMCG variables" << endl;}
+  if (_do_EEMCG)
+  {
+    if (Verbosity() > 0)
+    {
+      cout << "\t... resetting EEMCG variables" << endl;
+    }
     _nTowers_EEMCG = 0;
     for (Int_t itow = 0; itow < _maxNTowers; itow++)
     {
@@ -3966,7 +4072,8 @@ void EventEvaluatorEIC::resetBuffer()
       _tower_EEMCG_iPhi[itow] = 0;
       _tower_EEMCG_trueID[itow] = 0;
     }
-    if(_do_CLUSTERS){
+    if (_do_CLUSTERS)
+    {
       _nclusters_EEMCG = 0;
       for (Int_t itow = 0; itow < _maxNclusters; itow++)
       {
@@ -3977,11 +4084,17 @@ void EventEvaluatorEIC::resetBuffer()
         _cluster_EEMCG_trueID[itow] = 0;
       }
     }
-    if (Verbosity() > 0){ cout << "\t... EEMCG variables reset" << endl;}
+    if (Verbosity() > 0)
+    {
+      cout << "\t... EEMCG variables reset" << endl;
+    }
   }
   if (_do_DRCALO)
   {
-    if (Verbosity() > 0){ cout << "\t... resetting DRCALO variables" << endl;}
+    if (Verbosity() > 0)
+    {
+      cout << "\t... resetting DRCALO variables" << endl;
+    }
     _nTowers_DRCALO = 0;
     for (Int_t itow = 0; itow < _maxNTowersDR; itow++)
     {
@@ -3992,11 +4105,17 @@ void EventEvaluatorEIC::resetBuffer()
       _tower_DRCALO_iPhi[itow] = 0;
       _tower_DRCALO_trueID[itow] = 0;
     }
-    if (Verbosity() > 0){ cout << "\t... DRCALO variables reset" << endl;}
+    if (Verbosity() > 0)
+    {
+      cout << "\t... DRCALO variables reset" << endl;
+    }
   }
   if (_do_FOCAL)
   {
-    if (Verbosity() > 0){ cout << "\t... resetting FOCAL variables" << endl;}
+    if (Verbosity() > 0)
+    {
+      cout << "\t... resetting FOCAL variables" << endl;
+    }
     _nTowers_FOCAL = 0;
     for (Int_t itow = 0; itow < _maxNTowersDR; itow++)
     {
@@ -4007,11 +4126,17 @@ void EventEvaluatorEIC::resetBuffer()
       _tower_FOCAL_iPhi[itow] = 0;
       _tower_FOCAL_trueID[itow] = 0;
     }
-    if (Verbosity() > 0){ cout << "\t... FOCAL variables reset" << endl;}
+    if (Verbosity() > 0)
+    {
+      cout << "\t... FOCAL variables reset" << endl;
+    }
   }
   if (_do_LFHCAL)
   {
-    if (Verbosity() > 0){ cout << "\t... resetting LFHCAL variables" << endl;}
+    if (Verbosity() > 0)
+    {
+      cout << "\t... resetting LFHCAL variables" << endl;
+    }
     _nTowers_LFHCAL = 0;
     for (Int_t itow = 0; itow < _maxNTowers; itow++)
     {
@@ -4021,11 +4146,17 @@ void EventEvaluatorEIC::resetBuffer()
       _tower_LFHCAL_iL[itow] = 0;
       _tower_LFHCAL_trueID[itow] = 0;
     }
-    if (Verbosity() > 0){ cout << "\t... LFHCAL variables reset" << endl;}
+    if (Verbosity() > 0)
+    {
+      cout << "\t... LFHCAL variables reset" << endl;
+    }
   }
   if (_do_TRACKS)
   {
-    if (Verbosity() > 0){ cout << "\t... resetting Track variables" << endl;}
+    if (Verbosity() > 0)
+    {
+      cout << "\t... resetting Track variables" << endl;
+    }
     _nTracks = 0;
     for (Int_t itrk = 0; itrk < _maxNTracks; itrk++)
     {
@@ -4061,7 +4192,10 @@ void EventEvaluatorEIC::resetBuffer()
         _track_TLP_true_t[iproj] = 0;
       }
     }
-    if (Verbosity() > 0){ cout << "\t... track variables reset" << endl;}
+    if (Verbosity() > 0)
+    {
+      cout << "\t... track variables reset" << endl;
+    }
   }
   if (_do_MCPARTICLES)
   {
@@ -4094,6 +4228,9 @@ void EventEvaluatorEIC::resetBuffer()
       _hepmcp_m2[iHepmcp] = 0;
       _hepmcp_m1[iHepmcp] = 0;
     }
-    if (Verbosity() > 0){ cout << "\t... MC variables reset" << endl;}
+    if (Verbosity() > 0)
+    {
+      cout << "\t... MC variables reset" << endl;
+    }
   }
 }

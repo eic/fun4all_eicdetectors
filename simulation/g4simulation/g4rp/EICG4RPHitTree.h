@@ -1,5 +1,5 @@
-#ifndef EICG4B0HITTREE_H
-#define EICG4B0HITTREE_H
+#ifndef EICG4RPHITTREE_H
+#define EICG4RPHITTREE_H
 
 #include <fun4all/SubsysReco.h>
 
@@ -14,14 +14,14 @@ class PHCompositeNode;
 class TFile;
 class TTree;
 
-class EICG4B0HitTree : public SubsysReco
+class EICG4RPHitTree : public SubsysReco
 {
  public:
   //! constructor
-  EICG4B0HitTree(const std::string &name = "EICG4B0HitTree", const std::string &filename = "EICG4B0HitTree.root");
+  EICG4RPHitTree(const std::string &name = "EICG4RPHitTree", const std::string &filename = "EICG4RPHitTree.root");
 
   //! destructor
-  ~EICG4B0HitTree() override;
+  ~EICG4RPHitTree() override;
 
   //! full initialization
   int Init(PHCompositeNode *) override;
@@ -35,7 +35,6 @@ class EICG4B0HitTree : public SubsysReco
   void AddNode(const std::string &name, const int detid = 0);
 
  protected:
-  Fun4AllHistoManager *hm;
   std::string _filename;
   std::set<std::string> _node_postfix;
   std::map<std::string, int> _detid;
@@ -44,7 +43,10 @@ class EICG4B0HitTree : public SubsysReco
 
  private:
   int Nhit;
+  std::vector<int> layerType;
   std::vector<int> layerID;
+  std::vector<int> xID;
+  std::vector<int> yID;
   std::vector<float> x0;
   std::vector<float> y0;
   std::vector<float> z0;

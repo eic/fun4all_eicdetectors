@@ -4,14 +4,14 @@
 // you use for your detector in the SetDefaultParameters() method here
 // The place to do this is marked by //implement your own here//
 // The parameters have no units, they need to be converted in the
-// EICG4B0Detector::ConstructMe() method
+// EICG4RPDetector::ConstructMe() method
 // but the convention is as mentioned cm and deg
 //____________________________________________________________________________..
 //
-#include "EICG4B0Subsystem.h"
+#include "EICG4RPSubsystem.h"
 
-#include "EICG4B0Detector.h"
-#include "EICG4B0SteppingAction.h"
+#include "EICG4RPDetector.h"
+#include "EICG4RPSteppingAction.h"
 
 #include <phparameter/PHParameters.h>
 
@@ -26,7 +26,7 @@
 #include <phool/getClass.h>
 
 //_______________________________________________________________________
-EICG4B0Subsystem::EICG4B0Subsystem(const std::string &name, const int lyr)
+EICG4RPSubsystem::EICG4RPSubsystem(const std::string &name, const int lyr)
   : PHG4DetectorSubsystem(name, lyr)
   , m_Detector(nullptr)
   , m_SteppingAction(nullptr)
@@ -36,10 +36,10 @@ EICG4B0Subsystem::EICG4B0Subsystem(const std::string &name, const int lyr)
   InitializeParameters();
 }
 //_______________________________________________________________________
-int EICG4B0Subsystem::InitRunSubsystem(PHCompositeNode *topNode)
+int EICG4RPSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
 {
   // create detector
-  m_Detector = new EICG4B0Detector(this, topNode, GetParams(), Name(), GetLayer());
+  m_Detector = new EICG4RPDetector(this, topNode, GetParams(), Name(), GetLayer());
   m_Detector->SuperDetector(SuperDetector());
   m_Detector->OverlapCheck(CheckOverlap());
 
@@ -69,28 +69,28 @@ int EICG4B0Subsystem::InitRunSubsystem(PHCompositeNode *topNode)
     {
       nodename = "G4HIT_" + Name();
     }
-    PHG4HitContainer *b0_hits = findNode::getClass<PHG4HitContainer>(topNode, nodename);
-    if (!b0_hits)
+    PHG4HitContainer *rp_hits = findNode::getClass<PHG4HitContainer>(topNode, nodename);
+    if (!rp_hits)
     {
-      dstNode->addNode(new PHIODataNode<PHObject>(b0_hits = new PHG4HitContainer(nodename), nodename, "PHObject"));
+      dstNode->addNode(new PHIODataNode<PHObject>(rp_hits = new PHG4HitContainer(nodename), nodename, "PHObject"));
     }
-    b0_hits->AddLayer(GetLayer());
-    auto *tmp = new EICG4B0SteppingAction(this, m_Detector, GetParams());
+    rp_hits->AddLayer(GetLayer());
+    auto *tmp = new EICG4RPSteppingAction(this, m_Detector, GetParams());
     tmp->HitNodeName(nodename);
     m_SteppingAction = tmp;
   }
   else if (GetParams()->get_int_param("blackhole"))
   {
-    m_SteppingAction = new EICG4B0SteppingAction(this, m_Detector, GetParams());
+    m_SteppingAction = new EICG4RPSteppingAction(this, m_Detector, GetParams());
   }
   if (m_SteppingAction)
   {
-    (dynamic_cast<EICG4B0SteppingAction *>(m_SteppingAction))->SaveAllHits(m_SaveAllHitsFlag);
+    (dynamic_cast<EICG4RPSteppingAction *>(m_SteppingAction))->SaveAllHits(m_SaveAllHitsFlag);
   }
   return 0;
 }
 //_______________________________________________________________________
-int EICG4B0Subsystem::process_event(PHCompositeNode *topNode)
+int EICG4RPSubsystem::process_event(PHCompositeNode *topNode)
 {
   // pass top node to stepping action so that it gets
   // relevant nodes needed internally
@@ -101,7 +101,7 @@ int EICG4B0Subsystem::process_event(PHCompositeNode *topNode)
   return 0;
 }
 //_______________________________________________________________________
-void EICG4B0Subsystem::Print(const std::string &what) const
+void EICG4RPSubsystem::Print(const std::string &what) const
 {
   if (m_Detector)
   {
@@ -111,35 +111,31 @@ void EICG4B0Subsystem::Print(const std::string &what) const
 }
 
 //_______________________________________________________________________
-PHG4Detector *EICG4B0Subsystem::GetDetector(void) const
+PHG4Detector *EICG4RPSubsystem::GetDetector(void) const
 {
   return m_Detector;
 }
 
 //_______________________________________________________________________
-void EICG4B0Subsystem::SetDefaultParameters()
+void EICG4RPSubsystem::SetDefaultParameters()
 {
   // sizes are in cm
   // angles are in deg
   // units should be converted to G4 units when used
   //implement your own here//
-  set_default_double_param("place_x", 0.);          //subdetector position
-  set_default_double_param("place_y", 0.);          //subdetector position
-  set_default_double_param("place_z", 0.);          //subdetector position
-  set_default_double_param("pipe_ir", 2.8);         //beam pipe inner radius (for future implementation)
-  set_default_double_param("pipe_or", 3.05);        //beam pipe outer raidus (for future implementation)
-  set_default_double_param("pipe_hole", 5.0);       //beam pipe cut off radius in the detector volume
-  set_default_double_param("pipe_x", -3.4);         //beam pipe position
-  set_default_double_param("pipe_y", 0.);           //beam pipe position
-  set_default_double_param("pipe_z", 0.);           //beam pipe position
-  set_default_double_param("rot_y", 0.);            //subdetector rotation
-  set_default_double_param("outer_radius", 2.);     //detector outer radiues
-  set_default_double_param("d_radius", 5.);         //packman cutoff size
-  set_default_double_param("length", 10.);          //detector length
-  set_default_double_param("startAngle", 0.);       //start Angle for packman cutoff
-  set_default_double_param("spanningAngle", 360.);  //spanning Angle of the detector (for packman cutoff)
-  set_default_double_param("detid", 0.);            //detector id
-  set_default_int_param("ispipe", 0);               //pipe or detector (for future implementation)
+  set_default_double_param("place_x", 0.);   //subdetector position
+  set_default_double_param("place_y", 0.);   //subdetector position
+  set_default_double_param("place_z", 0.);   //subdetector position
+  set_default_double_param("hole_x", 10.0);  //beam pipe cut off in the detector volume
+  set_default_double_param("hole_y", 5.0);   //beam pipe cut off in the detector volume
+  set_default_double_param("pipe_x", 0);     //beam pipe position
+  set_default_double_param("pipe_y", 0.);    //beam pipe position
+  set_default_double_param("pipe_z", 0.);    //beam pipe position
+  set_default_double_param("rot_y", 0.025);  //subdetector rotation
+  set_default_double_param("rp_x", 25.);     //detector outer radiues
+  set_default_double_param("rp_y", 10.);     //detector outer radiues
+  set_default_double_param("length", .1);    //detector length
+  set_default_double_param("detid", 0.);     //detector id
   set_default_int_param("lightyield", 0);
   set_default_int_param("use_g4steps", 0);
   set_default_double_param("tmin", NAN);

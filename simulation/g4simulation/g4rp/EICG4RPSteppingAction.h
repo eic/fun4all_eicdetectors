@@ -1,13 +1,13 @@
 // Tell emacs that this is a C++ source
 //  -*- C++ -*-.
-#ifndef EICG4B0STEPPINGACTION_H
-#define EICG4B0STEPPINGACTION_H
+#ifndef EICG4RPSTEPPINGACTION_H
+#define EICG4RPSTEPPINGACTION_H
 
 #include <g4main/PHG4SteppingAction.h>
 #include <string>
 
-class EICG4B0Detector;
-class EICG4B0Subsystem;
+class EICG4RPDetector;
+class EICG4RPSubsystem;
 
 class G4Step;
 class G4VPhysicalVolume;
@@ -17,14 +17,14 @@ class PHG4Shower;
 class PHG4HitContainer;
 class PHParameters;
 
-class EICG4B0SteppingAction : public PHG4SteppingAction
+class EICG4RPSteppingAction : public PHG4SteppingAction
 {
  public:
   //! constructor
-  EICG4B0SteppingAction(EICG4B0Subsystem* subsys, EICG4B0Detector* detector, const PHParameters* parameters);
+  EICG4RPSteppingAction(EICG4RPSubsystem* subsys, EICG4RPDetector* detector, const PHParameters* parameters);
 
   //! destructor
-  virtual ~EICG4B0SteppingAction() override;
+  virtual ~EICG4RPSteppingAction() override;
 
   //! stepping action
   virtual bool UserSteppingAction(const G4Step*, bool) override;
@@ -42,8 +42,8 @@ class EICG4B0SteppingAction : public PHG4SteppingAction
 
  private:
   //! pointer to the detector
-  EICG4B0Subsystem* m_Subsystem;
-  EICG4B0Detector* m_Detector;
+  EICG4RPSubsystem* m_Subsystem;
+  EICG4RPDetector* m_Detector;
 
   const PHParameters* m_Params;
   //! pointer to hit container
@@ -54,7 +54,7 @@ class EICG4B0SteppingAction : public PHG4SteppingAction
   G4VPhysicalVolume* m_SaveVolPre;
   G4VPhysicalVolume* m_SaveVolPost;
 
-  bool m_SaveAllHitsFlag = true;
+  bool m_SaveAllHitsFlag = false;
   int m_SaveLightYieldFlag;
   int m_SaveTrackId;
   int m_SavePreStepStatus;
@@ -72,4 +72,4 @@ class EICG4B0SteppingAction : public PHG4SteppingAction
   std::string m_HitNodeName;
 };
 
-#endif  // EICG4B0STEPPINGACTION_H
+#endif  // EICG4RPSTEPPINGACTION_H
