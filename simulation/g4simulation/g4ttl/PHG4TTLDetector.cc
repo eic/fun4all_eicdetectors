@@ -891,7 +891,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
                                                 (diameter_coolingtube - 2*wallthickness_coolingtube) / 2,
                                                 (diameter_coolingtube - 2*wallthickness_coolingtube) / 2);
         G4VSolid *sol_cooling_tube_left = new G4Box("sol_cooling_tube_left_tmp" + std::to_string(row),
-                                                0.96*(sqrt(pow(rMax,2)-pow( (abs(row)*fullsensor_width) - (fullsensor_width/2.0) ,2))- sqrt(pow(rMin,2)-pow( (abs(row)*fullsensor_width)-(fullsensor_width/2) ,2)) + xoffset)/2,
+                                                0.86*(sqrt(pow(rMax,2)-pow( (abs(row)*fullsensor_width) - (fullsensor_width/2.0) ,2))- sqrt(pow(rMin,2)-pow( (abs(row)*fullsensor_width)-(fullsensor_width/2) ,2)) + xoffset)/2,
                                                 diameter_coolingtube / 2,
                                                 diameter_coolingtube / 2);
         sol_cooling_tube_left = new G4SubtractionSolid(G4String("sol_cooling_tube_left" + std::to_string(row)), sol_cooling_tube_left, sol_cutout_tube_left, 0, G4ThreeVector(0,0,0));
@@ -901,7 +901,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
         m_DisplayAction->AddVolume(Log_cooling_tube_left, "Cooling_tube");
 
         G4VSolid *sol_water_cooling_left = new G4Box("sol_water_cooling_left" + std::to_string(row),
-                                                0.95*(sqrt(pow(rMax,2)-pow( (abs(row)*fullsensor_width) - (fullsensor_width/2.0) ,2))- sqrt(pow(rMin,2)-pow( (abs(row)*fullsensor_width)-(fullsensor_width/2) ,2)) + xoffset)/2,
+                                                0.85*(sqrt(pow(rMax,2)-pow( (abs(row)*fullsensor_width) - (fullsensor_width/2.0) ,2))- sqrt(pow(rMin,2)-pow( (abs(row)*fullsensor_width)-(fullsensor_width/2) ,2)) + xoffset)/2,
                                                 0.99*(diameter_coolingtube - 2*wallthickness_coolingtube) / 2,
                                                 0.99*(diameter_coolingtube - 2*wallthickness_coolingtube) / 2);
         G4LogicalVolume *Log_water_cooling_left = new G4LogicalVolume(sol_water_cooling_left,  //
@@ -934,7 +934,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
                                                 (diameter_coolingtube - 2*wallthickness_coolingtube) / 2,
                                                 (diameter_coolingtube - 2*wallthickness_coolingtube) / 2);
         G4VSolid *sol_cooling_tube_right = new G4Box("sol_cooling_tube_right_tmp" + std::to_string(row),
-                                                0.96*(sqrt(pow(rMax,2)-pow( (abs(row)*fullsensor_width) - (fullsensor_width/2.0) ,2))- sqrt(pow(rMin,2)-pow( (abs(row)*fullsensor_width)-(fullsensor_width/2) ,2)) - xoffset)/2,
+                                                0.86*(sqrt(pow(rMax,2)-pow( (abs(row)*fullsensor_width) - (fullsensor_width/2.0) ,2))- sqrt(pow(rMin,2)-pow( (abs(row)*fullsensor_width)-(fullsensor_width/2) ,2)) - xoffset)/2,
                                                 diameter_coolingtube / 2,
                                                 diameter_coolingtube / 2);
         sol_cooling_tube_right = new G4SubtractionSolid(G4String("sol_cooling_tube_right" + std::to_string(row)), sol_cooling_tube_right, sol_cutout_tube_right, 0, G4ThreeVector(0,0,0));
@@ -944,7 +944,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
         m_DisplayAction->AddVolume(Log_cooling_tube_right, "Cooling_tube");
 
         G4VSolid *sol_water_cooling_right = new G4Box("sol_water_cooling_right" + std::to_string(row),
-                                                0.95*(sqrt(pow(rMax,2)-pow( (abs(row)*fullsensor_width) - (fullsensor_width/2.0) ,2))- sqrt(pow(rMin,2)-pow( (abs(row)*fullsensor_width)-(fullsensor_width/2) ,2)) - xoffset)/2,
+                                                0.85*(sqrt(pow(rMax,2)-pow( (abs(row)*fullsensor_width) - (fullsensor_width/2.0) ,2))- sqrt(pow(rMin,2)-pow( (abs(row)*fullsensor_width)-(fullsensor_width/2) ,2)) - xoffset)/2,
                                                 0.99*(diameter_coolingtube - 2*wallthickness_coolingtube) / 2,
                                                 0.99*(diameter_coolingtube - 2*wallthickness_coolingtube) / 2);
         G4LogicalVolume *Log_water_cooling_right = new G4LogicalVolume(sol_water_cooling_right,  //
