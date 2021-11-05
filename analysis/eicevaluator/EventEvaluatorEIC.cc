@@ -1157,6 +1157,9 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
           (GetProjectionNameFromIndex(iIndex).find("rpTruth2") != std::string::npos) ||  // needed for IP8
           (GetProjectionNameFromIndex(iIndex).find("offMomTruth") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("b0Truth") != std::string::npos) ||
+          (GetProjectionNameFromIndex(iIndex).find("EGEM") != std::string::npos) ||
+          (GetProjectionNameFromIndex(iIndex).find("FGEM") != std::string::npos) ||
+          (GetProjectionNameFromIndex(iIndex).find("RWELL") != std::string::npos) ||
           (((GetProjectionNameFromIndex(iIndex).find("BH_1") != std::string::npos) || (GetProjectionNameFromIndex(iIndex).find("BH_FORWARD_PLUS") != std::string::npos) || (GetProjectionNameFromIndex(iIndex).find("BH_FORWARD_NEG") != std::string::npos)) && _do_BLACKHOLE))
       {
 
