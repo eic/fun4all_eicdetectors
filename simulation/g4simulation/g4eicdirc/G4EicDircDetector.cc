@@ -1092,7 +1092,7 @@ void G4EicDircDetector::SetVisualization()
   Log_Longitudinal_Support->SetVisAttributes(waSupport);
   Log_End_Support_inner->SetVisAttributes(waSupport);
   */
-  G4Colour DircColour = G4Colour(1., 1.0, 0.);
+  G4Colour DircColour = G4Colour(1., 1.0, 0., 1.);
 
   /*G4VisAttributes *waDirc = new G4VisAttributes(DircColour);
   waDirc->SetForceWireframe(true);
@@ -1103,22 +1103,22 @@ void G4EicDircDetector::SetVisualization()
   waFd->SetForceWireframe(true);
   lFd->SetVisAttributes(waFd);
 
-  G4VisAttributes* waBar = new G4VisAttributes(G4Colour(0., 1., 0.9, 0.05));  //0.05
+  G4VisAttributes* waBar = new G4VisAttributes(G4Colour(0., 153./255, 0., 1));  //0.05
   waBar->SetVisibility(true);
   lBarL->SetVisAttributes(waBar);
   lBarS->SetVisAttributes(waBar);
 
-  G4VisAttributes* waGlue = new G4VisAttributes(G4Colour(0., 0.4, 0.9, 0.1));
+  G4VisAttributes* waGlue = new G4VisAttributes(G4Colour(0., 0.4, 0.9, 1));
   waGlue->SetVisibility(true);
   lGlue->SetVisAttributes(waGlue);
 
-  G4VisAttributes* waMirror = new G4VisAttributes(G4Colour(1., 1., 0.9, 0.2));
+  G4VisAttributes* waMirror = new G4VisAttributes(G4Colour(1., 1., 0.9, 1));
   waMirror->SetVisibility(true);
   lMirror->SetVisAttributes(waMirror);
 
-  double transp = 0.4;
+  double transp = 1;
   G4VisAttributes* vaLens = new G4VisAttributes(G4Colour(0., 1., 1., transp));
-  vaLens->SetForceWireframe(true);
+  //vaLens->SetForceWireframe(true);
   // vaLens->SetForceAuxEdgeVisible(true);
   // vaLens->SetForceLineSegmentsPerCircle(10);
   // vaLens->SetLineWidth(4);
@@ -1135,21 +1135,21 @@ void G4EicDircDetector::SetVisualization()
     if (fLensId == 3 || fLensId == 6) lLens3->SetVisAttributes(vaLens);
   }
 
-  G4VisAttributes* waPrizm = new G4VisAttributes(G4Colour(0., 0.9, 0.9, 0.4));  //0.4
+  G4VisAttributes* waPrizm = new G4VisAttributes(G4Colour(0., 0.9, 0.9, 1));  //0.4
   // waPrizm->SetForceAuxEdgeVisible(true);
   // waPrizm->SetForceSolid(true);
   lPrizm->SetVisAttributes(waPrizm);
 
   // G4VisAttributes *waMcp = new G4VisAttributes(G4Colour(0.1,0.1,0.9,0.3));
-  G4VisAttributes* waMcp = new G4VisAttributes(G4Colour(1.0, 0., 0.1, 0.4));
+  G4VisAttributes* waMcp = new G4VisAttributes(G4Colour(1.0, 0., 0.1, 1));
   // waMcp->SetForceWireframe(true);
   waMcp->SetForceSolid(true);
   lMcp->SetVisAttributes(waMcp);
 
-  G4VisAttributes* waPixel = new G4VisAttributes(G4Colour(0.7, 0.0, 0.1, 0.5));
+  G4VisAttributes* waPixel = new G4VisAttributes(G4Colour(0.7, 0.0, 0.1, 1));
   waPixel->SetForceWireframe(true);
   if (fMcpLayout == 3)
-    waPixel->SetVisibility(false);
+    waPixel->SetVisibility(true);
   else
     waPixel->SetVisibility(true);
   lPixel->SetVisAttributes(waPixel);
