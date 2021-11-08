@@ -21,26 +21,44 @@
 //____________________________________________________________________________..
 
 #include "EICG4B0Detector.h"
+//#include "EICG4B0SteppingAction.h"
+//#include "EICG4B0Subsystem.h"
 
 #include <phparameter/PHParameters.h>
 
 #include <g4main/PHG4Detector.h>
+#include <g4main/PHG4DisplayAction.h>  // for PHG4DisplayAction
+//#include <g4main/PHG4Subsystem.h>
 
 #include <Geant4/G4Color.hh>
+#include <Geant4/G4Box.hh>
 #include <Geant4/G4LogicalVolume.hh>
 #include <Geant4/G4Material.hh>
 #include <Geant4/G4PVPlacement.hh>
 #include <Geant4/G4SubtractionSolid.hh>
 #include <Geant4/G4SystemOfUnits.hh>
 #include <Geant4/G4Tubs.hh>
+#include <Geant4/G4RotationMatrix.hh>
+#include <Geant4/G4SystemOfUnits.hh>
+#include <Geant4/G4ThreeVector.hh>      // for G4ThreeVector
+#include <Geant4/G4Transform3D.hh>      // for G4Transform3D
+#include <Geant4/G4Types.hh>            // for G4double, G4int
+#include <Geant4/G4VPhysicalVolume.hh>  // for G4VPhysicalVolume
+#include <TSystem.h>
 #include <Geant4/G4UnionSolid.hh>
 #include <Geant4/G4VisAttributes.hh>
 
 #include <cmath>
 #include <iostream>
-
+#include <cstdlib>
+#include <fstream>
+#include <sstream>
+#include <utility>
+ 
 class G4VSolid;
 class PHCompositeNode;
+
+using namespace std;
 
 //____________________________________________________________________________..
 EICG4B0Detector::EICG4B0Detector(PHG4Subsystem *subsys,
@@ -56,7 +74,7 @@ EICG4B0Detector::EICG4B0Detector(PHG4Subsystem *subsys,
 //_______________________________________________________________
 int EICG4B0Detector::IsInDetector(G4VPhysicalVolume *volume) const
 {
-  std::set<G4VPhysicalVolume *>::const_iterator iter = m_PhysicalVolumesSet.find(volume);
+  set<G4VPhysicalVolume *>::const_iterator iter = m_PhysicalVolumesSet.find(volume);
   if (iter != m_PhysicalVolumesSet.end())
   {
     return 1;
@@ -78,12 +96,20 @@ void EICG4B0Detector::ConstructMe(G4LogicalVolume *logicWorld)
 {
   //begin implement your own here://
   // Do not forget to multiply the parameters with their respective CLHEP/G4 unit !
-  if (Verbosity() >= 1) std::cout << " !!! length = " << m_Params->get_double_param("length") << std::endl;
+  if (Verbosity() > 0)
+  {
+    std::cout << "EICG4B0Detector: Begin Construction" << std::endl;
+  }
+
+  cout << " !!! length = " << m_Params->get_double_param("length");
   if (m_Params->get_double_param("spanningAngle") >= 360)
   {
-    if (Verbosity() >= 0) std::cout << " !!! No PACKMAN" << std::endl;
+    cout << " !!! No PACKMAN" << endl;
     return;
   }
+  //Print("ALL");
+
+
   G4VSolid *solid0 = new G4Tubs("EICG4B0Solid0",
                                 0.,
                                 m_Params->get_double_param("outer_radius") * cm,
@@ -102,8 +128,8 @@ void EICG4B0Detector::ConstructMe(G4LogicalVolume *logicWorld)
                                 (m_Params->get_double_param("startAngle") + m_Params->get_double_param("spanningAngle")) * degree,
                                 (360 - m_Params->get_double_param("spanningAngle")) * degree);
   G4UnionSolid *solid10 = new G4UnionSolid("EICG4B0Solid10", solid0, solid1);
-  G4SubtractionSolid *solidB0 = new G4SubtractionSolid("EICG4B0Solid", solid10, solidPipeHole, 0,
-                                                       G4ThreeVector(m_Params->get_double_param("pipe_x") * cm, m_Params->get_double_param("pipe_y") * cm, m_Params->get_double_param("pipe_z") * cm));
+  G4SubtractionSolid *solidB0 = new G4SubtractionSolid("EICG4B0Solid", solid10, solidPipeHole, 0, G4ThreeVector(m_Params->get_double_param("pipe_x") * cm, m_Params->get_double_param("pipe_y") * cm, m_Params->get_double_param("pipe_z") * cm));
+  G4RotationMatrix *rotm = new G4RotationMatrix();
   G4LogicalVolume *logical = new G4LogicalVolume(solidB0,
                                                  G4Material::GetMaterial(m_Params->get_string_param("material")),
                                                  "EICG4B0Logical");
@@ -114,7 +140,6 @@ void EICG4B0Detector::ConstructMe(G4LogicalVolume *logicWorld)
   if (m_Params->get_string_param("material") == "G4_Si") vis->SetColor(1., 1., 0., .8);
   vis->SetForceSolid(true);
   logical->SetVisAttributes(vis);
-  G4RotationMatrix *rotm = new G4RotationMatrix();
   rotm->rotateY(m_Params->get_double_param("rot_y") * deg);
   //  rotm->rotateY(0. * deg);
 
@@ -134,8 +159,10 @@ void EICG4B0Detector::ConstructMe(G4LogicalVolume *logicWorld)
   m_PhysicalVolumesDet.insert({phy, m_Params->get_double_param("detid") + 1});
   //  m_LogicalVolumesSet.insert(logical);
   //end implement your own here://
+
   return;
 }
+//_______________________________________________________________
 
 //_______________________________________________________________
 void EICG4B0Detector::Print(const std::string &what) const

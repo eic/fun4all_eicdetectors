@@ -8,10 +8,10 @@
 // but the convention is as mentioned cm and deg
 //____________________________________________________________________________..
 //
-#include "EICG4B0Subsystem.h"
+#include "EICG4B0ECALSubsystem.h"
 
-#include "EICG4B0Detector.h"
-#include "EICG4B0SteppingAction.h"
+#include "EICG4B0ECALDetector.h"
+#include "EICG4B0ECALSteppingAction.h"
 
 #include <phparameter/PHParameters.h>
 
@@ -28,7 +28,7 @@
 using namespace std;
 
 //_______________________________________________________________________
-EICG4B0Subsystem::EICG4B0Subsystem(const std::string &name, const int lyr)
+EICG4B0ECALSubsystem::EICG4B0ECALSubsystem(const std::string &name, const int lyr)
   : PHG4DetectorSubsystem(name, lyr)
   , m_Detector(nullptr)
   , m_SteppingAction(nullptr)
@@ -39,12 +39,13 @@ EICG4B0Subsystem::EICG4B0Subsystem(const std::string &name, const int lyr)
   InitializeParameters();
 }
 //_______________________________________________________________________
-int EICG4B0Subsystem::InitRunSubsystem(PHCompositeNode *topNode)
+int EICG4B0ECALSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
 {
   // create detector
-  m_Detector = new EICG4B0Detector(this, topNode, GetParams(), Name(), GetLayer());
+  m_Detector = new EICG4B0ECALDetector(this, topNode, GetParams(), Name(), GetLayer());
   m_Detector->SuperDetector(SuperDetector());
   m_Detector->OverlapCheck(CheckOverlap());
+  m_Detector->SetTowerMappingFile(mappingfile_); 
 
   if (GetParams()->get_int_param("active"))
   {
@@ -53,7 +54,7 @@ int EICG4B0Subsystem::InitRunSubsystem(PHCompositeNode *topNode)
   
     string nodename;
     string geonode;
-
+//	std::cout<<"B0ECAL: "<<SuperDetector()<<std::endl;
     if (SuperDetector() != "NONE")
     {
     // create super detector subnodes
@@ -79,22 +80,22 @@ int EICG4B0Subsystem::InitRunSubsystem(PHCompositeNode *topNode)
        dstNode->addNode(new PHIODataNode<PHObject>(b0_hits = new PHG4HitContainer(nodename), nodename, "PHObject"));
     }
     b0_hits->AddLayer(GetLayer());
-    auto *tmp = new EICG4B0SteppingAction(this, m_Detector, GetParams());
+    auto *tmp = new EICG4B0ECALSteppingAction(this, m_Detector, GetParams());
     tmp->HitNodeName(nodename);
     m_SteppingAction = tmp;
    }
    else if (GetParams()->get_int_param("blackhole"))
    {
-     m_SteppingAction = new EICG4B0SteppingAction(this, m_Detector, GetParams());
+     m_SteppingAction = new EICG4B0ECALSteppingAction(this, m_Detector, GetParams());
    }
    if (m_SteppingAction)
    {
-      (dynamic_cast<EICG4B0SteppingAction *>(m_SteppingAction))->SaveAllHits(m_SaveAllHitsFlag);
+      (dynamic_cast<EICG4B0ECALSteppingAction *>(m_SteppingAction))->SaveAllHits(m_SaveAllHitsFlag);
    }
   return 0;
 }
 //_______________________________________________________________________
-int EICG4B0Subsystem::process_event(PHCompositeNode *topNode)
+int EICG4B0ECALSubsystem::process_event(PHCompositeNode *topNode)
 {
   // pass top node to stepping action so that it gets
   // relevant nodes needed internally
@@ -105,7 +106,7 @@ int EICG4B0Subsystem::process_event(PHCompositeNode *topNode)
   return 0;
 }
 //_______________________________________________________________________
-void EICG4B0Subsystem::Print(const string &what) const
+void EICG4B0ECALSubsystem::Print(const string &what) const
 {
   if (m_Detector)
   {
@@ -115,13 +116,13 @@ void EICG4B0Subsystem::Print(const string &what) const
 }
 
 //_______________________________________________________________________
-PHG4Detector *EICG4B0Subsystem::GetDetector(void) const
+PHG4Detector *EICG4B0ECALSubsystem::GetDetector(void) const
 {
   return m_Detector;
 }
 
 //_______________________________________________________________________
-void EICG4B0Subsystem::SetDefaultParameters()
+void EICG4B0ECALSubsystem::SetDefaultParameters()
 {
   // sizes are in cm
   // angles are in deg
@@ -144,16 +145,19 @@ void EICG4B0Subsystem::SetDefaultParameters()
   set_default_double_param("spanningAngle", 360.);  //spanning Angle of the detector (for packman cutoff)
   set_default_double_param("detid", 0.);            //detector id
   set_default_int_param("ispipe", 0);               //pipe or detector (for future implementation)
-  set_default_int_param("lightyield", 0);
+  set_default_int_param("lightyield", 1);
   set_default_int_param("use_g4steps", 0);
   set_default_double_param("tower_size", 2.);
+  set_default_double_param("global_x", 0);
+  set_default_double_param("global_y", 0);
+  set_default_double_param("global_z", 640);
   set_default_double_param("readout_size", 2.);
   set_default_double_param("tmin", NAN);
   set_default_double_param("tmax", NAN);
   set_default_string_param("material", "G4_PbWO4");  //detector material
 }
 
-void EICG4B0Subsystem::SetTowerMappingFile(const std::string& filename)
+void EICG4B0ECALSubsystem::SetTowerMappingFile(const std::string& filename)
 {
   mappingfile_ = filename;
 }

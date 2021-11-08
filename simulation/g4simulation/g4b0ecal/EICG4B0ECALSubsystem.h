@@ -1,13 +1,13 @@
 // Tell emacs that this is a C++ source
 //  -*- C++ -*-.
-#ifndef EICG4B0SUBSYSTEM_H
-#define EICG4B0SUBSYSTEM_H
+#ifndef EICG4B0ECALSUBSYSTEM_H
+#define EICG4B0ECALSUBSYSTEM_H
 
 #include <g4detectors/PHG4DetectorSubsystem.h>
 
 class PHCompositeNode;
 class PHG4Detector;
-class EICG4B0Detector;
+class EICG4B0ECALDetector;
 class PHG4SteppingAction;
 
 /**
@@ -16,18 +16,18 @@ class PHG4SteppingAction;
    * The detector is constructed and registered via EICG4B0Detector
    *
    *
-   * \see EICG4B0Detector
-   * \see EICG4B0Subsystem
+   * \see EICG4B0ECALDetector
+   * \see EICG4B0ECALSubsystem
    *
    */
-class EICG4B0Subsystem : public PHG4DetectorSubsystem
+class EICG4B0ECALSubsystem : public PHG4DetectorSubsystem
 {
  public:
   //! constructor
-  EICG4B0Subsystem(const std::string& name = "EICG4B0", const int layer = 0);
+  EICG4B0ECALSubsystem(const std::string& name = "EICG4B0ECAL", const int layer = 0);
 
   //! destructor
-  virtual ~EICG4B0Subsystem() {}
+  virtual ~EICG4B0ECALSubsystem() {}
 
   /*!
   creates relevant hit nodes that will be populated by the stepping action and stored in the output DST
@@ -61,7 +61,7 @@ class EICG4B0Subsystem : public PHG4DetectorSubsystem
  private:
   //! detector construction
   /*! derives from PHG4Detector */
-  EICG4B0Detector* m_Detector;
+  EICG4B0ECALDetector* m_Detector;
 
   //! particle tracking "stepping" action
   /*! derives from PHG4SteppingActions */
@@ -72,4 +72,4 @@ class EICG4B0Subsystem : public PHG4DetectorSubsystem
   std::string mappingfile_;
 };
 
-#endif  // EICG4B0SUBSYSTEM_H
+#endif  // EICG4B0ECALSUBSYSTEM_H

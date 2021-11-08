@@ -1,53 +1,44 @@
 AUTOMAKE_OPTIONS = foreign
 
 lib_LTLIBRARIES = \
-    libEICG4B0.la
+    libEICG4B0ECAL.la
 
 AM_LDFLAGS = \
   -L$(libdir) \
   -L$(OFFLINE_MAIN)/lib \
-  -L$(OFFLINE_MAIN)/lib64 \
-  -L$(ROOTSYS)/lib
+  -L$(OFFLINE_MAIN)/lib64
 
 AM_CPPFLAGS = \
   -I$(includedir) \
   -I$(OFFLINE_MAIN)/include \
-  -I$(OFFLINE_MAIN)/include/eigen3  \
   -I$(ROOTSYS)/include \
-  -I${G4_MAIN}/include
+  -isystem ${G4_MAIN}/include
 
 pkginclude_HEADERS = \
-  EICG4B0Subsystem.h \
-  B0TrackFastSimEval.h\
-  B0TrackFastSim.h
+  EICG4B0ECALSubsystem.h \
+  B0RawTowerBuilderByHitIndex.h
 
-libEICG4B0_la_SOURCES = \
+libEICG4B0ECAL_la_SOURCES = \
   $(ROOT5_DICTS) \
-  EICG4B0Subsystem.cc \
-  EICG4B0Detector.cc \
-  EICG4B0SteppingAction.cc \
-  B0TrackFastSimEval.cc \ 
-  B0TrackFastSim.cc 
+  EICG4B0ECALSubsystem.cc \
+  EICG4B0ECALDetector.cc \
+  EICG4B0ECALSteppingAction.cc \
+  B0RawTowerBuilderByHitIndex.cc
 
-libEICG4B0_la_LDFLAGS  = \
+libEICG4B0ECAL_la_LDFLAGS  = \
   -L$(libdir) \
   -L$(OFFLINE_MAIN)/lib \
-libEICG4B0_la_LIBADD = \
   -lcalo_io \
   -lfun4all \
-  -lPHGenFit \
   -lg4detectors_io \
   -lphg4hit\
   -lgsl \
   -lgslcblas \
   -lg4eval_io \
   -lg4eval \
-  -leiceval\
-  -lgslcblas \
-  -lphgeom \
-  -lphg4hit \
-  -ltrackbase_historic_io \
-  -lphparameter\
+  -leiceval
+
+libEICG4B0ECAL_la_LIBADD = \
   -lphool \
   -lSubsysReco\
   -lg4detectors\
@@ -62,7 +53,7 @@ noinst_PROGRAMS = \
   testexternals
 
 testexternals_SOURCES = testexternals.C
-testexternals_LDADD   = libEICG4B0.la
+testexternals_LDADD   = libEICG4B0ECAL.la
 
 
 testexternals.C:

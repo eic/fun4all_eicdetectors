@@ -16,10 +16,10 @@
 //
 //____________________________________________________________________________..
 
-#include "EICG4B0SteppingAction.h"
+#include "EICG4B0ECALSteppingAction.h"
 
-#include "EICG4B0Detector.h"
-#include "EICG4B0Subsystem.h"
+#include "EICG4B0ECALDetector.h"
+#include "EICG4B0ECALSubsystem.h"
 
 #include <phparameter/PHParameters.h>
 
@@ -33,6 +33,7 @@
 #include <g4main/PHG4TrackUserInfoV1.h>
 
 #include <phool/getClass.h>
+#include <phool/PHCompositeNode.h>
 
 #include <TSystem.h>
 
@@ -62,7 +63,7 @@
 class PHCompositeNode;
 
 //____________________________________________________________________________..
-EICG4B0SteppingAction::EICG4B0SteppingAction(EICG4B0Subsystem *subsys, EICG4B0Detector *detector, const PHParameters *parameters)
+EICG4B0ECALSteppingAction::EICG4B0ECALSteppingAction(EICG4B0ECALSubsystem *subsys, EICG4B0ECALDetector *detector, const PHParameters *parameters)
   : PHG4SteppingAction(detector->GetName())
   , m_Subsystem(subsys)
   , m_Detector(detector)
@@ -72,7 +73,7 @@ EICG4B0SteppingAction::EICG4B0SteppingAction(EICG4B0Subsystem *subsys, EICG4B0De
   , m_SaveShower(nullptr)
   , m_SaveVolPre(nullptr)
   , m_SaveVolPost(nullptr)
-//  , m_SaveLightYieldFlag(m_Params->get_int_param("lightyield"))
+  , m_SaveLightYieldFlag(m_Params->get_int_param("lightyield"))
   , m_SaveTrackId(-1)
   , m_SavePreStepStatus(-1)
   , m_SavePostStepStatus(-1)
@@ -86,10 +87,6 @@ EICG4B0SteppingAction::EICG4B0SteppingAction(EICG4B0Subsystem *subsys, EICG4B0De
   , m_EdepSum(0)
   , m_EabsSum(0)
   , m_EionSum(0)
-  , _towerdivision(0.0)
-  , _tower_size(2.0)
-  , _readout_size(2.0)
-  , _detector_size(20)
 {
 // G4 seems to have issues in the um range
    m_Zmin -= copysign(m_Zmin, 1. / 1e6 * cm);
@@ -97,7 +94,7 @@ EICG4B0SteppingAction::EICG4B0SteppingAction(EICG4B0Subsystem *subsys, EICG4B0De
 }
 
 //____________________________________________________________________________..
-EICG4B0SteppingAction::~EICG4B0SteppingAction()
+EICG4B0ECALSteppingAction::~EICG4B0ECALSteppingAction()
 {
   // if the last hit was a zero energie deposit hit, it is just reset
   // and the memory is still allocated, so we need to delete it here
@@ -108,7 +105,7 @@ EICG4B0SteppingAction::~EICG4B0SteppingAction()
 
 //____________________________________________________________________________..
 // This is the implementation of the G4 UserSteppingAction
-bool EICG4B0SteppingAction::UserSteppingAction(const G4Step *aStep, bool was_used)
+bool EICG4B0ECALSteppingAction::UserSteppingAction(const G4Step *aStep, bool was_used)
 {
   G4TouchableHandle touch = aStep->GetPreStepPoint()->GetTouchableHandle();
   G4TouchableHandle touchpost = aStep->GetPostStepPoint()->GetTouchableHandle();
@@ -118,14 +115,18 @@ bool EICG4B0SteppingAction::UserSteppingAction(const G4Step *aStep, bool was_use
   //  == 0 outside of detector
   //   > 0 for hits in active volume
   //  < 0 for hits in passive material
+
+
   int whichactive = m_Detector->IsInDetector(volume);
   if (!whichactive)
   {
     return false;
   }
   // collect energy and track length step by step
+  
   G4double edep = aStep->GetTotalEnergyDeposit() / GeV;
   G4double eion = (aStep->GetTotalEnergyDeposit() - aStep->GetNonIonizingEnergyDeposit()) / GeV;
+  G4double light_yield = GetVisibleEnergyDeposition(aStep);
   const G4Track *aTrack = aStep->GetTrack();
   // if this detector stops everything, just put all kinetic energy into edep
   if (m_BlackHoleFlag)
@@ -147,16 +148,7 @@ bool EICG4B0SteppingAction::UserSteppingAction(const G4Step *aStep, bool was_use
   int idx_j = -1;
   int idx_k = -1;
 // deadhits for dead material
- int layer_type = 0;
-  if (m_Params->get_string_param("material") == "G4_Cu") layer_type=0;
-  else layer_type = 1; 
-  //if (layer_id % 2 == 1) //Proper implementation for several layer configurations
-/*
-   if (m_Params->get_string_param("material") == "G4_Cu") 
-  {
-	return false;
-  }
-*/
+ int layer_type = 1;
   if (!m_ActiveFlag)
   {
 	return false;
@@ -226,8 +218,6 @@ bool EICG4B0SteppingAction::UserSteppingAction(const G4Step *aStep, bool was_use
     m_Hit->set_layer((unsigned int) layer_id);
     // here we set the entrance values in cm
     FindTowerIndexFromPosition(prePoint, idx_j, idx_k);
-  //std::cout << "B0 Hits: "<<postPoint->GetPosition().x() / cm<<" "<<postPoint->GetPosition().y() / cm<<" "<<edep<<std::endl;
-
     m_Hit->set_x(0, prePoint->GetPosition().x() / cm);
     m_Hit->set_y(0, prePoint->GetPosition().y() / cm);
     m_Hit->set_z(0, prePoint->GetPosition().z() / cm);
@@ -250,37 +240,18 @@ bool EICG4B0SteppingAction::UserSteppingAction(const G4Step *aStep, bool was_use
     {
            m_Hit->set_eion(0);
     }
-    if (layer_type){
-//	m_SaveHitContainer=m_HitContainer;
-	m_Hit->set_eion(0);
-//	if (m_SaveLightYieldFlag)
-//  	{
-//       		m_Hit->set_light_yield(0);
+    if (m_SaveLightYieldFlag)
+    {
+       		m_Hit->set_light_yield(0);
 		m_Hit->set_index_j(idx_j);
 	    	m_Hit->set_index_k(idx_k);
-//   	}
     }
-/*    else{
-	m_SaveHitContainer=m_AbsorberHitContainer;
-   }*/
     // implement your own here://
     // add the properties you are interested in via set_XXX methods
     // you can find existing set methods in $OFFLINE_MAIN/include/g4main/PHG4Hit.h
     // this is initialization of your value. This is not needed you can just set the final
     // value at the last step in this volume later one
-/*    if (whichactive > 0)
-    {
-      m_EionSum = 0;  // assuming the ionization energy is only needed for active
-                      // volumes (scintillators)
-      m_Hit->set_eion(0);
-      m_SaveHitContainer = m_HitContainer;
-    }
-    else
-    {
-      std::cout << "implement stuff for whichactive < 0 (inactive volumes)" << std::endl;
-      gSystem->Exit(1);
-    }
-*/    // this is for the tracking of the truth info
+  // this is for the tracking of the truth info
     if (G4VUserTrackInformation *p = aTrack->GetUserInformation())
     {
       if (PHG4TrackUserInfoV1 *pp = dynamic_cast<PHG4TrackUserInfoV1 *>(p))
@@ -349,7 +320,6 @@ bool EICG4B0SteppingAction::UserSteppingAction(const G4Step *aStep, bool was_use
   m_Hit->set_x(1, postPoint->GetPosition().x() / cm);
   m_Hit->set_y(1, postPoint->GetPosition().y() / cm);
   m_Hit->set_z(1, postPoint->GetPosition().z() / cm);
-  
   m_Hit->set_px(1, postPoint->GetMomentum().x() / GeV);
   m_Hit->set_py(1, postPoint->GetMomentum().y() / GeV);
   m_Hit->set_pz(1, postPoint->GetMomentum().z() / GeV);
@@ -357,11 +327,6 @@ bool EICG4B0SteppingAction::UserSteppingAction(const G4Step *aStep, bool was_use
   m_Hit->set_t(1, postPoint->GetGlobalTime() / nanosecond);
   //sum up the energy to get total deposited
   m_Hit->set_edep(m_Hit->get_edep() + edep);
-  if (layer_type){
-	m_Hit->set_eion(m_Hit->get_eion()+eion);
-	m_Hit->set_light_yield(m_Hit->get_light_yield()+eion);
-  }
-  if (!layer_type) m_EabsSum += edep; 
   m_EdepSum += edep;
   if (!hasMotherSubsystem() && (m_Hit->get_z(1) * cm > m_Zmax || m_Hit->get_z(1) * cm < m_Zmin))
   {
@@ -375,24 +340,20 @@ bool EICG4B0SteppingAction::UserSteppingAction(const G4Step *aStep, bool was_use
     m_Hit->set_edep(-1);  // only energy=0 g4hits get dropped, this way geantinos survive the g4hit compression
 	if(layer_type){
 		m_Hit->set_eion(-1);
-//		m_Hit->set_light_yield(-1);
+		m_Hit->set_light_yield(-1);
 	}
   }
   else
   {
     if (!m_BlackHoleFlag)
     {
-       double eion = edep - aStep->GetNonIonizingEnergyDeposit() / GeV;
+       eion = edep - aStep->GetNonIonizingEnergyDeposit() / GeV;
        m_Hit->set_eion(m_Hit->get_eion() + eion);
+  if(m_SaveLightYieldFlag)
+	  	m_Hit->set_light_yield(m_Hit->get_light_yield()+light_yield);
     }
   }
 
-/*  if (m_SaveLightYieldFlag)
-  {
-    double light_yield = GetVisibleEnergyDeposition(aStep) / GeV;
-    m_Hit->set_light_yield(m_Hit->get_light_yield() + light_yield);
-  }
-*/
   if (edep > 0 || m_SaveAllHitsFlag)
   {
     if (G4VUserTrackInformation* p = aTrack->GetUserInformation())
@@ -431,8 +392,6 @@ bool EICG4B0SteppingAction::UserSteppingAction(const G4Step *aStep, bool was_use
     {
 	m_Hit->set_layer(layer_id);
 	m_Hit->set_hit_type(layer_type);
-//	m_Hit->set_eion(m_EionSum);
-//	m_Hit->set_edep(m_EdepSum);
       m_HitContainer->AddHit(layer_id, m_Hit);
       if (m_SaveShower)
       {
@@ -453,63 +412,33 @@ bool EICG4B0SteppingAction::UserSteppingAction(const G4Step *aStep, bool was_use
 }
 
 //____________________________________________________________________________..
-int EICG4B0SteppingAction::FindTowerIndexFromPosition(G4StepPoint* prePoint, int& j, int& k)
+int EICG4B0ECALSteppingAction::FindTowerIndexFromPosition(G4StepPoint* prePoint, int& j, int& k)
 {
   int j_0 = 0;  //The j and k indices for the scintillator / tower
   int k_0 = 0;  //The j and k indices for the scintillator / tower
-  int towersize = 2;
-  if(_towerdivision==0.){
-    int maxsubtow = (int) ( (_tower_size) / (_readout_size));
-    _towerdivision = (_tower_size - (maxsubtow * _readout_size))/maxsubtow;
-    _towerdivision+=_readout_size;
-  }
-//  j_0 = (int) ( ( _detector_size + ( prePoint->GetPosition().x() ) ) / _towerdivision ); //TODO DRCALO TOWER SIZE
-//  k_0 = (int) ( ( _detector_size + ( prePoint->GetPosition().y() ) ) / _towerdivision ); //TODO DRCALO TOWER SIZE
-
-  j_0 = (int) ( ( 36.6 + ( prePoint->GetPosition().x() / cm ) ) / towersize ); //TODO DRCALO TOWER SIZE
-  k_0 = (int) ( ( 22 + ( prePoint->GetPosition().y() / cm ) ) / towersize ); //TODO DRCALO TOWER SIZE
+  double towersize = m_Params->get_double_param("tower_size");
+  double radius = m_Params->get_double_param("outer_radius");
+  double det_x_pos = m_Params->get_double_param("global_x");
+  double det_y_pos = m_Params->get_double_param("global_y");
+  j_0 = (int) ( ( radius - det_x_pos + towersize + ( prePoint->GetPosition().x() / cm ) ) / towersize ); //TODO DRCALO TOWER SIZE
+  k_0 = (int) ( ( radius - det_y_pos + towersize + ( prePoint->GetPosition().y() / cm ) ) / towersize ); //TODO DRCALO TOWER SIZE
   j = (j_0 * 1);
   k = (k_0 * 1);
 
   return 0;
 }
 //____________________________________________________________________________..
-void EICG4B0SteppingAction::SetInterfacePointers(PHCompositeNode *topNode)
+void EICG4B0ECALSteppingAction::SetInterfacePointers(PHCompositeNode *topNode)
 {
-  //std::string hitnodename = "G4HIT_" + m_Detector->GetName();
-  //  std::cout << " ---> !!! hitnodename: " << hitnodename << std::endl;
-  // now look for the map and grab a pointer to it.
-//  std::string hitnodename;
-//  std::string absorbernodename;
-//  if (m_Detector->SuperDetector()!= "NONE")
-//  {
-//	hitnodename = "G4HIT_" + m_Detector->SuperDetector();
-//	absorbernodename = "G4HIT_ABSORBER_" + m_Detector->SuperDetector();
-//  }
-//  else
-//  {
-//	 hitnodename = "G4HIT_" + m_Detector->GetName();
-//	 absorbernodename = "G4HIT_ABSORBER_" + m_Detector->GetName();
-//  }
   m_HitContainer = findNode::getClass<PHG4HitContainer>(topNode, m_HitNodeName);
-//  m_AbsorberHitContainer = findNode::getClass<PHG4HitContainer>(topNode, absorbernodename);
-  // if we do not find the node we need to make it.
   if (!m_HitContainer)
   {
-    std::cout << "EICG4B0SteppingAction::SetTopNode - unable to find "
+    std::cout << "EICG4B0ECALSteppingAction::SetTopNode - unable to find "
               << m_HitNodeName << std::endl;
 	gSystem->Exit(1);
   }
-/* if (!m_AbsorberHitContainer)
-  {
-    if (Verbosity() > 0)
-    {
-      std::cout << "EICG4B0SteppingAction::SetInterfacePointers - unable to find " << absorbernodename << std::endl;
-	std::cout <<"Are you running Realistic B0 ???"<<std::endl;
-    }
-  }*/
 }
-bool EICG4B0SteppingAction::hasMotherSubsystem() const
+bool EICG4B0ECALSteppingAction::hasMotherSubsystem() const
 {
   if (m_Subsystem->GetMotherSubsystem())
   {
