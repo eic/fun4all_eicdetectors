@@ -31,6 +31,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <set>
 
 class PHG4Hit;
 class PHG4HitContainer;
@@ -347,6 +348,9 @@ class B0TrackFastSim : public SubsysReco
   bool m_DoVertexingFlag;
 
   PHParameters* m_Parameter = nullptr;
+
+  static const std::set<std::string> reserved_cylinder_projection_names;
+  static const std::set<std::string> reserved_zplane_projection_names;
 };
 
 #endif /*__PHG4TrackFastSim_H__*/

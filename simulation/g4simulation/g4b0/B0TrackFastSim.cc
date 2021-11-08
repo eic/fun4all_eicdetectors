@@ -98,8 +98,8 @@ using namespace std;
 // names of our implemented calorimeters where the projections are done
 // at 1/2 of their depth, not at the surface
 // this is used to avoid user added projections with identical names
-set<string> reserved_cylinder_projection_names{"B0ECAL"};
-set<string> reserved_zplane_projection_names{};
+const set<string> B0TrackFastSim::reserved_cylinder_projection_names{};
+const set<string> B0TrackFastSim::reserved_zplane_projection_names{"B0ECAL"};
 
 B0TrackFastSim::B0TrackFastSim(const std::string& name)
   : SubsysReco(name)
