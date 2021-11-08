@@ -406,7 +406,7 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
   G4Material *materialLayer_SH[nLayers_SH] = {
       G4Material::GetMaterial("G4_GRAPHITE"),
       G4Material::GetMaterial("G4_POLYSTYRENE"),
-      G4Material::GetMaterial("G4_GRAPHITE"),
+      G4Material::GetMaterial("G4_AIR"),
       G4Material::GetMaterial("G4_POLYSTYRENE")};
   G4double thicknessLayer_SH[nLayers_SH] = {
       0.25 * mm,
@@ -527,7 +527,7 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
 
   for (int isec = 0; isec < 12; isec++)
   {
-    if(isec!=3 && isec!=4)continue; // NOTE REMOVE
+    // if(isec!=3 && isec!=4)continue; // NOTE REMOVE
     // if(isec!=3)continue; // NOTE REMOVE
     G4RotationMatrix *motherrot = new G4RotationMatrix();
     motherrot->rotateX(M_PI / 2);
@@ -539,11 +539,11 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
     for (int ilen = 1; ilen < ((detlength / 2 - segmentlength / 2) / segmentlength); ilen++)
     {
       // forward segments
-      // G4ThreeVector vec_det_fwdlayers_transl((rCenter*cos(M_PI / 12.)+moduleShift) * cos(isec * 2 * M_PI / 12.), (rCenter*cos(M_PI / 12.)+moduleShift) * sin(isec * 2 * M_PI / 12.), place_z + ilen * segmentlength);
-      // assemblyDetector->AddPlacedVolume(log_module_envelope, vec_det_fwdlayers_transl, motherrot);
+      G4ThreeVector vec_det_fwdlayers_transl((rCenter*cos(M_PI / 12.)+moduleShift) * cos(isec * 2 * M_PI / 12.), (rCenter*cos(M_PI / 12.)+moduleShift) * sin(isec * 2 * M_PI / 12.), place_z + ilen * segmentlength);
+      assemblyDetector->AddPlacedVolume(log_module_envelope, vec_det_fwdlayers_transl, motherrot);
       // backward segments
-      // G4ThreeVector vec_det_bcklayers_transl((rCenter*cos(M_PI / 12.)+moduleShift) * cos(isec * 2 * M_PI / 12.), (rCenter*cos(M_PI / 12.)+moduleShift) * sin(isec * 2 * M_PI / 12.), place_z -ilen * segmentlength);
-      // assemblyDetector->AddPlacedVolume(log_module_envelope, vec_det_bcklayers_transl, motherrot);
+      G4ThreeVector vec_det_bcklayers_transl((rCenter*cos(M_PI / 12.)+moduleShift) * cos(isec * 2 * M_PI / 12.), (rCenter*cos(M_PI / 12.)+moduleShift) * sin(isec * 2 * M_PI / 12.), place_z -ilen * segmentlength);
+      assemblyDetector->AddPlacedVolume(log_module_envelope, vec_det_bcklayers_transl, motherrot);
 
 
     }
@@ -772,7 +772,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
   G4Material *materialLayer_SH[nLayers_SH] = {
       G4Material::GetMaterial("G4_GRAPHITE"),
       G4Material::GetMaterial("G4_POLYSTYRENE"),
-      G4Material::GetMaterial("G4_GRAPHITE"),
+      G4Material::GetMaterial("G4_AIR"),
       G4Material::GetMaterial("G4_POLYSTYRENE")};
   G4double thicknessLayer_SH[nLayers_SH] = {
       0.25 * mm,
@@ -891,7 +891,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
                                                 (diameter_coolingtube - 2*wallthickness_coolingtube) / 2,
                                                 (diameter_coolingtube - 2*wallthickness_coolingtube) / 2);
         G4VSolid *sol_cooling_tube_left = new G4Box("sol_cooling_tube_left_tmp" + std::to_string(row),
-                                                0.96*(sqrt(pow(rMax,2)-pow( (abs(row)*fullsensor_width) - (fullsensor_width/2.0) ,2))- sqrt(pow(rMin,2)-pow( (abs(row)*fullsensor_width)-(fullsensor_width/2) ,2)) + xoffset)/2,
+                                                0.86*(sqrt(pow(rMax,2)-pow( (abs(row)*fullsensor_width) - (fullsensor_width/2.0) ,2))- sqrt(pow(rMin,2)-pow( (abs(row)*fullsensor_width)-(fullsensor_width/2) ,2)) + xoffset)/2,
                                                 diameter_coolingtube / 2,
                                                 diameter_coolingtube / 2);
         sol_cooling_tube_left = new G4SubtractionSolid(G4String("sol_cooling_tube_left" + std::to_string(row)), sol_cooling_tube_left, sol_cutout_tube_left, 0, G4ThreeVector(0,0,0));
@@ -901,7 +901,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
         m_DisplayAction->AddVolume(Log_cooling_tube_left, "Cooling_tube");
 
         G4VSolid *sol_water_cooling_left = new G4Box("sol_water_cooling_left" + std::to_string(row),
-                                                0.95*(sqrt(pow(rMax,2)-pow( (abs(row)*fullsensor_width) - (fullsensor_width/2.0) ,2))- sqrt(pow(rMin,2)-pow( (abs(row)*fullsensor_width)-(fullsensor_width/2) ,2)) + xoffset)/2,
+                                                0.85*(sqrt(pow(rMax,2)-pow( (abs(row)*fullsensor_width) - (fullsensor_width/2.0) ,2))- sqrt(pow(rMin,2)-pow( (abs(row)*fullsensor_width)-(fullsensor_width/2) ,2)) + xoffset)/2,
                                                 0.99*(diameter_coolingtube - 2*wallthickness_coolingtube) / 2,
                                                 0.99*(diameter_coolingtube - 2*wallthickness_coolingtube) / 2);
         G4LogicalVolume *Log_water_cooling_left = new G4LogicalVolume(sol_water_cooling_left,  //
@@ -934,7 +934,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
                                                 (diameter_coolingtube - 2*wallthickness_coolingtube) / 2,
                                                 (diameter_coolingtube - 2*wallthickness_coolingtube) / 2);
         G4VSolid *sol_cooling_tube_right = new G4Box("sol_cooling_tube_right_tmp" + std::to_string(row),
-                                                0.96*(sqrt(pow(rMax,2)-pow( (abs(row)*fullsensor_width) - (fullsensor_width/2.0) ,2))- sqrt(pow(rMin,2)-pow( (abs(row)*fullsensor_width)-(fullsensor_width/2) ,2)) - xoffset)/2,
+                                                0.86*(sqrt(pow(rMax,2)-pow( (abs(row)*fullsensor_width) - (fullsensor_width/2.0) ,2))- sqrt(pow(rMin,2)-pow( (abs(row)*fullsensor_width)-(fullsensor_width/2) ,2)) - xoffset)/2,
                                                 diameter_coolingtube / 2,
                                                 diameter_coolingtube / 2);
         sol_cooling_tube_right = new G4SubtractionSolid(G4String("sol_cooling_tube_right" + std::to_string(row)), sol_cooling_tube_right, sol_cutout_tube_right, 0, G4ThreeVector(0,0,0));
@@ -944,7 +944,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
         m_DisplayAction->AddVolume(Log_cooling_tube_right, "Cooling_tube");
 
         G4VSolid *sol_water_cooling_right = new G4Box("sol_water_cooling_right" + std::to_string(row),
-                                                0.95*(sqrt(pow(rMax,2)-pow( (abs(row)*fullsensor_width) - (fullsensor_width/2.0) ,2))- sqrt(pow(rMin,2)-pow( (abs(row)*fullsensor_width)-(fullsensor_width/2) ,2)) - xoffset)/2,
+                                                0.85*(sqrt(pow(rMax,2)-pow( (abs(row)*fullsensor_width) - (fullsensor_width/2.0) ,2))- sqrt(pow(rMin,2)-pow( (abs(row)*fullsensor_width)-(fullsensor_width/2) ,2)) - xoffset)/2,
                                                 0.99*(diameter_coolingtube - 2*wallthickness_coolingtube) / 2,
                                                 0.99*(diameter_coolingtube - 2*wallthickness_coolingtube) / 2);
         G4LogicalVolume *Log_water_cooling_right = new G4LogicalVolume(sol_water_cooling_right,  //
