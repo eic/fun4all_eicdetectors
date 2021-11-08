@@ -5,6 +5,7 @@
 
 #include <g4main/PHG4Detector.h>
 
+#include <map>
 #include <set>
 #include <string>  // for string
 
@@ -24,7 +25,7 @@ class EICG4B0Detector : public PHG4Detector
   virtual ~EICG4B0Detector() override {}
 
   //! construct
-  void ConstructMe(G4LogicalVolume *world) override;
+  virtual void ConstructMe(G4LogicalVolume *world) override;
 
   void Print(const std::string &what = "ALL") const override;
 
@@ -34,15 +35,13 @@ class EICG4B0Detector : public PHG4Detector
   //@}
 
   int GetDetId(G4VPhysicalVolume *) const;
-
   void SuperDetector(const std::string &name) { m_SuperDetector = name; }
   const std::string SuperDetector() const { return m_SuperDetector; }
   int get_Layer() const { return m_Layer; }
   PHParameters *getParams();
-
  private:
-  PHParameters *m_Params;
 
+  PHParameters *m_Params;
   // active volumes
   std::set<G4VPhysicalVolume *> m_PhysicalVolumesSet;
   //  std::set<G4LogicalVolume *>   m_LogicalVolumesSet;

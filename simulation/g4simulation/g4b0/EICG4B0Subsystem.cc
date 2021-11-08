@@ -25,11 +25,14 @@
 #include <phool/PHObject.h>
 #include <phool/getClass.h>
 
+using namespace std;
+
 //_______________________________________________________________________
 EICG4B0Subsystem::EICG4B0Subsystem(const std::string &name, const int lyr)
   : PHG4DetectorSubsystem(name, lyr)
   , m_Detector(nullptr)
   , m_SteppingAction(nullptr)
+  , mappingfile_("")
 {
   // call base class method which will set up parameter infrastructure
   // and call our SetDefaultParameters() method
@@ -47,46 +50,47 @@ int EICG4B0Subsystem::InitRunSubsystem(PHCompositeNode *topNode)
   {
     PHNodeIterator iter(topNode);
     PHCompositeNode *dstNode = dynamic_cast<PHCompositeNode *>(iter.findFirst("PHCompositeNode", "DST"));
-
-    std::string nodename;
+  
+    string nodename;
+    string geonode;
 
     if (SuperDetector() != "NONE")
     {
-      // create super detector subnodes
-      PHNodeIterator iter_dst(dstNode);
-      PHCompositeNode *superSubNode = dynamic_cast<PHCompositeNode *>(iter_dst.findFirst("PHCompositeNode", SuperDetector()));
-      if (!superSubNode)
-      {
-        superSubNode = new PHCompositeNode(SuperDetector());
-        dstNode->addNode(superSubNode);
-      }
-      dstNode = superSubNode;
-
-      nodename = "G4HIT_" + SuperDetector();
+    // create super detector subnodes
+       PHNodeIterator iter_dst(dstNode);
+       PHCompositeNode *superSubNode = dynamic_cast<PHCompositeNode *>(iter_dst.findFirst("PHCompositeNode", SuperDetector()));
+       if (!superSubNode)
+       {
+         superSubNode = new PHCompositeNode(SuperDetector());
+         dstNode->addNode(superSubNode);
+       }
+       dstNode = superSubNode;
+   
+       nodename = "G4HIT_" + SuperDetector();
     }
-
+ 
     else
     {
-      nodename = "G4HIT_" + Name();
+       nodename = "G4HIT_" + Name();
     }
     PHG4HitContainer *b0_hits = findNode::getClass<PHG4HitContainer>(topNode, nodename);
     if (!b0_hits)
     {
-      dstNode->addNode(new PHIODataNode<PHObject>(b0_hits = new PHG4HitContainer(nodename), nodename, "PHObject"));
+       dstNode->addNode(new PHIODataNode<PHObject>(b0_hits = new PHG4HitContainer(nodename), nodename, "PHObject"));
     }
     b0_hits->AddLayer(GetLayer());
     auto *tmp = new EICG4B0SteppingAction(this, m_Detector, GetParams());
     tmp->HitNodeName(nodename);
     m_SteppingAction = tmp;
-  }
-  else if (GetParams()->get_int_param("blackhole"))
-  {
-    m_SteppingAction = new EICG4B0SteppingAction(this, m_Detector, GetParams());
-  }
-  if (m_SteppingAction)
-  {
-    (dynamic_cast<EICG4B0SteppingAction *>(m_SteppingAction))->SaveAllHits(m_SaveAllHitsFlag);
-  }
+   }
+   else if (GetParams()->get_int_param("blackhole"))
+   {
+     m_SteppingAction = new EICG4B0SteppingAction(this, m_Detector, GetParams());
+   }
+   if (m_SteppingAction)
+   {
+      (dynamic_cast<EICG4B0SteppingAction *>(m_SteppingAction))->SaveAllHits(m_SaveAllHitsFlag);
+   }
   return 0;
 }
 //_______________________________________________________________________
@@ -101,7 +105,7 @@ int EICG4B0Subsystem::process_event(PHCompositeNode *topNode)
   return 0;
 }
 //_______________________________________________________________________
-void EICG4B0Subsystem::Print(const std::string &what) const
+void EICG4B0Subsystem::Print(const string &what) const
 {
   if (m_Detector)
   {
@@ -142,7 +146,14 @@ void EICG4B0Subsystem::SetDefaultParameters()
   set_default_int_param("ispipe", 0);               //pipe or detector (for future implementation)
   set_default_int_param("lightyield", 0);
   set_default_int_param("use_g4steps", 0);
+  set_default_double_param("tower_size", 2.);
+  set_default_double_param("readout_size", 2.);
   set_default_double_param("tmin", NAN);
   set_default_double_param("tmax", NAN);
   set_default_string_param("material", "G4_PbWO4");  //detector material
+}
+
+void EICG4B0Subsystem::SetTowerMappingFile(const std::string& filename)
+{
+  mappingfile_ = filename;
 }
