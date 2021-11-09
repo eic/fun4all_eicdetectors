@@ -86,7 +86,6 @@ EICG4B0ECALSteppingAction::EICG4B0ECALSteppingAction(EICG4B0ECALSubsystem *subsy
   , m_Tmax(m_Params->get_double_param("tmax") * ns)
   , m_EdepSum(0)
   , m_EabsSum(0)
-  , m_EionSum(0)
 {
 // G4 seems to have issues in the um range
    m_Zmin -= copysign(m_Zmin, 1. / 1e6 * cm);
