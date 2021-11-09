@@ -85,7 +85,6 @@ EICG4B0SteppingAction::EICG4B0SteppingAction(EICG4B0Subsystem *subsys, EICG4B0De
   , m_Tmax(m_Params->get_double_param("tmax") * ns)
   , m_EdepSum(0)
   , m_EabsSum(0)
-  , m_EionSum(0)
   , _towerdivision(0.0)
   , _tower_size(2.0)
   , _readout_size(2.0)

@@ -87,7 +87,6 @@ class EICG4B0SteppingAction : public PHG4SteppingAction
   double m_Tmax;
   double m_EdepSum;
   double m_EabsSum;
-  double m_EionSum;
   double _towerdivision;
   double _tower_size;
   double _readout_size;

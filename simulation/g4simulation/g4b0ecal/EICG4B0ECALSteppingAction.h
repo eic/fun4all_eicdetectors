@@ -72,7 +72,6 @@ class EICG4B0ECALSteppingAction : public PHG4SteppingAction
   double m_Tmax;
   double m_EdepSum;
   double m_EabsSum;
-  double m_EionSum;
   std::string m_HitNodeName;
 };
 
