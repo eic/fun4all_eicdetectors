@@ -201,7 +201,10 @@ bool PHG4HybridHomogeneousCalorimeterSteppingAction::UserSteppingAction(const G4
     if (whichactive > 0)
     {
       m_Hit->set_eion(m_Hit->get_eion() + eion);
-      m_Hit->set_light_yield(m_Hit->get_light_yield() + eion);
+
+      // using the G4 scintillation light production model
+      double light_yield = GetVisibleEnergyDeposition(aStep);
+      m_Hit->set_light_yield(m_Hit->get_light_yield() + light_yield);
     }
 
     if (geantino)
