@@ -3485,18 +3485,33 @@ int EventEvaluatorEIC::GetProjectionIndex(std::string projname)
     return 45;
 
   else if (projname.find("EFST_0") != std::string::npos)
-    return 50;
+    return 100;
   else if (projname.find("EFST_1") != std::string::npos)
-    return 51;
+    return 101;
   else if (projname.find("EFST_2") != std::string::npos)
-    return 52;
+    return 102;
   else if (projname.find("EFST_3") != std::string::npos)
-    return 53;
+    return 103;
   else if (projname.find("EFST_4") != std::string::npos)
-    return 54;
+    return 104;
   else if (projname.find("EFST_5") != std::string::npos)
-    return 55;
+    return 105;
   else if (projname.find("EFST_6") != std::string::npos)
+    return 106;
+
+  else if (projname.find("FST_0") != std::string::npos)
+    return 50;
+  else if (projname.find("FST_1") != std::string::npos)
+    return 51;
+  else if (projname.find("FST_2") != std::string::npos)
+    return 52;
+  else if (projname.find("FST_3") != std::string::npos)
+    return 53;
+  else if (projname.find("FST_4") != std::string::npos)
+    return 54;
+  else if (projname.find("FST_5") != std::string::npos)
+    return 55;
+  else if (projname.find("FST_6") != std::string::npos)
     return 56;
 
   else if (projname.find("EHCAL") != std::string::npos)
@@ -3533,21 +3548,6 @@ int EventEvaluatorEIC::GetProjectionIndex(std::string projname)
     return 91;
   else if (projname.find("BH_FORWARD_NEG") != std::string::npos)
     return 92;
-
-  else if (projname.find("FST_0") != std::string::npos)
-    return 100;
-  else if (projname.find("FST_1") != std::string::npos)
-    return 101;
-  else if (projname.find("FST_2") != std::string::npos)
-    return 102;
-  else if (projname.find("FST_3") != std::string::npos)
-    return 103;
-  else if (projname.find("FST_4") != std::string::npos)
-    return 104;
-  else if (projname.find("FST_5") != std::string::npos)
-    return 105;
-  else if (projname.find("FST_6") != std::string::npos)
-    return 106;
  
   else if (projname.find("RWELL_0") != std::string::npos)
     return 110;
