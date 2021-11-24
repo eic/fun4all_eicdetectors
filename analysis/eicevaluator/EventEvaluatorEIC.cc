@@ -280,6 +280,10 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   , _hepmcp_x1(NAN)
   , _hepmcp_x2(NAN)
   , _hepmcp_Q2(NAN)
+  , _hepmcp_vtx_x(NAN)
+  , _hepmcp_vtx_y(NAN)
+  , _hepmcp_vtx_z(NAN)
+  , _hepmcp_vtx_t(NAN)
 
   //  , _hepmcp_ID_parent(0)
   , _hepmcp_status(0)
@@ -802,6 +806,10 @@ int EventEvaluatorEIC::Init(PHCompositeNode* topNode)
     _event_tree->Branch("hepmcp_x1", &_hepmcp_x1, "hepmcp_x1/F");
     _event_tree->Branch("hepmcp_x2", &_hepmcp_x2, "hepmcp_x2/F");
     _event_tree->Branch("hepmcp_Q2", &_hepmcp_Q2, "hepmcp_Q2/F");
+    _event_tree->Branch("hepmcp_vtx_x", &_hepmcp_vtx_x, "hepmcp_vtx_x/F");
+    _event_tree->Branch("hepmcp_vtx_y", &_hepmcp_vtx_y, "hepmcp_vtx_y/F");
+    _event_tree->Branch("hepmcp_vtx_z", &_hepmcp_vtx_z, "hepmcp_vtx_z/F");
+    _event_tree->Branch("hepmcp_vtx_t", &_hepmcp_vtx_t, "hepmcp_vtx_t/F");
 
     //    _event_tree->Branch("hepmcp_ID_parent", _hepmcp_ID_parent, "hepmcp_ID_parent[nHepmcp]/F");
     _event_tree->Branch("hepmcp_status", _hepmcp_status, "hepmcp_status[nHepmcp]/I");
@@ -3302,6 +3310,11 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
             return;
           }
 
+          _hepmcp_vtx_x = hepmcevent->get_collision_vertex().x();
+          _hepmcp_vtx_y = hepmcevent->get_collision_vertex().y();
+          _hepmcp_vtx_z = hepmcevent->get_collision_vertex().z();
+          _hepmcp_vtx_t = hepmcevent->get_collision_vertex().t();
+
           HepMC::PdfInfo* pdfinfo = truthevent->pdf_info();
 
           //     m_partid1 = pdfinfo->id1();
@@ -4219,6 +4232,10 @@ void EventEvaluatorEIC::resetBuffer()
   if (_do_HEPMC)
   {
     _nHepmcp = 0;
+    _hepmcp_vtx_x = 0;
+    _hepmcp_vtx_y = 0;
+    _hepmcp_vtx_z = 0;
+    _hepmcp_vtx_t = 0;
     for (Int_t iHepmcp = 0; iHepmcp < _maxNHepmcp; iHepmcp++)
     {
       _hepmcp_E[iHepmcp] = 0;

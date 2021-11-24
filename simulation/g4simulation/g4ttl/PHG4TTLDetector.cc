@@ -142,7 +142,7 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
   G4VSolid *sol_module_envelope = new G4Trd("sol_module_envelope",
                                             sin(M_PI / 12.) * (rCenter-det_height/2), sin(M_PI / 12.) * (rCenter + det_height/2),
                                             segmentlength / 2, segmentlength / 2,
-                                            det_height / 2);
+                                            (det_height*1.001) / 2);
 
   G4LogicalVolume *log_module_envelope = new G4LogicalVolume(sol_module_envelope, Air, "log_module_envelope");
 
@@ -872,6 +872,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
         // replicate singletower tower design numSensorsRow times along x-axis
         new G4PVReplica("TTLDetRowLeftPhysical" + std::to_string(row),log_sensor_and_readout,TTLDetRowLeftLogical,
                         kXAxis,((numSensorsRow-1) /2 + numSensorLeftAdd),segmentlength);
+        m_DisplayAction->AddVolume(TTLDetRowLeftLogical, "StripBox");
 
         G4RotationMatrix *rotationSensor = new G4RotationMatrix();
         rotationSensor->rotateZ(-M_PI);
@@ -918,6 +919,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
         // // create mother volume with space for numSensorsRow towers along x-axis
         auto TTLDetRowRightSolid    = new G4Box("TTLDetRowRightBox" + std::to_string(row), (((numSensorsRow-1) /2 - numSensorRightAdd)) * segmentlength / 2.0,fullsensor_width / 2.0,thicknessDet_SH / 2.0);
         auto TTLDetRowRightLogical  = new G4LogicalVolume(TTLDetRowRightSolid,Air,"TTLDetRowRightLogical" + std::to_string(row));
+        m_DisplayAction->AddVolume(TTLDetRowRightLogical, "StripBox");
         // // replicate singletower tower design numSensorsRow times along x-axis
         new G4PVReplica("TTLDetRowRightPhysical" + std::to_string(row),log_sensor_and_readout,TTLDetRowRightLogical,
                         kXAxis,((numSensorsRow-1) /2 - numSensorRightAdd ),segmentlength);
@@ -967,6 +969,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
         // create mother volume with space for numSensors towers along x-axis
         auto TTLDetRowSolid    = new G4Box("TTLDetRowBox" + std::to_string(row), (numSensorsRow - numSensorsInner) / 2 * segmentlength / 2.0,fullsensor_width / 2.0,thicknessDet_SH / 2.0);
         auto TTLDetRowLogical  = new G4LogicalVolume(TTLDetRowSolid,Air,"TTLDetRowLogical" + std::to_string(row));
+        m_DisplayAction->AddVolume(TTLDetRowLogical, "StripBox");
         // replicate singletower tower design numSensors times along x-axis
         new G4PVReplica("TTLDetRowPhysical" + std::to_string(row),log_sensor_and_readout,TTLDetRowLogical,
                         kXAxis,(numSensorsRow - numSensorsInner) / 2,segmentlength);
@@ -1028,6 +1031,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
         // create mother volume with space for numSensorsRow towers along x-axis
         auto TTLDetRowSolid    = new G4Box("TTLDetRowBox" + std::to_string(row), numSensorsRow * segmentlength / 2.0,fullsensor_width / 2.0,thicknessDet_SH / 2.0);
         auto TTLDetRowLogical  = new G4LogicalVolume(TTLDetRowSolid,Air,"TTLDetRowLogical" + std::to_string(row));
+        m_DisplayAction->AddVolume(TTLDetRowLogical, "StripBox");
         // replicate singletower tower design numSensorsRow times along x-axis
         new G4PVReplica("TTLDetRowPhysicalReplica" + std::to_string(row),log_sensor_and_readout,TTLDetRowLogical,
                         kXAxis,numSensorsRow,segmentlength);
