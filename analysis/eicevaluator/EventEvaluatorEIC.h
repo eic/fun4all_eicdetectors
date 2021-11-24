@@ -290,6 +290,9 @@ class EventEvaluatorEIC : public SubsysReco
   float* _track_px;
   float* _track_py;
   float* _track_pz;
+  float* _track_x;
+  float* _track_y;
+  float* _track_z;
   float* _track_dca;
   float* _track_dca_2d;
   float* _track_trueID;
@@ -307,6 +310,9 @@ class EventEvaluatorEIC : public SubsysReco
   float* _track_TLP_y;
   float* _track_TLP_z;
   float* _track_TLP_t;
+  float* _track_TLP_px;
+  float* _track_TLP_py;
+  float* _track_TLP_pz;
   float* _track_TLP_true_x;
   float* _track_TLP_true_y;
   float* _track_TLP_true_z;
@@ -321,6 +327,9 @@ class EventEvaluatorEIC : public SubsysReco
   float* _mcpart_px;
   float* _mcpart_py;
   float* _mcpart_pz;
+  float* _mcpart_x;
+  float* _mcpart_y;
+  float* _mcpart_z;
   int* _mcpart_BCID;
 
   // MC particles
