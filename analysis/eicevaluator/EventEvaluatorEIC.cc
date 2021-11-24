@@ -249,6 +249,9 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   , _track_px(0)
   , _track_py(0)
   , _track_pz(0)
+  , _track_x(0)
+  , _track_y(0)
+  , _track_z(0)
   , _track_dca(0)
   , _track_dca_2d(0)
   , _track_trueID(0)
@@ -260,6 +263,9 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   , _track_TLP_y(0)
   , _track_TLP_z(0)
   , _track_TLP_t(0)
+  , _track_TLP_px(0)
+  , _track_TLP_py(0)
+  , _track_TLP_pz(0)
   , _track_TLP_true_x(0)
   , _track_TLP_true_y(0)
   , _track_TLP_true_z(0)
@@ -273,6 +279,9 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   , _mcpart_px(0)
   , _mcpart_py(0)
   , _mcpart_pz(0)
+  , _mcpart_x(0)
+  , _mcpart_y(0)
+  , _mcpart_z(0)
   , _mcpart_BCID(0)
 
   , _nHepmcp(0)
@@ -466,6 +475,9 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   _track_px = new float[_maxNTracks];
   _track_py = new float[_maxNTracks];
   _track_pz = new float[_maxNTracks];
+  _track_x = new float[_maxNTracks];
+  _track_y = new float[_maxNTracks];
+  _track_z = new float[_maxNTracks];
   _track_dca = new float[_maxNTracks];
   _track_dca_2d = new float[_maxNTracks];
   _track_source = new unsigned short[_maxNTracks];
@@ -475,6 +487,9 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   _track_TLP_y = new float[_maxNProjections];
   _track_TLP_z = new float[_maxNProjections];
   _track_TLP_t = new float[_maxNProjections];
+  _track_TLP_px = new float[_maxNProjections];
+  _track_TLP_py = new float[_maxNProjections];
+  _track_TLP_pz = new float[_maxNProjections];
   _track_TLP_true_x = new float[_maxNProjections];
   _track_TLP_true_y = new float[_maxNProjections];
   _track_TLP_true_z = new float[_maxNProjections];
@@ -490,6 +505,9 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   _mcpart_px = new float[_maxNMCPart];
   _mcpart_py = new float[_maxNMCPart];
   _mcpart_pz = new float[_maxNMCPart];
+  _mcpart_x = new float[_maxNMCPart];
+  _mcpart_y = new float[_maxNMCPart];
+  _mcpart_z = new float[_maxNMCPart];
   _mcpart_BCID = new int[_maxNMCPart];
 
   _hepmcp_BCID = new int[_maxNHepmcp];
@@ -554,6 +572,9 @@ int EventEvaluatorEIC::Init(PHCompositeNode* topNode)
     _event_tree->Branch("tracks_px", _track_px, "tracks_px[nTracks]/F");
     _event_tree->Branch("tracks_py", _track_py, "tracks_py[nTracks]/F");
     _event_tree->Branch("tracks_pz", _track_pz, "tracks_pz[nTracks]/F");
+    _event_tree->Branch("tracks_x", _track_x, "tracks_x[nTracks]/F");
+    _event_tree->Branch("tracks_y", _track_y, "tracks_y[nTracks]/F");
+    _event_tree->Branch("tracks_z", _track_z, "tracks_z[nTracks]/F");
     _event_tree->Branch("tracks_dca", _track_dca, "tracks_dca[nTracks]/F");
     _event_tree->Branch("tracks_dca_2d", _track_dca_2d, "tracks_dca_2d[nTracks]/F");
     _event_tree->Branch("tracks_trueID", _track_trueID, "tracks_trueID[nTracks]/F");
@@ -576,6 +597,9 @@ int EventEvaluatorEIC::Init(PHCompositeNode* topNode)
     _event_tree->Branch("track_TLP_y", _track_TLP_y, "track_TLP_y[nProjections]/F");
     _event_tree->Branch("track_TLP_z", _track_TLP_z, "track_TLP_z[nProjections]/F");
     _event_tree->Branch("track_TLP_t", _track_TLP_t, "track_TLP_t[nProjections]/F");
+    _event_tree->Branch("track_TLP_px", _track_TLP_px, "track_TLP_px[nProjections]/F");
+    _event_tree->Branch("track_TLP_py", _track_TLP_py, "track_TLP_py[nProjections]/F");
+    _event_tree->Branch("track_TLP_pz", _track_TLP_pz, "track_TLP_pz[nProjections]/F");
     _event_tree->Branch("track_TLP_true_x", _track_TLP_true_x, "track_TLP_true_x[nProjections]/F");
     _event_tree->Branch("track_TLP_true_y", _track_TLP_true_y, "track_TLP_true_y[nProjections]/F");
     _event_tree->Branch("track_TLP_true_z", _track_TLP_true_z, "track_TLP_true_z[nProjections]/F");
@@ -796,6 +820,9 @@ int EventEvaluatorEIC::Init(PHCompositeNode* topNode)
     _event_tree->Branch("mcpart_px", _mcpart_px, "mcpart_px[nMCPart]/F");
     _event_tree->Branch("mcpart_py", _mcpart_py, "mcpart_py[nMCPart]/F");
     _event_tree->Branch("mcpart_pz", _mcpart_pz, "mcpart_pz[nMCPart]/F");
+    _event_tree->Branch("mcpart_x", _mcpart_x, "mcpart_x[nMCPart]/F");
+    _event_tree->Branch("mcpart_y", _mcpart_y, "mcpart_y[nMCPart]/F");
+    _event_tree->Branch("mcpart_z", _mcpart_z, "mcpart_z[nMCPart]/F");
     _event_tree->Branch("mcpart_BCID", _mcpart_BCID, "mcpart_BCID[nMCPart]/I");
   }
   if (_do_HEPMC)
@@ -3056,6 +3083,9 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
             _track_px[_nTracks] = track->get_px();
             _track_py[_nTracks] = track->get_py();
             _track_pz[_nTracks] = track->get_pz();
+            _track_x[_nTracks] = track->get_x();
+            _track_y[_nTracks] = track->get_y();
+            _track_z[_nTracks] = track->get_z();
             // Ideally, would be dca3d_xy and dca3d_z, but these don't seem to be calculated properly in the
             // current (June 2021) simulations (they return NaN). So we take dca (seems to be ~ the 3d distance)
             // and dca_2d (seems to be ~ the distance in the transverse plane).
@@ -3086,6 +3116,9 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
                   _track_TLP_y[_nProjections] = trkstates->second->get_pos(1);
                   _track_TLP_z[_nProjections] = trkstates->second->get_pos(2);
                   _track_TLP_t[_nProjections] = trkstates->first;
+                  _track_TLP_px[_nProjections] = trkstates->second->get_px();
+                  _track_TLP_py[_nProjections] = trkstates->second->get_py();
+                  _track_TLP_pz[_nProjections] = trkstates->second->get_pz();
                   _track_ProjLayer[_nProjections] = trackStateIndex;
                   _track_ProjTrackID[_nProjections] = _nTracks;
 
@@ -3254,6 +3287,13 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
         _mcpart_px[_nMCPart] = g4particle->get_px();
         _mcpart_py[_nMCPart] = g4particle->get_py();
         _mcpart_pz[_nMCPart] = g4particle->get_pz();
+        PHG4VtxPoint* vtxtmp = truthinfocontainer->GetVtx(g4particle->get_vtx_id());
+        if (vtxtmp)
+        {
+          _mcpart_x[_nMCPart] = vtxtmp->get_x();
+          _mcpart_y[_nMCPart] = vtxtmp->get_y();
+          _mcpart_z[_nMCPart] = vtxtmp->get_z();
+        }
         //BCID added for G4Particle --  HEPMC particle matching
         _mcpart_BCID[_nMCPart] = g4particle->get_barcode();
         // TVector3 projvec(_mcpart_px[0],_mcpart_py[0],_mcpart_pz[0]);
@@ -4182,6 +4222,9 @@ void EventEvaluatorEIC::resetBuffer()
       _track_px[itrk] = 0;
       _track_py[itrk] = 0;
       _track_pz[itrk] = 0;
+      _track_x[itrk] = 0;
+      _track_y[itrk] = 0;
+      _track_z[itrk] = 0;
       _track_dca[itrk] = 0;
       _track_dca_2d[itrk] = 0;
       _track_source[itrk] = 0;
@@ -4202,6 +4245,9 @@ void EventEvaluatorEIC::resetBuffer()
         _track_TLP_y[iproj] = 0;
         _track_TLP_z[iproj] = 0;
         _track_TLP_t[iproj] = 0;
+        _track_TLP_px[iproj] = 0;
+        _track_TLP_py[iproj] = 0;
+        _track_TLP_pz[iproj] = 0;
         _track_TLP_true_x[iproj] = 0;
         _track_TLP_true_y[iproj] = 0;
         _track_TLP_true_z[iproj] = 0;
@@ -4225,6 +4271,9 @@ void EventEvaluatorEIC::resetBuffer()
       _mcpart_px[imcpart] = 0;
       _mcpart_py[imcpart] = 0;
       _mcpart_pz[imcpart] = 0;
+      _mcpart_x[imcpart] = 0;
+      _mcpart_y[imcpart] = 0;
+      _mcpart_z[imcpart] = 0;
       _mcpart_BCID[imcpart] = -10;
     }
   }
