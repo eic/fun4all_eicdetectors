@@ -329,6 +329,10 @@ class EventEvaluatorEIC : public SubsysReco
   float _hepmcp_x1;
   float _hepmcp_x2;
   float _hepmcp_Q2;
+  float _hepmcp_vtx_x;
+  float _hepmcp_vtx_y;
+  float _hepmcp_vtx_z;
+  float _hepmcp_vtx_t;
   //  float* _hepmcp_ID_parent;
   int* _hepmcp_status;
   int* _hepmcp_PDG;
