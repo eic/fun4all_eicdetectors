@@ -102,6 +102,7 @@ int PHG4LFHcalSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
     }
     // create stepping action
     m_SteppingAction = new PHG4LFHcalSteppingAction(m_Detector, GetParams());
+    // m_SteppingAction = new PHG4LFHcalSteppingAction(m_Detector, m_Detector->getParamsDet());
   }
 
   return 0;
@@ -147,6 +148,9 @@ void PHG4LFHcalSubsystem::SetDefaultParameters()
   set_default_double_param("thickness_absorber", 1.6);
   set_default_double_param("thickness_scintillator", 0.4);
   set_default_int_param("nlayerspertowerseg", 10);
+  set_default_int_param("usetailcatcher", 0);
+  set_default_double_param("zdepthcatcheroffset", 1000000.);
+  set_default_int_param("nLayerOffsetTailcatcher", 0);
   
 
   std::ostringstream mappingfilename;
@@ -166,6 +170,7 @@ void PHG4LFHcalSubsystem::SetDefaultParameters()
   set_default_string_param("mapping_file_md5", PHG4Utils::md5sum(mappingfilename.str()));
   set_default_string_param("scintillator", "G4_POLYSTYRENE");
   set_default_string_param("absorber", "G4_Fe");
+  set_default_string_param("absorber_W", "G4_W");
 
   return;
 }
