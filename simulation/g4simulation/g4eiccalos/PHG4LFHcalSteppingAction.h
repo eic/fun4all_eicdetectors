@@ -46,6 +46,8 @@ class PHG4LFHcalSteppingAction : public PHG4SteppingAction
   int m_AbsorberTruthFlag = 0;
   int m_BlackHoleFlag = 0;
   int m_NlayersPerTowerSeg = 10;
+  double m_zdepthtailcatcher = 100000;
+  int m_NLayerTailCatcherOffset = 0;
 };
 
 #endif  // G4DETECTORS_PHG4LFHCALSTEPPINGACTION_H

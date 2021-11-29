@@ -45,6 +45,8 @@ PHG4LFHcalSteppingAction::PHG4LFHcalSteppingAction(PHG4LFHcalDetector* detector,
   , m_AbsorberTruthFlag(parameters->get_int_param("absorberactive"))
   , m_BlackHoleFlag(parameters->get_int_param("blackhole"))
   , m_NlayersPerTowerSeg(parameters->get_int_param("nlayerspertowerseg"))
+  , m_zdepthtailcatcher(parameters->get_double_param("zdepthcatcheroffset"))
+  , m_NLayerTailCatcherOffset(parameters->get_int_param("nLayerOffsetTailcatcher"))
 {
 }
 
@@ -115,6 +117,13 @@ bool PHG4LFHcalSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
     /* Get Geant4 pre- and post-step points */
     G4StepPoint* prePoint = aStep->GetPreStepPoint();
     G4StepPoint* postPoint = aStep->GetPostStepPoint();
+    // std::cout << "\t" << icopy << "\t idx_j =" << idx_j << ", idx_k =" << idx_k << ", idx_l =" << idx_l <<"\t id:" << icopy << "\t layer_id:" << layer_id << "\t layer:" << layer << "\tz: "  << printf("%3.0f",prePoint->GetPosition().z() / cm) << "\ttco: " << m_zdepthtailcatcher << "\tnlayoffs: " << m_NLayerTailCatcherOffset;
+    // if(prePoint->GetPosition().z() / cm > m_zdepthtailcatcher){
+    //   idx_l = (int)((layer + m_NLayerTailCatcherOffset)/ m_NlayersPerTowerSeg);
+    //   std::cout << "\tidx_l fixed: " << idx_l << std::endl;
+    // }
+    // else { std::cout <<std::endl;}
+    // std::cout << "x: " << prePoint->GetPosition().x() << "\ty: "  << prePoint->GetPosition().y() << "\tz: "  << prePoint->GetPosition().z() << std::endl;
 
     switch (prePoint->GetStepStatus())
     {

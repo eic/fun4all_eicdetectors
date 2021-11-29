@@ -48,7 +48,20 @@ void PHG4LFHcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
     G4VisAttributes *visatt = new G4VisAttributes();
     visatt->SetForceSolid(true);
     m_VisAttVec.push_back(visatt);  // for later deletion
-    if (it.second == "Absorber")
+    if (it.second == "Invisible")
+    {
+        visatt->SetVisibility(false);
+    }
+    else if (it.second == "Absorber_W")
+    {
+      if (showdetails){
+        visatt->SetColour(G4Colour::Black());
+        visatt->SetVisibility(true);
+        std::cout << " is visible" ;
+      } else 
+        visatt->SetVisibility(false);
+    }
+    else if (it.second == "Absorber")
     {
       if (showdetails){
         visatt->SetColour(G4Colour::Blue());
@@ -80,6 +93,16 @@ void PHG4LFHcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
         std::cout << " is visible" ;
       } else 
         visatt->SetVisibility(false);
+    }
+    else if (it.second == "SingleTower_W")
+    {
+      if (showdetails)
+        visatt->SetVisibility(false);
+      else {
+        visatt->SetColour(G4Colour::Black());
+        visatt->SetVisibility(true);
+        std::cout << " is visible" ;
+      }
     }
     else if (it.second == "SingleTower")
     {

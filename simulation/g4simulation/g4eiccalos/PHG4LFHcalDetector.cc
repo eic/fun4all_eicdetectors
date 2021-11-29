@@ -48,6 +48,14 @@ PHG4LFHcalDetector::PHG4LFHcalDetector(PHG4Subsystem* subsys, PHCompositeNode* N
   , m_TowerLogicNamePrefix("hHcalTower")
   , m_SuperDetector("NONE")
 {
+  if (m_Params->get_string_param("mapping_file").empty())
+  {
+    cout << "ERROR in PHG4LFHcalDetector: No mapping file specified. Abort detector construction." << endl;
+    cout << "Please run set_string_param(\"mapping_file\", std::string filename ) first." << endl;
+    gSystem->Exit(1);
+  }
+  /* Read parameters for detector construction and mappign from file */
+  ParseParametersFromTable();
 }
 //_______________________________________________________________________
 int PHG4LFHcalDetector::IsInLFHcal(G4VPhysicalVolume* volume) const
@@ -79,15 +87,8 @@ void PHG4LFHcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
     std::cout << "PHG4LFHcalDetector: Begin Construction" << std::endl;
   }
 
-  if (m_Params->get_string_param("mapping_file").empty())
-  {
-    cout << "ERROR in PHG4LFHcalDetector: No mapping file specified. Abort detector construction." << endl;
-    cout << "Please run set_string_param(\"mapping_file\", std::string filename ) first." << endl;
-    gSystem->Exit(1);
-  }
-
-  /* Read parameters for detector construction and mappign from file */
-  ParseParametersFromTable();
+  // /* Read parameters for detector construction and mappign from file */
+  // ParseParametersFromTable();
 
   /* Create the cone envelope = 'world volume' for the crystal calorimeter */
   recoConsts* rc = recoConsts::instance();
@@ -153,6 +154,7 @@ PHG4LFHcalDetector::ConstructTower()
   G4int nlayers                   = TowerDz / (thickness_absorber + thickness_scintillator);
   G4Material* material_scintillator = G4Material::GetMaterial(m_Params->get_string_param("scintillator"));
   G4Material* material_absorber     = G4Material::GetMaterial(m_Params->get_string_param("absorber"));
+  G4Material* material_absorber_W     = G4Material::GetMaterial(m_Params->get_string_param("absorber_W"));
   G4Material* material_wls          = G4Material::GetMaterial(m_Params->get_string_param("scintillator"));
   
   //**********************************************************************************************
@@ -181,6 +183,12 @@ PHG4LFHcalDetector::ConstructTower()
                                                           WorldMaterial,
                                                           "miniblock_logic",
                                                           0, 0, 0);
+  G4LogicalVolume* miniblock_W_logic  = new G4LogicalVolume(miniblock_solid,
+                                                          WorldMaterial,
+                                                          "miniblock_W_logic",
+                                                          0, 0, 0);
+  m_DisplayAction->AddVolume(miniblock_logic, "Invisible");
+  m_DisplayAction->AddVolume(miniblock_W_logic, "Invisible");
   //**********************************************************************************************
   /* create logical & geometry volumes for scintillator and absorber plates to place inside mini read-out unit */
   //**********************************************************************************************
@@ -198,15 +206,23 @@ PHG4LFHcalDetector::ConstructTower()
                                                         "single_plate_absorber_logic",
                                                         0, 0, 0);
   m_AbsorberLogicalVolSet.insert(logic_absorber);
+  G4LogicalVolume* logic_absorber_W = new G4LogicalVolume(solid_absorber,
+                                                        material_absorber_W,
+                                                        "single_plate_absorber_W_logic",
+                                                        0, 0, 0);
+  m_AbsorberLogicalVolSet.insert(logic_absorber_W);
   G4LogicalVolume* logic_scint = new G4LogicalVolume(solid_scintillator,
                                                      material_scintillator,
                                                      "hLFHCAL_scintillator_plate_logic",
                                                      0, 0, 0);
   m_ScintiLogicalVolSet.insert(logic_scint);
   m_DisplayAction->AddVolume(logic_absorber, "Absorber");
+  m_DisplayAction->AddVolume(logic_absorber_W, "Absorber_W");
   m_DisplayAction->AddVolume(logic_scint, "Scintillator");
   string name_absorber      = m_TowerLogicNamePrefix + "_single_plate_absorber";
+  string name_absorber_W      = m_TowerLogicNamePrefix + "_single_plate_absorber_W";
   string name_scintillator  = m_TowerLogicNamePrefix + "_single_plate_scintillator";
+  // place Steel absorber and scintillator in miniblock
   new G4PVPlacement(0, G4ThreeVector(0, 0, -thickness_scintillator/2),
                     logic_absorber,
                     name_absorber,
@@ -217,6 +233,19 @@ PHG4LFHcalDetector::ConstructTower()
                     logic_scint,
                     name_scintillator,
                     miniblock_logic,
+                    0, 0, OverlapCheck());
+
+  // place Tungsten absorber and scintillator in a separate miniblock
+  new G4PVPlacement(0, G4ThreeVector(0, 0, -thickness_scintillator/2),
+                    logic_absorber_W,
+                    name_absorber,
+                    miniblock_W_logic,
+                    0, 0, OverlapCheck());
+
+  new G4PVPlacement(0, G4ThreeVector(0, 0, (thickness_absorber)/ 2.),
+                    logic_scint,
+                    name_scintillator,
+                    miniblock_W_logic,
                     0, 0, OverlapCheck());
 
   
@@ -252,10 +281,21 @@ PHG4LFHcalDetector::ConstructTower()
   //**********************************************************************************************
   /* create logical volume for single tower */
   //**********************************************************************************************
+  double SteelTowerLength = TowerDz;
+  double WTowerLength = 0.;
+  int nLayersSteel = nlayers;
+  int nLayersTungsten = 0;
+  if(m_Params->get_int_param("usetailcatcher")){
+    SteelTowerLength -= 10*(thickness_absorber+thickness_scintillator);
+    nLayersSteel -= 10;
+    nLayersTungsten = 10;
+    WTowerLength = 10*(thickness_absorber+thickness_scintillator);
+    std::cout << "using 10 layer tungsten tailcatcher in LFHCAL" << std::endl;
+  }
   G4VSolid* single_tower_solidRep = new G4Box("single_tower_solidRep",
-                                           (TowerDx - WlsDw) / 2.0,
-                                           TowerDy / 2.0,
-                                           TowerDz / 2.0);
+                                          (TowerDx - WlsDw) / 2.0,
+                                          TowerDy / 2.0,
+                                          SteelTowerLength / 2.0);
 
   G4LogicalVolume* single_tower_logicRep = new G4LogicalVolume(single_tower_solidRep,
                                                             WorldMaterial,
@@ -263,17 +303,39 @@ PHG4LFHcalDetector::ConstructTower()
                                                             0, 0, 0);
   string name_tower = m_TowerLogicNamePrefix;
   new G4PVReplica(name_tower,miniblock_logic,single_tower_logicRep,
-                      kZAxis,nlayers, thickness_absorber+thickness_scintillator,0);
+                      kZAxis,nLayersSteel, thickness_absorber+thickness_scintillator,0);
   
-  new G4PVPlacement(0, G4ThreeVector(-WlsDw / 2.0, 0, 0),
+  new G4PVPlacement(0, G4ThreeVector(-WlsDw / 2.0, 0, -WTowerLength/2),
                   single_tower_logicRep,
                   name_tower,
                   single_tower_logic,
                   0, 0, OverlapCheck());
 
-  
   m_DisplayAction->AddVolume(single_tower_logicRep, "SingleTower");
 
+  if(m_Params->get_int_param("usetailcatcher")){
+    G4VSolid* single_tower_W_solidRep = new G4Box("single_tower_W_solidRep",
+                                            (TowerDx - WlsDw) / 2.0,
+                                            TowerDy / 2.0,
+                                            WTowerLength / 2.0);
+
+    G4LogicalVolume* single_tower_W_logicRep = new G4LogicalVolume(single_tower_W_solidRep,
+                                                              WorldMaterial,
+                                                              "single_tower_W_logicRep",
+                                                              0, 0, 0);
+    string name_tower_W = m_TowerLogicNamePrefix + "_W";
+    new G4PVReplica(name_tower_W,miniblock_W_logic,single_tower_W_logicRep,
+                        kZAxis,nLayersTungsten, thickness_absorber+thickness_scintillator,0);
+
+    new G4PVPlacement(0, G4ThreeVector(-WlsDw / 2.0, 0, SteelTowerLength/2),
+                    single_tower_W_logicRep,
+                    name_tower_W,
+                    single_tower_logic,
+                    0, 0, OverlapCheck());
+
+    m_DisplayAction->AddVolume(single_tower_W_logicRep, "SingleTower_W");
+
+  }
   if (Verbosity() > 0)
   {
     std::cout << "PHG4LFHcalDetector: Building logical volume for single tower done." << std::endl;
@@ -494,7 +556,15 @@ int PHG4LFHcalDetector::ParseParametersFromTable()
   if (parit != m_GlobalParameterMap.end())
     m_Params->set_double_param("yoffset", parit->second);  
   
+  parit = m_GlobalParameterMap.find("usetailcatcher");
+  if (parit != m_GlobalParameterMap.end())
+    m_Params->set_int_param("usetailcatcher", parit->second);  
   
+  //! TODO make this better!
+  if(m_Params->get_int_param("usetailcatcher")){
+    m_Params->set_double_param("zdepthcatcheroffset", m_Params->get_double_param("place_z") + (m_Params->get_double_param("tower_dz")/2) - (10 * (m_Params->get_double_param("thickness_scintillator")+m_Params->get_double_param("thickness_absorber"))));
+    m_Params->set_int_param("nLayerOffsetTailcatcher",  (int)((m_Params->get_double_param("tower_dz")- (10 * (m_Params->get_double_param("thickness_scintillator")+m_Params->get_double_param("thickness_absorber"))))/(m_Params->get_double_param("thickness_scintillator")+m_Params->get_double_param("thickness_absorber"))));
+  }
   if (Verbosity() > 1){
     std::cout << "PHG4 detector LFHCal - Absorber: " << m_Params->get_double_param("thickness_absorber") << " cm\t Scintilator: "<< m_Params->get_double_param("thickness_scintillator") << " cm\t layers per segment: " << m_Params->get_int_param("nlayerspertowerseg") << std::endl;
   }
