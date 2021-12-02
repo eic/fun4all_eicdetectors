@@ -78,6 +78,8 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   , _do_FOCAL(false)
   , _do_LFHCAL(false)
   , _do_HITS(false)
+  , _do_HITS_ABSORBER(false)
+  , _do_HITS_CALO(false)
   , _do_TRACKS(false)
   , _do_CLUSTERS(false)
   , _do_VERTEX(false)
@@ -101,6 +103,8 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   , _hits_z2(0)
   , _hits_t(0)
   , _hits_edep(0)
+  , _hits_lightyield(0)
+  , _hits_isAbsorber(0)
 
   , _nTowers_FHCAL(0)
   , _tower_FHCAL_E(0)
@@ -363,6 +367,8 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   _hits_z2 = new float[_maxNHits];
   _hits_t = new float[_maxNHits];
   _hits_edep = new float[_maxNHits];
+  _hits_lightyield = new float[_maxNHits];
+  _hits_isAbsorber = new int[_maxNHits];
 
   _tower_FHCAL_E = new float[_maxNTowers];
   _tower_FHCAL_iEta = new int[_maxNTowers];
@@ -562,6 +568,8 @@ int EventEvaluatorEIC::Init(PHCompositeNode* topNode)
     _event_tree->Branch("hits_z2", _hits_z2, "hits_z2[nHits]/F");
     _event_tree->Branch("hits_t", _hits_t, "hits_t[nHits]/F");
     _event_tree->Branch("hits_edep", _hits_edep, "hits_edep[nHits]/F");
+    _event_tree->Branch("hits_lightyield", _hits_lightyield, "hits_lightyield[nHits]/F");
+    _event_tree->Branch("hits_isAbsorber", _hits_isAbsorber, "hits_isAbsorber[nHits]/I");
   }
 
   if (_do_TRACKS)
@@ -1183,6 +1191,14 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       // you need to add your layer name here to be saved! This has to be done
       // as we do not want to save thousands of calorimeter hits!
       if (
+          (_do_HITS_CALO && ( (GetProjectionNameFromIndex(iIndex).find("LFHCAL") != std::string::npos) ||
+                              (GetProjectionNameFromIndex(iIndex).find("HCALIN") != std::string::npos) ||
+                              (GetProjectionNameFromIndex(iIndex).find("HCALOUT") != std::string::npos) ||
+                              (GetProjectionNameFromIndex(iIndex).find("BECAL") != std::string::npos) ||
+                              (GetProjectionNameFromIndex(iIndex).find("FEMC") != std::string::npos) ||
+                              (GetProjectionNameFromIndex(iIndex).find("EHCAL") != std::string::npos) ||
+                              (GetProjectionNameFromIndex(iIndex).find("EEMCH") != std::string::npos) ||
+                              (GetProjectionNameFromIndex(iIndex).find("EEMC") != std::string::npos))) ||
           (GetProjectionNameFromIndex(iIndex).find("TTL") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("LBLVTX") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("BARR") != std::string::npos) ||
@@ -1227,6 +1243,8 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
             _hits_z2[_nHitsLayers] = hit_iter->second->get_z(1);
             _hits_t[_nHitsLayers] = hit_iter->second->get_t(0);
             _hits_edep[_nHitsLayers] = hit_iter->second->get_edep();
+            _hits_lightyield[_nHitsLayers] = hit_iter->second->get_light_yield();
+            _hits_isAbsorber[_nHitsLayers] = 0;
             _hits_layerID[_nHitsLayers] = iIndex;
             // cout << "i " << hit_iter->second->get_index_i() << "\tj " <<hit_iter->second->get_index_j() << "\tk " <<hit_iter->second->get_index_k() << "\tl " << hit_iter->second->get_index_l() << "\tsens_x "<< hit_iter->second->get_strip_z_index()<< "\tsens_y "<< hit_iter->second->get_strip_y_index()   << endl;
             if (truthinfocontainerHits)
@@ -1285,6 +1303,98 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
             cout << __PRETTY_FUNCTION__ << " could not find " << nodename << endl;
           }
           continue;
+        }
+        if(_do_HITS_ABSORBER){
+          string nodenameAbs = "G4HIT_ABSORBER_" + GetProjectionNameFromIndex(iIndex);
+          PHG4HitContainer* hitsAbs = findNode::getClass<PHG4HitContainer>(topNode, nodenameAbs);
+          if (hitsAbs)
+          {
+            if (Verbosity() > 1)
+            {
+              cout << __PRETTY_FUNCTION__ << " absorber number of hits: " << hitsAbs->size() << endl;
+            }
+            PHG4HitContainer::ConstRange hit_range = hitsAbs->getHits();
+            for (PHG4HitContainer::ConstIterator hit_iter = hit_range.first; hit_iter != hit_range.second; hit_iter++)
+            {
+              if (Verbosity() > 1)
+              {
+                cout << __PRETTY_FUNCTION__ << " found hit with id " << hit_iter->second->get_trkid() << endl;
+              }
+              if (_nHitsLayers > _maxNHits)
+              {
+                cout << __PRETTY_FUNCTION__ << " exceededed maximum hit array size! Please check where these hits come from!" << endl;
+                break;
+              }
+
+              _hits_x[_nHitsLayers] = hit_iter->second->get_x(0);
+              _hits_y[_nHitsLayers] = hit_iter->second->get_y(0);
+              _hits_z[_nHitsLayers] = hit_iter->second->get_z(0);
+              _hits_x2[_nHitsLayers] = hit_iter->second->get_x(1);
+              _hits_y2[_nHitsLayers] = hit_iter->second->get_y(1);
+              _hits_z2[_nHitsLayers] = hit_iter->second->get_z(1);
+              _hits_t[_nHitsLayers] = hit_iter->second->get_t(0);
+              _hits_edep[_nHitsLayers] = hit_iter->second->get_edep();
+              _hits_lightyield[_nHitsLayers] = hit_iter->second->get_light_yield();
+              _hits_isAbsorber[_nHitsLayers] = 1;
+              _hits_layerID[_nHitsLayers] = iIndex;
+              // cout << "i " << hit_iter->second->get_index_i() << "\tj " <<hit_iter->second->get_index_j() << "\tk " <<hit_iter->second->get_index_k() << "\tl " << hit_iter->second->get_index_l() << "\tsens_x "<< hit_iter->second->get_strip_z_index()<< "\tsens_y "<< hit_iter->second->get_strip_y_index()   << endl;
+              if (truthinfocontainerHits)
+              {
+                PHG4Particle* particle = truthinfocontainerHits->GetParticle(hit_iter->second->get_trkid());
+
+                if (particle->get_parent_id() != 0)
+                {
+                  PHG4Particle* g4particleMother = truthinfocontainerHits->GetParticle(hit_iter->second->get_trkid());
+                  int mcSteps = 0;
+                  while (g4particleMother->get_parent_id() != 0)
+                  {
+                    g4particleMother = truthinfocontainerHits->GetParticle(g4particleMother->get_parent_id());
+                    if (g4particleMother == NULL) break;
+                    mcSteps += 1;
+                  }
+                  if (mcSteps <= _depth_MCstack)
+                  {
+                    _hits_trueID[_nHitsLayers] = hit_iter->second->get_trkid();
+                  }
+                  else
+                  {
+                    PHG4Particle* g4particleMother2 = truthinfocontainerHits->GetParticle(hit_iter->second->get_trkid());
+                    int mcSteps2 = 0;
+                    while (g4particleMother2->get_parent_id() != 0 && (mcSteps2 < (mcSteps - _depth_MCstack + 1)))
+                    {
+                      g4particleMother2 = truthinfocontainerHits->GetParticle(g4particleMother2->get_parent_id());
+                      if (g4particleMother2 == NULL)
+                      {
+                        break;
+                      }
+                      else
+                      {
+                        _hits_trueID[_nHitsLayers] = g4particleMother2->get_parent_id();
+                        mcSteps2 += 1;
+                      }
+                    }
+                  }
+                }
+                else
+                {
+                  _hits_trueID[_nHitsLayers] = hit_iter->second->get_trkid();
+                }
+              }
+              _nHitsLayers++;
+            }
+            if (Verbosity() > 0)
+            {
+              cout << "saved\t" << _nHitsLayers << "\thits for absorber of " << GetProjectionNameFromIndex(iIndex) << endl;
+            }
+          }
+          else
+          {
+            if (Verbosity() > 0)
+            {
+              cout << __PRETTY_FUNCTION__ << " could not find " << nodename << endl;
+            }
+            continue;
+          }
         }
       }
     }
@@ -3923,6 +4033,8 @@ void EventEvaluatorEIC::resetBuffer()
       _hits_z2[ihit] = 0;
       _hits_t[ihit] = 0;
       _hits_edep[ihit] = 0;
+      _hits_lightyield[ihit] = 0;
+      _hits_isAbsorber[ihit] = 0;
     }
     if (Verbosity() > 0)
     {
