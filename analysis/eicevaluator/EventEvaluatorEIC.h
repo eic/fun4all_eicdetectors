@@ -64,6 +64,8 @@ class EventEvaluatorEIC : public SubsysReco
   void set_do_FOCAL(bool b) { _do_FOCAL = b; }
   void set_do_LFHCAL(bool b) { _do_LFHCAL = b; }
   void set_do_HITS(bool b) { _do_HITS = b; }
+  void set_do_HITS_ABSORBER(bool b) { _do_HITS_ABSORBER = b; }
+  void set_do_HITS_CALO(bool b) { _do_HITS_CALO = b; }
   void set_do_TRACKS(bool b) { _do_TRACKS = b; }
   void set_do_PID_LogLikelihood(bool b) { _do_PID_LogLikelihood = b; }
   void set_do_CLUSTERS(bool b) { _do_CLUSTERS = b; }
@@ -107,6 +109,8 @@ class EventEvaluatorEIC : public SubsysReco
   bool _do_FOCAL;
   bool _do_LFHCAL;
   bool _do_HITS;
+  bool _do_HITS_ABSORBER;
+  bool _do_HITS_CALO;
   bool _do_TRACKS;
   bool _do_CLUSTERS;
   bool _do_VERTEX;
@@ -135,6 +139,8 @@ class EventEvaluatorEIC : public SubsysReco
   float* _hits_z2;
   float* _hits_t;
   float* _hits_edep;
+  float* _hits_lightyield;
+  int* _hits_isAbsorber;
 
   // towers
   int _nTowers_FHCAL;
@@ -402,7 +408,7 @@ class EventEvaluatorEIC : public SubsysReco
   void resetGeometryArrays();                             ///< reset the tree variables before filling for a new event
   void resetBuffer();                                     ///< reset the tree variables before filling for a new event
 
-  const int _maxNHits = 10000;
+  const int _maxNHits = 1000000;
   const int _maxNTowers = 50 * 50;
   const int _maxNTowersCentral = 2000;
   const int _maxNTowersDR = 3000 * 3000;
