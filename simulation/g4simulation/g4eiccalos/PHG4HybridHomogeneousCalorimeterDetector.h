@@ -58,8 +58,12 @@ class PHG4HybridHomogeneousCalorimeterDetector : public PHG4Detector
   virtual int GetCaloType() const { return PHG4CrystalCalorimeterDefs::CaloType::nonprojective; }
 
  private:  // private stuff
+  G4LogicalVolume* ConstructSupportFrame(G4LogicalVolume *envelope);
   G4LogicalVolume *ConstructTower();
-  int PlaceTower(G4LogicalVolume *envelope, G4LogicalVolume *tower);
+  int PlaceTower(G4LogicalVolume *envelope, G4LogicalVolume *tower);//, G4LogicalVolume *support);
+  G4Material* GetScintillatorMaterial(float setting);
+  G4Material* GetTedlarMaterial();
+  G4Material* GetVM2000Material();
   int ParseParametersFromTable();
 
   struct towerposition

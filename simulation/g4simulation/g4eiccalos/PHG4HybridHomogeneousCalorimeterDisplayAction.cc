@@ -43,18 +43,45 @@ void PHG4HybridHomogeneousCalorimeterDisplayAction::ApplyDisplayAction(G4VPhysic
     m_VisAttVec.push_back(visatt);  // for later deletion
     if (it.second == "CarbonShell")
     {
-      visatt->SetColour(G4Colour::Black());
+      // visatt->SetForceWireframe(true);
+      visatt->SetColour(G4Colour(2 * 21. / 255, 2 * 27. / 255, 2 * 31. / 255));
+      // visatt->SetColour(G4Colour::Black());
+      // visatt->SetVisibility(false);
     }
     else if (it.second == "Crystal")
     {
       visatt->SetColour(G4Colour::Cyan());
+      visatt->SetForceSolid(true);
+      // visatt->SetForceWireframe(true);
+      // visatt->SetVisibility(false);
     }
     else if (it.second == "Envelope")
     {
       visatt->SetVisibility(false);
     }
+    else if (it.second == "VM2000")
+    {
+      visatt->SetColour(G4Colour::Gray());
+      visatt->SetForceSolid(true);
+      // visatt->SetForceWireframe(true);
+      // visatt->SetVisibility(false);
+    }
+    else if (it.second == "Tedlar")
+    {
+      visatt->SetColour(G4Colour::White());
+      visatt->SetForceSolid(true);
+      // visatt->SetForceWireframe(true);
+      // visatt->SetVisibility(false);
+    }
     else if (it.second == "Invisible")
     {
+      visatt->SetVisibility(false);
+    }
+    else if (it.second == "WIP")
+    {
+      visatt->SetColour(G4Colour::Green());
+      visatt->SetForceWireframe(true);
+      // visatt->SetVisibility(true);
       visatt->SetVisibility(false);
     }
     else if (it.second == "TwoByTwo")
