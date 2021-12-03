@@ -134,6 +134,11 @@ void PHG4HybridHomogeneousCalorimeterSubsystem::SetDefaultParameters()
 {
   // values in cm and degrees
   set_default_int_param("projective", 0);
+  set_default_int_param("carbon_frame_style", 0);
+  set_default_double_param("carbon_frame_depth", 1.0);
+  set_default_double_param("carbon_face_lip", 0.1);
+  set_default_double_param("reflective_foil_thickness", 0.0);
+  set_default_double_param("tedlar_thickness", 0.0);
 
   set_default_double_param("crystal_dx", 2.);
   set_default_double_param("crystal_dy", 2.);
