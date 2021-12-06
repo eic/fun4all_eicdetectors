@@ -13,6 +13,10 @@
 #include <Geant4/G4Cons.hh>
 #include <Geant4/G4Element.hh>  // for G4Element
 #include <Geant4/G4LogicalVolume.hh>
+#include <Geant4/G4MaterialPropertiesTable.hh>
+#include <Geant4/G4OpticalSurface.hh>
+#include <Geant4/G4LogicalBorderSurface.hh>
+#include <Geant4/G4LogicalSkinSurface.hh>
 #include <Geant4/G4Material.hh>
 #include <Geant4/G4PVPlacement.hh>
 #include <Geant4/G4RotationMatrix.hh>  // for G4RotationMatrix
@@ -48,6 +52,7 @@ PHG4HybridHomogeneousCalorimeterDetector::PHG4HybridHomogeneousCalorimeterDetect
   , _towerlogicnameprefix("HybridHomogeneousCalorimeterTower")
   , m_IsActive(m_Params->get_int_param("active"))
   , m_AbsorberActive(m_Params->get_int_param("absorberactive"))
+  , m_doLightProp(false)
 {
 }
 
@@ -153,13 +158,22 @@ G4LogicalVolume* PHG4HybridHomogeneousCalorimeterDetector::ConstructTower()
 
   G4double carbon_thickness = m_Params->get_double_param("carbon_gap") * cm;
   G4double airgap_crystal_carbon = m_Params->get_double_param("air_gap") * cm;
+
   G4double reflective_foil_thickness = m_Params->get_double_param("reflective_foil_thickness") * cm;
   G4double tedlar_thickness = m_Params->get_double_param("tedlar_thickness") * cm;
   bool doWrapping = false;
   if(reflective_foil_thickness>0 || tedlar_thickness>0) doWrapping = true;
+
+  G4int sensor_count = m_Params->get_int_param("sensor_count") * cm;
+  G4double sensor_dimension = m_Params->get_double_param("sensor_dimension") * cm;
+  G4double sensor_thickness = m_Params->get_double_param("sensor_thickness") * cm;
+  bool doSensors = false;
+  if(sensor_dimension>0 && sensor_count>0 && sensor_thickness>0) doSensors = true;
+
   G4double tower_dx = crystal_dx + 2 * (carbon_thickness + airgap_crystal_carbon + reflective_foil_thickness + tedlar_thickness);
   G4double tower_dy = crystal_dy + 2 * (carbon_thickness + airgap_crystal_carbon + reflective_foil_thickness + tedlar_thickness);
   G4double tower_dz = crystal_dz + 2 * (carbon_thickness);
+  if(doSensors) tower_dz = crystal_dz + 2 * (carbon_thickness) + sensor_thickness;
   int carbon_frame_style = m_Params->get_int_param("carbon_frame_style");
 
   recoConsts* rc = recoConsts::instance();
@@ -204,7 +218,7 @@ G4LogicalVolume* PHG4HybridHomogeneousCalorimeterDetector::ConstructTower()
     // name_shell.str("");
     // name_shell << _towerlogicnameprefix << "_single_absorber";
     string name_shell = _towerlogicnameprefix + "_single_shell";
-    G4VPhysicalVolume* physvol_carbon = new G4PVPlacement(0, G4ThreeVector(0, 0, 0), Carbon_shell_logic, name_shell, single_tower_logic, 0, 0, OverlapCheck());
+    G4VPhysicalVolume* physvol_carbon = new G4PVPlacement(0, G4ThreeVector(0, 0, sensor_thickness/2), Carbon_shell_logic, name_shell, single_tower_logic, 0, 0, OverlapCheck());
     m_PassiveVolumeSet.insert(physvol_carbon);
 
   } else if(carbon_frame_style==1){
@@ -228,7 +242,7 @@ G4LogicalVolume* PHG4HybridHomogeneousCalorimeterDetector::ConstructTower()
     string name_gap = _towerlogicnameprefix + "_single_shell";
     G4VPhysicalVolume* physvol_carbon_gap_front = new G4PVPlacement(0, G4ThreeVector(0, 0, tower_dz/2-carbon_frame_depth/2-carbon_thickness), logic_gap, name_gap + "_gap_front", single_tower_logic, 0, 0, OverlapCheck());
     m_PassiveVolumeSet.insert(physvol_carbon_gap_front);
-    G4VPhysicalVolume* physvol_carbon_gap_back = new G4PVPlacement(0, G4ThreeVector(0, 0, -tower_dz/2+carbon_frame_depth/2+carbon_thickness), logic_gap, name_gap + "_gap_back", single_tower_logic, 0, 0, OverlapCheck());
+    G4VPhysicalVolume* physvol_carbon_gap_back = new G4PVPlacement(0, G4ThreeVector(0, 0, -tower_dz/2+carbon_frame_depth/2+carbon_thickness+sensor_thickness), logic_gap, name_gap + "_gap_back", single_tower_logic, 0, 0, OverlapCheck());
     m_PassiveVolumeSet.insert(physvol_carbon_gap_back);
 
     G4double carbon_face_lip = m_Params->get_double_param("carbon_face_lip") * cm;
@@ -251,7 +265,7 @@ G4LogicalVolume* PHG4HybridHomogeneousCalorimeterDetector::ConstructTower()
     string name_face = _towerlogicnameprefix + "_single_shell";
     G4VPhysicalVolume* physvol_carbon_face_front = new G4PVPlacement(0, G4ThreeVector(0, 0, tower_dz/2-carbon_thickness/2), logic_face, name_face + "_face_front", single_tower_logic, 0, 0, OverlapCheck());
     m_PassiveVolumeSet.insert(physvol_carbon_face_front);
-    G4VPhysicalVolume* physvol_carbon_face_back = new G4PVPlacement(0, G4ThreeVector(0, 0, -tower_dz/2+carbon_thickness/2), logic_face, name_face + "_face_back", single_tower_logic, 0, 0, OverlapCheck());
+    G4VPhysicalVolume* physvol_carbon_face_back = new G4PVPlacement(0, G4ThreeVector(0, 0, -tower_dz/2+carbon_thickness/2+sensor_thickness), logic_face, name_face + "_face_back", single_tower_logic, 0, 0, OverlapCheck());
     m_PassiveVolumeSet.insert(physvol_carbon_face_back);
   }
   // wrap towers in VM2000 and Tedlar foils if requested
@@ -273,7 +287,7 @@ G4LogicalVolume* PHG4HybridHomogeneousCalorimeterDetector::ConstructTower()
     GetDisplayAction()->AddVolume(VM2000_foil_logic, "VM2000");
 
     string name_VM2000foil = _towerlogicnameprefix + "_single_foil_VM2000";
-    G4VPhysicalVolume* physvol_VM2000 = new G4PVPlacement(0, G4ThreeVector(0, 0, 0), VM2000_foil_logic, name_VM2000foil, single_tower_logic, 0, 0, OverlapCheck());
+    G4VPhysicalVolume* physvol_VM2000 = new G4PVPlacement(0, G4ThreeVector(0, 0, sensor_thickness/2), VM2000_foil_logic, name_VM2000foil, single_tower_logic, 0, 0, OverlapCheck());
     m_PassiveVolumeSet.insert(physvol_VM2000);
 
     /* create geometry volume for frame (carbon fiber shell) inside single_tower */
@@ -294,7 +308,7 @@ G4LogicalVolume* PHG4HybridHomogeneousCalorimeterDetector::ConstructTower()
     GetDisplayAction()->AddVolume(Tedlar_foil_logic, "Tedlar");
 
     string name_Tedlarfoil = _towerlogicnameprefix + "_single_foil_Tedlar";
-    G4VPhysicalVolume* physvol_Tedlar = new G4PVPlacement(0, G4ThreeVector(0, 0, 0), Tedlar_foil_logic, name_Tedlarfoil, single_tower_logic, 0, 0, OverlapCheck());
+    G4VPhysicalVolume* physvol_Tedlar = new G4PVPlacement(0, G4ThreeVector(0, 0, sensor_thickness/2), Tedlar_foil_logic, name_Tedlarfoil, single_tower_logic, 0, 0, OverlapCheck());
     m_PassiveVolumeSet.insert(physvol_Tedlar);
 
   }
@@ -304,14 +318,39 @@ G4LogicalVolume* PHG4HybridHomogeneousCalorimeterDetector::ConstructTower()
   G4Material *material_Scin   = G4Material::GetMaterial("G4_PbWO4");
   if(M_para>0) material_Scin  = GetScintillatorMaterial(M_para);
 
+  if(m_doLightProp){
+    //scintillation and optical properties for the crystal
+    CrystalTable(material_Scin);
+  }
+
   G4LogicalVolume* logic_crystal = new G4LogicalVolume(solid_crystal, material_Scin, "single_crystal_logic", 0, 0, 0);
+
+  if(m_doLightProp){
+    //crystal optical surface
+    SurfaceTable(logic_crystal);
+  }
   GetDisplayAction()->AddVolume(logic_crystal, "Crystal");
 
   /* Place crystal in logical tower volume */
   string name_crystal = _towerlogicnameprefix + "_single_crystal";
-  G4VPhysicalVolume* physvol_crys = new G4PVPlacement(0, G4ThreeVector(0, 0, 0), logic_crystal, name_crystal, single_tower_logic, 0, 0, OverlapCheck());
+  G4VPhysicalVolume* physvol_crys = new G4PVPlacement(0, G4ThreeVector(0, 0, sensor_thickness/2), logic_crystal, name_crystal, single_tower_logic, 0, 0, OverlapCheck());
   m_ActiveVolumeSet.insert(physvol_crys);
 
+  if(doSensors){
+    G4VSolid *single_sensor_solid = new G4Box("single_sensor_solid", sensor_dimension/2., sensor_dimension/2., sensor_thickness/2.);
+    G4Material *material_Sensor = G4Material::GetMaterial("G4_Si");
+
+    G4LogicalVolume* single_sensor_logic = new G4LogicalVolume(single_sensor_solid, material_Sensor, "single_sensor_logic", 0, 0, 0);
+    GetDisplayAction()->AddVolume(single_sensor_logic, "Sensor");
+
+    string name_sensor = _towerlogicnameprefix + "_single_sensor";
+
+    G4VPhysicalVolume* physvol_sensor_0 = new G4PVPlacement(0, G4ThreeVector(0, 0, -tower_dz/2 +carbon_thickness + sensor_thickness/2), single_sensor_logic, name_sensor, single_tower_logic, 0, 0, OverlapCheck());
+    m_ActiveVolumeSet.insert(physvol_sensor_0);
+    if(m_doLightProp){
+      MakeBoundary(physvol_crys, physvol_sensor_0);
+    }
+  }
   if (Verbosity() > 0)
     cout << "PHG4HybridHomogeneousCalorimeterDetector: Building logical volume for single tower done." << endl;
   
@@ -363,6 +402,7 @@ PHG4HybridHomogeneousCalorimeterDetector::GetScintillatorMaterial(float setting)
   if( (setting > 0.) && (setting < 1.) )
     {
       material_Scin = G4Material::GetMaterial("G4_PbWO4");
+  // g4MatData.push_back(0.0333333*mm/MeV);
       if (Verbosity()) cout << "Set G4_PbWO4..." << endl;
     }
   else if( (setting > 1.) && (setting < 2.) )
@@ -433,6 +473,94 @@ PHG4HybridHomogeneousCalorimeterDetector::GetScintillatorMaterial(float setting)
   
   return material_Scin;
 }
+
+
+//_____________________________________________________________________________
+void PHG4HybridHomogeneousCalorimeterDetector::CrystalTable(G4Material *mat) {
+
+  //scintillation and optical properties
+
+  //already done
+  if(mat->GetMaterialPropertiesTable()) return;
+
+  //G4cout << "OpTable::CrystalTable, " << mat->GetMaterialPropertiesTable() << G4endl;
+
+  const G4int ntab = 2;
+  G4double scin_en[] = {2.9*eV, 3.*eV}; // 420 nm (the range is 414 - 428 nm)
+  G4double scin_fast[] = {1., 1.};
+
+  G4MaterialPropertiesTable *tab = new G4MaterialPropertiesTable();
+
+  tab->AddProperty("FASTCOMPONENT", scin_en, scin_fast, ntab);
+  tab->AddConstProperty("FASTTIMECONSTANT", 6*ns);
+  tab->AddConstProperty("SCINTILLATIONYIELD", 200/MeV); // 200/MEV nominal  10
+  tab->AddConstProperty("RESOLUTIONSCALE", 1.);
+
+  G4double opt_en[] = {1.551*eV, 3.545*eV}; // 350 - 800 nm
+  G4double opt_r[] = {2.4, 2.4};
+  G4double opt_abs[] = {200*cm, 200*cm};
+
+  tab->AddProperty("RINDEX", opt_en, opt_r, ntab);
+  tab->AddProperty("ABSLENGTH", opt_en, opt_abs, ntab);
+
+  mat->SetMaterialPropertiesTable(tab);
+
+}//CrystalTable
+
+//_____________________________________________________________________________
+void PHG4HybridHomogeneousCalorimeterDetector::SurfaceTable(G4LogicalVolume *vol) {
+
+  //crystal optical surface
+
+  G4OpticalSurface *surface = new G4OpticalSurface("CrystalSurface", unified, polished, dielectric_metal);
+  //G4LogicalSkinSurface *csurf = 
+  new G4LogicalSkinSurface("CrystalSurfaceL", vol, surface);
+
+  //surface material
+  const G4int ntab = 2;
+  G4double opt_en[] = {1.551*eV, 3.545*eV}; // 350 - 800 nm
+  G4double reflectivity[] = {0.8, 0.8};
+  G4double efficiency[] = {0.9, 0.9};
+  G4MaterialPropertiesTable *surfmat = new G4MaterialPropertiesTable();
+  surfmat->AddProperty("REFLECTIVITY", opt_en, reflectivity, ntab);
+  surfmat->AddProperty("EFFICIENCY", opt_en, efficiency, ntab);
+  surface->SetMaterialPropertiesTable(surfmat);
+  //csurf->DumpInfo();
+
+}//SurfaceTable
+
+
+//_____________________________________________________________________________
+void PHG4HybridHomogeneousCalorimeterDetector::MakeBoundary(G4VPhysicalVolume *crystal, G4VPhysicalVolume *opdet) {
+
+  //optical boundary between the crystal and optical photons detector
+
+  G4OpticalSurface *surf = new G4OpticalSurface("OpDetS");
+  //surf->SetType(dielectric_dielectric); // photons go to the detector, must have rindex defined
+  surf->SetType(dielectric_metal); // photon is absorbed when reaching the detector, no material rindex required
+  //surf->SetFinish(ground);
+  surf->SetFinish(polished);
+  //surf->SetModel(unified);
+  surf->SetModel(glisur);
+
+  new G4LogicalBorderSurface("OpDetB", crystal, opdet, surf);
+
+  const G4int ntab = 2;
+  G4double opt_en[] = {1.551*eV, 3.545*eV}; // 350 - 800 nm
+  //G4double reflectivity[] = {0., 0.};
+  G4double reflectivity[] = {0.1, 0.1};
+  //G4double reflectivity[] = {0.9, 0.9};
+  //G4double reflectivity[] = {1., 1.};
+  G4double efficiency[] = {1., 1.};
+
+  G4MaterialPropertiesTable *surfmat = new G4MaterialPropertiesTable();
+  surfmat->AddProperty("REFLECTIVITY", opt_en, reflectivity, ntab);
+  surfmat->AddProperty("EFFICIENCY", opt_en, efficiency, ntab);
+  surf->SetMaterialPropertiesTable(surfmat);
+
+
+
+}//MakeBoundary
 
 
 G4Material* PHG4HybridHomogeneousCalorimeterDetector::GetTedlarMaterial()
@@ -713,7 +841,21 @@ int PHG4HybridHomogeneousCalorimeterDetector::ParseParametersFromTable()
   {
     m_Params->set_double_param("reflective_foil_thickness", parit->second);
   }
-
+  parit = _map_global_parameter.find("sensor_dimension");
+  if (parit != _map_global_parameter.end())
+  {
+    m_Params->set_double_param("sensor_dimension", parit->second);
+  }
+  parit = _map_global_parameter.find("sensor_count");
+  if (parit != _map_global_parameter.end())
+  {
+    m_Params->set_int_param("sensor_count", parit->second);
+  }
+  parit = _map_global_parameter.find("sensor_thickness");
+  if (parit != _map_global_parameter.end())
+  {
+    m_Params->set_double_param("sensor_thickness", parit->second);
+  }
   
   return 0;
 }

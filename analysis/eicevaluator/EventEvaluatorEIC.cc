@@ -3719,6 +3719,22 @@ int EventEvaluatorEIC::GetProjectionIndex(std::string projname)
   else if (projname.find("RWELL_2") != std::string::npos)
     return 112;
 
+
+  else if (projname.find("EST_0") != std::string::npos)
+    return 113;
+  else if (projname.find("EST_1") != std::string::npos)
+    return 114;
+  else if (projname.find("EST_2") != std::string::npos)
+    return 115;
+  else if (projname.find("EST_3") != std::string::npos)
+    return 116;
+  else if (projname.find("EST_4") != std::string::npos)
+    return 117;
+  else if (projname.find("EST_5") != std::string::npos)
+    return 118;
+  else if (projname.find("EST_6") != std::string::npos)
+    return 119;
+
   else if (projname.find("FGEM_0") != std::string::npos)
     return 120;
   else if (projname.find("FGEM_1") != std::string::npos)
@@ -3917,6 +3933,20 @@ std::string EventEvaluatorEIC::GetProjectionNameFromIndex(int projindex)
     return "RWELL_1";
   case 112:
     return "RWELL_2";
+
+  case 113:
+    return "EST_0";
+  case 114:
+    return "EST_1";
+  case 115:
+    return "EST_2";
+  case 116:
+    return "EST_3";
+  case 117:
+    return "EST_4";
+  case 118:
+    return "EST_5";
+
 
   case 120:
     return "FGEM_0";
