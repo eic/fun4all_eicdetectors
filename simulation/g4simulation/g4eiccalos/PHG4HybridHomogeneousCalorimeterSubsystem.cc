@@ -53,6 +53,7 @@ int PHG4HybridHomogeneousCalorimeterSubsystem::InitRunSubsystem(PHCompositeNode*
   m_Detector->OverlapCheck(CheckOverlap());
   m_Detector->SuperDetector(SuperDetector());
   m_Detector->DetectorId(GetLayer());
+  m_Detector->DoFullLightProp(_do_lightpropagation);
 
   if (GetParams()->get_int_param("active"))
   {
@@ -139,6 +140,9 @@ void PHG4HybridHomogeneousCalorimeterSubsystem::SetDefaultParameters()
   set_default_double_param("carbon_face_lip", 0.1);
   set_default_double_param("reflective_foil_thickness", 0.0);
   set_default_double_param("tedlar_thickness", 0.0);
+  set_default_double_param("sensor_thickness", 0.0);
+  set_default_double_param("sensor_dimension", 0.0);
+  set_default_int_param("sensor_count", 0);
 
   set_default_double_param("crystal_dx", 2.);
   set_default_double_param("crystal_dy", 2.);

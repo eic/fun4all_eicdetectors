@@ -47,6 +47,7 @@ class PHG4HybridHomogeneousCalorimeterDetector : public PHG4Detector
 
   int get_DetectorId() const { return m_DetectorId; }
   void DetectorId(const int i) { m_DetectorId = i; }
+  void DoFullLightProp(bool doProp) { m_doLightProp = doProp; }
 
   // ----- additional accessors used by derived classes: ------------
 
@@ -65,7 +66,9 @@ class PHG4HybridHomogeneousCalorimeterDetector : public PHG4Detector
   G4Material* GetTedlarMaterial();
   G4Material* GetVM2000Material();
   int ParseParametersFromTable();
-
+  void CrystalTable(G4Material *mat);
+  void SurfaceTable(G4LogicalVolume *vol);
+  void MakeBoundary(G4VPhysicalVolume *vol1, G4VPhysicalVolume *vol2);
   struct towerposition
   {
     G4double x;
@@ -94,6 +97,7 @@ class PHG4HybridHomogeneousCalorimeterDetector : public PHG4Detector
   // in the following variables
   int m_IsActive;
   int m_AbsorberActive;
+  bool m_doLightProp;
 };
 
 #endif

@@ -48,6 +48,9 @@ class PHG4HybridHomogeneousCalorimeterSubsystem : public PHG4DetectorSubsystem
   /** Select projective geometry for calorimeter
    */
   void SetProjectiveGeometry(const std::string &filename1, const std::string &filename2);
+  /** Select projective geometry for calorimeter
+   */
+  void DoFullLightPropagation(bool doProp) {_do_lightpropagation = doProp;};
 
  private:
   //! set detector specific parameters and their defaults
@@ -66,6 +69,7 @@ class PHG4HybridHomogeneousCalorimeterSubsystem : public PHG4DetectorSubsystem
   //! display attribute setting
   /*! derives from PHG4DisplayAction */
   PHG4DisplayAction *m_DisplayAction = nullptr;
+  bool _do_lightpropagation = false;
 };
 
 #endif
