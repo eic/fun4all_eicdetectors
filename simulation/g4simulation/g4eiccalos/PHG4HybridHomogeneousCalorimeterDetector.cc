@@ -195,7 +195,7 @@ G4LogicalVolume* PHG4HybridHomogeneousCalorimeterDetector::ConstructTower()
                                       crystal_dz / 2.0);
 
   G4Material *material_shell  = GetCarbonFiber();
-  if(carbon_frame_style==0){
+  if(carbon_frame_style==0 && carbon_thickness>0){
     /* create geometry volume for frame (carbon fiber shell) inside single_tower */
     G4VSolid* Carbon_hunk_solid = new G4Box(G4String("Carbon_hunk_solid"),
                                             tower_dx / 2.0,
