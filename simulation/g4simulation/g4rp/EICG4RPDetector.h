@@ -6,7 +6,7 @@
 #include <g4main/PHG4Detector.h>
 
 #include <set>
-#include <string>  // for string
+#include <string>
 
 class G4LogicalVolume;
 class G4VPhysicalVolume;
@@ -38,16 +38,18 @@ class EICG4RPDetector : public PHG4Detector
   void SuperDetector(const std::string &name) { m_SuperDetector = name; }
   const std::string SuperDetector() const { return m_SuperDetector; }
   int get_Layer() const { return m_Layer; }
+  void SetParametersFromFile();
+
   PHParameters *getParams();
 
  private:
   PHParameters *m_Params;
-
-  // active volumes
-  std::set<G4VPhysicalVolume *> m_PhysicalVolumesSet;
-  //  std::set<G4LogicalVolume *>   m_LogicalVolumesSet;
-  std::map<G4VPhysicalVolume *, int> m_PhysicalVolumesDet;
-  //  std::map<G4LogicalVolume *, int>   m_LogicalVolumesDet;
+  
+  // active volumes (i.e. G4_Si)
+  std::map<G4VPhysicalVolume *, int> m_ActivePhysicalVolumesMap;
+  // passive volumes (i.e. G4_Cu)
+  std::set<G4VPhysicalVolume *> m_PassivePhysicalVolumesSet;
+  
   int m_Layer;
   std::string m_SuperDetector;
 };

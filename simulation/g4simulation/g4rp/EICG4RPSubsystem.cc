@@ -1,13 +1,5 @@
 //____________________________________________________________________________..
 //
-// This is the interface to the framework. You only need to define the parameters
-// you use for your detector in the SetDefaultParameters() method here
-// The place to do this is marked by //implement your own here//
-// The parameters have no units, they need to be converted in the
-// EICG4RPDetector::ConstructMe() method
-// but the convention is as mentioned cm and deg
-//____________________________________________________________________________..
-//
 #include "EICG4RPSubsystem.h"
 
 #include "EICG4RPDetector.h"
@@ -24,6 +16,15 @@
 #include <phool/PHNodeIterator.h>
 #include <phool/PHObject.h>
 #include <phool/getClass.h>
+
+#include <TSystem.h>
+
+#include <cmath>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <utility> 
 
 //_______________________________________________________________________
 EICG4RPSubsystem::EICG4RPSubsystem(const std::string &name, const int lyr)
@@ -119,26 +120,30 @@ PHG4Detector *EICG4RPSubsystem::GetDetector(void) const
 //_______________________________________________________________________
 void EICG4RPSubsystem::SetDefaultParameters()
 {
-  // sizes are in cm
-  // angles are in deg
-  // units should be converted to G4 units when used
-  //implement your own here//
-  set_default_double_param("place_x", 0.);   //subdetector position
-  set_default_double_param("place_y", 0.);   //subdetector position
-  set_default_double_param("place_z", 0.);   //subdetector position
-  set_default_double_param("hole_x", 10.0);  //beam pipe cut off in the detector volume
-  set_default_double_param("hole_y", 5.0);   //beam pipe cut off in the detector volume
-  set_default_double_param("pipe_x", 0);     //beam pipe position
-  set_default_double_param("pipe_y", 0.);    //beam pipe position
-  set_default_double_param("pipe_z", 0.);    //beam pipe position
-  set_default_double_param("rot_y", 0.025);  //subdetector rotation
-  set_default_double_param("rp_x", 25.);     //detector outer radiues
-  set_default_double_param("rp_y", 10.);     //detector outer radiues
-  set_default_double_param("length", .1);    //detector length
+
+  std::string filename;
+  std::string calibroot = std::string(getenv("CALIBRATIONROOT"));
+  
+  if ( calibroot.empty() )
+  {    
+    std::cout << "no CALIBRATIONROOT environment variable" << std::endl;
+    gSystem->Exit(1);
+  }
+
+  filename = calibroot + "/RomanPots/RP_parameters_IP6.dat";
+
+  set_default_string_param("parameter_file", filename);  
+  set_default_double_param("FFenclosure_center", 2500);
+  set_default_int_param("layerNumber", 1);
   set_default_double_param("detid", 0.);     //detector id
   set_default_int_param("lightyield", 0);
   set_default_int_param("use_g4steps", 0);
   set_default_double_param("tmin", NAN);
   set_default_double_param("tmax", NAN);
-  set_default_string_param("material", "G4_PbWO4");  //detector material
+}
+
+//_______________________________________________________________________
+void EICG4RPSubsystem::SetParameterFile(std::string &filename)
+{
+  set_string_param("parameter_file", filename );
 }

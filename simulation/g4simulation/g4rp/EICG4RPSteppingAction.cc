@@ -79,8 +79,8 @@ EICG4RPSteppingAction::EICG4RPSteppingAction(EICG4RPSubsystem *subsys, EICG4RPDe
   , m_ActiveFlag(m_Params->get_int_param("active"))
   , m_BlackHoleFlag(m_Params->get_int_param("blackhole"))
   , m_UseG4StepsFlag(m_Params->get_int_param("use_g4steps"))
-  , m_Zmin(m_Params->get_double_param("place_z") * cm - m_Params->get_double_param("length") * cm / 2.)
-  , m_Zmax(m_Params->get_double_param("place_z") * cm + m_Params->get_double_param("length") * cm / 2.)
+  //, m_Zmin(m_Params->get_double_param("place_z") * cm - m_Params->get_double_param("length") * cm / 2.)
+  //, m_Zmax(m_Params->get_double_param("place_z") * cm + m_Params->get_double_param("length") * cm / 2.)
   , m_Tmin(m_Params->get_double_param("tmin") * ns)
   , m_Tmax(m_Params->get_double_param("tmax") * ns)
   , m_EdepSum(0)
@@ -88,8 +88,8 @@ EICG4RPSteppingAction::EICG4RPSteppingAction(EICG4RPSubsystem *subsys, EICG4RPDe
   , m_EionSum(0)
 {
   // G4 seems to have issues in the um range
-  m_Zmin -= copysign(m_Zmin, 1. / 1e6 * cm);
-  m_Zmax += copysign(m_Zmax, 1. / 1e6 * cm);
+  //m_Zmin -= copysign(m_Zmin, 1. / 1e6 * cm);
+  //m_Zmax += copysign(m_Zmax, 1. / 1e6 * cm);
 }
 
 //____________________________________________________________________________..
@@ -114,8 +114,8 @@ bool EICG4RPSteppingAction::UserSteppingAction(const G4Step *aStep, bool was_use
   //  == 0 outside of detector
   //   > 0 for hits in active volume
   //  < 0 for hits in passive material
-  int whichactive = m_Detector->IsInDetector(volume);
-  if (!whichactive)
+  int activeMaterial = m_Detector->IsInDetector(volume);
+  if ( ! activeMaterial )
   {
     return false;
   }
@@ -140,11 +140,11 @@ bool EICG4RPSteppingAction::UserSteppingAction(const G4Step *aStep, bool was_use
   // the detector id can be used to distinguish between them
   // hits can easily be analyzed later according to their detector id
   int layer_id = m_Detector->get_Layer();
-  int layer_type = 0;
-  if (m_Params->get_string_param("material") == "G4_Cu")
-    layer_type = 0;
-  else
-    layer_type = 1;
+  //int layer_type = 0;
+  //if (m_Params->get_string_param("material") == "G4_Cu")
+    //layer_type = 0;
+  //else
+    //layer_type = 1;
   // no hits for dead material
   //if (layer_id % 2 == 1) //Proper implementation for several layer configurations
   //  if (m_Params->get_string_param("material") == "G4_Cu")
@@ -274,13 +274,13 @@ bool EICG4RPSteppingAction::UserSteppingAction(const G4Step *aStep, bool was_use
         //        pp->GetShower()->add_g4hit_id(m_SaveHitContainer->GetID(), m_Hit->get_hit_id());
       }
     }
-    if (!hasMotherSubsystem() && (m_Hit->get_z(0) * cm > m_Zmax || m_Hit->get_z(0) * cm < m_Zmin))
-    {
-      std::cout << m_Detector->SuperDetector() << std::setprecision(9)
-                << " PHG4CylinderSteppingAction: Entry hit z " << m_Hit->get_z(0) * cm
-                << " outside acceptance,  zmin " << m_Zmin
-                << ", zmax " << m_Zmax << ", layer: " << layer_id << std::endl;
-    }
+    //if (!hasMotherSubsystem() && (m_Hit->get_z(0) * cm > m_Zmax || m_Hit->get_z(0) * cm < m_Zmin))
+    //{
+    //  std::cout << m_Detector->SuperDetector() << std::setprecision(9)
+    //            << " PHG4CylinderSteppingAction: Entry hit z " << m_Hit->get_z(0) * cm
+    //            << " outside acceptance,  zmin " << m_Zmin
+    //            << ", zmax " << m_Zmax << ", layer: " << layer_id << std::endl;
+    //}
     break;
   default:
     break;
@@ -338,16 +338,19 @@ bool EICG4RPSteppingAction::UserSteppingAction(const G4Step *aStep, bool was_use
   m_Hit->set_pz(1, postPoint->GetMomentum().z() / GeV);
 
   m_Hit->set_t(1, postPoint->GetGlobalTime() / nanosecond);
+  
   //sum up the energy to get total deposited
   m_Hit->set_edep(m_Hit->get_edep() + edep);
-  if (layer_type == 0) m_EabsSum += edep;
-  if (!hasMotherSubsystem() && (m_Hit->get_z(1) * cm > m_Zmax || m_Hit->get_z(1) * cm < m_Zmin))
-  {
-    std::cout << m_Detector->SuperDetector() << std::setprecision(9)
-              << " PHG4CylinderSteppingAction: Exit hit z " << m_Hit->get_z(1) * cm
-              << " outside acceptance zmin " << m_Zmin
-              << ", zmax " << m_Zmax << ", layer: " << layer_id << std::endl;
-  }
+  
+  //if (layer_type == 0) m_EabsSum += edep;
+  
+  //if (!hasMotherSubsystem() && (m_Hit->get_z(1) * cm > m_Zmax || m_Hit->get_z(1) * cm < m_Zmin))
+  //{
+  //  std::cout << m_Detector->SuperDetector() << std::setprecision(9)
+  //            << " PHG4CylinderSteppingAction: Exit hit z " << m_Hit->get_z(1) * cm
+  //            << " outside acceptance zmin " << m_Zmin
+  //            << ", zmax " << m_Zmax << ", layer: " << layer_id << std::endl;
+  //}
   if (geantino)
   {
     m_Hit->set_edep(-1);  // only energy=0 g4hits get dropped, this way geantinos survive the g4hit compression
@@ -404,7 +407,8 @@ bool EICG4RPSteppingAction::UserSteppingAction(const G4Step *aStep, bool was_use
       // update values at exit coordinates and set keep flag
       // of track to keep
       m_Hit->set_layer(layer_id);
-      m_Hit->set_hit_type(layer_type);
+      //m_Hit->set_hit_type(layer_type);
+      m_Hit->set_hit_type( 0 );
       m_Hit->set_eion(m_EionSum);
       m_HitContainer->AddHit(layer_id, m_Hit);
       if (m_SaveShower)

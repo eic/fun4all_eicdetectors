@@ -52,6 +52,8 @@ class EICG4RPSubsystem : public PHG4DetectorSubsystem
 
   void SaveAllHits(bool i = true) { m_SaveAllHitsFlag = i; }
 
+  void SetParameterFile( std::string &filename );
+
  protected:
   // \brief Set default parameter values
   void SetDefaultParameters() override;
