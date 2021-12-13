@@ -49,7 +49,6 @@ class EICG4RPSteppingAction : public PHG4SteppingAction
   //! pointer to hit container
   PHG4HitContainer* m_HitContainer;
   PHG4Hit* m_Hit;
-  //  PHG4HitContainer* m_SaveHitContainer;
   PHG4Shower* m_SaveShower;
   G4VPhysicalVolume* m_SaveVolPre;
   G4VPhysicalVolume* m_SaveVolPost;

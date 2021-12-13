@@ -55,12 +55,6 @@ EICG4RPDetector::EICG4RPDetector(PHG4Subsystem *subsys,
 //_______________________________________________________________
 int EICG4RPDetector::IsInDetector(G4VPhysicalVolume *volume) const
 {
-  //std::set<G4VPhysicalVolume *>::const_iterator iter = m_ActivePhysicalVolumesMap.find(volume);
-
-  //if (iter != m_ActivePhysicalVolumesSet.end())
-  //{
-  //  return 1;
-  //}
 
   if( m_ActivePhysicalVolumesMap.find( volume ) != m_ActivePhysicalVolumesMap.end() ) {
       return 1;
