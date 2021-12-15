@@ -79,7 +79,7 @@ bool PHG4ForwardEcalSteppingAction::UserSteppingAction(const G4Step* aStep, bool
 
   int layer_id = m_Detector->get_Layer();
   int towertype = m_Detector->get_TowerType();
-  unsigned int icopy = touch->GetVolume(2)->GetCopyNo();
+  unsigned int icopy = touch->GetVolume(3)->GetCopyNo();
   if (towertype != 2)
     icopy = touch->GetVolume(1)->GetCopyNo();
   int idx_j = icopy >> 16;

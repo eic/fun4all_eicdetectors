@@ -164,7 +164,7 @@ G4LogicalVolume* PHG4HybridHomogeneousCalorimeterDetector::ConstructTower()
   bool doWrapping = false;
   if(reflective_foil_thickness>0 || tedlar_thickness>0) doWrapping = true;
 
-  G4int sensor_count = m_Params->get_int_param("sensor_count") * cm;
+  G4int sensor_count = m_Params->get_int_param("sensor_count");
   G4double sensor_dimension = m_Params->get_double_param("sensor_dimension") * cm;
   G4double sensor_thickness = m_Params->get_double_param("sensor_thickness") * cm;
   bool doSensors = false;

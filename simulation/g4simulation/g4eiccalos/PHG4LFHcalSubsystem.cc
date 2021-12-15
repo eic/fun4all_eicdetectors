@@ -53,6 +53,7 @@ int PHG4LFHcalSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
   m_Detector->SuperDetector(SuperDetector());
   m_Detector->OverlapCheck(CheckOverlap());
   m_Detector->Verbosity(Verbosity());
+  m_Detector->DoFullLightProp(_do_lightpropagation);
 
   std::set<std::string> nodes;
   if (GetParams()->get_int_param("active"))
@@ -139,7 +140,7 @@ void PHG4LFHcalSubsystem::SetDefaultParameters()
   set_default_double_param("rMax1", 262.);
   set_default_double_param("rMin2", 5.);
   set_default_double_param("rMax2", 336.9);
-  set_default_double_param("wls_dw", 0.1);
+  set_default_double_param("wls_dw", 0.125);
   set_default_double_param("rot_x", 0.);
   set_default_double_param("rot_y", 0.);
   set_default_double_param("rot_z", 0.);
@@ -149,8 +150,11 @@ void PHG4LFHcalSubsystem::SetDefaultParameters()
   set_default_double_param("thickness_scintillator", 0.4);
   set_default_int_param("nlayerspertowerseg", 10);
   set_default_int_param("usetailcatcher", 0);
+  set_default_double_param("frame_width", 0.);
+  set_default_double_param("width_coating", 0.);
   set_default_double_param("zdepthcatcheroffset", 1000000.);
   set_default_int_param("nLayerOffsetTailcatcher", 0);
+  set_default_int_param("embed_fiber", 0);
   
 
   std::ostringstream mappingfilename;

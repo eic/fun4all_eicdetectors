@@ -56,6 +56,7 @@ int PHG4ForwardEcalSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
   {
     m_Detector = new PHG4ForwardEcalDetector(this, topNode, GetParams(), Name());
   }
+  m_Detector->DoFullLightProp(_do_lightpropagation);
 
   m_Detector->SuperDetector(SuperDetector());
   m_Detector->OverlapCheck(CheckOverlap());
@@ -130,6 +131,21 @@ PHG4Detector* PHG4ForwardEcalSubsystem::GetDetector(void) const
 
 void PHG4ForwardEcalSubsystem::SetDefaultParameters()
 {
+  set_default_int_param("nFibers", 0);
+  set_default_double_param("fiber_diam", 0.);
+  set_default_double_param("width_coating", 0.);
+  set_default_double_param("tower_readout_dz", 4.0);
+  set_default_double_param("clamp_plate_width", 0.0);
+  set_default_double_param("place_x", 0.);
+  set_default_double_param("place_y", 0.);
+  set_default_double_param("place_z", -108.);
+  set_default_double_param("rMin1", 2.2);
+  set_default_double_param("rMax1", 65.6);
+  set_default_double_param("rMin2", 2.6);
+  set_default_double_param("rMax2", 77.5);
+  set_default_double_param("rot_x", 0.);
+  set_default_double_param("rot_y", 180.);
+  set_default_double_param("rot_z", 0.);
   std::ostringstream mappingfilename;
   const char* calibroot = getenv("CALIBRATIONROOT");
   if (calibroot)

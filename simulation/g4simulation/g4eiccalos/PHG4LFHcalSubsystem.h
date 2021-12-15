@@ -41,6 +41,8 @@ class PHG4LFHcalSubsystem : public PHG4DetectorSubsystem
   PHG4SteppingAction *GetSteppingAction() const { return m_SteppingAction; }
   PHG4DisplayAction *GetDisplayAction() const { return m_DisplayAction; }
 
+  void DoFullLightPropagation(bool doProp) {_do_lightpropagation = doProp;};
+
   /** Set mapping file for calorimeter towers
    */
   void SetTowerMappingFile(const std::string &filename);
@@ -67,6 +69,7 @@ class PHG4LFHcalSubsystem : public PHG4DetectorSubsystem
   /*! derives from PHG4DisplayAction */
   PHG4DisplayAction *m_DisplayAction = nullptr;
   bool showdetailed = false;
+  bool _do_lightpropagation = false;
 };
 
 #endif

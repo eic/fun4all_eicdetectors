@@ -20,6 +20,8 @@ class PHG4ForwardEcalSubsystem : public PHG4DetectorSubsystem
    */
   PHG4ForwardEcalSubsystem(const std::string& name = "FORWARD_ECAL_DEFAULT", const int layer = 0);
 
+  void DoFullLightPropagation(bool doProp) {_do_lightpropagation = doProp;};
+
   /** Destructor
    */
   virtual ~PHG4ForwardEcalSubsystem();
@@ -68,6 +70,7 @@ class PHG4ForwardEcalSubsystem : public PHG4DetectorSubsystem
 
   int m_EICDetectorFlag = 0;
   bool showdetailed = false;
+  bool _do_lightpropagation = false;
 };
 
 #endif
