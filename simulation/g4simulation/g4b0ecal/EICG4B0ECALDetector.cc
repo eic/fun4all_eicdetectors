@@ -38,6 +38,7 @@
 #include <Geant4/G4SubtractionSolid.hh>
 #include <Geant4/G4SystemOfUnits.hh>
 #include <Geant4/G4Tubs.hh>
+#include <Geant4/G4Box.hh>
 #include <Geant4/G4RotationMatrix.hh>
 #include <Geant4/G4SystemOfUnits.hh>
 #include <Geant4/G4ThreeVector.hh>      // for G4ThreeVector
@@ -120,11 +121,20 @@ void EICG4B0ECALDetector::ConstructMe(G4LogicalVolume *logicWorld)
                                 m_Params->get_double_param("length") / 2. * cm,
                                 m_Params->get_double_param("startAngle") * degree,
                                 m_Params->get_double_param("spanningAngle") * degree);
-  G4VSolid *solidPipeHole = new G4Tubs("EICG4B0ECALIonPipeSolid",
+  G4VSolid *solidPipeHole = new G4Tubs("EICG4B0IonPipeSolid",
                                        0.,
-                                       m_Params->get_double_param("pipe_hole") * cm,
+                                       m_Params->get_double_param("pipe_hole_r") * cm,
                                        m_Params->get_double_param("length") * cm,
                                        0., 360. * degree);
+  G4VSolid *solidCableHole = new G4Tubs("EICG4B0CableSolid",
+                                       0.,
+                                       m_Params->get_double_param("cable_hole") * cm,
+                                       m_Params->get_double_param("length") * cm,
+                                       0., 360. * degree);
+  G4VSolid *solidPipeHole1 = new G4Box("EICG4B0PipeSolid1",
+                                m_Params->get_double_param("pipe_hole") / 2. * cm,
+                                m_Params->get_double_param("pipe_hole_r")  * cm,
+                                m_Params->get_double_param("length")  * cm);
   G4VSolid *solid1 = new G4Tubs("EICG4B0ECALSolid1",
                                 0.,
                                 (m_Params->get_double_param("outer_radius") - m_Params->get_double_param("d_radius")) * cm,
@@ -132,7 +142,10 @@ void EICG4B0ECALDetector::ConstructMe(G4LogicalVolume *logicWorld)
                                 (m_Params->get_double_param("startAngle") + m_Params->get_double_param("spanningAngle")) * degree,
                                 (360 - m_Params->get_double_param("spanningAngle")) * degree);
   G4UnionSolid *solid10 = new G4UnionSolid("EICG4B0ECALSolid10", solid0, solid1);
-  G4SubtractionSolid *solidB0 = new G4SubtractionSolid("EICG4B0ECALSolid", solid10, solidPipeHole, 0, G4ThreeVector(m_Params->get_double_param("pipe_x") * cm, m_Params->get_double_param("pipe_y") * cm, m_Params->get_double_param("pipe_z") * cm));
+  G4SubtractionSolid *solids = new G4SubtractionSolid("EICG4B0Solid", solid10, solidPipeHole, 0, G4ThreeVector((m_Params->get_double_param("pipe_x")+m_Params->get_double_param("pipe_hole")/2) * cm, m_Params->get_double_param("pipe_y") * cm, m_Params->get_double_param("pipe_z") * cm));
+  G4SubtractionSolid *solids1 = new G4SubtractionSolid("EICG4B0Solid", solids, solidPipeHole, 0, G4ThreeVector((m_Params->get_double_param("pipe_x")-m_Params->get_double_param("pipe_hole")/2) * cm, m_Params->get_double_param("pipe_y") * cm, m_Params->get_double_param("pipe_z") * cm));
+  G4SubtractionSolid *solids2 = new G4SubtractionSolid("EICG4B0Solid", solids1, solidCableHole, 0, G4ThreeVector(m_Params->get_double_param("cable_x") * cm, m_Params->get_double_param("cable_y") * cm, m_Params->get_double_param("cable_z") * cm));
+  G4SubtractionSolid *solidB0 = new G4SubtractionSolid("EICG4B0Solid", solids2, solidPipeHole1, 0, G4ThreeVector(m_Params->get_double_param("pipe_x") * cm, m_Params->get_double_param("pipe_y") * cm, m_Params->get_double_param("pipe_z") * cm));
   G4RotationMatrix *rotm = new G4RotationMatrix();
   if (_mapping_tower_file.empty())
   {

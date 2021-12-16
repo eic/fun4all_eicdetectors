@@ -133,7 +133,12 @@ void EICG4B0ECALSubsystem::SetDefaultParameters()
   set_default_double_param("place_z", 0.);          //subdetector position
   set_default_double_param("pipe_ir", 2.8);         //beam pipe inner radius (for future implementation)
   set_default_double_param("pipe_or", 3.05);        //beam pipe outer raidus (for future implementation)
-  set_default_double_param("pipe_hole", 5.0);       //beam pipe cut off radius in the detector volume
+  set_default_double_param("pipe_hole_r", 3.5);       //beam pipe cut off radius in the detector volume
+  set_default_double_param("pipe_hole", 1.0);       //beam pipe cut off rectangle in the detector volume
+  set_default_double_param("cable_hole", 2.0);       //beam pipe cut off radius in the detector volume
+  set_default_double_param("cable_x", -17.0);         //cable hole position
+  set_default_double_param("cable_y", 0.);           // position
+  set_default_double_param("cable_z", 0.);           // position
   set_default_double_param("pipe_x", -3.4);         //beam pipe position
   set_default_double_param("pipe_y", 0.);           //beam pipe position
   set_default_double_param("pipe_z", 0.);           //beam pipe position
