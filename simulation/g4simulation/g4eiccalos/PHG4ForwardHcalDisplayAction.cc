@@ -51,9 +51,8 @@ void PHG4ForwardHcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol
       visatt->SetColour(G4Colour::Gray());
       if (showdetails)
         visatt->SetVisibility(true);
-      else 
+      else
         visatt->SetVisibility(false);
-
     }
     else if (it.second == "FHcalEnvelope")
     {
@@ -64,7 +63,7 @@ void PHG4ForwardHcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol
       visatt->SetColour(G4Colour::White());
       if (showdetails)
         visatt->SetVisibility(true);
-      else 
+      else
         visatt->SetVisibility(false);
     }
     else if (it.second == "WLSplate")
@@ -72,7 +71,7 @@ void PHG4ForwardHcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol
       visatt->SetColour(G4Colour::Yellow());
       if (showdetails)
         visatt->SetVisibility(true);
-      else 
+      else
         visatt->SetVisibility(false);
     }
     else if (it.second == "SupportPlate")
@@ -80,7 +79,7 @@ void PHG4ForwardHcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol
       visatt->SetColour(G4Colour::Gray());
       if (showdetails)
         visatt->SetVisibility(true);
-      else 
+      else
         visatt->SetVisibility(false);
     }
     else if (it.second == "SingleTower")
@@ -88,7 +87,7 @@ void PHG4ForwardHcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol
       visatt->SetColour(G4Colour::Gray());
       if (showdetails)
         visatt->SetVisibility(false);
-      else 
+      else
         visatt->SetVisibility(true);
     }
     else

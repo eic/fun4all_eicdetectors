@@ -1,6 +1,5 @@
 #include "PHG4BarrelEcalSubsystem.h"
 #include "PHG4BarrelEcalDetector.h"
-#include "PHG4BarrelEcalDetector.h"
 #include "PHG4BarrelEcalDisplayAction.h"
 #include "PHG4BarrelEcalSteppingAction.h"
 
@@ -25,7 +24,7 @@
 #include <sstream>
 
 class PHG4Detector;
- 
+
 //_______________________________________________________________________
 PHG4BarrelEcalSubsystem::PHG4BarrelEcalSubsystem(const std::string& name, const int lyr)
   : PHG4DetectorSubsystem(name, lyr)
@@ -52,7 +51,7 @@ int PHG4BarrelEcalSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
   m_Detector->SuperDetector(SuperDetector());
   m_Detector->OverlapCheck(CheckOverlap());
   m_Detector->Verbosity(Verbosity());
-  
+
   std::set<std::string> nodes;
 
   if (GetParams()->get_int_param("active"))
@@ -142,16 +141,16 @@ void PHG4BarrelEcalSubsystem::SetDefaultParameters()
   set_default_double_param("max_radius", 138.);
   set_default_double_param("CenterZ_Shift", -41.);
   set_default_double_param("tower_length", 45.5);
-  set_default_double_param("cone1_h",30.);
-  set_default_double_param("cone1_dz",24.);
-  set_default_double_param("cone2_h",20.5);
-  set_default_double_param("cone2_dz",25.5);
-  set_default_double_param("thickness_wall",0.1);
-  set_default_double_param("silicon_width_half",0.05);
-  set_default_double_param("kapton_width_half",0.05);
-  set_default_double_param("SIO2_width_half",0.05);
-  set_default_double_param("Carbon_width_half",1.);
-  set_default_double_param("support_length",1.5);
+  set_default_double_param("cone1_h", 30.);
+  set_default_double_param("cone1_dz", 24.);
+  set_default_double_param("cone2_h", 20.5);
+  set_default_double_param("cone2_dz", 25.5);
+  set_default_double_param("thickness_wall", 0.1);
+  set_default_double_param("silicon_width_half", 0.05);
+  set_default_double_param("kapton_width_half", 0.05);
+  set_default_double_param("SIO2_width_half", 0.05);
+  set_default_double_param("Carbon_width_half", 1.);
+  set_default_double_param("support_length", 1.5);
 
   return;
 }
@@ -159,7 +158,6 @@ void PHG4BarrelEcalSubsystem::SetDefaultParameters()
 void PHG4BarrelEcalSubsystem::SetTowerMappingFile(const std::string& filename)
 {
   set_string_param("mapping_file", filename);
-  
 }
 
 void PHG4BarrelEcalSubsystem::Print(const std::string& what) const

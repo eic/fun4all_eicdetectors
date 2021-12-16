@@ -1,4 +1,4 @@
- // Tell emacs that this is a C++ source
+// Tell emacs that this is a C++ source
 //  -*- C++ -*-.
 #ifndef G4DETECTORS_PHG4BARRELECALDISPLAYACTION_H
 #define G4DETECTORS_PHG4BARRELECALDISPLAYACTION_H

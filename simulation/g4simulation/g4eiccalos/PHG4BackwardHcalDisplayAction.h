@@ -18,7 +18,7 @@ class PHG4BackwardHcalDisplayAction : public PHG4DisplayAction
  public:
   PHG4BackwardHcalDisplayAction(const std::string &name);
   PHG4BackwardHcalDisplayAction(const std::string &name, bool detailed);
-  
+
   virtual ~PHG4BackwardHcalDisplayAction();
 
   void ApplyDisplayAction(G4VPhysicalVolume *physvol);

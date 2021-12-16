@@ -3,39 +3,39 @@
 #include <calobase/RawTowerContainer.h>
 #include <calobase/RawTowerv2.h>
 
-#include <calobase/RawTower.h>                 // for RawTower
-#include <calobase/RawTowerDefs.h>             // for convert_name_to_caloid
-#include <calobase/RawTowerGeom.h>             // for RawTowerGeom
-#include <calobase/RawTowerGeomv3.h>
-#include <calobase/RawTowerGeomContainer.h>    // for RawTowerGeomContainer
+#include <calobase/RawTower.h>               // for RawTower
+#include <calobase/RawTowerDefs.h>           // for convert_name_to_caloid
+#include <calobase/RawTowerGeom.h>           // for RawTowerGeom
+#include <calobase/RawTowerGeomContainer.h>  // for RawTowerGeomContainer
 #include <calobase/RawTowerGeomContainerv1.h>
+#include <calobase/RawTowerGeomv3.h>
 
 #include <g4main/PHG4Hit.h>
 #include <g4main/PHG4HitContainer.h>
 
 #include <fun4all/Fun4AllReturnCodes.h>
-#include <fun4all/SubsysReco.h>                // for SubsysReco
+#include <fun4all/SubsysReco.h>  // for SubsysReco
 
 #include <phool/PHCompositeNode.h>
 #include <phool/PHIODataNode.h>
-#include <phool/PHNode.h>                      // for PHNode
+#include <phool/PHNode.h>  // for PHNode
 #include <phool/PHNodeIterator.h>
-#include <phool/PHObject.h>                    // for PHObject
+#include <phool/PHObject.h>  // for PHObject
 #include <phool/getClass.h>
-#include <phool/phool.h>                       // for PHWHERE
+#include <phool/phool.h>  // for PHWHERE
 
 #include <TRotation.h>
 #include <TVector3.h>
 
-#include <cstdlib>                            // for exit
-#include <exception>                           // for exception
+#include <bitset>
+#include <cstdlib>    // for exit
+#include <exception>  // for exception
 #include <fstream>
 #include <iostream>
 #include <map>
 #include <sstream>
 #include <stdexcept>
-#include <utility>                             // for pair, make_pair
-#include <bitset>
+#include <utility>  // for pair, make_pair
 
 using namespace std;
 
@@ -124,8 +124,7 @@ int RawTowerBuilderByHitIndexLHCal::process_event(PHCompositeNode *topNode)
     RawTowerDefs::keytype calotowerid = RawTowerDefs::encode_towerid(m_CaloId,
                                                                      g4hit_i->get_index_j(),
                                                                      g4hit_i->get_index_k(),
-                                                                     g4hit_i->get_index_l()
-                                                                    );
+                                                                     g4hit_i->get_index_l());
     /* add the energy to the corresponding tower */
     RawTowerv2 *tower = dynamic_cast<RawTowerv2 *>(m_Towers->getTower(calotowerid));
     if (!tower)
@@ -133,13 +132,13 @@ int RawTowerBuilderByHitIndexLHCal::process_event(PHCompositeNode *topNode)
       tower = new RawTowerv2(calotowerid);
       tower->set_energy(0);
       m_Towers->AddTower(tower->get_id(), tower);
-      if (Verbosity() > 2) 
+      if (Verbosity() > 2)
       {
-        std::cout << "in: " <<  g4hit_i->get_index_j() << "\t" << g4hit_i->get_index_k() << "\t" << g4hit_i->get_index_l() << std::endl;
-        std::cout << "decoded: " <<  tower->get_bineta() << "\t" << tower->get_binphi()  << "\t" << tower->get_binl()  << std::endl;
+        std::cout << "in: " << g4hit_i->get_index_j() << "\t" << g4hit_i->get_index_k() << "\t" << g4hit_i->get_index_l() << std::endl;
+        std::cout << "decoded: " << tower->get_bineta() << "\t" << tower->get_binphi() << "\t" << tower->get_binl() << std::endl;
       }
     }
-    tower->add_ecell((g4hit_i->get_index_j() << (10+4)) + (g4hit_i->get_index_k()<< 4)+ g4hit_i->get_index_l(), g4hit_i->get_light_yield());
+    tower->add_ecell((g4hit_i->get_index_j() << (10 + 4)) + (g4hit_i->get_index_k() << 4) + g4hit_i->get_index_l(), g4hit_i->get_light_yield());
     tower->set_energy(tower->get_energy() + g4hit_i->get_light_yield());
     tower->add_eshower(g4hit_i->get_shower_id(), g4hit_i->get_edep());
   }
@@ -154,7 +153,7 @@ int RawTowerBuilderByHitIndexLHCal::process_event(PHCompositeNode *topNode)
   m_Towers->compress(m_Emin);
   if (Verbosity())
   {
-    std::cout << "storing towers: "<< m_Towers->size() << std::endl;
+    std::cout << "storing towers: " << m_Towers->size() << std::endl;
     cout << "Energy lost by dropping towers with less than " << m_Emin
          << " energy, lost energy: " << towerE - m_Towers->getTotalEdep() << endl;
     m_Towers->identify();
@@ -249,7 +248,6 @@ bool RawTowerBuilderByHitIndexLHCal::ReadGeometryFromTable()
     }
   }
 
-  
   string line_mapping;
 
   while (getline(istream_mapping, line_mapping))
@@ -282,7 +280,8 @@ bool RawTowerBuilderByHitIndexLHCal::ReadGeometryFromTable()
         exit(1);
       }
 
-      for (int il = 0; il < m_NTowerSeg; il++){
+      for (int il = 0; il < m_NTowerSeg; il++)
+      {
         /* Construct unique Tower ID */
         unsigned int temp_id = RawTowerDefs::encode_towerid(m_CaloId, idx_j, idx_k, il);
 
@@ -290,12 +289,12 @@ bool RawTowerBuilderByHitIndexLHCal::ReadGeometryFromTable()
         RawTowerGeom *temp_geo = new RawTowerGeomv3(temp_id);
         temp_geo->set_center_x(pos_x);
         temp_geo->set_center_y(pos_y);
-        
-        float blocklength = m_NLayersPerTowerSeg*(m_ThicknessAbsorber+m_ThicknessScintilator);
-        temp_geo->set_center_z(pos_z-0.5*size_z+(il+0.5)*blocklength);
+
+        float blocklength = m_NLayersPerTowerSeg * (m_ThicknessAbsorber + m_ThicknessScintilator);
+        temp_geo->set_center_z(pos_z - 0.5 * size_z + (il + 0.5) * blocklength);
         temp_geo->set_size_x(size_x);
         temp_geo->set_size_y(size_y);
-        temp_geo->set_size_z(m_NLayersPerTowerSeg*(m_ThicknessAbsorber+m_ThicknessScintilator));
+        temp_geo->set_size_z(m_NLayersPerTowerSeg * (m_ThicknessAbsorber + m_ThicknessScintilator));
         temp_geo->set_tower_type((int) type);
 
         /* Insert this tower into position map */
@@ -318,7 +317,7 @@ bool RawTowerBuilderByHitIndexLHCal::ReadGeometryFromTable()
       }
 
       m_GlobalParameterMap.insert(make_pair(parname, parval));
-      
+
       /* Update member variables for global parameters based on parsed parameter file */
       std::map<string, double>::iterator parit;
 
@@ -359,22 +358,22 @@ bool RawTowerBuilderByHitIndexLHCal::ReadGeometryFromTable()
         m_ThicknessScintilator = parit->second;
 
       if ((m_ThicknessAbsorber + m_ThicknessScintilator) != 0.)
-        m_NLayers = (int)(m_TowerDepth / (m_ThicknessAbsorber + m_ThicknessScintilator));
+        m_NLayers = (int) (m_TowerDepth / (m_ThicknessAbsorber + m_ThicknessScintilator));
 
       parit = m_GlobalParameterMap.find("nlayerspertowerseg");
       if (parit != m_GlobalParameterMap.end())
-        m_NLayersPerTowerSeg = (int)parit->second;
+        m_NLayersPerTowerSeg = (int) parit->second;
 
       if (m_NLayersPerTowerSeg > 0)
-        m_NTowerSeg = (int)(m_NLayers/m_NLayersPerTowerSeg);
-      
+        m_NTowerSeg = (int) (m_NLayers / m_NLayersPerTowerSeg);
+
       if (Verbosity() > 1)
       {
-        std::cout << "RawTowerBuilder LHCal - Absorber: " << m_ThicknessAbsorber << " cm\t Scintilator: "<< m_ThicknessScintilator << " cm\t #Layers: " << m_NLayers << "\t layers per segment: " << m_NLayersPerTowerSeg <<  "\t #segment: "<< m_NTowerSeg << std::endl;
+        std::cout << "RawTowerBuilder LHCal - Absorber: " << m_ThicknessAbsorber << " cm\t Scintilator: " << m_ThicknessScintilator << " cm\t #Layers: " << m_NLayers << "\t layers per segment: " << m_NLayersPerTowerSeg << "\t #segment: " << m_NTowerSeg << std::endl;
       }
     }
   }
-    
+
   /* Correct tower geometries for global calorimter translation / rotation 
    * after reading parameters from file */
   RawTowerGeomContainer::ConstRange all_towers = m_Geoms->get_tower_geometries();

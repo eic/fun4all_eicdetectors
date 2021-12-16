@@ -15,14 +15,18 @@
 
 #include <Geant4/G4Box.hh>
 #include <Geant4/G4Cons.hh>
-#include <Geant4/G4SubtractionSolid.hh>
+#include <Geant4/G4LogicalSkinSurface.hh>
 #include <Geant4/G4LogicalVolume.hh>
 #include <Geant4/G4Material.hh>
+#include <Geant4/G4MaterialPropertiesTable.hh>
+#include <Geant4/G4OpticalSurface.hh>
 #include <Geant4/G4PVPlacement.hh>
 #include <Geant4/G4PVReplica.hh>
 #include <Geant4/G4PhysicalConstants.hh>
+#include <Geant4/G4Polyhedra.hh>
 #include <Geant4/G4RotationMatrix.hh>  // for G4RotationMatrix
 #include <Geant4/G4String.hh>          // for G4String
+#include <Geant4/G4SubtractionSolid.hh>
 #include <Geant4/G4SystemOfUnits.hh>
 #include <Geant4/G4ThreeVector.hh>  // for G4ThreeVector
 #include <Geant4/G4Transform3D.hh>  // for G4Transform3D
@@ -50,6 +54,7 @@ PHG4ForwardEcalDetector::PHG4ForwardEcalDetector(PHG4Subsystem* subsys, PHCompos
   , m_GdmlConfig(PHG4GDMLUtility::GetOrMakeConfigNode(Node))
   , m_ActiveFlag(m_Params->get_int_param("active"))
   , m_AbsorberActiveFlag(m_Params->get_int_param("absorberactive"))
+  , m_doLightProp(false)
 {
   for (int i = 0; i < 3; i++)
   {
@@ -109,19 +114,19 @@ void PHG4ForwardEcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
   recoConsts* rc = recoConsts::instance();
   G4Material* WorldMaterial = G4Material::GetMaterial(rc->get_StringFlag("WorldMaterial"));
 
-  
-  G4VSolid *beampipe_cutout = new G4Cons("FEMC_beampipe_cutout",
+  G4double tower_readout_dz = m_Params->get_double_param("tower_readout_dz") * cm;
+
+  G4VSolid* beampipe_cutout = new G4Cons("FEMC_beampipe_cutout",
                                          0, m_RMin[0],
                                          0, m_RMin[1],
-                                         m_dZ / 2.0,
+                                         (m_dZ + tower_readout_dz),
                                          0, 2 * M_PI);
-  G4VSolid *ecal_envelope_solid = new G4Cons("FEMC_envelope_solid_cutout",
-                                            0, m_RMax[0],
-                                            0, m_RMax[1],
-                                            m_dZ / 2.0,
-                                            0, 2 * M_PI);
+  G4VSolid* ecal_envelope_solid = new G4Cons("FEMC_envelope_solid_cutout",
+                                             0, m_RMax[0],
+                                             0, m_RMax[1],
+                                             (m_dZ + tower_readout_dz) / 2.0,
+                                             0, 2 * M_PI);
   ecal_envelope_solid = new G4SubtractionSolid(G4String("hFEMC_envelope_solid"), ecal_envelope_solid, beampipe_cutout, 0, G4ThreeVector(m_Params->get_double_param("xoffset") * cm, m_Params->get_double_param("yoffset") * cm, 0.));
-
 
   G4LogicalVolume* ecal_envelope_log = new G4LogicalVolume(ecal_envelope_solid, WorldMaterial, "hFEMC_envelope", 0, 0, 0);
 
@@ -137,7 +142,7 @@ void PHG4ForwardEcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
   /* Place envelope cone in simulation */
   std::string name_envelope = m_TowerLogicNamePrefix + "_envelope";
 
-  new G4PVPlacement(G4Transform3D(ecal_rotm, G4ThreeVector(m_PlaceX, m_PlaceY, m_PlaceZ)),
+  new G4PVPlacement(G4Transform3D(ecal_rotm, G4ThreeVector(m_PlaceX, m_PlaceY, m_PlaceZ - tower_readout_dz / 2)),
                     ecal_envelope_log, name_envelope, logicWorld, 0, false, OverlapCheck());
 
   /* Construct single calorimeter towers */
@@ -172,162 +177,187 @@ PHG4ForwardEcalDetector::ConstructTower(int type)
   {
     std::cout << "PHG4ForwardEcalDetector: Build logical volume for single tower, type = " << type << std::endl;
   }
-  assert(type >= 0 && type <= 6);
-  // This method allows construction of Type 0,1 tower (PbGl or PbW04).
-  // Call a separate routine to generate Type 2 towers (PbSc)
-  // Call a separate routine to generate Type 3-6 towers (E864 Pb-Scifi)
-
-  if (type == 2) 
-    return ConstructTowerType2();
-  if ((type == 3) || (type == 4) || (type == 5) || (type == 6)) 
-    return ConstructTowerType3_4_5_6(type);
-
   /* create logical volume for single tower */
   recoConsts* rc = recoConsts::instance();
   G4Material* WorldMaterial = G4Material::GetMaterial(rc->get_StringFlag("WorldMaterial"));
 
-  G4Material* material_scintillator;
-  double tower_dx = m_TowerDx[type];
-  double tower_dy = m_TowerDy[type];
-  double tower_dz = m_TowerDz[type];
-  std::cout << "building type " << type << " towers" << std::endl;
-  if (type == 0)
-  {
-    material_scintillator = G4Material::GetMaterial("G4_LEAD_OXIDE");
-  }
-  else if (type == 1)
-  {
-    material_scintillator = G4Material::GetMaterial("G4_PbWO4");
-  }
-  else
-  {
-    std::cout << "PHG4ForwardEcalDetector::ConstructTower invalid type = " << type << std::endl;
-    material_scintillator = nullptr;
-  }
-
-  std::string single_tower_solid_name = m_TowerLogicNamePrefix + "_single_scintillator_type" + std::to_string(type);
-
-  G4VSolid* single_tower_solid = new G4Box(single_tower_solid_name,
-                                           tower_dx / 2.0,
-                                           tower_dy / 2.0,
-                                           tower_dz / 2.0);
-
-  std::string single_tower_logic_name = "single_tower_logic_type" + std::to_string(type);
-
-  G4LogicalVolume* single_tower_logic = new G4LogicalVolume(single_tower_solid,
-                                                            WorldMaterial,
-                                                            single_tower_logic_name,
-                                                            0, 0, 0);
-
-  std::string single_scintillator_name = "single_scintillator_type" + std::to_string(type);
-
-  G4VSolid* solid_scintillator = new G4Box(single_scintillator_name,
-                                           tower_dx / 2.0,
-                                           tower_dy / 2.0,
-                                           tower_dz / 2.0);
-
-  std::string hEcal_scintillator_plate_logic_name = "hFEMC_scintillator_plate_logic_type" + std::to_string(type);
-
-  G4LogicalVolume* logic_scint = new G4LogicalVolume(solid_scintillator,
-                                                     material_scintillator,
-                                                     hEcal_scintillator_plate_logic_name,
-                                                     0, 0, 0);
-
-  GetDisplayAction()->AddVolume(logic_scint, "Scintillator");
-
-  /* place physical volumes for scintillator */
-
-  std::string name_scintillator = m_TowerLogicNamePrefix + "_single_plate_scintillator";
-
-  new G4PVPlacement(0, G4ThreeVector(0.0, 0.0, 0.0),
-                    logic_scint,
-                    name_scintillator,
-                    single_tower_logic,
-                    0, 0, OverlapCheck());
-
-  GetDisplayAction()->AddVolume(single_tower_logic, "SingleTower");
-
-  if (Verbosity() > 0)
-  {
-    std::cout << "PHG4ForwardEcalDetector: Building logical volume for single tower done, type = " << type << std::endl;
-  }
-
-  return single_tower_logic;
-}
-
-G4LogicalVolume*
-PHG4ForwardEcalDetector::ConstructTowerType2()
-{
-  if (Verbosity() > 0)
-  {
-    std::cout << "PHG4ForwardEcalDetector: Build logical volume for single tower type 2..." << std::endl;
-  }
-  /* create logical volume for single tower */
-  recoConsts* rc = recoConsts::instance();
-  G4Material* WorldMaterial = G4Material::GetMaterial(rc->get_StringFlag("WorldMaterial"));
+  /* create geometry volumes for scintillator and absorber plates to place inside single_tower */
+  // PHENIX EMCal JGL 3/27/2016
+  G4int nlayers = 66;
+  G4double thickness_layer = m_TowerDz[2] / (float) nlayers;
+  // update layer thickness with https://doi.org/10.1016/S0168-9002(02)01954-X
+  G4double thickness_cell = 5.6 * mm;
+  G4double thickness_absorber = 1.55 * mm;     // 1.55mm absorber
+  G4double thickness_scintillator = 4.0 * mm;  // 4mm scintillator
+  // notched in TiO2 coating in scintillator plate
+  G4double width_coating = m_Params->get_double_param("width_coating") * cm;  // 4mm scintillator
+  G4Material* material_scintillator = GetScintillatorMaterial();              //G4Material::GetMaterial("G4_POLYSTYRENE");
+  G4Material* material_absorber = G4Material::GetMaterial("G4_Pb");
+  G4int nFibers = m_Params->get_int_param("nFibers");
+  G4double fiber_diam = m_Params->get_double_param("fiber_diam") * cm;  // 4mm scintillator
+  G4double fiber_extra_length = 0.0;
+  // additional fiber length at end of calorimeter
+  if (fiber_diam > 0) fiber_extra_length = 0.5 * cm;
+  // width of plate in front of FEMC for clamping all layers
+  G4double clamp_plate_width = m_Params->get_double_param("clamp_plate_width") * cm;
+  // depth of readout (4cm)
+  G4double tower_readout_dz = m_Params->get_double_param("tower_readout_dz") * cm;
 
   G4VSolid* single_tower_solid = new G4Box("single_tower_solid2",
                                            m_TowerDx[2] / 2.0,
                                            m_TowerDy[2] / 2.0,
-                                           m_TowerDz[2] / 2.0);
+                                           (m_TowerDz[2] + tower_readout_dz) / 2.0);
+  G4VSolid* single_tower_solid_replica = new G4Box("single_tower_solid_replica",
+                                                   m_TowerDx[2] / 2.0,
+                                                   m_TowerDy[2] / 2.0,
+                                                   m_TowerDz[2] / 2.0);
 
   G4LogicalVolume* single_tower_logic = new G4LogicalVolume(single_tower_solid,
                                                             WorldMaterial,
                                                             "single_tower_logic2",
                                                             0, 0, 0);
 
-  /* create geometry volumes for scintillator and absorber plates to place inside single_tower */
-  // PHENIX EMCal JGL 3/27/2016
-  G4int nlayers                   = 66;
-  G4double thickness_layer        = m_TowerDz[2] / (float) nlayers;
-  // update layer thickness with https://doi.org/10.1016/S0168-9002(02)01954-X
-  G4double thickness_cell = 5.6 * mm;
-  G4double thickness_absorber     = 1.5 * mm;      // 1.5mm absorber
-  G4double thickness_scintillator = 4.0 * mm;  // 4mm scintillator
-  G4Material* material_scintillator = G4Material::GetMaterial("G4_POLYSTYRENE");
-  G4Material* material_absorber     = G4Material::GetMaterial("G4_Pb");
+  GetDisplayAction()->AddVolume(single_tower_logic, "SingleTower");
 
   if (Verbosity())
   {
-    std::cout <<" m_TowerDz[2] = "<< m_TowerDz[2]<< " thickness_layer = "<<thickness_layer<<" thickness_cell = "<<thickness_cell<<std::endl;
+    std::cout << " m_TowerDz[2] = " << m_TowerDz[2] << " thickness_layer = " << thickness_layer << " thickness_cell = " << thickness_cell << std::endl;
   }
 
-  if (thickness_layer<=thickness_cell)
+  if (thickness_layer <= thickness_cell)
   {
-    std::cout<<__PRETTY_FUNCTION__
-        <<"Tower size z (m_TowerDz[2) from database is too thin. "
-        <<"It does not fit the layer structure as described in https://doi.org/10.1016/S0168-9002(02)01954-X !"<<std::endl
-        <<"Abort"<<std::endl;
-    std::cout <<" m_TowerDz[2] = "<< m_TowerDz[2]<<" i.e. nlayers "<<nlayers<< " * thickness_layer "<<thickness_layer<<" <= thickness_cell "<<thickness_cell<<std::endl;
+    std::cout << __PRETTY_FUNCTION__
+              << "Tower size z (m_TowerDz[2) from database is too thin. "
+              << "It does not fit the layer structure as described in https://doi.org/10.1016/S0168-9002(02)01954-X !" << std::endl
+              << "Abort" << std::endl;
+    std::cout << " m_TowerDz[2] = " << m_TowerDz[2] << " i.e. nlayers " << nlayers << " * thickness_layer " << thickness_layer << " <= thickness_cell " << thickness_cell << std::endl;
     exit(1);
   }
-  
-  
+
   //**********************************************************************************************
   /* create logical and geometry volumes for minitower read-out unit */
   //**********************************************************************************************
-  G4VSolid* miniblock_solid         = new G4Box("miniblock_solid",
-                                                m_TowerDx[2] / 2.0,
-                                                m_TowerDy[2] / 2.0,
-                                                thickness_cell / 2.0);
-  G4LogicalVolume* miniblock_logic  = new G4LogicalVolume(miniblock_solid,
-                                                          WorldMaterial,
-                                                          "miniblock_logic",
-                                                          0, 0, 0);
+  G4VSolid* miniblock_solid = new G4Box("miniblock_solid",
+                                        m_TowerDx[2] / 2.0,
+                                        m_TowerDy[2] / 2.0,
+                                        thickness_cell / 2.0);
+  G4LogicalVolume* miniblock_logic = new G4LogicalVolume(miniblock_solid,
+                                                         WorldMaterial,
+                                                         "miniblock_logic",
+                                                         0, 0, 0);
   GetDisplayAction()->AddVolume(miniblock_logic, "miniblock");
   //**********************************************************************************************
   /* create logical & geometry volumes for scintillator and absorber plates to place inside mini read-out unit */
-  //**********************************************************************************************  
+  //**********************************************************************************************
   G4VSolid* solid_absorber = new G4Box("single_plate_absorber_solid2",
                                        m_TowerDx[2] / 2.0,
                                        m_TowerDy[2] / 2.0,
                                        thickness_absorber / 2.0);
 
   G4VSolid* solid_scintillator = new G4Box("single_plate_scintillator2",
-                                           m_TowerDx[2] / 2.0,
-                                           m_TowerDy[2] / 2.0,
+                                           (m_TowerDx[2]) / 2.0,
+                                           (m_TowerDy[2]) / 2.0,
+                                           //  (m_TowerDx[2] - 2*width_coating) / 2.0,
+                                           //  (m_TowerDy[2] - 2*width_coating) / 2.0,
                                            thickness_scintillator / 2.0);
 
+  if (clamp_plate_width > 0)
+  {
+    G4VSolid* solid_clamp1 = new G4Box("single_plate_clamp_solid1",
+                                       m_TowerDx[2] / 2.0,
+                                       m_TowerDy[2] / 2.0,
+                                       clamp_plate_width / 2.0);
+    G4LogicalVolume* logic_clampplate = new G4LogicalVolume(solid_clamp1,
+                                                            G4Material::GetMaterial("G4_Fe"),
+                                                            "logic_clampplate",
+                                                            0, 0, 0);
+    m_AbsorberLogicalVolSet.insert(logic_clampplate);
+    GetDisplayAction()->AddVolume(logic_clampplate, "Clamp");
+    std::string name_clamp = m_TowerLogicNamePrefix + "_single_plate_clamp";
+
+    new G4PVPlacement(0, G4ThreeVector(0, 0, (m_dZ + tower_readout_dz) / 2.0 - clamp_plate_width / 2.0),
+                      logic_clampplate,
+                      name_clamp,
+                      single_tower_logic,
+                      0, 0, OverlapCheck());
+  }
+  if (nFibers > 0 && nFibers == 5 && fiber_diam > 0)
+  {
+    G4VSolid* cutoutfiber_solid = new G4Tubs("cutoutfiber_solid",
+                                             0.0, 1.01 * fiber_diam / 2.0, m_TowerDz[2], 0.0, 2 * M_PI);
+
+    single_tower_solid_replica = new G4SubtractionSolid(G4String("single_tower_solid_replica_cu1"), single_tower_solid_replica, cutoutfiber_solid, 0, G4ThreeVector(0, 0, 0.));
+    single_tower_solid_replica = new G4SubtractionSolid(G4String("single_tower_solid_replica_cu2"), single_tower_solid_replica, cutoutfiber_solid, 0, G4ThreeVector(-m_TowerDx[2] / 4.0, m_TowerDy[2] / 4.0, 0.));
+    single_tower_solid_replica = new G4SubtractionSolid(G4String("single_tower_solid_replica_cu3"), single_tower_solid_replica, cutoutfiber_solid, 0, G4ThreeVector(m_TowerDx[2] / 4.0, m_TowerDy[2] / 4.0, 0.));
+    single_tower_solid_replica = new G4SubtractionSolid(G4String("single_tower_solid_replica_cu4"), single_tower_solid_replica, cutoutfiber_solid, 0, G4ThreeVector(m_TowerDx[2] / 4.0, -m_TowerDy[2] / 4.0, 0.));
+    single_tower_solid_replica = new G4SubtractionSolid(G4String("single_tower_solid_replica_cu5"), single_tower_solid_replica, cutoutfiber_solid, 0, G4ThreeVector(-m_TowerDx[2] / 4.0, -m_TowerDy[2] / 4.0, 0.));
+
+    solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_cu1"), solid_absorber, cutoutfiber_solid, 0, G4ThreeVector(0, 0, 0.));
+    solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_cu2"), solid_absorber, cutoutfiber_solid, 0, G4ThreeVector(-m_TowerDx[2] / 4.0, m_TowerDy[2] / 4.0, 0.));
+    solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_cu3"), solid_absorber, cutoutfiber_solid, 0, G4ThreeVector(m_TowerDx[2] / 4.0, m_TowerDy[2] / 4.0, 0.));
+    solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_cu4"), solid_absorber, cutoutfiber_solid, 0, G4ThreeVector(m_TowerDx[2] / 4.0, -m_TowerDy[2] / 4.0, 0.));
+    solid_absorber = new G4SubtractionSolid(G4String("solid_absorber_cu5"), solid_absorber, cutoutfiber_solid, 0, G4ThreeVector(-m_TowerDx[2] / 4.0, -m_TowerDy[2] / 4.0, 0.));
+
+    solid_scintillator = new G4SubtractionSolid(G4String("solid_scintillator_cu1"), solid_scintillator, cutoutfiber_solid, 0, G4ThreeVector(0, 0, 0.));
+    solid_scintillator = new G4SubtractionSolid(G4String("solid_scintillator_cu2"), solid_scintillator, cutoutfiber_solid, 0, G4ThreeVector(-m_TowerDx[2] / 4.0, m_TowerDy[2] / 4.0, 0.));
+    solid_scintillator = new G4SubtractionSolid(G4String("solid_scintillator_cu3"), solid_scintillator, cutoutfiber_solid, 0, G4ThreeVector(m_TowerDx[2] / 4.0, m_TowerDy[2] / 4.0, 0.));
+    solid_scintillator = new G4SubtractionSolid(G4String("solid_scintillator_cu4"), solid_scintillator, cutoutfiber_solid, 0, G4ThreeVector(m_TowerDx[2] / 4.0, -m_TowerDy[2] / 4.0, 0.));
+    solid_scintillator = new G4SubtractionSolid(G4String("solid_scintillator_cu5"), solid_scintillator, cutoutfiber_solid, 0, G4ThreeVector(-m_TowerDx[2] / 4.0, -m_TowerDy[2] / 4.0, 0.));
+
+    if (clamp_plate_width > 0)
+    {
+      G4VSolid* solid_clamp2 = new G4Box("single_plate_clamp_solid2",
+                                         m_TowerDx[2] / 2.0,
+                                         m_TowerDy[2] / 2.0,
+                                         clamp_plate_width / 2.0);
+      solid_clamp2 = new G4SubtractionSolid(G4String("solid_clamp2_cu1"), solid_clamp2, cutoutfiber_solid, 0, G4ThreeVector(0, 0, 0.));
+      solid_clamp2 = new G4SubtractionSolid(G4String("solid_clamp2_cu2"), solid_clamp2, cutoutfiber_solid, 0, G4ThreeVector(-m_TowerDx[2] / 4.0, m_TowerDy[2] / 4.0, 0.));
+      solid_clamp2 = new G4SubtractionSolid(G4String("solid_clamp2_cu3"), solid_clamp2, cutoutfiber_solid, 0, G4ThreeVector(m_TowerDx[2] / 4.0, m_TowerDy[2] / 4.0, 0.));
+      solid_clamp2 = new G4SubtractionSolid(G4String("solid_clamp2_cu4"), solid_clamp2, cutoutfiber_solid, 0, G4ThreeVector(m_TowerDx[2] / 4.0, -m_TowerDy[2] / 4.0, 0.));
+      solid_clamp2 = new G4SubtractionSolid(G4String("solid_clamp2_cu5"), solid_clamp2, cutoutfiber_solid, 0, G4ThreeVector(-m_TowerDx[2] / 4.0, -m_TowerDy[2] / 4.0, 0.));
+      G4LogicalVolume* logic_clampplate2 = new G4LogicalVolume(solid_clamp2,
+                                                               G4Material::GetMaterial("G4_Fe"),
+                                                               "logic_clampplate2",
+                                                               0, 0, 0);
+      m_AbsorberLogicalVolSet.insert(logic_clampplate2);
+      GetDisplayAction()->AddVolume(logic_clampplate2, "Clamp");
+      std::string name_clamp = m_TowerLogicNamePrefix + "_single_plate_clamp2";
+
+      new G4PVPlacement(0, G4ThreeVector(0, 0, (tower_readout_dz) / 2.0 - clamp_plate_width - m_TowerDz[2] / 2.0 - clamp_plate_width / 2.0),
+                        logic_clampplate2,
+                        name_clamp,
+                        single_tower_logic,
+                        0, 0, OverlapCheck());
+    }
+  }
+
+  if (width_coating > 0)
+  {
+    G4double depthCoating = 0.93 * thickness_scintillator;
+    G4double zPlaneCoating[2] = {0, depthCoating};
+    G4double rInnerCoating[2] = {(m_TowerDx[2] - 2 * width_coating) / 2, (m_TowerDx[2] - 2 * width_coating) / 2.0};
+    G4double rOuterCoating[2] = {m_TowerDx[2] / 2.0, m_TowerDx[2] / 2.0};
+    G4VSolid* solid_coating = new G4Polyhedra("solid_coating",
+                                              0, 2 * M_PI,
+                                              4, 2,
+                                              zPlaneCoating, rInnerCoating, rOuterCoating);
+    G4LogicalVolume* logic_coating = new G4LogicalVolume(solid_coating,
+                                                         GetCoatingMaterial(),
+                                                         "logic_coating",
+                                                         0, 0, 0);
+    m_AbsorberLogicalVolSet.insert(logic_coating);
+    GetDisplayAction()->AddVolume(logic_coating, "Coating");
+    std::string name_coating = m_TowerLogicNamePrefix + "_single_plate_coating";
+
+    G4RotationMatrix* rotCoating = new G4RotationMatrix();
+    rotCoating->rotateZ(M_PI / 4);
+    new G4PVPlacement(rotCoating, G4ThreeVector(0, 0, thickness_cell / 2.0 - depthCoating),
+                      logic_coating,
+                      name_coating,
+                      miniblock_logic,
+                      0, 0, OverlapCheck());
+    solid_scintillator = new G4SubtractionSolid(G4String("solid_scintillator_cuCoating"), solid_scintillator, solid_coating, rotCoating, G4ThreeVector(0, 0, thickness_scintillator / 2.0 - depthCoating));
+  }
   G4LogicalVolume* logic_absorber = new G4LogicalVolume(solid_absorber,
                                                         material_absorber,
                                                         "single_plate_absorber_logic2",
@@ -338,162 +368,96 @@ PHG4ForwardEcalDetector::ConstructTowerType2()
                                                      "hEcal_scintillator_plate_logic2",
                                                      0, 0, 0);
   m_ScintiLogicalVolSet.insert(logic_scint);
-  
+  if (m_doLightProp)
+  {
+    SurfaceTable(logic_scint);
+  }
+
   GetDisplayAction()->AddVolume(logic_absorber, "Absorber");
   GetDisplayAction()->AddVolume(logic_scint, "Scintillator");
 
   std::string name_absorber = m_TowerLogicNamePrefix + "_single_plate_absorber2";
   std::string name_scintillator = m_TowerLogicNamePrefix + "_single_plate_scintillator2";
 
-  new G4PVPlacement(0, G4ThreeVector(0, 0, -thickness_scintillator/2),
+  new G4PVPlacement(0, G4ThreeVector(0, 0, -thickness_cell / 2.0 + thickness_absorber / 2.0),
                     logic_absorber,
                     name_absorber,
                     miniblock_logic,
                     0, 0, OverlapCheck());
 
-  new G4PVPlacement(0, G4ThreeVector(0, 0, (thickness_absorber)/ 2.),
+  new G4PVPlacement(0, G4ThreeVector(0, 0, thickness_cell / 2.0 - thickness_scintillator / 2.0),
                     logic_scint,
                     name_scintillator,
                     miniblock_logic,
                     0, 0, OverlapCheck());
 
+  G4LogicalVolume* single_tower_replica_logic = new G4LogicalVolume(single_tower_solid_replica,
+                                                                    WorldMaterial,
+                                                                    "single_tower_replica_logic",
+                                                                    0, 0, 0);
   /* create replica within tower */
   std::string name_tower = m_TowerLogicNamePrefix;
-  new G4PVReplica(name_tower,miniblock_logic,single_tower_logic,
-                      kZAxis,nlayers, thickness_layer,0);
+  new G4PVReplica(name_tower, miniblock_logic, single_tower_replica_logic,
+                  kZAxis, nlayers, thickness_layer, 0);
 
-  GetDisplayAction()->AddVolume(single_tower_logic, "SingleTower");
+  GetDisplayAction()->AddVolume(single_tower_replica_logic, "SingleTower");
 
-  if (Verbosity() > 0)
-  {
-    std::cout << "PHG4ForwardEcalDetector: Building logical volume for single tower done." << std::endl;
-  }
-
-  return single_tower_logic;
-}
-
-G4LogicalVolume*
-PHG4ForwardEcalDetector::ConstructTowerType3_4_5_6(int type)
-{
-  if (Verbosity() > 0)
-  {
-    std::cout << "PHG4ForwardEcalDetector: Build logical volume for single tower type ..." << type << std::endl;
-  }
-
-  double tower_dx, tower_dy, tower_dz;
-  int num_fibers_x, num_fibers_y;
-  tower_dx = m_TowerDx[type];
-  tower_dy = m_TowerDy[type];
-  tower_dz = m_TowerDz[type];
-  switch (type)
-  {
-  case 3:
-    num_fibers_x = 10;
-    num_fibers_y = 10;
-    break;
-  case 4:
-    num_fibers_x = 9;
-    num_fibers_y = 10;
-    break;
-  case 5:
-    num_fibers_x = 10;
-    num_fibers_y = 9;
-    break;
-  case 6:
-    num_fibers_x = 9;
-    num_fibers_y = 9;
-    break;
-  default:
-    std::cout << "PHG4ForwardEcalDetector: Invalid tower type in ConstructTowerType3_4_5_6, stopping..." << std::endl;
-    return nullptr;
-  }
-
-  /* create logical volume for single tower */
-  recoConsts* rc = recoConsts::instance();
-  G4Material* WorldMaterial = G4Material::GetMaterial(rc->get_StringFlag("WorldMaterial"));
-
-  std::string solidName = "single_tower_solid" + std::to_string(type);
-  G4VSolid* single_tower_solid = new G4Box(solidName,
-                                           tower_dx / 2.0,
-                                           tower_dy / 2.0,
-                                           tower_dz / 2.0);
-
-  std::string name_single_tower_logic = "single_tower_logic" + std::to_string(type);
-
-  G4LogicalVolume* single_tower_logic = new G4LogicalVolume(single_tower_solid,
-                                                            WorldMaterial,
-                                                            name_single_tower_logic,
-                                                            0, 0, 0);
-
-  // Now the absorber and then the fibers:
-
-  std::string absorberName = "single_absorber_solid" + std::to_string(type);
-  G4VSolid* single_absorber_solid = new G4Box(absorberName,
-                                              tower_dx / 2.0,
-                                              tower_dy / 2.0,
-                                              tower_dz / 2.0);
-
-  std::string absorberLogicName = "single_absorber_logic" + std::to_string(type);
-  ;
-  // E864 Pb-Scifi calorimeter
-  // E864 Calorimeter is 99% Pb, 1% Antimony
-  G4LogicalVolume* single_absorber_logic = new G4LogicalVolume(single_absorber_solid,
-                                                               G4Material::GetMaterial("E864_Absorber"),
-
-                                                               absorberLogicName,
-                                                               0, 0, 0);
-
-  /* create geometry volumes for scintillator and place inside single_tower */
-  // 1.1mm fibers
-
-  std::string fiberName = "single_fiber_scintillator_solid" + std::to_string(type);
-  G4VSolid* single_scintillator_solid = new G4Tubs(fiberName,
-                                                   0.0, 0.055 * cm, (tower_dz / 2.0), 0.0, CLHEP::twopi);
-
-  /* create logical volumes for scintillator and absorber plates to place inside single_tower */
-  G4Material* material_scintillator = G4Material::GetMaterial("G4_POLYSTYRENE");
-
-  std::string fiberLogicName = "hEcal_scintillator_fiber_logic" + std::to_string(type);
-  G4LogicalVolume* single_scintillator_logic = new G4LogicalVolume(single_scintillator_solid,
-                                                                   material_scintillator,
-                                                                   fiberLogicName,
-                                                                   0, 0, 0);
-  m_AbsorberLogicalVolSet.insert(single_absorber_logic);
-  m_ScintiLogicalVolSet.insert(single_scintillator_logic);
-  GetDisplayAction()->AddVolume(single_absorber_logic, "Absorber");
-  GetDisplayAction()->AddVolume(single_scintillator_logic, "Fiber");
-
-  // place array of fibers inside absorber
-
-  double fiber_unit_cell = 10.0 * cm / 47.0;
-  double xpos_i = -(tower_dx / 2.0) + (fiber_unit_cell / 2.0);
-  double ypos_i = -(tower_dy / 2.0) + (fiber_unit_cell / 2.0);
-  double zpos_i = 0.0;
-
-  std::string name_scintillator = m_TowerLogicNamePrefix + "_single_fiber_scintillator" + std::to_string(type);
-
-  for (int i = 0; i < num_fibers_x; i++)
-  {
-    for (int j = 0; j < num_fibers_y; j++)
-    {
-      new G4PVPlacement(0, G4ThreeVector(xpos_i + i * fiber_unit_cell, ypos_i + j * fiber_unit_cell, zpos_i),
-                        single_scintillator_logic,
-                        name_scintillator,
-                        single_absorber_logic,
-                        0, 0, OverlapCheck());
-    }
-  }
-
-  // Place the absorber inside the envelope
-
-  std::string name_absorber = m_TowerLogicNamePrefix + "_single_absorber" + std::to_string(type);
-
-  new G4PVPlacement(0, G4ThreeVector(0.0, 0.0, 0.0),
-                    single_absorber_logic,
-                    name_absorber,
+  new G4PVPlacement(0, G4ThreeVector(0, 0, (tower_readout_dz) / 2.0 - clamp_plate_width),
+                    single_tower_replica_logic,
+                    "replicated_layers_placed",
                     single_tower_logic,
                     0, 0, OverlapCheck());
-  GetDisplayAction()->AddVolume(single_tower_logic, "SingleTower");
+
+  // place array of fibers inside absorber
+  if (nFibers > 0 && nFibers == 5 && fiber_diam > 0)
+  {
+    std::string fiberName = "single_fiber_scintillator_solid" + std::to_string(type);
+    G4VSolid* single_scintillator_solid = new G4Tubs(fiberName,
+                                                     0.0, fiber_diam / 2.0, (m_TowerDz[2] + fiber_extra_length) / 2, 0.0, 2 * M_PI);
+
+    /* create logical volumes for scintillator and absorber plates to place inside single_tower */
+    G4Material* material_WLSFiber = GetWLSFiberFEMCMaterial();
+
+    std::string fiberLogicName = "hEcal_scintillator_fiber_logic" + std::to_string(type);
+    G4LogicalVolume* single_scintillator_logic = new G4LogicalVolume(single_scintillator_solid,
+                                                                     material_WLSFiber,
+                                                                     fiberLogicName,
+                                                                     0, 0, 0);
+    m_ScintiLogicalVolSet.insert(single_scintillator_logic);
+    GetDisplayAction()->AddVolume(single_scintillator_logic, "Fiber");
+
+    std::string name_scintillator = m_TowerLogicNamePrefix + "_single_fiber_scintillator" + std::to_string(type);
+
+    new G4PVPlacement(0, G4ThreeVector(0, 0, -fiber_extra_length / 2 + tower_readout_dz / 2 - clamp_plate_width),
+                      single_scintillator_logic,
+                      name_scintillator + "_center",
+                      single_tower_logic,
+                      0, 0, OverlapCheck());
+
+    new G4PVPlacement(0, G4ThreeVector(-m_TowerDx[2] / 4.0, m_TowerDy[2] / 4.0, -fiber_extra_length / 2 + tower_readout_dz / 2 - clamp_plate_width),
+                      single_scintillator_logic,
+                      name_scintillator + "_tl",
+                      single_tower_logic,
+                      0, 0, OverlapCheck());
+
+    new G4PVPlacement(0, G4ThreeVector(m_TowerDx[2] / 4.0, -m_TowerDy[2] / 4.0, -fiber_extra_length / 2 + tower_readout_dz / 2 - clamp_plate_width),
+                      single_scintillator_logic,
+                      name_scintillator + "_bl",
+                      single_tower_logic,
+                      0, 0, OverlapCheck());
+
+    new G4PVPlacement(0, G4ThreeVector(m_TowerDx[2] / 4.0, m_TowerDy[2] / 4.0, -fiber_extra_length / 2 + tower_readout_dz / 2 - clamp_plate_width),
+                      single_scintillator_logic,
+                      name_scintillator + "_tr",
+                      single_tower_logic,
+                      0, 0, OverlapCheck());
+
+    new G4PVPlacement(0, G4ThreeVector(-m_TowerDx[2] / 4.0, -m_TowerDy[2] / 4.0, -fiber_extra_length / 2 + tower_readout_dz / 2 - clamp_plate_width),
+                      single_scintillator_logic,
+                      name_scintillator + "_br",
+                      single_tower_logic,
+                      0, 0, OverlapCheck());
+  }
 
   if (Verbosity() > 0)
   {
@@ -530,6 +494,130 @@ int PHG4ForwardEcalDetector::PlaceTower(G4LogicalVolume* ecalenvelope, G4Logical
   }
 
   return 0;
+}
+
+//_______________________________________________________________________
+G4Material* PHG4ForwardEcalDetector::GetScintillatorMaterial()
+{
+  G4double density;
+  G4int ncomponents;
+  G4Material* material_ScintFEMC = new G4Material("PolystyreneFEMC", density = 1.03 * g / cm3, ncomponents = 2);
+  material_ScintFEMC->AddElement(G4Element::GetElement("C"), 8);
+  material_ScintFEMC->AddElement(G4Element::GetElement("H"), 8);
+
+  if (m_doLightProp)
+  {
+    const G4int ntab = 4;
+
+    G4double wls_Energy[] = {2.00 * eV, 2.87 * eV, 2.90 * eV,
+                             3.47 * eV};
+
+    G4double rIndexPstyrene[] = {1.5, 1.5, 1.5, 1.5};
+    G4double absorption1[] = {2. * cm, 2. * cm, 2. * cm, 2. * cm};
+    G4double scintilFast[] = {0.0, 0.0, 1.0, 1.0};
+    G4MaterialPropertiesTable* fMPTPStyrene = new G4MaterialPropertiesTable();
+    fMPTPStyrene->AddProperty("RINDEX", wls_Energy, rIndexPstyrene, ntab);
+    fMPTPStyrene->AddProperty("ABSLENGTH", wls_Energy, absorption1, ntab);
+    fMPTPStyrene->AddProperty("SCINTILLATIONCOMPONENT1", wls_Energy, scintilFast, ntab);
+    fMPTPStyrene->AddConstProperty("SCINTILLATIONYIELD", 10. / keV);
+    fMPTPStyrene->AddConstProperty("RESOLUTIONSCALE", 1.0);
+    fMPTPStyrene->AddConstProperty("SCINTILLATIONTIMECONSTANT", 10. * ns);
+
+    material_ScintFEMC->SetMaterialPropertiesTable(fMPTPStyrene);
+  }
+  // Set the Birks Constant for the Polystyrene scintillator
+  material_ScintFEMC->GetIonisation()->SetBirksConstant(0.126 * mm / MeV);
+
+  return material_ScintFEMC;
+}
+
+//_______________________________________________________________________
+G4Material* PHG4ForwardEcalDetector::GetCoatingMaterial()
+{
+  //--------------------------------------------------
+  // TiO2
+  //--------------------------------------------------
+  G4double density, fractionmass;
+  G4int ncomponents;
+  G4Material* material_TiO2 = new G4Material("TiO2_FEMC", density = 1.52 * g / cm3, ncomponents = 2);
+  material_TiO2->AddElement(G4Element::GetElement("Ti"), 1);
+  material_TiO2->AddElement(G4Element::GetElement("O"), 2);
+
+  //--------------------------------------------------
+  // Scintillator Coating - 15% TiO2 and 85% polystyrene by weight.
+  //--------------------------------------------------
+  //Coating_FEMC (Glass + Epoxy)
+  density = 1.86 * g / cm3;
+  G4Material* Coating_FEMC = new G4Material("Coating_FEMC", density, ncomponents = 2);
+  Coating_FEMC->AddMaterial(G4Material::GetMaterial("Epoxy"), fractionmass = 0.80);
+  Coating_FEMC->AddMaterial(material_TiO2, fractionmass = 0.20);
+
+  return Coating_FEMC;
+}
+
+//_____________________________________________________________________________
+void PHG4ForwardEcalDetector::SurfaceTable(G4LogicalVolume* vol)
+{
+  G4OpticalSurface* surface = new G4OpticalSurface("ScintWrapB1");
+
+  new G4LogicalSkinSurface("CrystalSurfaceL", vol, surface);
+
+  surface->SetType(dielectric_metal);
+  surface->SetFinish(polished);
+  surface->SetModel(glisur);
+
+  //crystal optical surface
+
+  //surface material
+  // const G4int ntab = 2;
+  // G4double opt_en[] = {1.551*eV, 3.545*eV}; // 350 - 800 nm
+  // G4double reflectivity[] = {0.8, 0.8};
+  // G4double efficiency[] = {0.9, 0.9};
+  G4MaterialPropertiesTable* surfmat = new G4MaterialPropertiesTable();
+  // surfmat->AddProperty("REFLECTIVITY", opt_en, reflectivity, ntab);
+  // surfmat->AddProperty("EFFICIENCY", opt_en, efficiency, ntab);
+  surface->SetMaterialPropertiesTable(surfmat);
+  //csurf->DumpInfo();
+
+}  //SurfaceTable
+//_______________________________________________________________________
+G4Material* PHG4ForwardEcalDetector::GetWLSFiberFEMCMaterial()
+{
+  if (Verbosity() > 0)
+  {
+    std::cout << "PHG4ForwardEcalDetector: Making WLSFiberFEMC material..." << std::endl;
+  }
+
+  G4double density;
+  G4int ncomponents;
+
+  G4Material* material_WLSFiberFEMC = new G4Material("WLSFiberFEMC", density = 1.18 * g / cm3, ncomponents = 3);
+  material_WLSFiberFEMC->AddElement(G4Element::GetElement("C"), 5);
+  material_WLSFiberFEMC->AddElement(G4Element::GetElement("H"), 8);
+  material_WLSFiberFEMC->AddElement(G4Element::GetElement("O"), 2);
+  if (m_doLightProp)
+  {
+    const G4int ntab = 4;
+    G4double wls_Energy[] = {2.00 * eV, 2.87 * eV, 2.90 * eV,
+                             3.47 * eV};
+
+    G4double RefractiveIndexFiber[] = {1.6, 1.6, 1.6, 1.6};
+    G4double AbsFiber[] = {9.0 * m, 9.0 * m, 0.1 * mm, 0.1 * mm};
+    G4double EmissionFib[] = {1.0, 1.0, 0.0, 0.0};
+    // Add entries into properties table
+    G4MaterialPropertiesTable* mptWLSfiber = new G4MaterialPropertiesTable();
+    mptWLSfiber->AddProperty("RINDEX", wls_Energy, RefractiveIndexFiber, ntab);
+    mptWLSfiber->AddProperty("WLSABSLENGTH", wls_Energy, AbsFiber, ntab);
+    mptWLSfiber->AddProperty("WLSCOMPONENT", wls_Energy, EmissionFib, ntab);
+    mptWLSfiber->AddConstProperty("WLSTIMECONSTANT", 0.5 * ns);
+    material_WLSFiberFEMC->SetMaterialPropertiesTable(mptWLSfiber);
+  }
+  if (Verbosity() > 0)
+  {
+    std::cout << "PHG4ForwardEcalDetector:  Making WLSFiberFEMC material done." << std::endl;
+  }
+
+  return material_WLSFiberFEMC;
 }
 
 int PHG4ForwardEcalDetector::ParseParametersFromTable()
@@ -688,16 +776,31 @@ int PHG4ForwardEcalDetector::ParseParametersFromTable()
   {
     m_TowerType = parit->second;
   }
-  
+
   parit = m_GlobalParameterMap.find("xoffset");
   if (parit != m_GlobalParameterMap.end())
-    m_Params->set_double_param("xoffset", parit->second);  
+    m_Params->set_double_param("xoffset", parit->second);
 
   parit = m_GlobalParameterMap.find("yoffset");
   if (parit != m_GlobalParameterMap.end())
-    m_Params->set_double_param("yoffset", parit->second);  
+    m_Params->set_double_param("yoffset", parit->second);
 
-  
+  parit = m_GlobalParameterMap.find("width_coating");
+  if (parit != m_GlobalParameterMap.end())
+    m_Params->set_double_param("width_coating", parit->second);
+
+  parit = m_GlobalParameterMap.find("clamp_plate_width");
+  if (parit != m_GlobalParameterMap.end())
+    m_Params->set_double_param("clamp_plate_width", parit->second);
+
+  parit = m_GlobalParameterMap.find("fiber_diam");
+  if (parit != m_GlobalParameterMap.end())
+    m_Params->set_double_param("fiber_diam", parit->second);
+
+  parit = m_GlobalParameterMap.find("nFibers");
+  if (parit != m_GlobalParameterMap.end())
+    m_Params->set_int_param("nFibers", parit->second);
+
   return 0;
 }
 

@@ -18,6 +18,7 @@ class PHParameters;
 
 class PHG4ForwardHcalSteppingAction : public PHG4SteppingAction
 {
+ using PHG4SteppingAction::SetHitNodeName;
  public:
   //! constructor
   PHG4ForwardHcalSteppingAction(PHG4ForwardHcalDetector*, const PHParameters* parameters);
@@ -27,7 +28,6 @@ class PHG4ForwardHcalSteppingAction : public PHG4SteppingAction
 
   //! stepping action
   bool UserSteppingAction(const G4Step*, bool) override;
-  ;
 
   //! reimplemented from base class
   void SetInterfacePointers(PHCompositeNode*) override;

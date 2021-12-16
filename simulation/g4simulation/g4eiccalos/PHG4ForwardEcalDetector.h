@@ -5,6 +5,7 @@
 
 #include <g4main/PHG4Detector.h>
 
+#include <Geant4/G4Material.hh>
 #include <Geant4/G4SystemOfUnits.hh>
 
 #include <cassert>
@@ -43,6 +44,8 @@ class PHG4ForwardEcalDetector : public PHG4Detector
   int IsInForwardEcal(G4VPhysicalVolume *) const;
 
   void SetTowerDimensions(double dx, double dy, double dz, int type);
+
+  void DoFullLightProp(bool doProp) { m_doLightProp = doProp; }
 
   void SetPlace(double place_in_x, double place_in_y, double place_in_z)
   {
@@ -97,7 +100,7 @@ class PHG4ForwardEcalDetector : public PHG4Detector
 
   int get_Layer() const { return m_Layer; }
   int get_TowerType() const { return m_TowerType; }
-  
+
   PHG4ForwardEcalDisplayAction *GetDisplayAction() { return m_DisplayAction; }
 
  private:
@@ -106,7 +109,10 @@ class PHG4ForwardEcalDetector : public PHG4Detector
   G4LogicalVolume *ConstructTowerType3_4_5_6(int type);
   int PlaceTower(G4LogicalVolume *envelope, G4LogicalVolume *tower[6]);
   int ParseParametersFromTable();
-
+  G4Material *GetWLSFiberFEMCMaterial();
+  G4Material *GetScintillatorMaterial();
+  G4Material *GetCoatingMaterial();
+  void SurfaceTable(G4LogicalVolume *vol);
   struct towerposition
   {
     double x;
@@ -144,7 +150,7 @@ class PHG4ForwardEcalDetector : public PHG4Detector
   int m_AbsorberActiveFlag = 0;
   int m_Layer = 0;
   int m_TowerType = 0;
-  
+
   std::string m_SuperDetector = "NONE";
   std::string m_TowerLogicNamePrefix = "hEcalTower";
 
@@ -168,6 +174,8 @@ class PHG4ForwardEcalDetector : public PHG4Detector
   std::map<std::string, double>::const_iterator FindIter(const std::string &name) { return m_GlobalParameterMap.find(name); }
   std::map<std::string, double>::const_iterator EndIter() { return m_GlobalParameterMap.end(); }
   void InsertParam(const std::string &parname, double parval) { m_GlobalParameterMap.insert(make_pair(parname, parval)); }
+
+  bool m_doLightProp;
 };
 
 #endif

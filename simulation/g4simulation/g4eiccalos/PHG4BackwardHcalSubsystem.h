@@ -47,9 +47,8 @@ class PHG4BackwardHcalSubsystem : public PHG4DetectorSubsystem
 
   /** Set level of detail for display
   */
-  void SetDetailed(bool b){showdetailed = b;}
+  void SetDetailed(bool b) { showdetailed = b; }
 
-  
  private:
   void SetDefaultParameters();
 

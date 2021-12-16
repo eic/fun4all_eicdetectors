@@ -192,21 +192,21 @@ PHG4BackwardHcalDetector::ConstructTower()
   m_AbsorberLogicalVolSet.insert(logic_absorber);
 
   G4LogicalVolume* logic_scint = new G4LogicalVolume(solid_scintillator,
-                                                      material_scintillator,
-                                                      "hHcal_scintillator_plate_logic",
-                                                      0, 0, 0);
+                                                     material_scintillator,
+                                                     "hHcal_scintillator_plate_logic",
+                                                     0, 0, 0);
   m_ScintiLogicalVolSet.insert(logic_scint);
 
   G4LogicalVolume* logic_wls = new G4LogicalVolume(solid_WLS_plate,
-                                                    material_wls,
-                                                    "hHcal_wls_plate_logic",
-                                                    0, 0, 0);
+                                                   material_wls,
+                                                   "hHcal_wls_plate_logic",
+                                                   0, 0, 0);
 
   m_AbsorberLogicalVolSet.insert(logic_wls);
   G4LogicalVolume* logic_support = new G4LogicalVolume(solid_support_plate,
-                                                        material_support,
-                                                        "hHcal_support_plate_logic",
-                                                        0, 0, 0);
+                                                       material_support,
+                                                       "hHcal_support_plate_logic",
+                                                       0, 0, 0);
 
   m_AbsorberLogicalVolSet.insert(logic_support);
   m_DisplayAction->AddVolume(logic_absorber, "Absorber");

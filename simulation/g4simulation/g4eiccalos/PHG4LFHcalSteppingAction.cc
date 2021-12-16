@@ -82,15 +82,15 @@ bool PHG4LFHcalSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
   unsigned int layer = touch->GetVolume(1)->GetCopyNo();
   int idx_j = icopy >> 16;
   int idx_k = icopy & 0xFFFF;
-  int idx_l = (int)(layer / m_NlayersPerTowerSeg);
+  int idx_l = (int) (layer / m_NlayersPerTowerSeg);
 
   if (Verbosity() > 2)
-    std::cout << "\t" << icopy << "\t idx_j =" << idx_j << ", idx_k =" << idx_k << ", idx_l =" << idx_l <<"\t id:" << icopy << "\t layer:" << layer << std::endl;
-  
+    std::cout << "\t" << icopy << "\t idx_j =" << idx_j << ", idx_k =" << idx_k << ", idx_l =" << idx_l << "\t id:" << icopy << "\t layer:" << layer << std::endl;
+
   /* Get energy deposited by this step */
   double edep = aStep->GetTotalEnergyDeposit() / GeV;
   double eion = (aStep->GetTotalEnergyDeposit() - aStep->GetNonIonizingEnergyDeposit()) / GeV;
-  
+
   /* Get pointer to associated Geant4 track */
   const G4Track* aTrack = aStep->GetTrack();
 
@@ -212,7 +212,7 @@ bool PHG4LFHcalSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
     m_Hit->set_x(1, postPoint->GetPosition().x() / cm);
     m_Hit->set_y(1, postPoint->GetPosition().y() / cm);
     m_Hit->set_z(1, postPoint->GetPosition().z() / cm);
-    
+
     m_Hit->set_t(1, postPoint->GetGlobalTime() / nanosecond);
 
     /* sum up the energy to get total deposited */
@@ -315,5 +315,4 @@ void PHG4LFHcalSteppingAction::SetInterfacePointers(PHCompositeNode* topNode)
       std::cout << "PHG4LFHcalSteppingAction::SetTopNode - unable to find " << absorbernodename << std::endl;
     }
   }
-    
 }

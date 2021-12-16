@@ -23,7 +23,7 @@ class PHG4LFHcalDisplayAction : public PHG4DisplayAction
 
   void ApplyDisplayAction(G4VPhysicalVolume *physvol);
   void AddVolume(G4LogicalVolume *logvol, const std::string &mat) { m_LogicalVolumeMap[logvol] = mat; }
-  
+
  private:
   std::map<G4LogicalVolume *, std::string> m_LogicalVolumeMap;
   std::vector<G4VisAttributes *> m_VisAttVec;

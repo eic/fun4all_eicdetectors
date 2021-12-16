@@ -16,11 +16,12 @@ class PHParameters;
 
 class PHG4BarrelEcalSteppingAction : public PHG4SteppingAction
 {
+ using PHG4SteppingAction::SetHitNodeName;
  public:
   //! constructor
   PHG4BarrelEcalSteppingAction(PHG4BarrelEcalDetector*, const PHParameters* parameters);
 
-  //! destructor 
+  //! destructor
   virtual ~PHG4BarrelEcalSteppingAction();
 
   //! stepping action
@@ -56,4 +57,4 @@ class PHG4BarrelEcalSteppingAction : public PHG4SteppingAction
   std::string m_SupportNodeName;
 };
 
-#endif  
+#endif

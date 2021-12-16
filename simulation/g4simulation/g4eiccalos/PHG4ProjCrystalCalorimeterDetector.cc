@@ -20,11 +20,11 @@
 #include <Geant4/G4Transform3D.hh>  // for G4Transform3D
 #include <Geant4/G4Trd.hh>
 #include <Geant4/G4TwoVector.hh>
-#include <Geant4/G4Types.hh>            // for G4double, G4int
+#include <Geant4/G4Types.hh>  // for G4double, G4int
 
 #include <TSystem.h>
 
-#include <cmath> // for M_PI
+#include <cmath>  // for M_PI
 #include <cstdlib>
 #include <iostream>
 #include <sstream>

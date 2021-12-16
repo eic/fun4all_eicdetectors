@@ -4,6 +4,7 @@
 #define G4DETECTORS_PHG4LFHCALDETECTOR_H
 
 #include <g4main/PHG4Detector.h>
+#include <Geant4/G4Material.hh>
 
 #include <Geant4/G4Types.hh>  // for G4double
 
@@ -42,15 +43,22 @@ class PHG4LFHcalDetector : public PHG4Detector
   void SuperDetector(const std::string &name) { m_SuperDetector = name; }
   const std::string SuperDetector() const { return m_SuperDetector; }
 
-  PHParameters* getParamsDet() const {return m_Params;}
+  PHParameters *getParamsDet() const { return m_Params; }
 
   int get_Layer() const { return m_Layer; }
+
+  void DoFullLightProp(bool doProp) { m_doLightProp = doProp; }
 
  private:
   G4LogicalVolume *ConstructTower();
   int PlaceTower(G4LogicalVolume *envelope, G4LogicalVolume *tower);
   int ParseParametersFromTable();
-
+  G4Material *GetScintillatorMaterial();
+  G4Material *GetCoatingMaterial();
+  G4Material *GetWLSFiberMaterial();
+  void SurfaceTable(G4LogicalVolume *vol);
+  void MakeBoundary(G4VPhysicalVolume *crystal, G4VPhysicalVolume *opdet, bool isFiber);
+  void MakeBoundary_Fiber_Scint(G4VPhysicalVolume *crystal, G4VPhysicalVolume *opdet);
   struct towerposition
   {
     G4double x;
@@ -75,6 +83,8 @@ class PHG4LFHcalDetector : public PHG4Detector
 
   std::set<G4LogicalVolume *> m_AbsorberLogicalVolSet;
   std::set<G4LogicalVolume *> m_ScintiLogicalVolSet;
+
+  bool m_doLightProp = false;
 };
 
 #endif

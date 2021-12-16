@@ -77,7 +77,7 @@ bool PHG4BarrelEcalSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
     return false;
   }
 
-   unsigned int icopy = touch->GetVolume(0)->GetCopyNo();
+  unsigned int icopy = touch->GetVolume(0)->GetCopyNo();
   int idx_k = icopy >> 16;
   int idx_j = icopy & 0xFFFF;
 
@@ -108,12 +108,11 @@ bool PHG4BarrelEcalSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
     {
       geantino = true;
     }
-   
+
     /* Get Geant4 pre- and post-step points */
     G4StepPoint* prePoint = aStep->GetPreStepPoint();
     G4StepPoint* postPoint = aStep->GetPostStepPoint();
 
-   
     switch (prePoint->GetStepStatus())
     {
     case fGeomBoundary:
@@ -146,91 +145,91 @@ bool PHG4BarrelEcalSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
         /* Set hit location (tower index) */
         m_Hit->set_index_j(idx_j);
         m_Hit->set_index_k(idx_k);
-    }
-    else
-    {
-      m_SaveHitContainer = m_AbsorberHitContainer;
-    }
-
-    // here we set what is common for scintillator and absorber hits
-    if (G4VUserTrackInformation* p = aTrack->GetUserInformation())
-    {
-      if (PHG4TrackUserInfoV1* pp = dynamic_cast<PHG4TrackUserInfoV1*>(p))
+      }
+      else
       {
-        m_Hit->set_trkid(pp->GetUserTrackId());
-        m_Hit->set_shower_id(pp->GetShower()->get_id());
-        m_SaveShower = pp->GetShower();
-       }
-    }
-    break;
+        m_SaveHitContainer = m_AbsorberHitContainer;
+      }
+
+      // here we set what is common for scintillator and absorber hits
+      if (G4VUserTrackInformation* p = aTrack->GetUserInformation())
+      {
+        if (PHG4TrackUserInfoV1* pp = dynamic_cast<PHG4TrackUserInfoV1*>(p))
+        {
+          m_Hit->set_trkid(pp->GetUserTrackId());
+          m_Hit->set_shower_id(pp->GetShower()->get_id());
+          m_SaveShower = pp->GetShower();
+        }
+      }
+      break;
     default:
-    break;
-  }
+      break;
+    }
 
-  /* Update exit values- will be overwritten with every step until
+    /* Update exit values- will be overwritten with every step until
    * we leave the volume or the particle ceases to exist */
-  m_Hit->set_x(1, postPoint->GetPosition().x() / cm);
-  m_Hit->set_y(1, postPoint->GetPosition().y() / cm);
-  m_Hit->set_z(1, postPoint->GetPosition().z() / cm);
+    m_Hit->set_x(1, postPoint->GetPosition().x() / cm);
+    m_Hit->set_y(1, postPoint->GetPosition().y() / cm);
+    m_Hit->set_z(1, postPoint->GetPosition().z() / cm);
 
-  m_Hit->set_t(1, postPoint->GetGlobalTime() / nanosecond);
+    m_Hit->set_t(1, postPoint->GetGlobalTime() / nanosecond);
 
-  /* sum up the energy to get total deposited */
-  m_Hit->set_edep(m_Hit->get_edep() + edep);
-  if (whichactive > 0)
-  {
-     m_Hit->set_eion(m_Hit->get_eion() + eion);
-    m_Hit->set_light_yield(m_Hit->get_light_yield() + eion);
-  }
-
-  if (geantino)
-  {
-    m_Hit->set_edep(-1);  // only energy=0 g4hits get dropped, this way geantinos survive the g4hit compression
+    /* sum up the energy to get total deposited */
+    m_Hit->set_edep(m_Hit->get_edep() + edep);
     if (whichactive > 0)
     {
-      m_Hit->set_eion(-1);
-      m_Hit->set_light_yield(-1);
+      m_Hit->set_eion(m_Hit->get_eion() + eion);
+      m_Hit->set_light_yield(m_Hit->get_light_yield() + eion);
     }
-  }
-  if (edep > 0)
-   {
-    if (G4VUserTrackInformation* p = aTrack->GetUserInformation())
+
+    if (geantino)
     {
-      if (PHG4TrackUserInfoV1* pp = dynamic_cast<PHG4TrackUserInfoV1*>(p))
+      m_Hit->set_edep(-1);  // only energy=0 g4hits get dropped, this way geantinos survive the g4hit compression
+      if (whichactive > 0)
       {
-        pp->SetKeep(1);  // we want to keep the track
+        m_Hit->set_eion(-1);
+        m_Hit->set_light_yield(-1);
       }
     }
-  }
-   // if any of these conditions is true this is the last step in
+    if (edep > 0)
+    {
+      if (G4VUserTrackInformation* p = aTrack->GetUserInformation())
+      {
+        if (PHG4TrackUserInfoV1* pp = dynamic_cast<PHG4TrackUserInfoV1*>(p))
+        {
+          pp->SetKeep(1);  // we want to keep the track
+        }
+      }
+    }
+    // if any of these conditions is true this is the last step in
     // this volume and we need to save the hit
     // postPoint->GetStepStatus() == fGeomBoundary: track leaves this volume
     // postPoint->GetStepStatus() == fWorldBoundary: track leaves this world
     // (not sure if this will ever be the case)
     // aTrack->GetTrackStatus() == fStopAndKill: track ends
-  if (postPoint->GetStepStatus() == fGeomBoundary ||
-      postPoint->GetStepStatus() == fWorldBoundary ||
-      postPoint->GetStepStatus() == fAtRestDoItProc ||
-      aTrack->GetTrackStatus() == fStopAndKill)
-  {
-    // save only hits with energy deposit (or -1 for geantino)
-    if (m_Hit->get_edep())
+    if (postPoint->GetStepStatus() == fGeomBoundary ||
+        postPoint->GetStepStatus() == fWorldBoundary ||
+        postPoint->GetStepStatus() == fAtRestDoItProc ||
+        aTrack->GetTrackStatus() == fStopAndKill)
     {
-      m_SaveHitContainer->AddHit(layer_id, m_Hit);
-      if (m_SaveShower)
+      // save only hits with energy deposit (or -1 for geantino)
+      if (m_Hit->get_edep())
       {
-        m_SaveShower->add_g4hit_id(m_HitContainer->GetID(), m_Hit->get_hit_id());
+        m_SaveHitContainer->AddHit(layer_id, m_Hit);
+        if (m_SaveShower)
+        {
+          m_SaveShower->add_g4hit_id(m_HitContainer->GetID(), m_Hit->get_hit_id());
+        }
+        // ownership has been transferred to container, set to null
+        // so we will create a new hit for the next track
+        m_Hit = nullptr;
       }
-      // ownership has been transferred to container, set to null
-      // so we will create a new hit for the next track
-      m_Hit = nullptr;
-    }
-     else
-    {
-      // if this hit has no energy deposit, just reset it for reuse
-      // this means we have to delete it in the dtor. If this was
-      // the last hit we processed the memory is still allocated
-      m_Hit->Reset();
+      else
+      {
+        // if this hit has no energy deposit, just reset it for reuse
+        // this means we have to delete it in the dtor. If this was
+        // the last hit we processed the memory is still allocated
+        m_Hit->Reset();
       }
     }
     return true;
@@ -240,7 +239,6 @@ bool PHG4BarrelEcalSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
     return false;
   }
 }
-
 
 //____________________________________________________________________________..
 void PHG4BarrelEcalSteppingAction::SetInterfacePointers(PHCompositeNode* topNode)
