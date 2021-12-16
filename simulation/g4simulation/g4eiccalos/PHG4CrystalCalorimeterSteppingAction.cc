@@ -22,12 +22,12 @@
 #include <Geant4/G4StepStatus.hh>  // for fGeomBoundary, fAtRest...
 #include <Geant4/G4SystemOfUnits.hh>
 #include <Geant4/G4ThreeVector.hh>            // for G4ThreeVector
+#include <Geant4/G4TouchableHandle.hh>        // for G4TouchableHandle
 #include <Geant4/G4Track.hh>                  // for G4Track
 #include <Geant4/G4TrackStatus.hh>            // for fStopAndKill
 #include <Geant4/G4Types.hh>                  // for G4double
 #include <Geant4/G4VPhysicalVolume.hh>        // for G4VPhysicalVolume
 #include <Geant4/G4VTouchable.hh>             // for G4VTouchable
-#include <Geant4/G4TouchableHandle.hh>                // for G4TouchableHandle
 #include <Geant4/G4VUserTrackInformation.hh>  // for G4VUserTrackInformation
 
 #include <TSystem.h>

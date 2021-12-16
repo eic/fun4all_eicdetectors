@@ -5,11 +5,11 @@
 
 #include <g4main/PHG4Detector.h>
 
-#include <Geant4/G4Types.hh>  // for G4double
-#include <Geant4/G4Transform3D.hh>
-#include <Geant4/G4Tubs.hh>
 #include <Geant4/G4SystemOfUnits.hh>
+#include <Geant4/G4Transform3D.hh>
 #include <Geant4/G4Trap.hh>
+#include <Geant4/G4Tubs.hh>
+#include <Geant4/G4Types.hh>  // for G4double
 
 #include <map>
 #include <set>
@@ -51,14 +51,13 @@ class PHG4BarrelEcalDetector : public PHG4Detector
   int get_Layer() const { return m_Layer; }
 
  private:
-
   //! BECAL parameters
 
-  G4double Radius = 85.*cm; //Inner radius of BECAL
-  G4double tower_length = 45.5*cm; // Length of the Tower
+  G4double Radius = 85. * cm;         //Inner radius of BECAL
+  G4double tower_length = 45.5 * cm;  // Length of the Tower
 
-  const int nTowers_layer = 128.; //Number of towers per phi tower
-  const double becal_length = 415*cm;  //support width
+  const int nTowers_layer = 128.;        //Number of towers per phi tower
+  const double becal_length = 415 * cm;  //support width
   const double th = 1.;
   const double overlap = 0.1;
 
@@ -67,15 +66,12 @@ class PHG4BarrelEcalDetector : public PHG4Detector
   G4double SIO2_width_half;
   G4double Carbon_width_half;
   G4double support_length;
-  
 
-  
   int PlaceTower(G4LogicalVolume *envelope);
   int ParseParametersFromTable();
 
   struct towerposition
   {
-
     G4double sizex1;
     G4double sizey1;
     G4double sizex2;
@@ -97,10 +93,10 @@ class PHG4BarrelEcalDetector : public PHG4Detector
 
   G4Trap *GetTowerTrap(std::map<std::string, towerposition>::iterator iterator);
   G4Trap *GetSiTrap(std::map<std::string, towerposition>::iterator iterator);
-  G4Trap* GetGlassTrap(std::map<std::string, towerposition>::iterator iterator);
-  G4Trap* GetKaptonTrap(std::map<std::string, towerposition>::iterator iterator);
-  G4Trap* GetSIO2Trap(std::map<std::string, towerposition>::iterator iterator);
-  G4Trap* GetCarbonTrap(std::map<std::string, towerposition>::iterator iterator);
+  G4Trap *GetGlassTrap(std::map<std::string, towerposition>::iterator iterator);
+  G4Trap *GetKaptonTrap(std::map<std::string, towerposition>::iterator iterator);
+  G4Trap *GetSIO2Trap(std::map<std::string, towerposition>::iterator iterator);
+  G4Trap *GetCarbonTrap(std::map<std::string, towerposition>::iterator iterator);
 
   G4LogicalVolume *GetTowerSci(std::map<std::string, towerposition>::iterator iterator);
   G4Trap *GetGlassTrapSubtract(std::map<std::string, towerposition>::iterator iterator);
@@ -108,8 +104,8 @@ class PHG4BarrelEcalDetector : public PHG4Detector
   G4LogicalVolume *ConstructGlass(std::map<std::string, towerposition>::iterator iterator);
   G4LogicalVolume *ConstructSi(std::map<std::string, towerposition>::iterator iterator);
   G4LogicalVolume *ConstructKapton(std::map<std::string, towerposition>::iterator iterator);
-  G4LogicalVolume *ConstructSIO2(std::map<std::string, towerposition>::iterator iterator);  
-  G4LogicalVolume *ConstructCarbon(std::map<std::string, towerposition>::iterator iterator);  
+  G4LogicalVolume *ConstructSIO2(std::map<std::string, towerposition>::iterator iterator);
+  G4LogicalVolume *ConstructCarbon(std::map<std::string, towerposition>::iterator iterator);
 
   PHG4BarrelEcalDisplayAction *m_DisplayAction = nullptr;
   PHParameters *m_Params = nullptr;
@@ -119,8 +115,7 @@ class PHG4BarrelEcalDetector : public PHG4Detector
   int m_SupportActiveFlag = 0;
   int m_Layer = 0;
 
- 
-  //G4LogicalVolume* singletower; 
+  //G4LogicalVolume* singletower;
   std::string m_TowerLogicNamePrefix;
   std::string m_SuperDetector;
 
@@ -132,7 +127,7 @@ class PHG4BarrelEcalDetector : public PHG4Detector
   std::set<G4LogicalVolume *> m_SupportLogicalVolSet;
 
   //! registry for volumes that should not be exported, i.e. fibers
-  PHG4GDMLConfig* gdml_config = nullptr;
+  PHG4GDMLConfig *gdml_config = nullptr;
 };
 
 #endif

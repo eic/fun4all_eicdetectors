@@ -14,8 +14,8 @@
 #include <Geant4/G4LogicalVolume.hh>
 #include <Geant4/G4Material.hh>
 #include <Geant4/G4PVPlacement.hh>
-#include <Geant4/G4SubtractionSolid.hh>
 #include <Geant4/G4RotationMatrix.hh>  // for G4RotationMatrix
+#include <Geant4/G4SubtractionSolid.hh>
 #include <Geant4/G4SystemOfUnits.hh>
 #include <Geant4/G4ThreeVector.hh>      // for G4ThreeVector
 #include <Geant4/G4Transform3D.hh>      // for G4Transform3D
@@ -98,18 +98,18 @@ void PHG4ForwardHcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
   recoConsts* rc = recoConsts::instance();
   G4Material* WorldMaterial = G4Material::GetMaterial(rc->get_StringFlag("WorldMaterial"));
 
-  G4VSolid *beampipe_cutout = new G4Cons("FHCAL_beampipe_cutout",
+  G4VSolid* beampipe_cutout = new G4Cons("FHCAL_beampipe_cutout",
                                          0, m_Params->get_double_param("rMin1") * cm,
                                          0, m_Params->get_double_param("rMin2") * cm,
                                          m_Params->get_double_param("dz") * cm / 2.0,
                                          0, 2 * M_PI);
-  G4VSolid *hcal_envelope_solid = new G4Cons("FHCAL_envelope_solid_cutout",
-                                            0, m_Params->get_double_param("rMax1") * cm,
-                                            0, m_Params->get_double_param("rMax2") * cm,
-                                            m_Params->get_double_param("dz") * cm / 2.0,
-                                            0, 2 * M_PI);
+  G4VSolid* hcal_envelope_solid = new G4Cons("FHCAL_envelope_solid_cutout",
+                                             0, m_Params->get_double_param("rMax1") * cm,
+                                             0, m_Params->get_double_param("rMax2") * cm,
+                                             m_Params->get_double_param("dz") * cm / 2.0,
+                                             0, 2 * M_PI);
   hcal_envelope_solid = new G4SubtractionSolid(G4String("FHCAL_envelope_solid"), hcal_envelope_solid, beampipe_cutout, 0, G4ThreeVector(m_Params->get_double_param("xoffset") * cm, m_Params->get_double_param("yoffset") * cm, 0.));
-  
+
   G4LogicalVolume* hcal_envelope_log = new G4LogicalVolume(hcal_envelope_solid, WorldMaterial, "hFHCAL_envelope", 0, 0, 0);
 
   m_DisplayAction->AddVolume(hcal_envelope_log, "FHcalEnvelope");
@@ -196,12 +196,13 @@ PHG4ForwardHcalDetector::ConstructTower()
   G4Material* material_wls = G4Material::GetMaterial(m_Params->get_string_param("scintillator"));
   G4Material* material_support = G4Material::GetMaterial(m_Params->get_string_param("support"));
 
-  if(m_Params->get_int_param("absorber_FeTungsten")==1){
+  if (m_Params->get_int_param("absorber_FeTungsten") == 1)
+  {
     G4double density;
     G4int natoms;
-    material_absorber = new G4Material("FeTungstenMix",  density =  10.1592*g/cm3, natoms=2);
-    material_absorber->AddMaterial(G4Material::GetMaterial("G4_Fe"), 80*perCent);  // Steel
-    material_absorber->AddMaterial(G4Material::GetMaterial("G4_W"),  20*perCent);  // Tungsten
+    material_absorber = new G4Material("FeTungstenMix", density = 10.1592 * g / cm3, natoms = 2);
+    material_absorber->AddMaterial(G4Material::GetMaterial("G4_Fe"), 80 * perCent);  // Steel
+    material_absorber->AddMaterial(G4Material::GetMaterial("G4_W"), 20 * perCent);   // Tungsten
   }
   G4LogicalVolume* logic_absorber = new G4LogicalVolume(solid_absorber,
                                                         material_absorber,
@@ -479,12 +480,11 @@ int PHG4ForwardHcalDetector::ParseParametersFromTable()
 
   parit = m_GlobalParameterMap.find("xoffset");
   if (parit != m_GlobalParameterMap.end())
-    m_Params->set_double_param("xoffset", parit->second);  
+    m_Params->set_double_param("xoffset", parit->second);
 
   parit = m_GlobalParameterMap.find("yoffset");
   if (parit != m_GlobalParameterMap.end())
-    m_Params->set_double_param("yoffset", parit->second);  
-  
+    m_Params->set_double_param("yoffset", parit->second);
 
   return 0;
 }

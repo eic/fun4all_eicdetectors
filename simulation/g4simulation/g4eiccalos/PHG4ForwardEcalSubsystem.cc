@@ -46,7 +46,7 @@ int PHG4ForwardEcalSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
   PHCompositeNode* dstNode = dynamic_cast<PHCompositeNode*>(iter.findFirst("PHCompositeNode", "DST"));
 
   // create display settings before detector
-  m_DisplayAction = new PHG4ForwardEcalDisplayAction(Name(),showdetailed);
+  m_DisplayAction = new PHG4ForwardEcalDisplayAction(Name(), showdetailed);
   // create detector
   if (m_EICDetectorFlag)
   {

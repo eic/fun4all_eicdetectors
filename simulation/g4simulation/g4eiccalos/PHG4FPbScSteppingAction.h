@@ -12,20 +12,17 @@ class PHG4HitContainer;
 
 class PHG4FPbScSteppingAction : public PHG4SteppingAction
 {
-  public:
-    PHG4FPbScSteppingAction( PHG4FPbScDetector* );
-    virtual ~PHG4FPbScSteppingAction(){}
-    
-    virtual bool UserSteppingAction(const G4Step*, bool);
-    
-    virtual void SetInterfacePointers( PHCompositeNode* );
-    
-  private:
-    PHG4FPbScDetector* detector_;
-    PHG4HitContainer* hits_;
+ public:
+  PHG4FPbScSteppingAction(PHG4FPbScDetector*);
+  virtual ~PHG4FPbScSteppingAction() {}
+
+  virtual bool UserSteppingAction(const G4Step*, bool);
+
+  virtual void SetInterfacePointers(PHCompositeNode*);
+
+ private:
+  PHG4FPbScDetector* detector_;
+  PHG4HitContainer* hits_;
 };
 
-
-
 #endif
-

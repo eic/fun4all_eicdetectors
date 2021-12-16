@@ -3,11 +3,11 @@
 
 namespace PHG4CrystalCalorimeterDefs
 {
-  enum CaloType
-  {
-    nonprojective = 1,
-    projective = 2
-  };
+enum CaloType
+{
+  nonprojective = 1,
+  projective = 2
+};
 }
 
 #endif

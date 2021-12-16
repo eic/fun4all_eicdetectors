@@ -81,7 +81,7 @@ bool PHG4ForwardHcalSteppingAction::UserSteppingAction(const G4Step* aStep, bool
   unsigned int icopy = touch->GetVolume(1)->GetCopyNo();
   int idx_j = icopy >> 16;
   int idx_k = icopy & 0xFFFF;
-  
+
   /* Get energy deposited by this step */
   double edep = aStep->GetTotalEnergyDeposit() / GeV;
   double eion = (aStep->GetTotalEnergyDeposit() - aStep->GetNonIonizingEnergyDeposit()) / GeV;

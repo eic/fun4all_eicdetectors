@@ -86,9 +86,8 @@ bool PHG4ForwardEcalSteppingAction::UserSteppingAction(const G4Step* aStep, bool
   int idx_k = icopy & 0xFFFF;
 
   if (Verbosity() > 2)
-    std::cout << "\t" << icopy << "\t idx_j =" << idx_j << ", idx_k =" << idx_k <<"\t id:" << icopy << "\t type: " << towertype <<  std::endl;
+    std::cout << "\t" << icopy << "\t idx_j =" << idx_j << ", idx_k =" << idx_k << "\t id:" << icopy << "\t type: " << towertype << std::endl;
 
-  
   /* Get energy deposited by this step */
   double edep = aStep->GetTotalEnergyDeposit() / GeV;
   double eion = (aStep->GetTotalEnergyDeposit() - aStep->GetNonIonizingEnergyDeposit()) / GeV;

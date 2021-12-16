@@ -41,20 +41,19 @@ class PHG4LFHcalSubsystem : public PHG4DetectorSubsystem
   PHG4SteppingAction *GetSteppingAction() const { return m_SteppingAction; }
   PHG4DisplayAction *GetDisplayAction() const { return m_DisplayAction; }
 
-  void DoFullLightPropagation(bool doProp) {_do_lightpropagation = doProp;};
+  void DoFullLightPropagation(bool doProp) { _do_lightpropagation = doProp; };
 
   /** Set mapping file for calorimeter towers
    */
   void SetTowerMappingFile(const std::string &filename);
   /** Set layers per tower segment by hand, has to be set in addition to mapping file
    */
-  void SetLayerPerTowerSegment(int layerPerTowerSeg) {set_int_param("nlayerspertowerseg", layerPerTowerSeg); }
-  
+  void SetLayerPerTowerSegment(int layerPerTowerSeg) { set_int_param("nlayerspertowerseg", layerPerTowerSeg); }
+
   /** Set level of detail for display
    */
-  void SetDetailed(bool b){showdetailed = b;}
+  void SetDetailed(bool b) { showdetailed = b; }
 
-  
  private:
   void SetDefaultParameters();
 

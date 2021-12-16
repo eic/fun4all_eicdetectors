@@ -113,7 +113,7 @@ int PHG4LFHcalSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
 int PHG4LFHcalSubsystem::process_event(PHCompositeNode* topNode)
 {
   // pass top node to stepping action so that it gets
-  // relevant nodes needed internally  
+  // relevant nodes needed internally
   if (m_SteppingAction)
   {
     m_SteppingAction->SetInterfacePointers(topNode);
@@ -155,7 +155,6 @@ void PHG4LFHcalSubsystem::SetDefaultParameters()
   set_default_double_param("zdepthcatcheroffset", 1000000.);
   set_default_int_param("nLayerOffsetTailcatcher", 0);
   set_default_int_param("embed_fiber", 0);
-  
 
   std::ostringstream mappingfilename;
   const char* calibroot = getenv("CALIBRATIONROOT");

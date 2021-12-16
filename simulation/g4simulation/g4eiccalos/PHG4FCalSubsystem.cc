@@ -4,7 +4,7 @@
 #include "PHG4FCalSteppingAction.h"
 
 #include <g4main/PHG4HitContainer.h>
-#include <g4main/PHG4Subsystem.h>          // for PHG4Subsystem
+#include <g4main/PHG4Subsystem.h>  // for PHG4Subsystem
 
 #include <phool/PHCompositeNode.h>
 #include <phool/PHIODataNode.h>    // for PHIODataNode

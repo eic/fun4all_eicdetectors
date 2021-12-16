@@ -3,38 +3,38 @@
 #include <calobase/RawTowerContainer.h>
 #include <calobase/RawTowerv1.h>
 
-#include <calobase/RawTower.h>                 // for RawTower
-#include <calobase/RawTowerDefs.h>             // for convert_name_to_caloid
-#include <calobase/RawTowerGeom.h>             // for RawTowerGeom
-#include <calobase/RawTowerGeomv4.h>
-#include <calobase/RawTowerGeomContainer.h>    // for RawTowerGeomContainer
+#include <calobase/RawTower.h>               // for RawTower
+#include <calobase/RawTowerDefs.h>           // for convert_name_to_caloid
+#include <calobase/RawTowerGeom.h>           // for RawTowerGeom
+#include <calobase/RawTowerGeomContainer.h>  // for RawTowerGeomContainer
 #include <calobase/RawTowerGeomContainer_Cylinderv1.h>
+#include <calobase/RawTowerGeomv4.h>
 
 #include <g4main/PHG4Hit.h>
 #include <g4main/PHG4HitContainer.h>
 
 #include <fun4all/Fun4AllReturnCodes.h>
-#include <fun4all/SubsysReco.h>                // for SubsysReco
+#include <fun4all/SubsysReco.h>  // for SubsysReco
 
 #include <phool/PHCompositeNode.h>
 #include <phool/PHIODataNode.h>
-#include <phool/PHNode.h>                      // for PHNode
+#include <phool/PHNode.h>  // for PHNode
 #include <phool/PHNodeIterator.h>
-#include <phool/PHObject.h>                    // for PHObject
+#include <phool/PHObject.h>  // for PHObject
 #include <phool/getClass.h>
-#include <phool/phool.h>                       // for PHWHERE
+#include <phool/phool.h>  // for PHWHERE
 
 #include <TRotation.h>
 #include <TVector3.h>
 
-#include <cstdlib>                            // for exit
-#include <exception>                           // for exception
+#include <cstdlib>    // for exit
+#include <exception>  // for exception
 #include <fstream>
 #include <iostream>
 #include <map>
 #include <sstream>
 #include <stdexcept>
-#include <utility>                             // for pair, make_pair
+#include <utility>  // for pair, make_pair
 
 using namespace std;
 
@@ -131,12 +131,12 @@ int RawTowerBuilderByHitIndexBECAL::process_event(PHCompositeNode *topNode)
   if (Verbosity())
   {
     towerE = m_Towers->getTotalEdep();
-    std::cout << "towers before compression: "<< m_Towers->size() << "\t" << m_Detector << std::endl;
+    std::cout << "towers before compression: " << m_Towers->size() << "\t" << m_Detector << std::endl;
   }
   m_Towers->compress(m_Emin);
   if (Verbosity())
   {
-    std::cout << "storing towers: "<< m_Towers->size() << std::endl;
+    std::cout << "storing towers: " << m_Towers->size() << std::endl;
     cout << "Energy lost by dropping towers with less than " << m_Emin
          << " energy, lost energy: " << towerE - m_Towers->getTotalEdep() << endl;
     m_Towers->identify();
@@ -181,7 +181,7 @@ void RawTowerBuilderByHitIndexBECAL::CreateNodes(PHCompositeNode *topNode)
 
   // Create the tower geometry node on the tree
   m_Geoms = new RawTowerGeomContainer_Cylinderv1(RawTowerDefs::convert_name_to_caloid(m_Detector));
-  
+
   string NodeNameTowerGeometries = "TOWERGEOM_" + m_Detector;
 
   PHIODataNode<PHObject> *geomNode = new PHIODataNode<PHObject>(m_Geoms, NodeNameTowerGeometries, "PHObject");
@@ -255,11 +255,10 @@ bool RawTowerBuilderByHitIndexBECAL::ReadGeometryFromTable()
       double rot_z, rot_y, rot_x;
       double size_z, size_y1, size_x1, size_y2, size_x2, p_Theta;
       std::string dummys;
- 
- 
-      if (!(iss >> dummys >> ideta_k >> idphi_j >>  size_x1 >>  size_x2 >> size_y1 >> size_y2 >> size_z >> p_Theta >> cx >> cy >> cz >> rot_x >> rot_y >> rot_z))
+
+      if (!(iss >> dummys >> ideta_k >> idphi_j >> size_x1 >> size_x2 >> size_y1 >> size_y2 >> size_z >> p_Theta >> cx >> cy >> cz >> rot_x >> rot_y >> rot_z))
       {
-        std::cout << "ERROR in PHG4ForwardHcalDetector: Failed to read line in mapping file " <<  m_MappingTowerFile << std::endl;
+        std::cout << "ERROR in PHG4ForwardHcalDetector: Failed to read line in mapping file " << m_MappingTowerFile << std::endl;
         exit(1);
       }
 
@@ -275,9 +274,9 @@ bool RawTowerBuilderByHitIndexBECAL::ReadGeometryFromTable()
       temp_geo->set_rotz(rot_z);
 
       m_Geoms->add_tower_geometry(temp_geo);
-
-    }else{
-      
+    }
+    else
+    {
       string parname;
       double parval;
       if (!(iss >> parname >> parval))
@@ -300,44 +299,40 @@ bool RawTowerBuilderByHitIndexBECAL::ReadGeometryFromTable()
       {
         radius = parit->second;  // in cm
       }
-      
+
       parit = m_GlobalParameterMap.find("tower_length");
       if (parit != m_GlobalParameterMap.end())
       {
         tower_length = parit->second;  // in cm
       }
-
     }
-
   }
 
-  m_Geoms->set_radius(radius + 0.5*tower_length); 
-  //cout << PHWHERE << "BECAL radius set to " <<  m_Geoms->get_radius() << " cm" << endl; 
-    
+  m_Geoms->set_radius(radius + 0.5 * tower_length);
+  //cout << PHWHERE << "BECAL radius set to " <<  m_Geoms->get_radius() << " cm" << endl;
+
   RawTowerGeomContainer::ConstRange all_towers = m_Geoms->get_tower_geometries();
-   
+
   for (RawTowerGeomContainer::ConstIterator it = all_towers.first;
-   it != all_towers.second; ++it)
+       it != all_towers.second; ++it)
   {
     double x_temp = it->second->get_center_x();
     double y_temp = it->second->get_center_y();
     double z_temp = it->second->get_center_z();
-    double roty   = it->second->get_roty();
-    double rotz   = it->second->get_rotz();
-  
+    double roty = it->second->get_roty();
+    double rotz = it->second->get_rotz();
 
-    double x_tempfinal =  x_temp + thickness_wall/2*abs(cos(roty - M_PI_2))*cos(rotz);
-    double y_tempfinal =  y_temp + thickness_wall/2*abs(cos(roty - M_PI_2))*sin(rotz);
-    double z_tempfinal =  z_temp + thickness_wall*sin(roty - M_PI_2);
+    double x_tempfinal = x_temp + thickness_wall / 2 * abs(cos(roty - M_PI_2)) * cos(rotz);
+    double y_tempfinal = y_temp + thickness_wall / 2 * abs(cos(roty - M_PI_2)) * sin(rotz);
+    double z_tempfinal = z_temp + thickness_wall * sin(roty - M_PI_2);
 
     it->second->set_center_x(x_tempfinal);
     it->second->set_center_y(y_tempfinal);
     it->second->set_center_z(z_tempfinal);
 
-
     if (Verbosity() > 2)
     {
-      cout << "*** Tower x y z : " << x_temp << " " << y_temp << " " << z_temp << endl;    
+      cout << "*** Tower x y z : " << x_temp << " " << y_temp << " " << z_temp << endl;
     }
   }
   if (Verbosity())
@@ -346,5 +341,4 @@ bool RawTowerBuilderByHitIndexBECAL::ReadGeometryFromTable()
   }
 
   return true;
-
 }

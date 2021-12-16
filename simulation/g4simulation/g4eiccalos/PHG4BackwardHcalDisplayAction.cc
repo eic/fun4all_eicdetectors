@@ -9,7 +9,7 @@
 #include <TSystem.h>
 
 #include <iostream>
-#include <utility>                     // for pair
+#include <utility>  // for pair
 
 using namespace std;
 
@@ -24,7 +24,6 @@ PHG4BackwardHcalDisplayAction::PHG4BackwardHcalDisplayAction(const std::string &
   showdetails = detailed;
   if (!detailed) std::cout << "PHG4BackwardHcalDisplayAction::disabled detailed view of towers" << std::endl;
 }
-
 
 PHG4BackwardHcalDisplayAction::~PHG4BackwardHcalDisplayAction()
 {
@@ -54,7 +53,7 @@ void PHG4BackwardHcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvo
       visatt->SetColour(G4Colour::Red());
       if (showdetails)
         visatt->SetVisibility(true);
-      else 
+      else
         visatt->SetVisibility(false);
     }
     else if (it.second == "FHcalEnvelope")
@@ -66,16 +65,15 @@ void PHG4BackwardHcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvo
       visatt->SetColour(G4Colour::White());
       if (showdetails)
         visatt->SetVisibility(true);
-      else 
+      else
         visatt->SetVisibility(false);
-
     }
     else if (it.second == "WLSplate")
     {
       visatt->SetColour(G4Colour::Yellow());
       if (showdetails)
         visatt->SetVisibility(true);
-      else 
+      else
         visatt->SetVisibility(false);
     }
     else if (it.second == "SupportPlate")
@@ -83,7 +81,7 @@ void PHG4BackwardHcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvo
       visatt->SetColour(G4Colour::Gray());
       if (showdetails)
         visatt->SetVisibility(true);
-      else 
+      else
         visatt->SetVisibility(false);
     }
     else if (it.second == "SingleTower")
@@ -91,9 +89,8 @@ void PHG4BackwardHcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvo
       visatt->SetColour(G4Colour::Red());
       if (showdetails)
         visatt->SetVisibility(false);
-      else 
+      else
         visatt->SetVisibility(true);
-
     }
     else
     {

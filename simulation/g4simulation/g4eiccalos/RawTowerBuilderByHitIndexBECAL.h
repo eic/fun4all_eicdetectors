@@ -6,7 +6,7 @@
 #include <fun4all/SubsysReco.h>
 
 #include <map>
-#include <string> 
+#include <string>
 
 class PHCompositeNode;
 class RawTowerContainer;
@@ -84,9 +84,9 @@ class RawTowerBuilderByHitIndexBECAL : public SubsysReco
 
   RawTowerDefs::CalorimeterId m_CaloId;
 
-  double thickness_wall = -1.; 
-  double radius = 85.0; 
-  double tower_length = 45.5; 
+  double thickness_wall = -1.;
+  double radius = 85.0;
+  double tower_length = 45.5;
 
   double m_Emin;
 

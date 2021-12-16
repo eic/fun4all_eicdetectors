@@ -95,7 +95,7 @@ class RawTowerBuilderByHitIndexLHCal : public SubsysReco
   double m_Emin;
   double m_TowerDepth;
   double m_ThicknessAbsorber;
-  double  m_ThicknessScintilator;
+  double m_ThicknessScintilator;
   int m_NLayers;
   int m_NLayersPerTowerSeg;
   int m_NTowerSeg;

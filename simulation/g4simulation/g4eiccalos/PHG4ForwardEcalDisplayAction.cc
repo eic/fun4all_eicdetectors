@@ -23,7 +23,6 @@ PHG4ForwardEcalDisplayAction::PHG4ForwardEcalDisplayAction(const std::string &na
   if (!detailed) std::cout << "PHG4ForwardEcalDisplayAction::disabled detailed view of towers" << std::endl;
 }
 
-
 PHG4ForwardEcalDisplayAction::~PHG4ForwardEcalDisplayAction()
 {
   for (auto &it : m_VisAttVec)
@@ -52,7 +51,7 @@ void PHG4ForwardEcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol
       visatt->SetColour(G4Colour::Gray());
       if (showdetails)
         visatt->SetVisibility(true);
-      else 
+      else
         visatt->SetVisibility(false);
     }
     else if (it.second == "Coating")
@@ -60,7 +59,7 @@ void PHG4ForwardEcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol
       visatt->SetColour(G4Colour::Black());
       if (showdetails)
         visatt->SetVisibility(true);
-      else 
+      else
         visatt->SetVisibility(false);
     }
     else if (it.second == "Clamp")
@@ -69,7 +68,7 @@ void PHG4ForwardEcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol
       // visatt->SetForceWireframe(true);
       if (showdetails)
         visatt->SetVisibility(true);
-      else 
+      else
         visatt->SetVisibility(false);
     }
     else if (it.second == "Envelope")
@@ -81,20 +80,20 @@ void PHG4ForwardEcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol
     else if (it.second == "Fiber")
     {
       // visatt->SetColour(G4Colour::Cyan());
-      visatt->SetColour(152./ 255,251./ 255,152./ 255, 0.4);
+      visatt->SetColour(152. / 255, 251. / 255, 152. / 255, 0.4);
       if (showdetails)
         visatt->SetVisibility(true);
-      else 
+      else
         visatt->SetVisibility(false);
     }
     else if (it.second == "Scintillator")
     {
       // visatt->SetColour(G4Colour::White());
       // visatt->SetColour(G4Colour::Cyan());
-      visatt->SetColour(127./ 255,255./ 255,212./ 255, 0.2);
+      visatt->SetColour(127. / 255, 255. / 255, 212. / 255, 0.2);
       if (showdetails)
         visatt->SetVisibility(true);
-      else 
+      else
         visatt->SetVisibility(false);
     }
     else if (it.second == "SingleTower")
@@ -104,7 +103,7 @@ void PHG4ForwardEcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol
       // visatt->SetForceWireframe(true);
       if (showdetails)
         visatt->SetVisibility(false);
-      else 
+      else
         visatt->SetVisibility(true);
     }
     else if (it.second == "miniblock")

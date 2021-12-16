@@ -5,8 +5,8 @@
 
 #include <g4main/PHG4Detector.h>
 
-#include <Geant4/G4SystemOfUnits.hh>
 #include <Geant4/G4Material.hh>
+#include <Geant4/G4SystemOfUnits.hh>
 
 #include <cassert>
 #include <map>
@@ -100,7 +100,7 @@ class PHG4ForwardEcalDetector : public PHG4Detector
 
   int get_Layer() const { return m_Layer; }
   int get_TowerType() const { return m_TowerType; }
-  
+
   PHG4ForwardEcalDisplayAction *GetDisplayAction() { return m_DisplayAction; }
 
  private:
@@ -109,9 +109,9 @@ class PHG4ForwardEcalDetector : public PHG4Detector
   G4LogicalVolume *ConstructTowerType3_4_5_6(int type);
   int PlaceTower(G4LogicalVolume *envelope, G4LogicalVolume *tower[6]);
   int ParseParametersFromTable();
-  G4Material* GetWLSFiberFEMCMaterial();
-  G4Material* GetScintillatorMaterial();
-  G4Material* GetCoatingMaterial();
+  G4Material *GetWLSFiberFEMCMaterial();
+  G4Material *GetScintillatorMaterial();
+  G4Material *GetCoatingMaterial();
   void SurfaceTable(G4LogicalVolume *vol);
   struct towerposition
   {
@@ -150,7 +150,7 @@ class PHG4ForwardEcalDetector : public PHG4Detector
   int m_AbsorberActiveFlag = 0;
   int m_Layer = 0;
   int m_TowerType = 0;
-  
+
   std::string m_SuperDetector = "NONE";
   std::string m_TowerLogicNamePrefix = "hEcalTower";
 

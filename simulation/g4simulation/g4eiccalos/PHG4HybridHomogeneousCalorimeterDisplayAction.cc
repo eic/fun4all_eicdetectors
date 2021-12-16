@@ -51,14 +51,14 @@ void PHG4HybridHomogeneousCalorimeterDisplayAction::ApplyDisplayAction(G4VPhysic
     else if (it.second == "Crystal")
     {
       visatt->SetColour(G4Colour::Cyan());
-      visatt->SetColour(127./ 255,255./ 255,212./ 255, 0.2);
+      visatt->SetColour(127. / 255, 255. / 255, 212. / 255, 0.2);
       visatt->SetForceSolid(true);
       // visatt->SetForceWireframe(true);
       // visatt->SetVisibility(false);
     }
     else if (it.second == "Sensor")
     {
-      visatt->SetColour(255./ 255,165./ 255,0./ 255, 0.2);
+      visatt->SetColour(255. / 255, 165. / 255, 0. / 255, 0.2);
       visatt->SetForceSolid(true);
       // visatt->SetForceWireframe(true);
       // visatt->SetVisibility(false);

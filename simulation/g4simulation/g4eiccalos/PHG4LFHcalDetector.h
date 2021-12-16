@@ -43,7 +43,7 @@ class PHG4LFHcalDetector : public PHG4Detector
   void SuperDetector(const std::string &name) { m_SuperDetector = name; }
   const std::string SuperDetector() const { return m_SuperDetector; }
 
-  PHParameters* getParamsDet() const {return m_Params;}
+  PHParameters *getParamsDet() const { return m_Params; }
 
   int get_Layer() const { return m_Layer; }
 
@@ -53,9 +53,9 @@ class PHG4LFHcalDetector : public PHG4Detector
   G4LogicalVolume *ConstructTower();
   int PlaceTower(G4LogicalVolume *envelope, G4LogicalVolume *tower);
   int ParseParametersFromTable();
-  G4Material*  GetScintillatorMaterial();
-  G4Material*  GetCoatingMaterial();
-  G4Material*  GetWLSFiberMaterial();
+  G4Material *GetScintillatorMaterial();
+  G4Material *GetCoatingMaterial();
+  G4Material *GetWLSFiberMaterial();
   void SurfaceTable(G4LogicalVolume *vol);
   void MakeBoundary(G4VPhysicalVolume *crystal, G4VPhysicalVolume *opdet, bool isFiber);
   void MakeBoundary_Fiber_Scint(G4VPhysicalVolume *crystal, G4VPhysicalVolume *opdet);
