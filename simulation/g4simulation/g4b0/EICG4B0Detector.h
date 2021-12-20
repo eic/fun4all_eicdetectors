@@ -39,8 +39,8 @@ class EICG4B0Detector : public PHG4Detector
   const std::string SuperDetector() const { return m_SuperDetector; }
   int get_Layer() const { return m_Layer; }
   PHParameters *getParams();
- private:
 
+ private:
   PHParameters *m_Params;
   // active volumes
   std::set<G4VPhysicalVolume *> m_PhysicalVolumesSet;

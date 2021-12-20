@@ -6,8 +6,8 @@
 #include <g4main/PHG4SteppingAction.h>
 #include <string>
 
+#include <Geant4/G4StepPoint.hh>
 #include <Geant4/G4TouchableHandle.hh>
-#include <Geant4/G4StepPoint.hh> 
 
 class EICG4B0Detector;
 class EICG4B0Subsystem;
@@ -24,7 +24,7 @@ class EICG4B0SteppingAction : public PHG4SteppingAction
 {
  public:
   //! constructor
-  EICG4B0SteppingAction(EICG4B0Subsystem *subsys, EICG4B0Detector *detector, const PHParameters* parameters);
+  EICG4B0SteppingAction(EICG4B0Subsystem* subsys, EICG4B0Detector* detector, const PHParameters* parameters);
 
   //! destructor
   virtual ~EICG4B0SteppingAction() override;
@@ -35,26 +35,26 @@ class EICG4B0SteppingAction : public PHG4SteppingAction
   //! reimplemented from base class
   virtual void SetInterfacePointers(PHCompositeNode*) override;
 
-//  virtual void SaveLightYield(const int i = 1) { m_SaveLightYieldFlag = i;}
+  //  virtual void SaveLightYield(const int i = 1) { m_SaveLightYieldFlag = i;}
 
   virtual bool hasMotherSubsystem() const;
 
-  virtual void SaveAllHits(bool i = true){ m_SaveAllHitsFlag = i;}
+  virtual void SaveAllHits(bool i = true) { m_SaveAllHitsFlag = i; }
 
-  virtual void HitNodeName(const std::string &name) {m_HitNodeName=name;}
+  virtual void HitNodeName(const std::string& name) { m_HitNodeName = name; }
 
   void SetTowerSize(double twrsze)
-    {
-      _tower_size = twrsze;
-    }
+  {
+    _tower_size = twrsze;
+  }
   void SetReadoutSize(double rdosze)
-    {
-      _readout_size = rdosze;
-    }
+  {
+    _readout_size = rdosze;
+  }
   void SetDetectorSize(double detsze)
-    {
-      _detector_size = detsze;
-    }
+  {
+    _detector_size = detsze;
+  }
 
  private:
   int FindTowerIndexFromPosition(G4StepPoint* prePoint, int& j, int& k);
@@ -65,16 +65,16 @@ class EICG4B0SteppingAction : public PHG4SteppingAction
 
   const PHParameters* m_Params;
   //! pointer to hit container
-  PHG4HitContainer* m_HitContainer=nullptr;
-//  PHG4HitContainer* m_AbsorberHitContainer=nullptr;
+  PHG4HitContainer* m_HitContainer = nullptr;
+  //  PHG4HitContainer* m_AbsorberHitContainer=nullptr;
   PHG4Hit* m_Hit;
-//  PHG4HitContainer* m_SaveHitContainer;
+  //  PHG4HitContainer* m_SaveHitContainer;
   PHG4Shower* m_SaveShower;
   G4VPhysicalVolume* m_SaveVolPre;
   G4VPhysicalVolume* m_SaveVolPost;
 
   bool m_SaveAllHitsFlag = false;
-//  int m_SaveLightYieldFlag;
+  //  int m_SaveLightYieldFlag;
   int m_SaveTrackId;
   int m_SavePreStepStatus;
   int m_SavePostStepStatus;
