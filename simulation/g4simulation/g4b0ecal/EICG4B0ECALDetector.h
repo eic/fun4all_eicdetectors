@@ -45,6 +45,7 @@ class EICG4B0ECALDetector : public PHG4Detector
   {
     _mapping_tower_file = filename;
   }
+
  private:
   G4LogicalVolume *ConstructTower();
   int PlaceTower(G4LogicalVolume *envelope, G4LogicalVolume *tower);
@@ -59,10 +60,10 @@ class EICG4B0ECALDetector : public PHG4Detector
     int idx_k;
   };
 
-//  std::map<std::string, G4double> m_GlobalParameterMap;
+  //  std::map<std::string, G4double> m_GlobalParameterMap;
   std::map<std::string, towerposition> m_TowerPositionMap;
 
-//  EICG4B0SteppingAction *m_SteppingAction;
+  //  EICG4B0SteppingAction *m_SteppingAction;
   PHParameters *m_Params;
   // active volumes
   std::set<G4VPhysicalVolume *> m_PhysicalVolumesSet;
@@ -74,11 +75,12 @@ class EICG4B0ECALDetector : public PHG4Detector
   std::string m_SuperDetector;
   std::string _mapping_tower_file;
   std::string m_TowerLogicNamePrefix;
+
  protected:
- void LogicalVolSetInsert(G4LogicalVolume *logvol)
-{
-	m_LogicalVolSet.insert(logvol);
-}
+  void LogicalVolSetInsert(G4LogicalVolume *logvol)
+  {
+    m_LogicalVolSet.insert(logvol);
+  }
 };
 
 #endif  // EICG4B0ECALDETECTOR_H

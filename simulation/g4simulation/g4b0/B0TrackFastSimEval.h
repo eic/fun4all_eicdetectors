@@ -29,8 +29,8 @@ class B0TrackFastSimEval : public SubsysReco
  public:
   //Default constructor
   B0TrackFastSimEval(const std::string& name = "B0TrackFastSimEval",
-                       const std::string& filename = "g4eval.root",
-                       const std::string& trackmapname = "SvtxTrackMap");
+                     const std::string& filename = "g4eval.root",
+                     const std::string& trackmapname = "SvtxTrackMap");
 
   //Initialization, called for initialization
   int Init(PHCompositeNode*) override;
@@ -136,7 +136,6 @@ class B0TrackFastSimEval : public SubsysReco
   // hits on reference cylinders and planes
   std::vector<std::vector<float>> m_TTree_ref_vec;
   std::vector<std::vector<float>> m_TTree_ref_p_vec;
-
 };
 
 #endif  //* G4TRACKFASTSIM_PHG4TRACKFASTSIMEVAL_H *//

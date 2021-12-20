@@ -25,8 +25,6 @@
 #include <phool/PHObject.h>
 #include <phool/getClass.h>
 
-using namespace std;
-
 //_______________________________________________________________________
 EICG4B0ECALSubsystem::EICG4B0ECALSubsystem(const std::string &name, const int lyr)
   : PHG4DetectorSubsystem(name, lyr)
@@ -45,53 +43,52 @@ int EICG4B0ECALSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
   m_Detector = new EICG4B0ECALDetector(this, topNode, GetParams(), Name(), GetLayer());
   m_Detector->SuperDetector(SuperDetector());
   m_Detector->OverlapCheck(CheckOverlap());
-  m_Detector->SetTowerMappingFile(mappingfile_); 
+  m_Detector->SetTowerMappingFile(mappingfile_);
 
   if (GetParams()->get_int_param("active"))
   {
     PHNodeIterator iter(topNode);
     PHCompositeNode *dstNode = dynamic_cast<PHCompositeNode *>(iter.findFirst("PHCompositeNode", "DST"));
-  
-    string nodename;
-    string geonode;
-//	std::cout<<"B0ECAL: "<<SuperDetector()<<std::endl;
+
+    std::string nodename;
+    //	std::cout<<"B0ECAL: "<<SuperDetector()<<std::endl;
     if (SuperDetector() != "NONE")
     {
-    // create super detector subnodes
-       PHNodeIterator iter_dst(dstNode);
-       PHCompositeNode *superSubNode = dynamic_cast<PHCompositeNode *>(iter_dst.findFirst("PHCompositeNode", SuperDetector()));
-       if (!superSubNode)
-       {
-         superSubNode = new PHCompositeNode(SuperDetector());
-         dstNode->addNode(superSubNode);
-       }
-       dstNode = superSubNode;
-   
-       nodename = "G4HIT_" + SuperDetector();
+      // create super detector subnodes
+      PHNodeIterator iter_dst(dstNode);
+      PHCompositeNode *superSubNode = dynamic_cast<PHCompositeNode *>(iter_dst.findFirst("PHCompositeNode", SuperDetector()));
+      if (!superSubNode)
+      {
+        superSubNode = new PHCompositeNode(SuperDetector());
+        dstNode->addNode(superSubNode);
+      }
+      dstNode = superSubNode;
+
+      nodename = "G4HIT_" + SuperDetector();
     }
- 
+
     else
     {
-       nodename = "G4HIT_" + Name();
+      nodename = "G4HIT_" + Name();
     }
     PHG4HitContainer *b0_hits = findNode::getClass<PHG4HitContainer>(topNode, nodename);
     if (!b0_hits)
     {
-       dstNode->addNode(new PHIODataNode<PHObject>(b0_hits = new PHG4HitContainer(nodename), nodename, "PHObject"));
+      dstNode->addNode(new PHIODataNode<PHObject>(b0_hits = new PHG4HitContainer(nodename), nodename, "PHObject"));
     }
     b0_hits->AddLayer(GetLayer());
     auto *tmp = new EICG4B0ECALSteppingAction(this, m_Detector, GetParams());
     tmp->HitNodeName(nodename);
     m_SteppingAction = tmp;
-   }
-   else if (GetParams()->get_int_param("blackhole"))
-   {
-     m_SteppingAction = new EICG4B0ECALSteppingAction(this, m_Detector, GetParams());
-   }
-   if (m_SteppingAction)
-   {
-      (dynamic_cast<EICG4B0ECALSteppingAction *>(m_SteppingAction))->SaveAllHits(m_SaveAllHitsFlag);
-   }
+  }
+  else if (GetParams()->get_int_param("blackhole"))
+  {
+    m_SteppingAction = new EICG4B0ECALSteppingAction(this, m_Detector, GetParams());
+  }
+  if (m_SteppingAction)
+  {
+    (dynamic_cast<EICG4B0ECALSteppingAction *>(m_SteppingAction))->SaveAllHits(m_SaveAllHitsFlag);
+  }
   return 0;
 }
 //_______________________________________________________________________
@@ -106,7 +103,7 @@ int EICG4B0ECALSubsystem::process_event(PHCompositeNode *topNode)
   return 0;
 }
 //_______________________________________________________________________
-void EICG4B0ECALSubsystem::Print(const string &what) const
+void EICG4B0ECALSubsystem::Print(const std::string &what) const
 {
   if (m_Detector)
   {
@@ -133,12 +130,12 @@ void EICG4B0ECALSubsystem::SetDefaultParameters()
   set_default_double_param("place_z", 0.);          //subdetector position
   set_default_double_param("pipe_ir", 2.8);         //beam pipe inner radius (for future implementation)
   set_default_double_param("pipe_or", 3.05);        //beam pipe outer raidus (for future implementation)
-  set_default_double_param("pipe_hole_r", 3.5);       //beam pipe cut off radius in the detector volume
+  set_default_double_param("pipe_hole_r", 3.5);     //beam pipe cut off radius in the detector volume
   set_default_double_param("pipe_hole", 1.0);       //beam pipe cut off rectangle in the detector volume
-  set_default_double_param("cable_hole", 2.0);       //beam pipe cut off radius in the detector volume
-  set_default_double_param("cable_x", -17.0);         //cable hole position
-  set_default_double_param("cable_y", 0.);           // position
-  set_default_double_param("cable_z", 0.);           // position
+  set_default_double_param("cable_hole", 2.0);      //beam pipe cut off radius in the detector volume
+  set_default_double_param("cable_x", -17.0);       //cable hole position
+  set_default_double_param("cable_y", 0.);          // position
+  set_default_double_param("cable_z", 0.);          // position
   set_default_double_param("pipe_x", -3.4);         //beam pipe position
   set_default_double_param("pipe_y", 0.);           //beam pipe position
   set_default_double_param("pipe_z", 0.);           //beam pipe position
@@ -162,7 +159,7 @@ void EICG4B0ECALSubsystem::SetDefaultParameters()
   set_default_string_param("material", "G4_PbWO4");  //detector material
 }
 
-void EICG4B0ECALSubsystem::SetTowerMappingFile(const std::string& filename)
+void EICG4B0ECALSubsystem::SetTowerMappingFile(const std::string &filename)
 {
   mappingfile_ = filename;
 }

@@ -43,15 +43,13 @@
 #define LogError(exp) std::cout << "ERROR: " << __FILE__ << ": " << __LINE__ << ": " << exp << "\n"
 #define LogWarning(exp) std::cout << "WARNING: " << __FILE__ << ": " << __LINE__ << ": " << exp << "\n"
 
-using namespace std;
-
-const string xyzt[] = {"x", "y", "z", "t"};
+const std::string xyzt[] = {"x", "y", "z", "t"};
 
 //----------------------------------------------------------------------------//
 //-- Constructor:
 //--  simple initialization
 //----------------------------------------------------------------------------//
-B0TrackFastSimEval::B0TrackFastSimEval(const string &name, const string &filename, const string &trackmapname)
+B0TrackFastSimEval::B0TrackFastSimEval(const std::string &name, const std::string &filename, const std::string &trackmapname)
   : SubsysReco(name)
   , m_TruthInfoContainer(nullptr)
   , m_TrackMap(nullptr)
@@ -61,17 +59,46 @@ B0TrackFastSimEval::B0TrackFastSimEval(const string &name, const string &filenam
   , m_H2D_DeltaMomVsTruthMom(nullptr)
   , m_H2D_DeltaMomVsTruthEta(nullptr)
   , m_EventCounter(0)
+  , m_TTree_Event(0)
+  , m_TTree_gTrackID(0)
+  , m_TTree_gFlavor(0)
+  , m_TTree_gpx(0)
+  , m_TTree_gpy(0)
+  , m_TTree_gpz(0)
+  , m_TTree_gvx(0)
+  , m_TTree_gvy(0)
+  , m_TTree_gvz(0)
+  , m_TTree_gvt(0)
+  , m_TTree_TrackID(0)
+  , m_TTree_Charge(0)
+  , m_TTree_nHits(0)
+  , m_TTree_px(0)
+  , m_TTree_py(0)
+  , m_TTree_pz(0)
+  , m_TTree_pcax(0)
+  , m_TTree_pcay(0)
+  , m_TTree_pcaz(0)
+  , m_TTree_dca2d(0)
+  , m_TTree_layer{0,0,0}
+  , m_TTree_vx(0)
+  , m_TTree_vy(0)
+  , m_TTree_vz(0)
+  , m_TTree_DeltaVx(0)
+  , m_TTree_DeltaVy(0)
+  , m_TTree_DeltaVz(0)
+  , m_TTree_nTracks(0)
+  , m_TTree_nFromTruth(0)
   , m_OutFileName(filename)
   , m_TrackMapName(trackmapname)
 {
-//  reset_variables();
+  //  reset_variables();
 }
 
 //----------------------------------------------------------------------------//
 //-- Init():
 //--   Intialize all histograms, trees, and ntuples
 //----------------------------------------------------------------------------//
-int B0TrackFastSimEval::Init(PHCompositeNode */*topNode*/)
+int B0TrackFastSimEval::Init(PHCompositeNode * /*topNode*/)
 {
   return Fun4AllReturnCodes::EVENT_OK;
 }
@@ -83,7 +110,7 @@ int B0TrackFastSimEval::Init(PHCompositeNode */*topNode*/)
 int B0TrackFastSimEval::InitRun(PHCompositeNode *topNode)
 {
   if (Verbosity())
-    cout << PHWHERE << " Openning file " << m_OutFileName << endl;
+    std::cout << PHWHERE << " Openning file " << m_OutFileName << std::endl;
   PHTFileServer::get().open(m_OutFileName, "RECREATE");
 
   // create TTree
@@ -117,28 +144,28 @@ int B0TrackFastSimEval::InitRun(PHCompositeNode *topNode)
                                                                     "B0TrackFastSim_Parameter");
   if (not nodeparams)
   {
-    cout << __PRETTY_FUNCTION__ << " : Warning, missing B0TrackFastSim_Parameter node and skip saving hits"
-         << endl;
+    std::cout << __PRETTY_FUNCTION__ << " : Warning, missing B0TrackFastSim_Parameter node and skip saving hits"
+         << std::endl;
   }
   else
   {
     B0TrackFastSim_Parameter.FillFrom(nodeparams);
     if (Verbosity())
     {
-      cout << __PRETTY_FUNCTION__ << " B0TrackFastSim_Parameter : ";
+      std::cout << __PRETTY_FUNCTION__ << " B0TrackFastSim_Parameter : ";
       B0TrackFastSim_Parameter.Print();
     }
 
     auto range = B0TrackFastSim_Parameter.get_all_int_params();
     for (auto iter = range.first; iter != range.second; ++iter)
     {
-      const string &phg4hit_node_name = iter->first;
+      const std::string &phg4hit_node_name = iter->first;
       const int &phg4hit_node_id = iter->second;
 
-      cout << __PRETTY_FUNCTION__ << " Prepare PHG4Hit node name " << phg4hit_node_name
-           << " with ID = " << phg4hit_node_id << endl;
+      std::cout << __PRETTY_FUNCTION__ << " Prepare PHG4Hit node name " << phg4hit_node_name
+           << " with ID = " << phg4hit_node_id << std::endl;
 
-      string branch_name = string("nHit_") + phg4hit_node_name;
+      std::string branch_name = std::string("nHit_") + phg4hit_node_name;
       m_TracksEvalTree->Branch(branch_name.c_str(),
                                &m_TTree_HitContainerID_nHits_map[phg4hit_node_id],
                                (branch_name + "/I").c_str());
@@ -171,12 +198,12 @@ int B0TrackFastSimEval::InitRun(PHCompositeNode *topNode)
   m_VertexEvalTree->Branch("ntracks", &m_TTree_nTracks, "ntracks/I");
   m_VertexEvalTree->Branch("n_from_truth", &m_TTree_nFromTruth, "n_from_truth/I");
 
-  for (map<string, unsigned int>::const_iterator iter = m_ProjectionNameMap.begin(); iter != m_ProjectionNameMap.end(); ++iter)
+  for (std::map<std::string, unsigned int>::const_iterator iter = m_ProjectionNameMap.begin(); iter != m_ProjectionNameMap.end(); ++iter)
   {
     for (int i = 0; i < 4; i++)
     {
-      string bname = iter->first + "_proj_" + xyzt[i];
-      string bdef = bname + "/F";
+      std::string bname = iter->first + "_proj_" + xyzt[i];
+      std::string bdef = bname + "/F";
 
       // fourth element is the path length
       if (i == 3)
@@ -189,31 +216,31 @@ int B0TrackFastSimEval::InitRun(PHCompositeNode *topNode)
 
     for (int i = 0; i < 3; i++)
     {
-      string bname = iter->first + "_proj_p" + xyzt[i];
-      string bdef = bname + "/F";
+      std::string bname = iter->first + "_proj_p" + xyzt[i];
+      std::string bdef = bname + "/F";
       m_TracksEvalTree->Branch(bname.c_str(), &m_TTree_proj_p_vec[iter->second][i], bdef.c_str());
     }
-    string nodename = "G4HIT_" + iter->first;
+    std::string nodename = "G4HIT_" + iter->first;
     PHG4HitContainer *hits = findNode::getClass<PHG4HitContainer>(topNode, nodename);
     if (hits)
     {
       for (int i = 0; i < 4; i++)
       {
-        string bname = iter->first + "_" + xyzt[i];
-        string bdef = bname + "/F";
+        std::string bname = iter->first + "_" + xyzt[i];
+        std::string bdef = bname + "/F";
         m_TracksEvalTree->Branch(bname.c_str(), &m_TTree_ref_vec[iter->second][i], bdef.c_str());
       }
       for (int i = 0; i < 3; i++)
       {
-        string bname = iter->first + "_p" + xyzt[i];
-        string bdef = bname + "/F";
+        std::string bname = iter->first + "_p" + xyzt[i];
+        std::string bdef = bname + "/F";
 
         m_TracksEvalTree->Branch(bname.c_str(), &m_TTree_ref_p_vec[iter->second][i], bdef.c_str());
       }
     }
     if (!hits && Verbosity() > 0)
     {
-      cout << "InitRun: could not find " << nodename << endl;
+      std::cout << "InitRun: could not find " << nodename << std::endl;
     }
   }
 
@@ -229,7 +256,7 @@ int B0TrackFastSimEval::process_event(PHCompositeNode *topNode)
 {
   m_EventCounter++;
   if (Verbosity() >= 2 and m_EventCounter % 1000 == 0)
-    cout << PHWHERE << "Events processed: " << m_EventCounter << endl;
+    std::cout << PHWHERE << "Events processed: " << m_EventCounter << std::endl;
 
   //std::cout << "Opening nodes" << std::endl;
   GetNodes(topNode);
@@ -246,7 +273,7 @@ int B0TrackFastSimEval::process_event(PHCompositeNode *topNode)
 //-- End():
 //--   End method, wrap everything up
 //----------------------------------------------------------------------------//
-int B0TrackFastSimEval::End(PHCompositeNode */*topNode*/)
+int B0TrackFastSimEval::End(PHCompositeNode * /*topNode*/)
 {
   PHTFileServer::get().cd(m_OutFileName);
 
@@ -298,7 +325,7 @@ void B0TrackFastSimEval::fill_track_tree(PHCompositeNode *topNode)
 
     SvtxTrack_FastSim *track = nullptr;
 
-    if (Verbosity()) cout << __PRETTY_FUNCTION__ << "TRACKmap size " << m_TrackMap->size() << std::endl;
+    if (Verbosity()) std::cout << __PRETTY_FUNCTION__ << "TRACKmap size " << m_TrackMap->size() << std::endl;
     for (SvtxTrackMap::ConstIter track_itr = m_TrackMap->begin();
          track_itr != m_TrackMap->end();
          track_itr++)
@@ -314,7 +341,7 @@ void B0TrackFastSimEval::fill_track_tree(PHCompositeNode *topNode)
         }
         continue;
       }
-      if (Verbosity()) cout << __PRETTY_FUNCTION__ << " PARTICLE!" << std::endl;
+      if (Verbosity()) std::cout << __PRETTY_FUNCTION__ << " PARTICLE!" << std::endl;
 
       if ((temp->get_truth_track_id() - g4particle->get_track_id()) == 0)
       {
@@ -357,10 +384,10 @@ void B0TrackFastSimEval::fill_track_tree(PHCompositeNode *topNode)
       m_TTree_pcay = track->get_y();
       m_TTree_pcaz = track->get_z();
       m_TTree_dca2d = track->get_dca2d();
-      m_TTree_layer[0]=0;
-      m_TTree_layer[1]=0;
-      m_TTree_layer[2]=0;
-      m_TTree_layer[3]=0;
+      m_TTree_layer[0] = 0;
+      m_TTree_layer[1] = 0;
+      m_TTree_layer[2] = 0;
+      m_TTree_layer[3] = 0;
       TVector3 truth_mom(m_TTree_gpx, m_TTree_gpy, m_TTree_gpz);
       TVector3 reco_mom(m_TTree_px, m_TTree_py, m_TTree_pz);
       //std::cout << "C2" << std::endl;
@@ -372,12 +399,12 @@ void B0TrackFastSimEval::fill_track_tree(PHCompositeNode *topNode)
            trkstates != track->end_states();
            ++trkstates)
       {
-        if (Verbosity()) cout << __PRETTY_FUNCTION__ << " checking " << trkstates->second->get_name() << endl;
-        map<string, unsigned int>::const_iterator iter = m_ProjectionNameMap.find(trkstates->second->get_name());
+        if (Verbosity()) std::cout << __PRETTY_FUNCTION__ << " checking " << trkstates->second->get_name() << std::endl;
+        std::map<std::string, unsigned int>::const_iterator iter = m_ProjectionNameMap.find(trkstates->second->get_name());
         if (iter != m_ProjectionNameMap.end())
         {
-        if (Verbosity()) 
-        cout << __PRETTY_FUNCTION__ << " found " << trkstates->second->get_name() << endl;
+          if (Verbosity())
+            std::cout << __PRETTY_FUNCTION__ << " found " << trkstates->second->get_name() << std::endl;
           // setting the projection (xyz and pxpypz)
           for (int i = 0; i < 3; i++)
           {
@@ -387,28 +414,28 @@ void B0TrackFastSimEval::fill_track_tree(PHCompositeNode *topNode)
           // fourth element is the path length
           m_TTree_proj_vec[iter->second][3] = trkstates->first;
 
-          string nodename = "G4HIT_" + trkstates->second->get_name();
-	 if (nodename.find("b0Truth_0")!= std::string::npos) m_TTree_layer[0] = 1;
-	 if (nodename.find("b0Truth_1")!= std::string::npos) m_TTree_layer[1] = 1;
-	 if (nodename.find("b0Truth_2")!= std::string::npos) m_TTree_layer[2] = 1;
-	 if (nodename.find("b0Truth_3")!= std::string::npos) m_TTree_layer[3] = 1;
+          std::string nodename = "G4HIT_" + trkstates->second->get_name();
+          if (nodename.find("b0Truth_0") != std::string::npos) m_TTree_layer[0] = 1;
+          if (nodename.find("b0Truth_1") != std::string::npos) m_TTree_layer[1] = 1;
+          if (nodename.find("b0Truth_2") != std::string::npos) m_TTree_layer[2] = 1;
+          if (nodename.find("b0Truth_3") != std::string::npos) m_TTree_layer[3] = 1;
           PHG4HitContainer *hits = findNode::getClass<PHG4HitContainer>(topNode, nodename);
           if (!hits)
           {
-            if (Verbosity()) cout << __PRETTY_FUNCTION__ << " could not find " << nodename << endl;
+            if (Verbosity()) std::cout << __PRETTY_FUNCTION__ << " could not find " << nodename << std::endl;
             continue;
           }
-          if (Verbosity()) cout << __PRETTY_FUNCTION__ << " number of hits: " << hits->size() << endl;
+          if (Verbosity()) std::cout << __PRETTY_FUNCTION__ << " number of hits: " << hits->size() << std::endl;
           PHG4HitContainer::ConstRange hit_range = hits->getHits();
           for (PHG4HitContainer::ConstIterator hit_iter = hit_range.first; hit_iter != hit_range.second; hit_iter++)
           {
-            if (Verbosity()) cout << __PRETTY_FUNCTION__ << " checking hit id " << hit_iter->second->get_trkid() << " against " << track->get_truth_track_id() << endl;
+            if (Verbosity()) std::cout << __PRETTY_FUNCTION__ << " checking hit id " << hit_iter->second->get_trkid() << " against " << track->get_truth_track_id() << std::endl;
             if (hit_iter->second->get_trkid() - track->get_truth_track_id() == 0)
             {
-              if (Verbosity()) cout << __PRETTY_FUNCTION__ << " found hit with id " << hit_iter->second->get_trkid() << endl;
+              if (Verbosity()) std::cout << __PRETTY_FUNCTION__ << " found hit with id " << hit_iter->second->get_trkid() << std::endl;
               if (iter->second > m_ProjectionNameMap.size())
               {
-                cout << "bad index: " << iter->second << endl;
+                std::cout << "bad index: " << iter->second << std::endl;
                 gSystem->Exit(1);
               }
               m_TTree_ref_vec[iter->second][0] = hit_iter->second->get_x(0);
@@ -425,10 +452,10 @@ void B0TrackFastSimEval::fill_track_tree(PHCompositeNode *topNode)
       }  // find projections
 
       // find number of hits
-     for (const auto &g4hit_id_hitset : track->g4hit_ids())
+      for (const auto &g4hit_id_hitset : track->g4hit_ids())
       {
         const int &g4hit_id = g4hit_id_hitset.first;
-        const set<PHG4HitDefs::keytype> &g4hit_set = g4hit_id_hitset.second;
+        const std::set<PHG4HitDefs::keytype> &g4hit_set = g4hit_id_hitset.second;
         //
         auto nhit_iter = m_TTree_HitContainerID_nHits_map.find(g4hit_id);
         assert(nhit_iter != m_TTree_HitContainerID_nHits_map.end());
@@ -448,7 +475,7 @@ void B0TrackFastSimEval::fill_track_tree(PHCompositeNode *topNode)
 //-- fill_tree():
 //--   Fill the trees with truth, track fit, and cluster information
 //----------------------------------------------------------------------------//
-void B0TrackFastSimEval::fill_vertex_tree(PHCompositeNode */*topNode*/)
+void B0TrackFastSimEval::fill_vertex_tree(PHCompositeNode * /*topNode*/)
 {
   if (!m_TruthInfoContainer)
   {
@@ -498,10 +525,10 @@ void B0TrackFastSimEval::fill_vertex_tree(PHCompositeNode */*topNode*/)
     // best matched vertex
     PHG4VtxPoint *best_vtx = nullptr;
     int best_n_match = -1;
-    map<PHG4VtxPoint *, int> vertex_match_map;
-    for (auto iter = vertex->begin_tracks(); iter != vertex->end_tracks(); ++iter)
+    std::map<PHG4VtxPoint *, int> vertex_match_map;
+    for (auto iter_2 = vertex->begin_tracks(); iter_2 != vertex->end_tracks(); ++iter_2)
     {
-      const auto &trackid = *iter;
+      const auto &trackid = *iter_2;
       const auto trackIter = m_TrackMap->find(trackid);
 
       if (trackIter == m_TrackMap->end()) continue;
@@ -585,7 +612,7 @@ void B0TrackFastSimEval::reset_variables()
   for (auto &elem : m_TTree_proj_p_vec) std::fill(elem.begin(), elem.end(), -9999);
   for (auto &elem : m_TTree_ref_vec) std::fill(elem.begin(), elem.end(), -9999);
   for (auto &elem : m_TTree_ref_p_vec) std::fill(elem.begin(), elem.end(), -9999);
-  for (auto &pair : m_TTree_HitContainerID_nHits_map) pair.second=0;
+  for (auto &pair : m_TTree_HitContainerID_nHits_map) pair.second = 0;
 }
 
 //----------------------------------------------------------------------------//
@@ -600,8 +627,8 @@ int B0TrackFastSimEval::GetNodes(PHCompositeNode *topNode)
                                                                     "G4TruthInfo");
   if (!m_TruthInfoContainer && m_EventCounter < 2)
   {
-    cout << PHWHERE << " PHG4TruthInfoContainer node not found on node tree"
-         << endl;
+    std::cout << PHWHERE << " PHG4TruthInfoContainer node not found on node tree"
+         << std::endl;
     return Fun4AllReturnCodes::ABORTEVENT;
   }
 
@@ -610,27 +637,27 @@ int B0TrackFastSimEval::GetNodes(PHCompositeNode *topNode)
   //std::cout << m_TrackMapName << std::endl;
   if (!m_TrackMap)
   {
-    cout << PHWHERE << "SvtxTrackMap node with name "
+    std::cout << PHWHERE << "SvtxTrackMap node with name "
          << m_TrackMapName
          << " not found on node tree"
-         << endl;
+         << std::endl;
     return Fun4AllReturnCodes::ABORTEVENT;
   }
 
   m_VertexMap = findNode::getClass<SvtxVertexMap>(topNode, "SvtxVertexMap");
   if (!m_VertexMap && Verbosity())
   {
-    cout << PHWHERE << "SvtxTrackMap node with name SvtxVertexMap not found on node tree. Will not build the vertex eval tree"
-         << endl;
+    std::cout << PHWHERE << "SvtxTrackMap node with name SvtxVertexMap not found on node tree. Will not build the vertex eval tree"
+         << std::endl;
   }
 
   return Fun4AllReturnCodes::EVENT_OK;
 }
 
-void B0TrackFastSimEval::AddProjection(const string &name)
+void B0TrackFastSimEval::AddProjection(const std::string &name)
 {
-	cout <<"B0TrackFastSimEval::AddProjection: Adding "<<name<<endl;
-  vector<float> floatvec{-9999, -9999, -9999, -9999};
+  if (Verbosity() > 0) std::cout << "B0TrackFastSimEval::AddProjection: Adding " << name << std::endl;
+  std::vector<float> floatvec{-9999, -9999, -9999, -9999};
   m_TTree_proj_vec.push_back(floatvec);
   m_TTree_proj_p_vec.push_back(floatvec);
   m_TTree_ref_vec.push_back(floatvec);

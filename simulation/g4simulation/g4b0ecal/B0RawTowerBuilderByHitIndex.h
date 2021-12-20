@@ -57,7 +57,7 @@ class B0RawTowerBuilderByHitIndex : public SubsysReco
   /** Set prefix for tower collection to identify simulated towers
    * before digitization.
    */
-  void   set_sim_tower_node_prefix(const std::string &simTowerNodePrefix)
+  void set_sim_tower_node_prefix(const std::string &simTowerNodePrefix)
   {
     m_SimTowerNodePrefix = simTowerNodePrefix;
   }
@@ -93,7 +93,6 @@ class B0RawTowerBuilderByHitIndex : public SubsysReco
   double m_Emin;
 
   std::map<std::string, double> m_GlobalParameterMap;
-
 };
 
 #endif

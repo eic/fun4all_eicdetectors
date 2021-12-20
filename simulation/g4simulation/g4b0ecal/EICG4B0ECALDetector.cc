@@ -30,44 +30,40 @@
 #include <g4main/PHG4DisplayAction.h>  // for PHG4DisplayAction
 //#include <g4main/PHG4Subsystem.h>
 
-#include <Geant4/G4Color.hh>
+#include <TSystem.h>
 #include <Geant4/G4Box.hh>
+#include <Geant4/G4Color.hh>
 #include <Geant4/G4LogicalVolume.hh>
 #include <Geant4/G4Material.hh>
 #include <Geant4/G4PVPlacement.hh>
+#include <Geant4/G4RotationMatrix.hh>
 #include <Geant4/G4SubtractionSolid.hh>
 #include <Geant4/G4SystemOfUnits.hh>
+#include <Geant4/G4ThreeVector.hh>  // for G4ThreeVector
+#include <Geant4/G4Transform3D.hh>  // for G4Transform3D
 #include <Geant4/G4Tubs.hh>
-#include <Geant4/G4Box.hh>
-#include <Geant4/G4RotationMatrix.hh>
-#include <Geant4/G4SystemOfUnits.hh>
-#include <Geant4/G4ThreeVector.hh>      // for G4ThreeVector
-#include <Geant4/G4Transform3D.hh>      // for G4Transform3D
-#include <Geant4/G4Types.hh>            // for G4double, G4int
-#include <Geant4/G4VPhysicalVolume.hh>  // for G4VPhysicalVolume
-#include <TSystem.h>
+#include <Geant4/G4Types.hh>  // for G4double, G4int
 #include <Geant4/G4UnionSolid.hh>
+#include <Geant4/G4VPhysicalVolume.hh>  // for G4VPhysicalVolume
 #include <Geant4/G4VisAttributes.hh>
 
-#include <phool/recoConsts.h> //For rc WorldMaterial
+#include <phool/recoConsts.h>  //For rc WorldMaterial
 
 #include <cmath>
-#include <iostream>
 #include <cstdlib>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <utility>
- 
+
 class G4VSolid;
 class PHCompositeNode;
 
-using namespace std;
-
 //____________________________________________________________________________..
 EICG4B0ECALDetector::EICG4B0ECALDetector(PHG4Subsystem *subsys,
-                                 PHCompositeNode *Node,
-                                 PHParameters *parameters,
-                                 const std::string &dnam, const int lyr)
+                                         PHCompositeNode *Node,
+                                         PHParameters *parameters,
+                                         const std::string &dnam, const int lyr)
   : PHG4Detector(subsys, Node, dnam)
   , m_Params(parameters)
   , m_Layer(lyr)
@@ -79,7 +75,7 @@ EICG4B0ECALDetector::EICG4B0ECALDetector(PHG4Subsystem *subsys,
 //_______________________________________________________________
 int EICG4B0ECALDetector::IsInDetector(G4VPhysicalVolume *volume) const
 {
-  G4LogicalVolume* mylogvol = volume->GetLogicalVolume();
+  G4LogicalVolume *mylogvol = volume->GetLogicalVolume();
   if (m_LogicalVolSet.find(mylogvol) != m_LogicalVolSet.end())
   {
     return 1;
@@ -106,14 +102,13 @@ void EICG4B0ECALDetector::ConstructMe(G4LogicalVolume *logicWorld)
     std::cout << "EICG4B0ECALDetector: Begin Construction" << std::endl;
   }
 
-  cout << " !!! length = " << m_Params->get_double_param("length");
+  std::cout << " !!! length = " << m_Params->get_double_param("length");
   if (m_Params->get_double_param("spanningAngle") >= 360)
   {
-    cout << " !!! No PACKMAN" << endl;
+    std::cout << " !!! No PACKMAN" << std::endl;
     return;
   }
   //Print("ALL");
-
 
   G4VSolid *solid0 = new G4Tubs("EICG4B0ECALSolid0",
                                 0.,
@@ -127,14 +122,14 @@ void EICG4B0ECALDetector::ConstructMe(G4LogicalVolume *logicWorld)
                                        m_Params->get_double_param("length") * cm,
                                        0., 360. * degree);
   G4VSolid *solidCableHole = new G4Tubs("EICG4B0CableSolid",
-                                       0.,
-                                       m_Params->get_double_param("cable_hole") * cm,
-                                       m_Params->get_double_param("length") * cm,
-                                       0., 360. * degree);
+                                        0.,
+                                        m_Params->get_double_param("cable_hole") * cm,
+                                        m_Params->get_double_param("length") * cm,
+                                        0., 360. * degree);
   G4VSolid *solidPipeHole1 = new G4Box("EICG4B0PipeSolid1",
-                                m_Params->get_double_param("pipe_hole") / 2. * cm,
-                                m_Params->get_double_param("pipe_hole_r")  * cm,
-                                m_Params->get_double_param("length")  * cm);
+                                       m_Params->get_double_param("pipe_hole") / 2. * cm,
+                                       m_Params->get_double_param("pipe_hole_r") * cm,
+                                       m_Params->get_double_param("length") * cm);
   G4VSolid *solid1 = new G4Tubs("EICG4B0ECALSolid1",
                                 0.,
                                 (m_Params->get_double_param("outer_radius") - m_Params->get_double_param("d_radius")) * cm,
@@ -142,24 +137,24 @@ void EICG4B0ECALDetector::ConstructMe(G4LogicalVolume *logicWorld)
                                 (m_Params->get_double_param("startAngle") + m_Params->get_double_param("spanningAngle")) * degree,
                                 (360 - m_Params->get_double_param("spanningAngle")) * degree);
   G4UnionSolid *solid10 = new G4UnionSolid("EICG4B0ECALSolid10", solid0, solid1);
-  G4SubtractionSolid *solids = new G4SubtractionSolid("EICG4B0Solid", solid10, solidPipeHole, 0, G4ThreeVector((m_Params->get_double_param("pipe_x")+m_Params->get_double_param("pipe_hole")/2) * cm, m_Params->get_double_param("pipe_y") * cm, m_Params->get_double_param("pipe_z") * cm));
-  G4SubtractionSolid *solids1 = new G4SubtractionSolid("EICG4B0Solid", solids, solidPipeHole, 0, G4ThreeVector((m_Params->get_double_param("pipe_x")-m_Params->get_double_param("pipe_hole")/2) * cm, m_Params->get_double_param("pipe_y") * cm, m_Params->get_double_param("pipe_z") * cm));
+  G4SubtractionSolid *solids = new G4SubtractionSolid("EICG4B0Solid", solid10, solidPipeHole, 0, G4ThreeVector((m_Params->get_double_param("pipe_x") + m_Params->get_double_param("pipe_hole") / 2) * cm, m_Params->get_double_param("pipe_y") * cm, m_Params->get_double_param("pipe_z") * cm));
+  G4SubtractionSolid *solids1 = new G4SubtractionSolid("EICG4B0Solid", solids, solidPipeHole, 0, G4ThreeVector((m_Params->get_double_param("pipe_x") - m_Params->get_double_param("pipe_hole") / 2) * cm, m_Params->get_double_param("pipe_y") * cm, m_Params->get_double_param("pipe_z") * cm));
   G4SubtractionSolid *solids2 = new G4SubtractionSolid("EICG4B0Solid", solids1, solidCableHole, 0, G4ThreeVector(m_Params->get_double_param("cable_x") * cm, m_Params->get_double_param("cable_y") * cm, m_Params->get_double_param("cable_z") * cm));
   G4SubtractionSolid *solidB0 = new G4SubtractionSolid("EICG4B0Solid", solids2, solidPipeHole1, 0, G4ThreeVector(m_Params->get_double_param("pipe_x") * cm, m_Params->get_double_param("pipe_y") * cm, m_Params->get_double_param("pipe_z") * cm));
   G4RotationMatrix *rotm = new G4RotationMatrix();
   if (_mapping_tower_file.empty())
   {
     std::cout << "ERROR in EICG4B0EcalDetector: No mapping file specified. Abort detector construction." << std::endl;
-//    gSystem->Exit(1);
+    //    gSystem->Exit(1);
   }
   /* Read parameters for detector construction and mappign from file */
   ParseParametersFromTable();
-  recoConsts* rc=recoConsts::instance();
-  G4Material* WorldMaterial = G4Material::GetMaterial(rc->get_StringFlag("WorldMaterial"));
+  recoConsts *rc = recoConsts::instance();
+  G4Material *WorldMaterial = G4Material::GetMaterial(rc->get_StringFlag("WorldMaterial"));
   G4LogicalVolume *b0_ecal_log = new G4LogicalVolume(solidB0,
-						WorldMaterial,
-                                                "B0ECAL_envelope",
-						0,0,0);
+                                                     WorldMaterial,
+                                                     "B0ECAL_envelope",
+                                                     0, 0, 0);
 
   G4VisAttributes *vis = new G4VisAttributes(G4Color(0.8, 0.4, 0.2, 1.0));
   vis->SetColor(0.8, 0.4, 0.2, 1.0);
@@ -167,21 +162,20 @@ void EICG4B0ECALDetector::ConstructMe(G4LogicalVolume *logicWorld)
   /* Place envelope cone in simulation */
   std::string name_envelope = m_TowerLogicNamePrefix + "_envelope";
 
-  G4VPhysicalVolume *phy = new G4PVPlacement(rotm, G4ThreeVector(m_Params->get_double_param("place_x") * cm,
-                                                           m_Params->get_double_param("place_y") * cm,
-                                                           m_Params->get_double_param("place_z") * cm),
-                    b0_ecal_log, name_envelope, logicWorld, 0, false, OverlapCheck());
+  G4VPhysicalVolume *phy = new G4PVPlacement(rotm, G4ThreeVector(m_Params->get_double_param("place_x") * cm, m_Params->get_double_param("place_y") * cm, m_Params->get_double_param("place_z") * cm),
+                                             b0_ecal_log, name_envelope, logicWorld, 0, false, OverlapCheck());
 
   //Create towers for the B0 Ecal:
   /* Construct single calorimeter tower */
-  if (Verbosity() > 0){
-	cout << "B0 ECal Envelope Location: x, y, z:"<<endl;
-	std::cout <<"Building Calorimeter from "<<m_Params->get_string_param("material")<<endl;
-  	cout<< m_Params->get_double_param("place_x")<<"\t";
-	cout<< m_Params->get_double_param("place_y")<<"\t";
-	cout<< m_Params->get_double_param("place_z")<<endl;
+  if (Verbosity() > 0)
+  {
+    std::cout << "B0 ECal Envelope Location: x, y, z:" << std::endl;
+    std::cout << "Building Calorimeter from " << m_Params->get_string_param("material") << std::endl;
+    std::cout << m_Params->get_double_param("place_x") << "\t";
+    std::cout << m_Params->get_double_param("place_y") << "\t";
+    std::cout << m_Params->get_double_param("place_z") << std::endl;
   }
-  G4LogicalVolume* singletower = ConstructTower();
+  G4LogicalVolume *singletower = ConstructTower();
   /* Place calorimeter tower within envelope */
   PlaceTower(b0_ecal_log, singletower);
   m_PhysicalVolumesSet.insert(phy);
@@ -193,7 +187,7 @@ void EICG4B0ECALDetector::ConstructMe(G4LogicalVolume *logicWorld)
   return;
 }
 //_______________________________________________________________
-G4LogicalVolume* EICG4B0ECALDetector::ConstructTower()
+G4LogicalVolume *EICG4B0ECALDetector::ConstructTower()
 {
   if (Verbosity() > 0)
   {
@@ -201,20 +195,21 @@ G4LogicalVolume* EICG4B0ECALDetector::ConstructTower()
   }
 
   /* create logical volume for single tower */
-  G4Material* EcalMaterial = G4Material::GetMaterial(m_Params->get_string_param("material"));
+  G4Material *EcalMaterial = G4Material::GetMaterial(m_Params->get_string_param("material"));
   double TowerDx = m_Params->get_double_param("tower_size") * cm;
   double TowerDy = m_Params->get_double_param("tower_size") * cm;
   double TowerDz = m_Params->get_double_param("length") * cm;
-  if (Verbosity() > 0){
-      std::cout << "EICG4B0ECALDetector: Construct tower " << m_Params->get_double_param("tower_size")<<"\t"
-		<< m_Params->get_double_param("length")  << std::endl;
+  if (Verbosity() > 0)
+  {
+    std::cout << "EICG4B0ECALDetector: Construct tower " << m_Params->get_double_param("tower_size") << "\t"
+              << m_Params->get_double_param("length") << std::endl;
   }
-  G4VSolid* single_tower_solid = new G4Box("single_tower_solid",
+  G4VSolid *single_tower_solid = new G4Box("single_tower_solid",
                                            TowerDx / 2.0,
                                            TowerDy / 2.0,
                                            TowerDz / 2.0);
 
-  G4LogicalVolume* single_tower_logic = new G4LogicalVolume(single_tower_solid,
+  G4LogicalVolume *single_tower_logic = new G4LogicalVolume(single_tower_solid,
                                                             EcalMaterial,
                                                             "single_tower_logic",
                                                             0, 0, 0);
@@ -226,9 +221,9 @@ G4LogicalVolume* EICG4B0ECALDetector::ConstructTower()
   return single_tower_logic;
 }
 
-int EICG4B0ECALDetector::PlaceTower(G4LogicalVolume* b0ecalenvelope, G4LogicalVolume* singletower)
+int EICG4B0ECALDetector::PlaceTower(G4LogicalVolume *b0ecalenvelope, G4LogicalVolume *singletower)
 {
-  /* Loop over all tower positions in vector and place tower */
+  /* Loop over all tower positions in std::vector and place tower */
   for (std::map<std::string, towerposition>::iterator iterator = m_TowerPositionMap.begin(); iterator != m_TowerPositionMap.end(); ++iterator)
   {
     if (Verbosity() > 0)
@@ -244,7 +239,7 @@ int EICG4B0ECALDetector::PlaceTower(G4LogicalVolume* b0ecalenvelope, G4LogicalVo
                       iterator->first,
                       b0ecalenvelope,
                       0, copyno, OverlapCheck());
-//                      0, 0, OverlapCheck());
+    //                      0, 0, OverlapCheck());
   }
 
   return 0;
@@ -277,40 +272,42 @@ int EICG4B0ECALDetector::ParseParametersFromTable()
     }
 
     std::istringstream iss(line_mapping);
-      unsigned idx_j, idx_k, idx_l;
-      G4double pos_x, pos_y, pos_z;
-      double Gpos_x, Gpos_y, Gpos_z, Gpos_z1;
-      G4double size_x, size_y, size_z;
-      G4double rot_x, rot_y, rot_z;
-      G4double dummy;
-	std::string dummys;
-//G4double	GlobalPlaceInX;
-//G4double	GlobalPlaceInY;
-//G4double	GlobalPlaceInZ;
+    unsigned idx_j, idx_k, idx_l;
+    G4double pos_x, pos_y, pos_z;
+    double Gpos_x, Gpos_y, Gpos_z, Gpos_z1;
+    G4double size_x, size_y, size_z;
+    G4double rot_x, rot_y, rot_z;
+    G4double dummy;
+    std::string dummys;
+    //G4double	GlobalPlaceInX;
+    //G4double	GlobalPlaceInY;
+    //G4double	GlobalPlaceInZ;
 
     if (line_mapping.find("B0 ") != std::string::npos)
     {
-      if (!(iss >> dummys>> Gpos_x >> Gpos_y >> Gpos_z >> Gpos_z1 ))
+      if (!(iss >> dummys >> Gpos_x >> Gpos_y >> Gpos_z >> Gpos_z1))
       {
-        std::cout << "ERROR in EICG4B0Detector: Failed to read global position from  mapping file " << _mapping_tower_file  << std::endl;
+        std::cout << "ERROR in EICG4B0Detector: Failed to read global position from  mapping file " << _mapping_tower_file << std::endl;
         gSystem->Exit(1);
       }
-	if (m_Params->get_double_param("global_x")!=Gpos_x || m_Params->get_double_param("global_y")!=Gpos_y ||m_Params->get_double_param("global_z")!=Gpos_z) {
-	std::cout <<endl;
-	std::cout << "B0 position changed since mapping file produced or wrong mapping is used "<<_mapping_tower_file  << std::endl;
-	std::cout<< m_Params->get_double_param("global_x") <<" "<< m_Params->get_double_param("global_y")<<" "<<m_Params->get_double_param("global_z") <<std::endl;
-	std::cout<< Gpos_x <<" " <<Gpos_y<<" "<<Gpos_z <<std::endl;
-	std::cout<< m_Params->get_double_param("global_x")-Gpos_x <<" "<< m_Params->get_double_param("global_y")-Gpos_y<<" "<<m_Params->get_double_param("global_z")-Gpos_z <<std::endl;
-//	gSystem->Exit(1);
-	}
-//	GlobalPlaceInX=pos_x*cm;
-//	GlobalPlaceInY=pos_y*cm;
-//	GlobalPlaceInZ=pos_z*cm;
-	}
-//    /* If line starts with keyword Tower, add to tower positions */
-   else if (line_mapping.find("Tower ") != std::string::npos){
-      /* read string- break if error */
-      if (!(iss >> dummys >>  idx_j >> idx_k >> idx_l >> pos_x >> pos_y >> pos_z >> size_x >> size_y >> size_z >> rot_x >> rot_y >> rot_z >> dummy))
+      if (m_Params->get_double_param("global_x") != Gpos_x || m_Params->get_double_param("global_y") != Gpos_y || m_Params->get_double_param("global_z") != Gpos_z)
+      {
+        std::cout << std::endl;
+        std::cout << "B0 position changed since mapping file produced or wrong mapping is used " << _mapping_tower_file << std::endl;
+        std::cout << m_Params->get_double_param("global_x") << " " << m_Params->get_double_param("global_y") << " " << m_Params->get_double_param("global_z") << std::endl;
+        std::cout << Gpos_x << " " << Gpos_y << " " << Gpos_z << std::endl;
+        std::cout << m_Params->get_double_param("global_x") - Gpos_x << " " << m_Params->get_double_param("global_y") - Gpos_y << " " << m_Params->get_double_param("global_z") - Gpos_z << std::endl;
+        //	gSystem->Exit(1);
+      }
+      //	GlobalPlaceInX=pos_x*cm;
+      //	GlobalPlaceInY=pos_y*cm;
+      //	GlobalPlaceInZ=pos_z*cm;
+    }
+    //    /* If line starts with keyword Tower, add to tower positions */
+    else if (line_mapping.find("Tower ") != std::string::npos)
+    {
+      /* read std::string- break if error */
+      if (!(iss >> dummys >> idx_j >> idx_k >> idx_l >> pos_x >> pos_y >> pos_z >> size_x >> size_y >> size_z >> rot_x >> rot_y >> rot_z >> dummy))
       //if (!(iss >> idx_j >> idx_k >> idx_l >> pos_x >> pos_y >> pos_z >> rot_x >> rot_y >> rot_z >> dummy))
       {
         std::cout << "ERROR in EICG4B0ECALDetector: Failed to read line in mapping file " << _mapping_tower_file << std::endl;
@@ -336,8 +333,9 @@ int EICG4B0ECALDetector::ParseParametersFromTable()
       tower_new.idx_j = idx_j;
       tower_new.idx_k = idx_k;
       m_TowerPositionMap.insert(make_pair(towername.str(), tower_new));
-	}
-	else std::cout <<"ERROR in EICG4B0ECALDetector: Unknown line in Mapping File " <<_mapping_tower_file << std::endl;
+    }
+    else
+      std::cout << "ERROR in EICG4B0ECALDetector: Unknown line in Mapping File " << _mapping_tower_file << std::endl;
   }
 
   return 0;

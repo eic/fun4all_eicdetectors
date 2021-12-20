@@ -18,20 +18,20 @@
 // #include <phgenfit/Track.h> is needed, it crashes on Ubuntu using
 // singularity with local cvmfs install
 // shared pointer later on uses this, forward declaration does not cut it
-#include <phgenfit/Track.h>
 #include <phgenfit/Fitter.h>
 #include <phgenfit/Measurement.h>  // for Measurement
 #include <phgenfit/PlanarMeasurement.h>
 #include <phgenfit/SpacepointMeasurement.h>
+#include <phgenfit/Track.h>
 
 #include <gsl/gsl_rng.h>
 
 #include <climits>  // for UINT_MAX
 #include <map>
-#include <string>
-#include <vector>
 #include <memory>
 #include <set>
+#include <string>
+#include <vector>
 
 class PHG4Hit;
 class PHG4HitContainer;
@@ -45,15 +45,15 @@ class PHParameters;
 
 namespace PHGenFit
 {
-  class Fitter;
-  class Measurement;
-  class PlanarMeasurement;
-  class Track;
+class Fitter;
+class Measurement;
+class PlanarMeasurement;
+class Track;
 } /* namespace PHGenFit */
 namespace genfit
 {
-  class GFRaveVertex;
-  class GFRaveVertexFactory;
+class GFRaveVertex;
+class GFRaveVertexFactory;
 } /* namespace genfit */
 
 class B0TrackFastSim : public SubsysReco
