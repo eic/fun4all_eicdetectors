@@ -31,6 +31,7 @@ class EICG4RPDetector : public PHG4Detector
   //!@name volume accessors
   //@{
   int IsInDetector(G4VPhysicalVolume *) const;
+  int IsInVirtualDetector(G4VPhysicalVolume *) const;
   //@}
 
   int GetDetId(G4VPhysicalVolume *) const;
@@ -47,6 +48,8 @@ class EICG4RPDetector : public PHG4Detector
   
   // active volumes (i.e. G4_Si)
   std::map<G4VPhysicalVolume *, int> m_ActivePhysicalVolumesMap;
+  // virtual volumes (i.e. G4_Galactic)
+  std::map<G4VPhysicalVolume *, int> m_VirtualPhysicalVolumesMap;
   // passive volumes (i.e. G4_Cu)
   std::set<G4VPhysicalVolume *> m_PassivePhysicalVolumesSet;
   

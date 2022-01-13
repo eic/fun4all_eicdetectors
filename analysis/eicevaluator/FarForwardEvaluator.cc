@@ -187,9 +187,17 @@ int FarForwardEvaluator::Init(PHCompositeNode* topNode)
   gDirectory->mkdir("RP");
   gDirectory->cd("RP");
 
-  h2_RP_XY = new TH2F("RP_XY", "RP XY", 400, -200, 200, 200, -50, 50);
+  h2_RP_XY = new TH2F("RP_XY", "RP XY;X (cm);Y (cm)", 400, -200, 200, 200, -50, 50);
   h1_RP_E_dep = new TH1F("RP_E_dep", "E Dependence", 120, 0.0, 60.0);
   h1_RP_E_abs = new TH1F("RP_E_abs", "E Absorbed", 120, 0.0, 60.0);
+
+  std::string paramFile = std::string(getenv("CALIBRATIONROOT")) + "/RomanPots/RP_parameters_IP6.dat";
+  int Nlayers = GetParameterFromFile <int> (paramFile, "Number_layers");
+
+  for( int layer = 0; layer < Nlayers; layer++ ) {
+	h2_RP_layers_XY.push_back( new TH2F(Form("RP_XY_layer%i",layer),"RP XY;X (cm);Y (cm)", 400, -200, 200, 200, -50, 50) );
+	h2_RP_virtlayers_XY.push_back( new TH2F(Form("RP_XY_virtlayer%i",layer),"RP XY;X (cm);Y (cm)", 2000, -200, 0, 200, -10, 10) );
+  }
 
   gDirectory->cd("/");
 
@@ -284,22 +292,23 @@ int FarForwardEvaluator::process_g4hits_ZDC(PHCompositeNode* topNode)
 
 int FarForwardEvaluator::process_g4hits_RomanPots(PHCompositeNode* topNode)
 {
-  std::ostringstream nodename;
+  std::string nodename = "G4HIT_rpTruth";
+  PHG4HitContainer* hits = findNode::getClass<PHG4HitContainer>(topNode, nodename);
 
-  nodename.str("");
-  nodename << "G4HIT_"
-           << "rpTruth";
-
-  PHG4HitContainer* hits = findNode::getClass<PHG4HitContainer>(topNode, nodename.str().c_str());
+  std::string nodenameVirt = nodename + "_VirtSheet";
+  PHG4HitContainer* hits_virt = findNode::getClass<PHG4HitContainer>(topNode, nodenameVirt);
 
   if (hits)
   {
-    //    // this returns an iterator to the beginning and the end of our G4Hits
+    // this returns an iterator to the beginning and the end of our G4Hits
     PHG4HitContainer::ConstRange hit_range = hits->getHits();
 
     for (PHG4HitContainer::ConstIterator hit_iter = hit_range.first; hit_iter != hit_range.second; hit_iter++)
     {
       h2_RP_XY->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
+      
+      h2_RP_layers_XY[ hit_iter->second->get_layer() ]->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
+
       g4rphitntuple->Fill(hit_iter->second->get_layer(),
                           hit_iter->second->get_hit_type(),
                           hit_iter->second->get_x(0),
@@ -316,6 +325,18 @@ int FarForwardEvaluator::process_g4hits_RomanPots(PHCompositeNode* topNode)
       else
         h1_RP_E_abs->Fill(hit_iter->second->get_edep());
     }
+  }
+
+  // hits on virtual layer without beam hole
+  if( hits_virt ) {
+
+	  PHG4HitContainer::ConstRange hit_range = hits_virt->getHits();
+
+	  for (PHG4HitContainer::ConstIterator hit_iter = hit_range.first; hit_iter != hit_range.second; hit_iter++)
+	  {
+		  h2_RP_virtlayers_XY[ hit_iter->second->get_layer() ]->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
+	  }
+
   }
 
   return Fun4AllReturnCodes::EVENT_OK;
@@ -384,3 +405,43 @@ int FarForwardEvaluator::End(PHCompositeNode* topNode)
 
   return Fun4AllReturnCodes::EVENT_OK;
 }
+
+//--------------------------------------------------------
+template <class T>
+T GetParameterFromFile(std::string filename, std::string param)
+{
+	std::ifstream infile;
+        std::string line;
+
+	infile.open( filename );
+
+	if( ! infile.is_open() ) 
+	{
+		std::cout << "ERROR in FarForwardEvaluator: Failed to open parameter file " << filename << std::endl;
+		gSystem->Exit(1);
+	}
+
+	while( std::getline(infile, line) ) {
+
+	    std::string name;
+	    double value;
+
+	    std::istringstream iss( line );
+
+	    // skip comment lines
+	    if( line.find("#") != std::string::npos ) { continue; }
+
+	    if( !(iss >> name >> value) ) {
+		std::cout << "Could not decode " << line << std::endl;
+		gSystem->Exit(1);
+	    }
+	    
+            if( name.compare(param) == 0 ) {
+		    return value;
+	    }
+	}
+
+        infile.close();
+	return 0;
+}
+

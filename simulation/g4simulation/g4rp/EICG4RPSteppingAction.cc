@@ -97,10 +97,13 @@ bool EICG4RPSteppingAction::UserSteppingAction(const G4Step *aStep, bool was_use
   //   > 0 for hits in active volume
   //  < 0 for hits in passive material
   int activeMaterial = m_Detector->IsInDetector(volume);
-  if ( ! activeMaterial )
+  int virtualMaterial = m_Detector->IsInVirtualDetector(volume);
+  
+  if ( ! activeMaterial && ! virtualMaterial )
   {
     return false;
   }
+
   // collect energy and track length step by step
   G4double edep = aStep->GetTotalEnergyDeposit() / GeV;
   //  G4double eion = (aStep->GetTotalEnergyDeposit() - aStep->GetNonIonizingEnergyDeposit()) / GeV;
@@ -365,7 +368,16 @@ bool EICG4RPSteppingAction::UserSteppingAction(const G4Step *aStep, bool was_use
       m_Hit->set_layer(layer_id);
       m_Hit->set_hit_type( 0 );
       m_Hit->set_eion(m_EionSum);
-      m_HitContainer->AddHit(layer_id, m_Hit);
+
+      if( activeMaterial ) 
+      {
+	m_HitContainer->AddHit(layer_id, m_Hit);
+      }
+      if( virtualMaterial ) 
+      {
+	m_HitContainerVirt->AddHit(layer_id, m_Hit);
+      }
+
       if (m_SaveShower)
       {
         m_SaveShower->add_g4hit_id(m_HitContainer->GetID(), m_Hit->get_hit_id());
@@ -391,6 +403,7 @@ void EICG4RPSteppingAction::SetInterfacePointers(PHCompositeNode *topNode)
   //  std::cout << " ---> !!! hitnodename: " << hitnodename << std::endl;
   // now look for the map and grab a pointer to it.
   m_HitContainer = findNode::getClass<PHG4HitContainer>(topNode, m_HitNodeName);
+  m_HitContainerVirt = findNode::getClass<PHG4HitContainer>(topNode, m_HitNodeNameVirt);
   // if we do not find the node we need to make it.
   if (!m_HitContainer)
   {
