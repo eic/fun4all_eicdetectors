@@ -151,7 +151,7 @@ void PHG4BarrelEcalSubsystem::SetDefaultParameters()
   set_default_double_param("SIO2_width_half", 0.05);
   set_default_double_param("Carbon_width_half", 1.);
   set_default_double_param("support_length", 1.5);
-
+  set_default_int_param("useLeadGlass", 0);
   return;
 }
 

@@ -24,6 +24,8 @@
 #include <Geant4/G4Tubs.hh>
 #include <Geant4/G4Types.hh>            // for G4double, G4int
 #include <Geant4/G4VPhysicalVolume.hh>  // for G4VPhysicalVolume
+#include <Geant4/G4TwoVector.hh>  // for G4VPhysicalVolume
+#include <Geant4/G4GenericTrap.hh>  // for G4VPhysicalVolume
 
 #include <g4gdml/PHG4GDMLConfig.hh>
 #include <g4gdml/PHG4GDMLUtility.hh>
@@ -50,6 +52,7 @@ PHG4BarrelEcalDetector::PHG4BarrelEcalDetector(PHG4Subsystem* subsys, PHComposit
   , m_SupportActiveFlag(m_Params->get_int_param("supportactive"))
   , m_TowerLogicNamePrefix("bcalTower")
   , m_SuperDetector("NONE")
+  , m_useLeadGlass(false)
 {
   gdml_config = PHG4GDMLUtility::GetOrMakeConfigNode(Node);
   assert(gdml_config);
@@ -198,18 +201,8 @@ int PHG4BarrelEcalDetector::PlaceTower(G4LogicalVolume* sec)
       m_DisplayAction->AddVolume(block_logic, "Block2");
     }
 
-    G4LogicalVolume* glass_logic = ConstructGlass(iterator);
-    if (iterator->second.idx_k % 2 == 0)
-    {
-      m_DisplayAction->AddVolume(glass_logic, "Block1");
-    }
-    else
-    {
-      m_DisplayAction->AddVolume(glass_logic, "Block2");
-    }
-
     G4RotationMatrix becal_rotm;
-    becal_rotm.rotateY(iterator->second.rotx);
+    becal_rotm.rotateX(M_PI/2.0 - iterator->second.rotx);
     becal_rotm.rotateY(iterator->second.roty);
     becal_rotm.rotateZ(iterator->second.rotz);
 
@@ -219,103 +212,58 @@ int PHG4BarrelEcalDetector::PlaceTower(G4LogicalVolume* sec)
                       sec,
                       0, copyno, OverlapCheck());
 
-    G4double posx_glass = iterator->second.centerx + th / 2 * abs(cos(iterator->second.roty - M_PI_2)) * cos(iterator->second.rotz);
-    G4double posy_glass = iterator->second.centery + th / 2 * abs(cos(iterator->second.roty - M_PI_2)) * sin(iterator->second.rotz);
-    G4double posz_glass = iterator->second.centerz + th * sin(iterator->second.roty - M_PI_2);
-
-    new G4PVPlacement(G4Transform3D(becal_rotm, G4ThreeVector(posx_glass, posy_glass, posz_glass)),
-                      glass_logic,
-                      G4String(string(iterator->first) + string("_Glass")),
-                      sec,
-                      0, copyno, OverlapCheck());
-
-    //=================Silicon
-    G4LogicalVolume* block_silicon = ConstructSi(iterator);
-    m_DisplayAction->AddVolume(block_silicon, "Si");
-
-    G4double pTheta = iterator->second.pTheta;
-    G4double theta = iterator->second.roty - M_PI_2;
-    G4double len = (tower_length / 2) + silicon_width_half + overlap;
-    G4double sci_sr = len * tan(pTheta);
-    G4double sci_sz = len;
-    G4double sci_mag = sqrt(sci_sr * sci_sr + sci_sz * sci_sz);
-
-    G4double posz_si = iterator->second.centerz - sci_mag * sin(theta + pTheta);
-    G4double posy_si = iterator->second.centery + sci_mag * cos(theta + pTheta) * sin(iterator->second.rotz);
-    G4double posx_si = iterator->second.centerx + sci_mag * cos(theta + pTheta) * cos(iterator->second.rotz);
-    new G4PVPlacement(G4Transform3D(becal_rotm, G4ThreeVector(posx_si, posy_si, posz_si)),
-                      block_silicon,
-                      G4String(string(iterator->first) + string("_Si")),
-                      sec,
-                      0, copyno, OverlapCheck());
-
-    //=================Kapton
-    G4LogicalVolume* block_kapton = ConstructKapton(iterator);
-    m_DisplayAction->AddVolume(block_kapton, "Kapton");
-
-    len += kapton_width_half + overlap + silicon_width_half;
-
-    G4double kapton_sr = len * tan(pTheta);
-    G4double kapton_sz = len;
-    G4double kapton_mag = sqrt(kapton_sr * kapton_sr + kapton_sz * kapton_sz);
-
-    G4double posz_kapton = iterator->second.centerz - kapton_mag * sin(theta + pTheta);
-    G4double posy_kapton = iterator->second.centery + kapton_mag * cos(theta + pTheta) * sin(iterator->second.rotz);
-    G4double posx_kapton = iterator->second.centerx + kapton_mag * cos(theta + pTheta) * cos(iterator->second.rotz);
-    new G4PVPlacement(G4Transform3D(becal_rotm, G4ThreeVector(posx_kapton, posy_kapton, posz_kapton)),
-                      block_kapton,
-                      G4String(string(iterator->first) + string("_Kapton")),
-                      sec,
-                      0, copyno, OverlapCheck());
-
-    //=================SIO2
-    G4LogicalVolume* block_SIO2 = ConstructSIO2(iterator);
-    m_DisplayAction->AddVolume(block_SIO2, "SIO2");
-
-    len += SIO2_width_half + overlap + kapton_width_half;
-
-    G4double SIO2_sr = len * tan(pTheta);
-    G4double SIO2_sz = len;
-    G4double SIO2_mag = sqrt(SIO2_sr * SIO2_sr + SIO2_sz * SIO2_sz);
-
-    G4double posz_SIO2 = iterator->second.centerz - SIO2_mag * sin(theta + pTheta);
-    G4double posy_SIO2 = iterator->second.centery + SIO2_mag * cos(theta + pTheta) * sin(iterator->second.rotz);
-    G4double posx_SIO2 = iterator->second.centerx + SIO2_mag * cos(theta + pTheta) * cos(iterator->second.rotz);
-    new G4PVPlacement(G4Transform3D(becal_rotm, G4ThreeVector(posx_SIO2, posy_SIO2, posz_SIO2)),
-                      block_SIO2,
-                      G4String(string(iterator->first) + string("SIO2")),
-                      sec,
-                      0, copyno, OverlapCheck());
-
-    //=================Carbon
-    G4LogicalVolume* block_Carbon = ConstructCarbon(iterator);
-
-    if (iterator->second.idx_k % 2 == 0)
-    {
-      m_DisplayAction->AddVolume(block_Carbon, "Block1");
-    }
-    else
-    {
-      m_DisplayAction->AddVolume(block_Carbon, "Block2");
-    }
-
-    len += Carbon_width_half + overlap + SIO2_width_half;
-
-    G4double Carbon_sr = len * tan(pTheta);
-    G4double Carbon_sz = len;
-    G4double Carbon_mag = sqrt(Carbon_sr * Carbon_sr + Carbon_sz * Carbon_sz);
-
-    G4double posz_Carbon = iterator->second.centerz - Carbon_mag * sin(theta + pTheta);
-    G4double posy_Carbon = iterator->second.centery + Carbon_mag * cos(theta + pTheta) * sin(iterator->second.rotz);
-    G4double posx_Carbon = iterator->second.centerx + Carbon_mag * cos(theta + pTheta) * cos(iterator->second.rotz);
-    new G4PVPlacement(G4Transform3D(becal_rotm, G4ThreeVector(posx_Carbon, posy_Carbon, posz_Carbon)),
-                      block_Carbon,
-                      G4String(string(iterator->first) + string("Carbon")),
-                      sec,
-                      0, copyno, OverlapCheck());
   }
   return 0;
 }
+
+G4LogicalVolume*
+PHG4BarrelEcalDetector::ConstructTower(std::map<std::string, towerposition>::iterator iterator)
+{
+  G4GenericTrap* block_tower = GetTowerTrap(iterator);
+  G4Material* material_shell = GetCarbonFiber();
+  assert(material_shell);
+
+  G4LogicalVolume* block_logic = new G4LogicalVolume(block_tower, material_shell,
+                                                    G4String(string(iterator->first) + string("_Tower")), 0, 0,
+                                                    nullptr);
+  m_AbsorberLogicalVolSet.insert(block_logic);
+  return block_logic;
+}
+
+G4Material* PHG4BarrelEcalDetector::GetCarbonFiber()
+{
+  static string matname = "CrystalCarbonFiber";
+  G4Material* carbonfiber = G4Material::GetMaterial(matname, false);  // false suppresses warning that material does not exist
+  if (!carbonfiber)
+  {
+    G4double density_carbon_fiber = 1.44 * g / cm3;
+    carbonfiber = new G4Material(matname, density_carbon_fiber, 1);
+    carbonfiber->AddElement(G4Element::GetElement("C"), 1);
+  }
+  return carbonfiber;
+}
+
+G4GenericTrap* PHG4BarrelEcalDetector::GetTowerTrap(std::map<std::string, towerposition>::iterator iterator)
+{
+  G4double zheight = iterator->second.size_height;
+  std::vector<G4TwoVector> trapcoords(8);
+  trapcoords[0] = G4TwoVector(-iterator->second.size_xin, -iterator->second.size_xin);
+  trapcoords[1] = G4TwoVector(-iterator->second.size_xin, iterator->second.size_xin);
+  trapcoords[2] = G4TwoVector(iterator->second.size_xin, iterator->second.size_xin);
+  trapcoords[3] = G4TwoVector(iterator->second.size_xin, -iterator->second.size_xin);
+
+  trapcoords[4] = G4TwoVector(-iterator->second.size_xout, -iterator->second.size_xout);
+  trapcoords[5] = G4TwoVector(-iterator->second.size_xout, iterator->second.size_xout);
+  trapcoords[6] = G4TwoVector(iterator->second.size_xout, iterator->second.size_xout);
+  trapcoords[7] = G4TwoVector(iterator->second.size_xout, -iterator->second.size_xout);
+
+  G4GenericTrap* block_tower = new G4GenericTrap("solid_tower",
+    zheight / 2, trapcoords
+  );
+
+  return block_tower;
+}
+
 
 int PHG4BarrelEcalDetector::ParseParametersFromTable()
 {
@@ -339,10 +287,11 @@ int PHG4BarrelEcalDetector::ParseParametersFromTable()
       unsigned idphi_j, ideta_k;
       G4double cx, cy, cz;
       G4double rot_z, rot_y, rot_x;
-      G4double size_z, size_y1, size_x1, size_y2, size_x2, p_Theta;
+      G4double size_height, size_xin, size_xout;
       std::string dummys;
+      // cout << "BECALtower " << itow << " " << 0 << " " << Lin << " " << Lout << " " << height << " " << xgrav << " " << ygrav << " " << zgrav << " " << theta0+theta1 << endl;
 
-      if (!(iss >> dummys >> ideta_k >> idphi_j >> size_x1 >> size_x2 >> size_y1 >> size_y2 >> size_z >> p_Theta >> cx >> cy >> cz >> rot_x >> rot_y >> rot_z))
+      if (!(iss >> dummys >> ideta_k >> idphi_j >> size_xin >> size_xout >> size_height >> cx >> cy >> cz >> rot_x >> rot_y >> rot_z))
       {
         std::cout << "ERROR in PHG4BarrelEcalDetector: Failed to read line in mapping file " << m_Params->get_string_param("mapping_file") << std::endl;
         gSystem->Exit(1);
@@ -356,12 +305,12 @@ int PHG4BarrelEcalDetector::ParseParametersFromTable()
 
       /* insert tower into tower map */
       towerposition tower_new;
-      tower_new.sizex1 = size_x1 * cm;
-      tower_new.sizex2 = size_x2 * cm;
-      tower_new.sizey1 = size_y1 * cm;
-      tower_new.sizey2 = size_y2 * cm;
-      tower_new.sizez = size_z * cm;
-      tower_new.pTheta = p_Theta;
+      tower_new.size_xin = size_xin * cm;
+      tower_new.size_xout = size_xout * cm;
+      tower_new.size_height = size_height * cm;
+      tower_new.sizey2 = 0 * cm;
+      tower_new.sizez = 0 * cm;
+      tower_new.pTheta = 0;
       tower_new.centerx = cx * cm;
       tower_new.centery = cy * cm;
       tower_new.centerz = cz * cm;
@@ -460,249 +409,15 @@ int PHG4BarrelEcalDetector::ParseParametersFromTable()
       {
         m_Params->set_double_param("support_length", parit->second);  // in cm
       }
+      parit = m_GlobalParameterMap.find("useLeadGlass");
+      if (parit != m_GlobalParameterMap.end())
+      {
+        m_Params->set_int_param("useLeadGlass", parit->second);
+        m_useLeadGlass = m_Params->get_int_param("useLeadGlass");
+        if(m_useLeadGlass) std::cout << "using lead glass as tower material" << std::endl;
+      }
     }
   }
 
   return 0;
-}
-
-G4LogicalVolume*
-PHG4BarrelEcalDetector::ConstructTower(std::map<std::string, towerposition>::iterator iterator)
-{
-  G4Trap* block_tower = GetTowerTrap(iterator);
-  G4Trap* block_glass = GetGlassTrapSubtract(iterator);
-  G4ThreeVector shift = G4ThreeVector(-th * sin(iterator->second.roty - M_PI_2), 0, th / 2 * abs(cos(iterator->second.roty - M_PI_2)));
-  G4VSolid* block_solid = new G4SubtractionSolid(G4String(string(iterator->first) + string("_Envelope")), block_tower, block_glass, 0, shift);
-  G4Material* material_shell = GetCarbonFiber();
-  assert(material_shell);
-
-  G4LogicalVolume* block_logic = new G4LogicalVolume(block_solid, material_shell,
-                                                     G4String(string(iterator->first) + string("_Tower")), 0, 0,
-                                                     nullptr);
-  m_AbsorberLogicalVolSet.insert(block_logic);
-  return block_logic;
-}
-
-G4LogicalVolume*
-PHG4BarrelEcalDetector::ConstructGlass(std::map<std::string, towerposition>::iterator iterator)
-{
-  G4Trap* block_solid = GetGlassTrap(iterator);
-  G4Material* material_glass = GetSciGlass();
-  assert(material_glass);
-  G4LogicalVolume* block_logic = new G4LogicalVolume(block_solid, material_glass,
-                                                     G4String(string(iterator->first) + string("_Glass")), 0, 0,
-                                                     nullptr);
-  m_ScintiLogicalVolSet.insert(block_logic);
-  return block_logic;
-}
-
-G4Material* PHG4BarrelEcalDetector::GetCarbonFiber()
-{
-  static string matname = "CrystalCarbonFiber";
-  G4Material* carbonfiber = G4Material::GetMaterial(matname, false);  // false suppresses warning that material does not exist
-  if (!carbonfiber)
-  {
-    G4double density_carbon_fiber = 1.44 * g / cm3;
-    carbonfiber = new G4Material(matname, density_carbon_fiber, 1);
-    carbonfiber->AddElement(G4Element::GetElement("C"), 1);
-  }
-  return carbonfiber;
-}
-
-G4Material* PHG4BarrelEcalDetector::GetSciGlass()
-{
-  static string matname = "sciglass";
-  G4Material* sciglass = G4Material::GetMaterial(matname, false);  // false suppresses warning that material does not exist
-  if (!sciglass)
-  {
-    G4double density;
-    G4int ncomponents;
-    sciglass = new G4Material(matname, density = 4.22 * g / cm3, ncomponents = 4, kStateSolid);
-    sciglass->AddElement(G4Element::GetElement("Ba"), 0.3875);
-    sciglass->AddElement(G4Element::GetElement("Gd"), 0.2146);
-    sciglass->AddElement(G4Element::GetElement("Si"), 0.1369);
-    sciglass->AddElement(G4Element::GetElement("O"), 0.2610);
-  }
-  return sciglass;
-}
-
-G4Trap* PHG4BarrelEcalDetector::GetGlassTrap(std::map<std::string, towerposition>::iterator iterator)
-{
-  G4double th = m_Params->get_double_param("thickness_wall") * cm;
-  G4double size_x1 = iterator->second.sizex1 / 2 - th;
-  G4double size_x2 = iterator->second.sizex2 / 2 - th;
-  G4double size_y1 = iterator->second.sizey1 / 2 - th;
-  G4double size_y2 = iterator->second.sizey2 / 2 - th;
-  G4double size_z = iterator->second.sizez / 2 - th;
-
-  G4Trap* block_glass = new G4Trap("solid_glass",
-                                   size_z,                      // G4double pDz,
-                                   iterator->second.pTheta, 0,  // G4double pTheta, G4double pPhi,
-                                   size_y1, size_x1, size_x1,   // G4double pDy1, G4double pDx1, G4double pDx2,
-                                   0,                           // G4double pAlp1,
-                                   size_y2, size_x2, size_x2,   // G4double pDy2, G4double pDx3, G4double pDx4,
-                                   0                            // G4double pAlp2 //
-  );
-
-  return block_glass;
-}
-
-G4Trap* PHG4BarrelEcalDetector::GetTowerTrap(std::map<std::string, towerposition>::iterator iterator)
-{
-  G4Trap* block_tower = new G4Trap("solid_tower",
-                                   iterator->second.sizez / 2,                                                              // G4double pDz,
-                                   iterator->second.pTheta, 0,                                                              // G4double pTheta, G4double pPhi,
-                                   iterator->second.sizey1 / 2, iterator->second.sizex1 / 2, iterator->second.sizex1 / 2.,  // G4double pDy1, G4double pDx1, G4double pDx2,
-                                   0,                                                                                       // G4double pAlp1,
-                                   iterator->second.sizey2 / 2, iterator->second.sizex2 / 2, iterator->second.sizex2 / 2.,  // G4double pDy2, G4double pDx3, G4double pDx4,
-                                   0                                                                                        // G4double pAlp2 //
-  );
-
-  return block_tower;
-}
-
-G4Trap* PHG4BarrelEcalDetector::GetGlassTrapSubtract(std::map<std::string, towerposition>::iterator iterator)
-{
-  G4double th = m_Params->get_double_param("thickness_wall") * cm;
-  G4double size_x1 = iterator->second.sizex1 / 2 - th + overlap;
-  G4double size_x2 = iterator->second.sizex2 / 2 - th + overlap;
-  G4double size_y1 = iterator->second.sizey1 / 2 - th + overlap;
-  G4double size_y2 = iterator->second.sizey2 / 2 - th + overlap;
-  G4double size_z = iterator->second.sizez / 2 - th / 2 + overlap;
-
-  G4Trap* block_glass = new G4Trap("solid_glass",
-                                   size_z,                      // G4double pDz,
-                                   iterator->second.pTheta, 0,  // G4double pTheta, G4double pPhi,
-                                   size_y1, size_x1, size_x1,   // G4double pDy1, G4double pDx1, G4double pDx2,
-                                   0,                           // G4double pAlp1,
-                                   size_y2, size_x2, size_x2,   // G4double pDy2, G4double pDx3, G4double pDx4,
-                                   0                            // G4double pAlp2 //
-  );
-
-  return block_glass;
-}
-
-G4Trap* PHG4BarrelEcalDetector::GetSiTrap(std::map<std::string, towerposition>::iterator iterator)
-{
-  G4double size_x1 = iterator->second.sizex2 / 2 - overlap;
-  G4double size_x2 = iterator->second.sizex2 / 2 - overlap;
-  G4double size_y1 = iterator->second.sizey2 / 2 - overlap;
-  G4double size_y2 = iterator->second.sizey2 / 2 - overlap;
-  G4double size_z = silicon_width_half;
-
-  G4Trap* block_si = new G4Trap("Si",
-                                size_z,                      // G4double pDz,
-                                iterator->second.pTheta, 0,  // G4double pTheta, G4double pPhi,
-                                size_y1, size_x1, size_x1,   // G4double pDy1, G4double pDx1, G4double pDx2,
-                                0,                           // G4double pAlp1,
-                                size_y2, size_x2, size_x2,   // G4double pDy2, G4double pDx3, G4double pDx4,
-                                0                            // G4double pAlp2 //
-  );
-
-  return block_si;
-}
-
-G4LogicalVolume*
-PHG4BarrelEcalDetector::ConstructSi(std::map<std::string, towerposition>::iterator iterator)
-{
-  G4Trap* block_solid = GetSiTrap(iterator);
-  G4Material* material_si = G4Material::GetMaterial("G4_POLYSTYRENE");
-  assert(material_si);
-  G4LogicalVolume* block_logic = new G4LogicalVolume(block_solid, material_si,
-                                                     G4String(string(iterator->first) + string("_solid_Si")), 0, 0,
-                                                     nullptr);
-  return block_logic;
-}
-
-G4Trap* PHG4BarrelEcalDetector::GetKaptonTrap(std::map<std::string, towerposition>::iterator iterator)
-{
-  G4double size_x1 = iterator->second.sizex2 / 2 - overlap;
-  G4double size_x2 = iterator->second.sizex2 / 2 - overlap;
-  G4double size_y1 = iterator->second.sizey2 / 2 - overlap;
-  G4double size_y2 = iterator->second.sizey2 / 2 - overlap;
-  G4double size_z = kapton_width_half;
-  G4Trap* block_si = new G4Trap("Kapton",
-                                size_z,                      // G4double pDz,
-                                iterator->second.pTheta, 0,  // G4double pTheta, G4double pPhi,
-                                size_y1, size_x1, size_x1,   // G4double pDy1, G4double pDx1, G4double pDx2,
-                                0,                           // G4double pAlp1,
-                                size_y2, size_x2, size_x2,   // G4double pDy2, G4double pDx3, G4double pDx4,
-                                0                            // G4double pAlp2 //
-  );
-  return block_si;
-}
-
-G4LogicalVolume*
-PHG4BarrelEcalDetector::ConstructKapton(std::map<std::string, towerposition>::iterator iterator)
-{
-  G4Trap* block_solid = GetKaptonTrap(iterator);
-  G4Material* material_kapton = G4Material::GetMaterial("G4_KAPTON");
-  assert(material_kapton);
-  G4LogicalVolume* block_logic = new G4LogicalVolume(block_solid, material_kapton,
-                                                     G4String(string(iterator->first) + string("_solid_Si")), 0, 0,
-                                                     nullptr);
-  return block_logic;
-}
-
-G4Trap* PHG4BarrelEcalDetector::GetSIO2Trap(std::map<std::string, towerposition>::iterator iterator)
-{
-  G4double size_x1 = iterator->second.sizex2 / 2 - overlap;
-  G4double size_x2 = iterator->second.sizex2 / 2 - overlap;
-  G4double size_y1 = iterator->second.sizey2 / 2 - overlap;
-  G4double size_y2 = iterator->second.sizey2 / 2 - overlap;
-  G4double size_z = SIO2_width_half;
-
-  G4Trap* block_SIO2 = new G4Trap("SIO2",
-                                  size_z,                      // G4double pDz,
-                                  iterator->second.pTheta, 0,  // G4double pTheta, G4double pPhi,
-                                  size_y1, size_x1, size_x1,   // G4double pDy1, G4double pDx1, G4double pDx2,
-                                  0,                           // G4double pAlp1,
-                                  size_y2, size_x2, size_x2,   // G4double pDy2, G4double pDx3, G4double pDx4,
-                                  0                            // G4double pAlp2 //
-  );
-  return block_SIO2;
-}
-
-G4LogicalVolume*
-PHG4BarrelEcalDetector::ConstructSIO2(std::map<std::string, towerposition>::iterator iterator)
-{
-  G4Trap* block_solid = GetSIO2Trap(iterator);
-  G4Material* material_SIO2 = G4Material::GetMaterial("Quartz");
-  assert(material_SIO2);
-  G4LogicalVolume* block_logic = new G4LogicalVolume(block_solid, material_SIO2,
-                                                     G4String(string(iterator->first) + string("_solid_material_SIO2")), 0, 0,
-                                                     nullptr);
-  return block_logic;
-}
-
-G4Trap* PHG4BarrelEcalDetector::GetCarbonTrap(std::map<std::string, towerposition>::iterator iterator)
-{
-  G4double size_x1 = iterator->second.sizex2 / 2 - overlap;
-  G4double size_x2 = iterator->second.sizex2 / 2 - overlap;
-  G4double size_y1 = iterator->second.sizey2 / 2 - overlap;
-  G4double size_y2 = iterator->second.sizey2 / 2 - overlap;
-  G4double size_z = Carbon_width_half;
-
-  G4Trap* block_SIO2 = new G4Trap("C",
-                                  size_z,                      // G4double pDz,
-                                  iterator->second.pTheta, 0,  // G4double pTheta, G4double pPhi,
-                                  size_y1, size_x1, size_x1,   // G4double pDy1, G4double pDx1, G4double pDx2,
-                                  0,                           // G4double pAlp1,
-                                  size_y2, size_x2, size_x2,   // G4double pDy2, G4double pDx3, G4double pDx4,
-                                  0                            // G4double pAlp2 //
-  );
-
-  return block_SIO2;
-}
-
-G4LogicalVolume*
-PHG4BarrelEcalDetector::ConstructCarbon(std::map<std::string, towerposition>::iterator iterator)
-{
-  G4Trap* block_solid = GetCarbonTrap(iterator);
-  G4Material* material_Carbon = G4Material::GetMaterial("G4_C");
-  assert(material_Carbon);
-  G4LogicalVolume* block_logic = new G4LogicalVolume(block_solid, material_Carbon,
-                                                     G4String(string(iterator->first) + string("_solid_material_C")), 0, 0,
-                                                     nullptr);
-  return block_logic;
 }

@@ -48,10 +48,14 @@ void PHG4BarrelEcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
     else if (it.second == "Block1")
     {
       visatt->SetColour(G4Colour(1., 0.5, 0.));
+      // visatt->SetColour(1., 0.5, 0., 0.6);
+      visatt->SetForceWireframe(true);
     }
     else if (it.second == "Block2")
     {
       visatt->SetColour(G4Colour::Blue());
+      // visatt->SetColour(0., 0.0, 1., 0.6);
+      visatt->SetForceWireframe(true);
     }
     else if (it.second == "Glass")
     {

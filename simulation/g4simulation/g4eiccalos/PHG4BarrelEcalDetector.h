@@ -10,6 +10,7 @@
 #include <Geant4/G4Trap.hh>
 #include <Geant4/G4Tubs.hh>
 #include <Geant4/G4Types.hh>  // for G4double
+#include <Geant4/G4GenericTrap.hh>  // for G4double
 
 #include <map>
 #include <set>
@@ -72,9 +73,9 @@ class PHG4BarrelEcalDetector : public PHG4Detector
 
   struct towerposition
   {
-    G4double sizex1;
-    G4double sizey1;
-    G4double sizex2;
+    G4double size_xin;
+    G4double size_height;
+    G4double size_xout;
     G4double sizey2;
     G4double sizez;
     G4double pTheta;
@@ -90,8 +91,9 @@ class PHG4BarrelEcalDetector : public PHG4Detector
 
   G4Material *GetCarbonFiber();
   G4Material *GetSciGlass();
+  G4Material *GetLeadGlass();
 
-  G4Trap *GetTowerTrap(std::map<std::string, towerposition>::iterator iterator);
+  G4GenericTrap *GetTowerTrap(std::map<std::string, towerposition>::iterator iterator);
   G4Trap *GetSiTrap(std::map<std::string, towerposition>::iterator iterator);
   G4Trap *GetGlassTrap(std::map<std::string, towerposition>::iterator iterator);
   G4Trap *GetKaptonTrap(std::map<std::string, towerposition>::iterator iterator);
@@ -118,6 +120,8 @@ class PHG4BarrelEcalDetector : public PHG4Detector
   //G4LogicalVolume* singletower;
   std::string m_TowerLogicNamePrefix;
   std::string m_SuperDetector;
+
+  int m_useLeadGlass = 0;
 
   std::map<std::string, G4double> m_GlobalParameterMap;
   std::map<std::string, towerposition> m_TowerPostionMap;
