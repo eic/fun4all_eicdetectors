@@ -94,8 +94,9 @@ class PHG4BarrelEcalDetector : public PHG4Detector
   G4Material *GetLeadGlass();
 
   G4GenericTrap *GetTowerTrap(std::map<std::string, towerposition>::iterator iterator);
+  G4GenericTrap *GetGlassTrap(std::map<std::string, towerposition>::iterator iterator, bool forSubtraction);
   G4Trap *GetSiTrap(std::map<std::string, towerposition>::iterator iterator);
-  G4Trap *GetGlassTrap(std::map<std::string, towerposition>::iterator iterator);
+  // G4Trap *GetGlassTrap(std::map<std::string, towerposition>::iterator iterator);
   G4Trap *GetKaptonTrap(std::map<std::string, towerposition>::iterator iterator);
   G4Trap *GetSIO2Trap(std::map<std::string, towerposition>::iterator iterator);
   G4Trap *GetCarbonTrap(std::map<std::string, towerposition>::iterator iterator);

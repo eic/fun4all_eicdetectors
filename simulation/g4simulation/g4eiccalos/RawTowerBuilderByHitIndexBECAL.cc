@@ -26,6 +26,7 @@
 
 #include <TRotation.h>
 #include <TVector3.h>
+#include <Geant4/G4Types.hh>            // for G4double, G4int
 
 #include <cstdlib>    // for exit
 #include <exception>  // for exception
@@ -251,14 +252,15 @@ bool RawTowerBuilderByHitIndexBECAL::ReadGeometryFromTable()
     if (line_mapping.find("BECALtower ") != string::npos)
     {
       unsigned idphi_j, ideta_k;
-      double cx, cy, cz;
-      double rot_z, rot_y, rot_x;
-      double size_z, size_y1, size_x1, size_y2, size_x2, p_Theta;
+      G4double cx, cy, cz;
+      G4double rot_z, rot_y, rot_x;
+      G4double size_height, size_xin, size_xout;
       std::string dummys;
+      // cout << "BECALtower " << itow << " " << 0 << " " << Lin << " " << Lout << " " << height << " " << xgrav << " " << ygrav << " " << zgrav << " " << theta0+theta1 << endl;
 
-      if (!(iss >> dummys >> ideta_k >> idphi_j >> size_x1 >> size_x2 >> size_y1 >> size_y2 >> size_z >> p_Theta >> cx >> cy >> cz >> rot_x >> rot_y >> rot_z))
+      if (!(iss >> dummys >> ideta_k >> idphi_j >> size_xin >> size_xout >> size_height >> cx >> cy >> cz >> rot_x >> rot_y >> rot_z))
       {
-        std::cout << "ERROR in PHG4ForwardHcalDetector: Failed to read line in mapping file " << m_MappingTowerFile << std::endl;
+        std::cout << "ERROR in RawTowerBuilderByHitIndexBECAL: Failed to read line in mapping file " << m_MappingTowerFile << std::endl;
         exit(1);
       }
 
@@ -270,6 +272,7 @@ bool RawTowerBuilderByHitIndexBECAL::ReadGeometryFromTable()
       temp_geo->set_center_x(cx);
       temp_geo->set_center_y(cy);
       temp_geo->set_center_z(cz);
+      temp_geo->set_roty(rot_x);
       temp_geo->set_roty(rot_y);
       temp_geo->set_rotz(rot_z);
 
@@ -311,30 +314,30 @@ bool RawTowerBuilderByHitIndexBECAL::ReadGeometryFromTable()
   m_Geoms->set_radius(radius + 0.5 * tower_length);
   //cout << PHWHERE << "BECAL radius set to " <<  m_Geoms->get_radius() << " cm" << endl;
 
-  RawTowerGeomContainer::ConstRange all_towers = m_Geoms->get_tower_geometries();
+  // RawTowerGeomContainer::ConstRange all_towers = m_Geoms->get_tower_geometries();
 
-  for (RawTowerGeomContainer::ConstIterator it = all_towers.first;
-       it != all_towers.second; ++it)
-  {
-    double x_temp = it->second->get_center_x();
-    double y_temp = it->second->get_center_y();
-    double z_temp = it->second->get_center_z();
-    double roty = it->second->get_roty();
-    double rotz = it->second->get_rotz();
+  // for (RawTowerGeomContainer::ConstIterator it = all_towers.first;
+  //      it != all_towers.second; ++it)
+  // {
+  //   double x_temp = it->second->get_center_x();
+  //   double y_temp = it->second->get_center_y();
+  //   double z_temp = it->second->get_center_z();
+  //   double roty = it->second->get_roty();
+  //   double rotz = it->second->get_rotz();
 
-    double x_tempfinal = x_temp + thickness_wall / 2 * abs(cos(roty - M_PI_2)) * cos(rotz);
-    double y_tempfinal = y_temp + thickness_wall / 2 * abs(cos(roty - M_PI_2)) * sin(rotz);
-    double z_tempfinal = z_temp + thickness_wall * sin(roty - M_PI_2);
+    // double x_tempfinal = x_temp + thickness_wall / 2 * abs(cos(roty - M_PI_2)) * cos(rotz);
+    // double y_tempfinal = y_temp + thickness_wall / 2 * abs(cos(roty - M_PI_2)) * sin(rotz);
+    // double z_tempfinal = z_temp + thickness_wall * sin(roty - M_PI_2);
 
-    it->second->set_center_x(x_tempfinal);
-    it->second->set_center_y(y_tempfinal);
-    it->second->set_center_z(z_tempfinal);
+    // it->second->set_center_x(x_tempfinal);
+    // it->second->set_center_y(y_tempfinal);
+    // it->second->set_center_z(z_tempfinal);
 
-    if (Verbosity() > 2)
-    {
-      cout << "*** Tower x y z : " << x_temp << " " << y_temp << " " << z_temp << endl;
-    }
-  }
+    // if (Verbosity() > 2)
+    // {
+    //   cout << "*** Tower x y z : " << x_temp << " " << y_temp << " " << z_temp << endl;
+    // }
+  // }
   if (Verbosity())
   {
     cout << "size tower geom container:" << m_Geoms->size() << "\t" << m_Detector << endl;
