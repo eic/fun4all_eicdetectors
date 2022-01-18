@@ -13,6 +13,7 @@ class PHCompositeNode;
 class PHG4Hit;
 class PHG4HitContainer;
 class PHParameters;
+class PHG4Shower;
 
 class EICG4ZDCSteppingAction : public PHG4SteppingAction
 {
@@ -39,6 +40,7 @@ class EICG4ZDCSteppingAction : public PHG4SteppingAction
   PHG4HitContainer* m_SaveHitContainer;
   G4VPhysicalVolume* m_SaveVolPre;
   G4VPhysicalVolume* m_SaveVolPost;
+  PHG4Shower* m_SaveShower;
 
   int m_SaveTrackId;
   int m_SavePreStepStatus;
@@ -47,7 +49,7 @@ class EICG4ZDCSteppingAction : public PHG4SteppingAction
   int m_BlackHoleFlag;
   double m_EdepSum;
   double m_EionSum;
-
+  double m_LightYield;
  
 };
 
