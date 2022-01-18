@@ -49,7 +49,7 @@ void PHG4BarrelEcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
     {
       visatt->SetColour(G4Colour(1., 0.5, 0.));
       // visatt->SetColour(1., 0.5, 0., 0.6);
-      visatt->SetForceWireframe(true);
+      // visatt->SetForceWireframe(true);
     }
     else if (it.second == "Block2")
     {
@@ -59,7 +59,8 @@ void PHG4BarrelEcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
     }
     else if (it.second == "Glass")
     {
-      visatt->SetColour(G4Colour::White());
+      // visatt->SetColour(G4Colour::White());
+      visatt->SetColour(152. / 255, 251. / 255, 152. / 255, 1.0);
       //visatt->SetForceWireframe(true);
     }
     else if (it.second == "Si")
@@ -76,7 +77,11 @@ void PHG4BarrelEcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
     }
     else if (it.second == "Carbon")
     {
-      visatt->SetColour(G4Colour::Black());
+      visatt->SetColour(220. / 255, 220. / 255, 220. / 255);
+    }
+    else if (it.second == "Invisible")
+    {
+      visatt->SetVisibility(false);
     }
     else
     {

@@ -191,18 +191,18 @@ int PHG4BarrelEcalDetector::PlaceTower(G4LogicalVolume* sec)
     int copyno = (iterator->second.idx_j << 16) + iterator->second.idx_k;
 
     G4LogicalVolume* block_logic = ConstructTower(iterator);
-    m_DisplayAction->AddVolume(block_logic, iterator->first);
+    // m_DisplayAction->AddVolume(block_logic, iterator->first);
     if (iterator->second.idx_k % 2 == 0)
     {
-      m_DisplayAction->AddVolume(block_logic, "Block1");
+      m_DisplayAction->AddVolume(block_logic, "Invisible");
     }
     else
     {
-      m_DisplayAction->AddVolume(block_logic, "Block2");
+      m_DisplayAction->AddVolume(block_logic, "Invisible");
     }
 
     G4RotationMatrix becal_rotm;
-    becal_rotm.rotateX(M_PI/2.0 - iterator->second.rotx);
+    becal_rotm.rotateX(iterator->second.rotx);
     becal_rotm.rotateY(iterator->second.roty);
     becal_rotm.rotateZ(iterator->second.rotz);
 
@@ -220,13 +220,63 @@ G4LogicalVolume*
 PHG4BarrelEcalDetector::ConstructTower(std::map<std::string, towerposition>::iterator iterator)
 {
   G4GenericTrap* block_tower = GetTowerTrap(iterator);
+  G4GenericTrap* block_glass = GetGlassTrap(iterator,false);
+  G4GenericTrap* block_glass_subtract = GetGlassTrap(iterator,true);
+  G4VSolid* block_shell = new G4SubtractionSolid(G4String(string(iterator->first) + string("_Envelope")), block_tower, block_glass_subtract, 0, G4ThreeVector(0.,0.,0.));
+
+
+  G4Material* material_scinti = GetSciGlass();
+  assert(material_scinti);
   G4Material* material_shell = GetCarbonFiber();
   assert(material_shell);
 
-  G4LogicalVolume* block_logic = new G4LogicalVolume(block_tower, material_shell,
+  // G4Trap* block_tower = GetTowerTrap(iterator);
+  // G4Trap* block_glass = GetGlassTrapSubtract(iterator);
+  // G4ThreeVector shift = G4ThreeVector(-th * sin(iterator->second.roty - M_PI_2), 0, th / 2 * abs(cos(iterator->second.roty - M_PI_2)));
+  // G4VSolid* block_solid = new G4SubtractionSolid(G4String(string(iterator->first) + string("_Envelope")), block_tower, block_glass, 0, shift);
+  // G4Material* material_shell = GetCarbonFiber();
+  // assert(material_shell);
+
+  // G4LogicalVolume* block_logic = new G4LogicalVolume(block_solid, material_shell,
+  //                                                    G4String(string(iterator->first) + string("_Tower")), 0, 0,
+  //                                                    nullptr);
+  // m_AbsorberLogicalVolSet.insert(block_logic);
+
+
+  G4LogicalVolume* block_logic = new G4LogicalVolume(block_tower, G4Material::GetMaterial("G4_AIR"),
                                                     G4String(string(iterator->first) + string("_Tower")), 0, 0,
                                                     nullptr);
-  m_AbsorberLogicalVolSet.insert(block_logic);
+  
+  G4LogicalVolume* glass_logic = new G4LogicalVolume(block_glass, material_scinti,
+                                                    G4String(string(iterator->first) + string("_Glass")), 0, 0,
+                                                    nullptr);
+  
+  G4LogicalVolume* shell_logic = new G4LogicalVolume(block_shell, material_shell,
+                                                    G4String(string(iterator->first) + string("_Wall")), 0, 0,
+                                                    nullptr);
+  new G4PVPlacement(0,G4ThreeVector(0, 0, 0),
+                  glass_logic,
+                  G4String(string(iterator->first) + string("_Glass")),
+                  block_logic,
+                  0, 0, OverlapCheck());
+  new G4PVPlacement(0,G4ThreeVector(0, 0, 0),
+                  shell_logic,
+                  G4String(string(iterator->first) + string("_Shell")),
+                  block_logic,
+                  0, 0, OverlapCheck());
+
+  if (iterator->second.idx_k % 2 == 0)
+  {
+    m_DisplayAction->AddVolume(glass_logic, "Block1");
+  }
+  else
+  {
+    m_DisplayAction->AddVolume(glass_logic, "Block2");
+  }
+  m_DisplayAction->AddVolume(shell_logic, "Carbon");
+
+  m_AbsorberLogicalVolSet.insert(shell_logic);
+  m_ScintiLogicalVolSet.insert(glass_logic);
   return block_logic;
 }
 
@@ -241,6 +291,24 @@ G4Material* PHG4BarrelEcalDetector::GetCarbonFiber()
     carbonfiber->AddElement(G4Element::GetElement("C"), 1);
   }
   return carbonfiber;
+}
+
+
+G4Material* PHG4BarrelEcalDetector::GetSciGlass()
+{
+  static string matname = "sciglass";
+  G4Material* sciglass = G4Material::GetMaterial(matname, false);  // false suppresses warning that material does not exist
+  if (!sciglass)
+  {
+    G4double density;
+    G4int ncomponents;
+    sciglass = new G4Material(matname, density = 4.22 * g / cm3, ncomponents = 4, kStateSolid);
+    sciglass->AddElement(G4Element::GetElement("Ba"), 0.3875);
+    sciglass->AddElement(G4Element::GetElement("Gd"), 0.2146);
+    sciglass->AddElement(G4Element::GetElement("Si"), 0.1369);
+    sciglass->AddElement(G4Element::GetElement("O"), 0.2610);
+  }
+  return sciglass;
 }
 
 G4GenericTrap* PHG4BarrelEcalDetector::GetTowerTrap(std::map<std::string, towerposition>::iterator iterator)
@@ -258,6 +326,29 @@ G4GenericTrap* PHG4BarrelEcalDetector::GetTowerTrap(std::map<std::string, towerp
   trapcoords[7] = G4TwoVector(iterator->second.size_xout, -iterator->second.size_xout);
 
   G4GenericTrap* block_tower = new G4GenericTrap("solid_tower",
+    zheight / 2, trapcoords
+  );
+
+  return block_tower;
+}
+
+G4GenericTrap* PHG4BarrelEcalDetector::GetGlassTrap(std::map<std::string, towerposition>::iterator iterator, bool forSubtraction = false)
+{
+  G4double carbon_wall = m_Params->get_double_param("thickness_wall") * cm;
+  G4double zheight = iterator->second.size_height;
+  if(forSubtraction) zheight+=0.01*cm;
+  std::vector<G4TwoVector> trapcoords(8);
+  trapcoords[0] = G4TwoVector(-(iterator->second.size_xin-carbon_wall), -(iterator->second.size_xin-carbon_wall));
+  trapcoords[1] = G4TwoVector(-(iterator->second.size_xin-carbon_wall), (iterator->second.size_xin-carbon_wall));
+  trapcoords[2] = G4TwoVector((iterator->second.size_xin-carbon_wall), (iterator->second.size_xin-carbon_wall));
+  trapcoords[3] = G4TwoVector((iterator->second.size_xin-carbon_wall), -(iterator->second.size_xin-carbon_wall));
+
+  trapcoords[4] = G4TwoVector(-(iterator->second.size_xout-carbon_wall), -(iterator->second.size_xout-carbon_wall));
+  trapcoords[5] = G4TwoVector(-(iterator->second.size_xout-carbon_wall), (iterator->second.size_xout-carbon_wall));
+  trapcoords[6] = G4TwoVector((iterator->second.size_xout-carbon_wall), (iterator->second.size_xout-carbon_wall));
+  trapcoords[7] = G4TwoVector((iterator->second.size_xout-carbon_wall), -(iterator->second.size_xout-carbon_wall));
+
+  G4GenericTrap* block_tower = new G4GenericTrap("solid_tower_glass",
     zheight / 2, trapcoords
   );
 
