@@ -15,7 +15,7 @@ pkginclude_HEADERS = \
   EICG4ZDCSubsystem.h\
   EICG4ZDCNtuple.h\
   EICG4ZDCHitTree.h\
-  EICG4ZDCRawTowerBuilder.h
+  EICG4ZDCRawTowerBuilderByHitIndex.h
 
 
 lib_LTLIBRARIES = \
@@ -28,7 +28,7 @@ libEICG4ZDC_la_SOURCES = \
   EICG4ZDCStructure.cc\
   EICG4ZDCNtuple.cc\
   EICG4ZDCHitTree.cc\
-  EICG4ZDCRawTowerBuilder.cc
+  EICG4ZDCRawTowerBuilderByHitIndex.cc
 
 libEICG4ZDC_la_LIBADD = \
   -lphool \
