@@ -64,6 +64,17 @@ int EICG4RPDetector::IsInDetector(G4VPhysicalVolume *volume) const
 }
 
 //_______________________________________________________________
+int EICG4RPDetector::IsInVirtualDetector(G4VPhysicalVolume *volume) const
+{
+
+  if( m_VirtualPhysicalVolumesMap.find( volume ) != m_VirtualPhysicalVolumesMap.end() ) {
+      return 1;
+  }
+  
+  return 0;
+}
+
+//_______________________________________________________________
 int EICG4RPDetector::GetDetId(G4VPhysicalVolume *volume) const
 {
   if (IsInDetector(volume))
@@ -99,6 +110,8 @@ void EICG4RPDetector::ConstructMe(G4LogicalVolume *logicWorld)
 	double CuDepth =  m_Params->get_double_param( prefix + "Cu_size_z" ) * cm;
 	double tenSigma_X = m_Params->get_double_param( prefix + "10sigma_x" ) * cm;
 	double tenSigma_Y = m_Params->get_double_param( prefix + "10sigma_y" ) * cm;
+
+	double virtPlaneDepth = 0.001 * cm;
 
 	// Derived quantities	  
 	int NsegmentsOffCenter = int( (tenSigma_X - 0.5*sensorWidth) / sensorWidth + 0.5 );
@@ -189,7 +202,7 @@ void EICG4RPDetector::ConstructMe(G4LogicalVolume *logicWorld)
 	G4VPhysicalVolume *physicalRP = new G4PVPlacement( rotm, position, logicalRP, "EICG4RP", 
 			logicWorld, 0, false, OverlapCheck());
 	
-	// Add it to the list of placed volumes so the IsInDetector method picks them up
+	// Add it to the list of active volumes so the IsInDetector method picks them up
 	m_ActivePhysicalVolumesMap.insert({physicalRP, layer + 1});
 	
 	///////////////////////////
@@ -215,9 +228,29 @@ void EICG4RPDetector::ConstructMe(G4LogicalVolume *logicWorld)
 	G4VPhysicalVolume *physicalCu = new G4PVPlacement( rotm, positionCu, logicalCu, "EICG4RPCu", 
 			logicWorld, 0, false, OverlapCheck());
 
-	// Add it as a passive layer (secondaries created by no hits stored)
+	// Add it as a passive volume (secondaries created by no hits stored)
         m_PassivePhysicalVolumesSet.insert(physicalCu);
 
+	/////////////////////////////
+	// Virtual plane with no beam hole. In front of active layer
+	G4Box *VirtPlate = new G4Box("VirtPlate",overallSize_X/2., overallSize_Y/2., virtPlaneDepth/2.);
+	G4LogicalVolume *logicalVirt = new G4LogicalVolume( VirtPlate,
+				G4Material::GetMaterial( "G4_Galactic" ), "EICG4RPVirtualLogical");
+
+	G4VisAttributes *visVirt = new G4VisAttributes( G4Color(1.0, 1.0, 1.0, 0.0) );
+	visVirt->SetForceSolid(true);
+	logicalVirt->SetVisAttributes(visVirt);
+	G4ThreeVector positionVirt = G4ThreeVector( 
+			center_X,
+			center_Y,
+			center_Z - sensorDepth/2.0 - virtPlaneDepth/2.0 - enclosureCenter );
+
+	G4VPhysicalVolume *physicalVirt = new G4PVPlacement( rotm, positionVirt, logicalVirt, "EICG4RPVirt", 
+			logicWorld, 0, false, OverlapCheck());
+
+	// Add it to the virtual volume
+        m_VirtualPhysicalVolumesMap.insert({physicalVirt, layer + 1});
+	
 	return;
 }
 

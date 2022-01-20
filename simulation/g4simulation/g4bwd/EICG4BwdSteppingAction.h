@@ -1,13 +1,16 @@
 // Tell emacs that this is a C++ source
 //  -*- C++ -*-.
-#ifndef EICG4RPSTEPPINGACTION_H
-#define EICG4RPSTEPPINGACTION_H
+#ifndef EICG4BwdSTEPPINGACTION_H
+#define EICG4BwdSTEPPINGACTION_H
 
 #include <g4main/PHG4SteppingAction.h>
 #include <string>
 
-class EICG4RPDetector;
-class EICG4RPSubsystem;
+#include <Geant4/G4TouchableHandle.hh>
+#include <Geant4/G4StepPoint.hh> 
+
+class EICG4BwdDetector;
+class EICG4BwdSubsystem;
 
 class G4Step;
 class G4VPhysicalVolume;
@@ -17,14 +20,14 @@ class PHG4Shower;
 class PHG4HitContainer;
 class PHParameters;
 
-class EICG4RPSteppingAction : public PHG4SteppingAction
+class EICG4BwdSteppingAction : public PHG4SteppingAction
 {
  public:
   //! constructor
-  EICG4RPSteppingAction(EICG4RPSubsystem* subsys, EICG4RPDetector* detector, const PHParameters* parameters);
+  EICG4BwdSteppingAction(EICG4BwdSubsystem *subsys, EICG4BwdDetector *detector, const PHParameters* parameters);
 
   //! destructor
-  virtual ~EICG4RPSteppingAction() override;
+  virtual ~EICG4BwdSteppingAction() override;
 
   //! stepping action
   virtual bool UserSteppingAction(const G4Step*, bool) override;
@@ -32,24 +35,24 @@ class EICG4RPSteppingAction : public PHG4SteppingAction
   //! reimplemented from base class
   virtual void SetInterfacePointers(PHCompositeNode*) override;
 
-  virtual void SaveLightYield(const int i = 1) { m_SaveLightYieldFlag = i; }
+  virtual void SaveLightYield(const int i = 1) { m_SaveLightYieldFlag = i;}
 
   virtual bool hasMotherSubsystem() const;
 
-  virtual void SaveAllHits(bool i = true) { m_SaveAllHitsFlag = i; }
+  virtual void SaveAllHits(bool i = true){ m_SaveAllHitsFlag = i;}
 
-  virtual void HitNodeName(const std::string& name) { m_HitNodeName = name; }
-  virtual void HitNodeNameVirt(const std::string& name) { m_HitNodeNameVirt = name; }
+  virtual void HitNodeName(const std::string &name) {m_HitNodeName=name;}
 
  private:
+  int FindTowerIndexFromPosition(G4StepPoint* prePoint, int& j, int& k);
+
   //! pointer to the detector
-  EICG4RPSubsystem* m_Subsystem;
-  EICG4RPDetector* m_Detector;
+  EICG4BwdSubsystem* m_Subsystem;
+  EICG4BwdDetector* m_Detector;
 
   const PHParameters* m_Params;
   //! pointer to hit container
-  PHG4HitContainer* m_HitContainer;
-  PHG4HitContainer* m_HitContainerVirt;
+  PHG4HitContainer* m_HitContainer=nullptr;
   PHG4Hit* m_Hit;
   PHG4Shower* m_SaveShower;
   G4VPhysicalVolume* m_SaveVolPre;
@@ -60,8 +63,8 @@ class EICG4RPSteppingAction : public PHG4SteppingAction
   int m_SaveTrackId;
   int m_SavePreStepStatus;
   int m_SavePostStepStatus;
-  int m_ActiveFlag;
-  int m_BlackHoleFlag;
+  int m_ActiveFlag = 0;
+  int m_BlackHoleFlag = 0;
   int m_UseG4StepsFlag;
   double m_Zmin;
   double m_Zmax;
@@ -71,7 +74,6 @@ class EICG4RPSteppingAction : public PHG4SteppingAction
   double m_EabsSum;
   double m_EionSum;
   std::string m_HitNodeName;
-  std::string m_HitNodeNameVirt;
 };
 
-#endif  // EICG4RPSTEPPINGACTION_H
+#endif  // EICG4BwdSTEPPINGACTION_H

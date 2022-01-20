@@ -22,6 +22,8 @@
 //
 //  -1/June/2021 First ZDC design (Crystal + FoCal style)   Shima Shimizu
 //               Provides volume info for TTree/Ntuple production
+//  -14/Dec/2021 Second ZDC design (1 layer Crystal) 
+//               modifications for: Absorber info, Digitization,                
 //
 #include "EICG4ZDCDetector.h"
 #include "EICG4ZDCStructure.h"
@@ -73,10 +75,17 @@ int EICG4ZDCDetector::IsInDetector(G4VPhysicalVolume *volume) const
   return 0;
 }
 
-int EICG4ZDCDetector::GetVolumeInfo(G4VPhysicalVolume *volume){
+int EICG4ZDCDetector::GetActiveVolumeInfo(G4VPhysicalVolume *volume){
 
   G4LogicalVolume *lvolume = volume->GetLogicalVolume();
   int lvinfo = m_ActiveLogicalVolumeInfoMap[lvolume];
+  return lvinfo;
+}
+
+int EICG4ZDCDetector::GetAbsorberVolumeInfo(G4VPhysicalVolume *volume){
+
+  G4LogicalVolume *lvolume = volume->GetLogicalVolume();
+  int lvinfo = m_AbsorberLogicalVolumeInfoMap[lvolume];
   return lvinfo;
 }
 
@@ -105,7 +114,7 @@ void EICG4ZDCDetector::ConstructMe(G4LogicalVolume *logicWorld)
       logical, "ZDC", logicWorld, 0, false, OverlapCheck());
 
   EICG4ZDCStructure *mzs = new EICG4ZDCStructure();
-  double endz = 0;
+  double endz = -zdim/2.;
 
   endz = mzs->ConstructCrystalTowers(-xdim/2.,-ydim/2.,-zdim/2.,
 				     xdim/2., ydim/2., zdim/2., gPhy);
@@ -121,7 +130,13 @@ void EICG4ZDCDetector::ConstructMe(G4LogicalVolume *logicWorld)
   
   mzs->ProvideLogicalVolumesSets(m_ActiveLogicalVolumesSet, 
   				 m_AbsorberLogicalVolumesSet);
-  mzs->ProvideLogicalVolumeInfoMap(m_ActiveLogicalVolumeInfoMap);
+  mzs->ProvideLogicalVolumeInfoMap(m_ActiveLogicalVolumeInfoMap,
+				   m_AbsorberLogicalVolumeInfoMap);
+
+  // mzs->PrintTowerMap("Crystal");
+  // mzs->PrintTowerMap("SiPixel");
+  // mzs->PrintTowerMap("SiPad");
+  //  mzs->PrintTowerMap("Sci");
 
  //end implement your own here://
   return;
@@ -133,7 +148,7 @@ void EICG4ZDCDetector::Print(const std::string &what) const
   std::cout << "EICG4ZDC Detector:" << std::endl;
   if (what == "ALL" || what == "VOLUME")
   {
-    std::cout << "Version 1.0" << std::endl;
+    std::cout << "Version 1.1" << std::endl;
     std::cout << "Parameters:" << std::endl;
     m_Params->Print();
   }

@@ -7,17 +7,17 @@
 //Crystal Towers
 constexpr G4int nCTowerX=20;
 constexpr G4int nCTowerY=20;
-constexpr G4int nCTowerZ=2;
+constexpr G4int nCTowerZ=1;
 constexpr G4double CTower_X = 3. *cm;
 constexpr G4double CTower_Y = 3. *cm;
-constexpr G4double CTower_Z = 10. *cm;
+constexpr G4double CTower_Z = 7. *cm;
 constexpr G4double CTower_GAP = 3. *cm;
 
 //MiniFoCal block
-constexpr G4int NumberOfLayers = 42;
+constexpr G4int NumberOfLayers = 22;
 constexpr G4int NumberPIX = 2;
-constexpr G4int NumberPAD = 40;
-constexpr G4int NPadOnlyLayers=20;
+constexpr G4int NumberPAD = 20;
+constexpr G4int NPadOnlyLayers=10;
 
 //=================================================================
 //PIX detector

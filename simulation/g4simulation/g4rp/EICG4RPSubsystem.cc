@@ -50,6 +50,7 @@ int EICG4RPSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
     PHCompositeNode *dstNode = dynamic_cast<PHCompositeNode *>(iter.findFirst("PHCompositeNode", "DST"));
 
     std::string nodename;
+    std::string nodenameVirtSheet;
 
     if (SuperDetector() != "NONE")
     {
@@ -65,19 +66,30 @@ int EICG4RPSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
 
       nodename = "G4HIT_" + SuperDetector();
     }
-
     else
     {
       nodename = "G4HIT_" + Name();
     }
+
+    nodenameVirtSheet = nodename + "_VirtSheet";
+
     PHG4HitContainer *rp_hits = findNode::getClass<PHG4HitContainer>(topNode, nodename);
-    if (!rp_hits)
+    PHG4HitContainer *rp_hitsVirtSheet = findNode::getClass<PHG4HitContainer>(topNode, nodenameVirtSheet);
+    
+    if( ! rp_hits )
     {
       dstNode->addNode(new PHIODataNode<PHObject>(rp_hits = new PHG4HitContainer(nodename), nodename, "PHObject"));
     }
+    if( ! rp_hitsVirtSheet )
+    {
+	    dstNode->addNode(new PHIODataNode<PHObject>(rp_hits = new PHG4HitContainer(nodenameVirtSheet), nodenameVirtSheet, "PHObject"));
+    }
+
     rp_hits->AddLayer(GetLayer());
+
     auto *tmp = new EICG4RPSteppingAction(this, m_Detector, GetParams());
     tmp->HitNodeName(nodename);
+    tmp->HitNodeNameVirt(nodenameVirtSheet);
     m_SteppingAction = tmp;
   }
   else if (GetParams()->get_int_param("blackhole"))

@@ -6,6 +6,9 @@
 /// \brief Compares reconstructed tracks to truth particles
 /// \author Wenliang (Bill) Li
 //===============================================
+#include <fstream>
+
+#include <TSystem.h>
 
 #include <fun4all/SubsysReco.h>
 
@@ -21,6 +24,11 @@ class PHCompositeNode;
 class TFile;
 class TNtuple;
 class TTree;
+
+
+template <class T>
+T GetParameterFromFile( std::string filename, std::string param );
+
 
 /// \class FarForwardEvaluator
 ///
@@ -62,6 +70,9 @@ class FarForwardEvaluator : public SubsysReco
   TH2F *h2_B0_XY;
 
   TH2F *h2_RP_XY;
+
+  std::vector<TH2F*> h2_RP_layers_XY;
+  std::vector<TH2F*> h2_RP_virtlayers_XY;
 
   Fun4AllHistoManager *hm;
 
