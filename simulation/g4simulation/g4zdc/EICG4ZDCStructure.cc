@@ -1,7 +1,8 @@
 //
 // -1/June/2021 First ZDC design (Crystal + FoCal style)   Shima Shimizu
 //              Started from  miniFocal Geometry codes
-//
+// -14/Dec/2021 Second ZDC design
+//              Able to produce tower maps
 
 #include "EICG4ZDCStructure.h"
 #include "EICG4ZDCconstants.h"
@@ -21,7 +22,15 @@ EICG4ZDCStructure::EICG4ZDCStructure() {
   Materials();
   SetColors();
   fLayer=0;
-  
+  _z_Crystal[0]=0; 
+  _z_Crystal[1]=0;
+  _z_EMLayers[0]=0; 
+  _z_EMLayers[1]=0;
+  _z_HCSilicon[0]=0; 
+  _z_HCSilicon[1]=0;
+  _z_HCSci[0]=0; 
+  _z_HCSci[1]=0;
+
 }
 EICG4ZDCStructure::~EICG4ZDCStructure() {}
 
@@ -35,9 +44,11 @@ void EICG4ZDCStructure::ProvideLogicalVolumesSets(std::set<G4LogicalVolume *> &A
 
 }
 
-void EICG4ZDCStructure::ProvideLogicalVolumeInfoMap(std::map<G4LogicalVolume *, int> &ActiveLogicalVolumeInfoMap){
+void EICG4ZDCStructure::ProvideLogicalVolumeInfoMap(std::map<G4LogicalVolume *, int> &ActiveLogicalVolumeInfoMap,
+						    std::map<G4LogicalVolume *, int> &AbsorberLogicalVolumeInfoMap){
 					       
   ActiveLogicalVolumeInfoMap = m_ActiveLogicalVolumeInfoMap;
+  AbsorberLogicalVolumeInfoMap = m_AbsorberLogicalVolumeInfoMap;
 
   return;
 
@@ -46,6 +57,7 @@ void EICG4ZDCStructure::ProvideLogicalVolumeInfoMap(std::map<G4LogicalVolume *, 
 double EICG4ZDCStructure::ConstructCrystalTowers(double Start_X, double Start_Y, double Start_Z, 
 					      double End_X, double End_Y, double End_Z,
 					      G4VPhysicalVolume *motherPhy) {
+  _z_Crystal[0] = Start_Z;
 
   double Center_X = (Start_X + End_X)/2.;
   double Center_Y = (Start_Y + End_Y)/2.;
@@ -84,6 +96,10 @@ double EICG4ZDCStructure::ConstructCrystalTowers(double Start_X, double Start_Y,
   std::pair<G4LogicalVolume*, int> pair_CPIX = std::make_pair(lV_PIX_Silicon, fLayer*100 + ZDCID::SI_PIXEL + ZDCID::CrystalTower);
   m_ActiveLogicalVolumeInfoMap.insert(pair_Crystal);
   m_ActiveLogicalVolumeInfoMap.insert(pair_CPIX);
+  std::pair<G4LogicalVolume*, int> pair_Glue2 = std::make_pair(lV_PIX_Glue2, fLayer*100 + ZDCID::Materials + ZDCID::CrystalTower);
+  std::pair<G4LogicalVolume*, int> pair_FPC = std::make_pair(lV_PIX_FPC, fLayer*100 + ZDCID::Materials + ZDCID::CrystalTower);
+  m_AbsorberLogicalVolumeInfoMap.insert(pair_Glue2);
+  m_AbsorberLogicalVolumeInfoMap.insert(pair_FPC);
 
   m_ActiveLogicalVolumesSet.insert(lV_PIX_Silicon);
   m_ActiveLogicalVolumesSet.insert(lV_Crystal);
@@ -147,13 +163,16 @@ double EICG4ZDCStructure::ConstructCrystalTowers(double Start_X, double Start_Y,
   
   fLayer += 2*nCTowerZ +1;
 
-  return Start_Z + (CTower_Z + CTower_GAP) * nCTowerZ + (PIX_Z + PIX_Glue2_Z + PIX_FPC_Z + PIX_AirGap) * (nCTowerZ +1);
+  _z_Crystal[1] = Start_Z + (CTower_Z + CTower_GAP) * nCTowerZ + (PIX_Z + PIX_Glue2_Z + PIX_FPC_Z + PIX_AirGap) * (nCTowerZ +1); 
+  return _z_Crystal[1];
 
 }
 
 double EICG4ZDCStructure::ConstructEMLayers(double Start_X, double Start_Y, double Start_Z, 
 			     double End_X, double End_Y, double End_Z,
 			     G4VPhysicalVolume *motherPhy) {
+
+  _z_EMLayers[0] = Start_Z;
 
   double Center_X = (Start_X + End_X)/2.;
   double Center_Y = (Start_Y + End_Y)/2.;
@@ -237,6 +256,24 @@ double EICG4ZDCStructure::ConstructEMLayers(double Start_X, double Start_Y, doub
   std::pair<G4LogicalVolume*, int> pair_PIX_Si = std::make_pair(lV_PIX_Silicon, infoval);
   m_ActiveLogicalVolumeInfoMap.insert(pair_PAD_Si);
   m_ActiveLogicalVolumeInfoMap.insert(pair_PIX_Si);
+  infoval = ZDCID::EMLayer+ NPadOnlyLayers * 10000 + fLayer*100 + ZDCID::Abs_Tungsten;
+  std::pair<G4LogicalVolume*, int> pair_PAD_W = std::make_pair(lV_PAD_W, infoval);
+  std::pair<G4LogicalVolume*, int> pair_PIX_W = std::make_pair(lV_PIX_W, infoval);
+  infoval = ZDCID::EMLayer+ NPadOnlyLayers * 10000 + fLayer*100 + ZDCID::Materials;
+  std::pair<G4LogicalVolume*, int> pair_PAD_Glue1 = std::make_pair(lV_PAD_Glue1, infoval);
+  std::pair<G4LogicalVolume*, int> pair_PIX_Glue1 = std::make_pair(lV_PIX_Glue1, infoval);
+  std::pair<G4LogicalVolume*, int> pair_PAD_Glue2 = std::make_pair(lV_PAD_Glue2, infoval);
+  std::pair<G4LogicalVolume*, int> pair_PIX_Glue2 = std::make_pair(lV_PIX_Glue2, infoval);
+  std::pair<G4LogicalVolume*, int> pair_PAD_FPC = std::make_pair(lV_PAD_FPC, infoval);
+  std::pair<G4LogicalVolume*, int> pair_PIX_FPC = std::make_pair(lV_PIX_FPC, infoval);
+  m_AbsorberLogicalVolumeInfoMap.insert(pair_PAD_W);
+  m_AbsorberLogicalVolumeInfoMap.insert(pair_PIX_W);
+  m_AbsorberLogicalVolumeInfoMap.insert(pair_PAD_Glue1);
+  m_AbsorberLogicalVolumeInfoMap.insert(pair_PIX_Glue1);
+  m_AbsorberLogicalVolumeInfoMap.insert(pair_PAD_Glue2);
+  m_AbsorberLogicalVolumeInfoMap.insert(pair_PIX_Glue2);
+  m_AbsorberLogicalVolumeInfoMap.insert(pair_PAD_FPC);
+  m_AbsorberLogicalVolumeInfoMap.insert(pair_PIX_FPC);
 
   m_ActiveLogicalVolumesSet.insert(lV_PAD_Silicon);
   m_ActiveLogicalVolumesSet.insert(lV_PIX_Silicon);
@@ -329,13 +366,17 @@ double EICG4ZDCStructure::ConstructEMLayers(double Start_X, double Start_Y, doub
   }
  
   fLayer += NumberOfLayers;
-  return Start_Z+TotalLayerThickness;
+ 
+  _z_EMLayers[1] = Start_Z+TotalLayerThickness;
+  return _z_EMLayers[1];
  
 }
 
 double EICG4ZDCStructure::ConstructHCSiliconLayers(double Start_X, double Start_Y, double Start_Z, 
 					    double End_X, double End_Y, double End_Z,
 					    G4VPhysicalVolume *motherPhy) {
+  _z_HCSilicon[0] = Start_Z;
+
   double Center_X = (Start_X + End_X)/2.;
   double Center_Y = (Start_Y + End_Y)/2.;
   double Width_X = End_X - Start_X;
@@ -376,6 +417,16 @@ double EICG4ZDCStructure::ConstructHCSiliconLayers(double Start_X, double Start_
   int infoval = ZDCID::HCPadLayer + fLayer*100 + ZDCID::SI_PAD;
   std::pair<G4LogicalVolume*, int> pair_PAD= std::make_pair(lV_PAD_Silicon, infoval);
   m_ActiveLogicalVolumeInfoMap.insert(pair_PAD);
+  infoval = ZDCID::HCPadLayer + fLayer*100 +ZDCID::Abs_Pb;
+  std::pair<G4LogicalVolume*, int> pair_Pb = std::make_pair(lV_HCal_Absorber,infoval);
+  infoval = ZDCID::HCPadLayer + fLayer*100 +ZDCID::Materials;
+  std::pair<G4LogicalVolume*, int> pair_Glue1 = std::make_pair(lV_PAD_Glue1,infoval);
+  std::pair<G4LogicalVolume*, int> pair_Glue2 = std::make_pair(lV_PAD_Glue2,infoval);
+  std::pair<G4LogicalVolume*, int> pair_FPC = std::make_pair(lV_PAD_FPC,infoval);
+  m_AbsorberLogicalVolumeInfoMap.insert(pair_Pb);
+  m_AbsorberLogicalVolumeInfoMap.insert(pair_Glue1);
+  m_AbsorberLogicalVolumeInfoMap.insert(pair_Glue2);
+  m_AbsorberLogicalVolumeInfoMap.insert(pair_FPC);
 
   m_ActiveLogicalVolumesSet.insert(lV_PAD_Silicon);
   m_AbsorberLogicalVolumesSet.insert(lV_HCal_Absorber);
@@ -413,13 +464,17 @@ double EICG4ZDCStructure::ConstructHCSiliconLayers(double Start_X, double Start_
   new G4PVPlacement(0, threeVect_HC_Si_Box, "PV_HC_Si_Box", lV_HC_Si_Box, motherPhy, false, 0);
   
   fLayer += HCALSiNumberOfLayers;
-  return Start_Z + TotalLayerThickness;
-  
+
+   _z_HCSilicon[1] = Start_Z + TotalLayerThickness;
+  return _z_HCSilicon[1];
+ 
 }
 
 double EICG4ZDCStructure::ConstructHCSciLayers(double Start_X, double Start_Y, double Start_Z, 
 					    double End_X, double End_Y, double End_Z,
 					    G4VPhysicalVolume *motherPhy) {
+
+  _z_HCSci[0] = Start_Z;
 
   double Center_X = (Start_X + End_X)/2.;
   double Center_Y = (Start_Y + End_Y)/2.;
@@ -457,6 +512,9 @@ double EICG4ZDCStructure::ConstructHCSciLayers(double Start_X, double Start_Y, d
   int infoval = ZDCID::HCSciLayer +NLayersHCALTower*10000 + fLayer*100 + ZDCID::Scintillator;
   std::pair<G4LogicalVolume*, int> pair_Scint= std::make_pair(lV_HCal_Scintillator, infoval);
   m_ActiveLogicalVolumeInfoMap.insert(pair_Scint);
+  infoval = ZDCID::HCSciLayer + NLayersHCALTower*10000 + fLayer*100 + ZDCID::Abs_Pb;
+  std::pair<G4LogicalVolume*, int> pair_Abs = std::make_pair(lV_HCal_Absorber, infoval);
+  m_AbsorberLogicalVolumeInfoMap.insert(pair_Abs);
 
   m_ActiveLogicalVolumesSet.insert(lV_HCal_Scintillator);
   m_AbsorberLogicalVolumesSet.insert(lV_HCal_Absorber);
@@ -489,7 +547,9 @@ double EICG4ZDCStructure::ConstructHCSciLayers(double Start_X, double Start_Y, d
   }
 
   fLayer += NLayersHCALTower;
-  return Start_Z+TotalThicknessCreated;
+
+  _z_HCSci[1] = Start_Z+TotalThicknessCreated;
+  return _z_HCSci[1];
 }
 
 void EICG4ZDCStructure::Materials(){
@@ -562,4 +622,215 @@ void EICG4ZDCStructure::SetColors(){
 
   return;
 
+}
+
+void EICG4ZDCStructure::PrintTowerMap(const std::string &d){
+  
+  std::ofstream map_file;
+  std::string filename = "ZDC_"+d+"_mapping.txt";
+  map_file.open(filename,std::ios::out);
+  
+  map_file<<"# ZDC_"<<d<<std::endl;
+  map_file<<"Gx0 "<<"\t"<<"-962.4"<<std::endl;
+  map_file<<"Gy0 "<<"\t"<<"0."<<std::endl;
+  map_file<<"Gz0 "<<"\t"<<"37000."<<std::endl;
+  map_file<<"Grot_x "<<"\t"<<"0."<<std::endl;
+  map_file<<"Grot_y "<<"\t"<<"-0.025"<<std::endl;
+  map_file<<"Grot_z "<<"\t"<<"0."<<std::endl;
+
+  double offsetZ=0;
+  if(d=="Crystal"){
+
+    offsetZ=0;
+
+    map_file<<"#Tower ID <-> Layer ID"<<std::endl;
+    for(int iL=0; iL<nCTowerZ; iL++)
+      map_file<<"iT_iL "<<iL<<"\t"<<2*iL+1<<std::endl;
+    
+    map_file<<"#Tower "<<"\t"<<"iLayer "<<"\t"<<"iX "<<"\t"<<"iY "<<"\t"
+	    <<"x_cnt " <<"\t"<<"y_cnt " <<"\t"<<"z_cnt "<<"\t"
+	    <<"size_x "<<"\t"<<"size_y "<<"\t"<<"size_z"<<std::endl;
+    
+    for(int iL=0; iL < nCTowerZ; iL++){
+      offsetZ += (PIX_Z + PIX_Glue2_Z + PIX_FPC_Z + PIX_AirGap);
+      double z_cnt = offsetZ + CTower_Z/2;
+
+      for(int ix = 0; ix < nCTowerX; ix++){
+	double x_cnt = (ix - nCTowerX/2) * CTower_X + CTower_X/2.;
+
+	for(int iy = 0; iy < nCTowerY; iy++){
+	  double y_cnt = (iy - nCTowerY/2) * CTower_Y + CTower_Y/2.;
+
+	  map_file<<"Tower "<<iL<<"\t"<<ix<<"\t"<<iy<<"\t"
+		  <<x_cnt<<"\t"<<y_cnt<<"\t"<<z_cnt<<"\t"
+		  <<CTower_X<<"\t"<<CTower_Y<<"\t"<<CTower_Z<<std::endl;
+	  
+	}
+      }
+      
+      offsetZ += CTower_Z;
+      offsetZ += CTower_GAP;
+    }
+  }else if (d=="SiPixel"){
+    
+    offsetZ = 0;
+    int nPixLayer = 1 + nCTowerZ + NumberPIX;
+
+    map_file<<"#Tower ID <-> Layer ID"<<std::endl;
+    for(int iL=0; iL<nPixLayer; iL++){
+      if(iL<=nCTowerZ) 
+	map_file<<"iT_iL "<<iL<<"\t"<<2*iL<<std::endl;
+      else 
+	map_file<<"iT_iL "<<iL<<"\t"
+		<<nCTowerZ*2 + (iL-nCTowerZ) * (NPadOnlyLayers + 1)<<std::endl;
+    }
+
+    map_file<<"#Tower "<<"\t"<<"iLayer "<<"\t"<<"iX "<<"\t"<<"iY "<<"\t"
+	    <<"x_cnt " <<"\t"<<"y_cnt " <<"\t"<<"z_cnt "<<"\t"
+	    <<"size_x "<<"\t"<<"size_y "<<"\t"<<"size_z"<<std::endl;
+    
+    for(int iL=0; iL < nPixLayer; iL++){
+
+      if(iL > nCTowerZ ) offsetZ += (PIX_Absorber_Z + PIX_Glue1_Z);
+
+      double z_cnt = offsetZ + PIX_Z/2;
+
+      offsetZ += (PIX_Z + PIX_Glue2_Z + PIX_FPC_Z + PIX_AirGap);
+      if(iL<nCTowerZ) 
+	offsetZ += (CTower_Z + CTower_GAP);
+      else 
+	offsetZ += (PAD_Layer_Thickness * NPadOnlyLayers);
+
+      for(int ix = 0; ix < NpixX; ix++){
+	double x_cnt = (ix - NpixX/2) * PIX_X + PIX_X/2.;
+
+	for(int iy = 0; iy < NpixY; iy++){
+	  double y_cnt = (iy - NpixY/2) * PIX_Y + PIX_Y/2.;
+
+	  map_file<<"Tower "<<iL<<"\t"<<ix<<"\t"<<iy<<"\t"
+		  <<x_cnt<<"\t"<<y_cnt<<"\t"<<z_cnt<<"\t"
+		  <<PIX_X<<"\t"<<PIX_Y<<"\t"<<PIX_Z<<std::endl;
+	  
+	}
+      }
+    }
+    
+  }else if(d=="SiPad"){
+    
+    offsetZ = _z_EMLayers[0] - _z_Crystal[0];
+    int iTower=0;
+
+    map_file<<"#Tower ID <-> Layer ID"<<std::endl;
+    for(int iB=0; iB<NumberPAD/NPadOnlyLayers; iB++){
+      for(int iL=0; iL<NPadOnlyLayers; iL++){
+	map_file<<"iT_iL "<<iTower<<"\t"
+		<<2*nCTowerZ + iB*(NPadOnlyLayers+1)+iL+1<<std::endl;
+	iTower++;
+      }
+    }
+    for(int iL=0; iL<HCALSiNumberOfLayers; iL++){
+      map_file<<"iT_iL "<<iTower<<"\t"
+	      <<2*nCTowerZ+1+NumberOfLayers+iL<<std::endl;
+      iTower++;
+    }
+
+
+    map_file<<"#Tower "<<"\t"<<"iLayer "<<"\t"<<"iX "<<"\t"<<"iY "<<"\t"
+	    <<"x_cnt " <<"\t"<<"y_cnt " <<"\t"<<"z_cnt "<<"\t"
+	    <<"size_x "<<"\t"<<"size_y "<<"\t"<<"size_z"<<std::endl;
+    
+    offsetZ += (PIX_Z + PIX_Glue2_Z + PIX_FPC_Z + PIX_AirGap);
+
+    iTower =0;
+    for(int iB=0; iB<NumberPAD/NPadOnlyLayers; iB++){
+      for(int iL=0; iL<NPadOnlyLayers; iL++){
+	
+	offsetZ += (PAD_Absorber_Z + PAD_Glue1_Z);      
+	double z_cnt = offsetZ + PAD_Z/2;
+	offsetZ += (PAD_Z + PAD_Glue2_Z + PAD_FPC_Z + PAD_AirGap);
+       
+	for(int ix = 0; ix < NpadX; ix++){
+	  double x_cnt = (ix - NpadX/2) * PAD_X + PAD_X/2.;
+
+	  for(int iy = 0; iy < NpadY; iy++){
+	    double y_cnt = (iy - NpadY/2) * PAD_Y + PAD_Y/2.;
+	    
+	    map_file<<"Tower "<<iTower<<"\t"<<ix<<"\t"<<iy<<"\t"
+		    <<x_cnt<<"\t"<<y_cnt<<"\t"<<z_cnt<<"\t"
+		    <<PAD_X<<"\t"<<PAD_Y<<"\t"<<PAD_Z<<std::endl;
+	    
+	  }
+	}	
+	iTower++;
+	
+      }
+      
+      offsetZ +=PIX_Layer_Thickness;
+    }
+
+    offsetZ = _z_HCSilicon[0] - _z_Crystal[0];
+   
+    for(int iL=0; iL<HCALSiNumberOfLayers; iL++){
+      offsetZ += (HCAL_Z_Absorber + PAD_Glue1_Z);
+      double z_cnt = offsetZ + PAD_Z/2;
+      offsetZ += (PAD_Z + PAD_Glue2_Z + PAD_FPC_Z + PAD_AirGap);
+
+      for(int ix = 0; ix < NpadX; ix++){
+	double x_cnt = (ix - NpadX/2) * PAD_X + PAD_X/2.;
+	
+	for(int iy = 0; iy < NpadY; iy++){
+	  double y_cnt = (iy - NpadY/2) * PAD_Y + PAD_Y/2.;
+	  
+	  map_file<<"Tower "<<iTower<<"\t"<<ix<<"\t"<<iy<<"\t"
+		  <<x_cnt<<"\t"<<y_cnt<<"\t"<<z_cnt<<"\t"
+		  <<PAD_X<<"\t"<<PAD_Y<<"\t"<<PAD_Z<<std::endl;
+	  
+	}
+      }	
+      iTower++;
+      
+    }
+    
+  }else if(d=="Sci"){
+
+    offsetZ = _z_HCSci[0] - _z_Crystal[0];
+
+    map_file<<"#Tower ID <-> Layer ID"<<std::endl;
+    for(int iB=0; iB<HCALNumberOfTowersZ; iB++){
+      map_file<<"iT_iL "<<iB<<"\t"
+	      <<2*nCTowerZ + 1 + NumberOfLayers + HCALSiNumberOfLayers 
+	+ iB * NLayersHCALTower<<std::endl;
+    }
+
+    map_file<<"#Tower "<<"\t"<<"iLayer "<<"\t"<<"iX "<<"\t"<<"iY "<<"\t"
+	    <<"x_cnt " <<"\t"<<"y_cnt " <<"\t"<<"z_cnt "<<"\t"
+	    <<"size_x "<<"\t"<<"size_y "<<"\t"<<"size_z"<<std::endl;
+
+    double HCTower_Z = NLayersHCALTower * HCal_Layer_Thickness;
+    std::cout<<"HC mapping: "<<offsetZ<<" "<<HCTower_Z<<std::endl;
+
+    for(int iB= 0; iB< HCALNumberOfTowersZ; iB++){
+      
+      double z_cnt = offsetZ + HCTower_Z/2.;
+      offsetZ += HCTower_Z;
+
+      for(int ix = 0; ix < HCALNumberOfTowersX; ix++){
+	double x_cnt = (ix - HCALNumberOfTowersX/2) * HCAL_X_Tower + HCAL_X_Tower/2.;
+
+	for(int iy = 0; iy < HCALNumberOfTowersY; iy++){
+	  double y_cnt = (iy - HCALNumberOfTowersY/2) * HCAL_Y_Tower + HCAL_Y_Tower/2.;
+		  
+	  map_file<<"Tower "<<iB<<"\t"<<ix<<"\t"<<iy<<"\t"
+		  <<x_cnt<<"\t"<<y_cnt<<"\t"<<z_cnt<<"\t"
+		  <<HCAL_X_Tower<<"\t"<<HCAL_Y_Tower<<"\t"<<HCTower_Z<<std::endl;
+	  
+	}
+      }	
+      
+      offsetZ += HCAL_Tower_Gap;
+    }
+  }
+    
+  map_file.close();
+  
 }

@@ -14,7 +14,9 @@ AM_LDFLAGS = \
 pkginclude_HEADERS = \
   EICG4ZDCSubsystem.h\
   EICG4ZDCNtuple.h\
-  EICG4ZDCHitTree.h
+  EICG4ZDCHitTree.h\
+  EICG4ZDCRawTowerBuilder.h
+
 
 lib_LTLIBRARIES = \
   libEICG4ZDC.la
@@ -25,13 +27,15 @@ libEICG4ZDC_la_SOURCES = \
   EICG4ZDCSteppingAction.cc\
   EICG4ZDCStructure.cc\
   EICG4ZDCNtuple.cc\
-  EICG4ZDCHitTree.cc
+  EICG4ZDCHitTree.cc\
+  EICG4ZDCRawTowerBuilder.cc
 
 libEICG4ZDC_la_LIBADD = \
   -lphool \
   -lSubsysReco\
   -lg4detectors\
-  -lg4testbench 
+  -lg4testbench\
+  -leiczdcbase
 
 BUILT_SOURCES = testexternals.cc
 

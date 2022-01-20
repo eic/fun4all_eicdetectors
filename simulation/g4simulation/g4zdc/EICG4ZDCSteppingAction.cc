@@ -18,7 +18,7 @@
 //
 //  -1/June/2021 First ZDC design (Crystal + FoCal style)   Shima Shimizu
 //               Attach Layer and channel ID to G4Hits for TTree/Ntuple production
-//
+//  -14/Dec/2021 Second ZDC design. Modifications for digitization.
 
 #include "EICG4ZDCSteppingAction.h"
 
@@ -72,6 +72,7 @@ EICG4ZDCSteppingAction::EICG4ZDCSteppingAction(EICG4ZDCDetector *detector, const
   , m_SaveHitContainer(nullptr)
   , m_SaveVolPre(nullptr)
   , m_SaveVolPost(nullptr)
+  , m_SaveShower(nullptr)   
   , m_SaveTrackId(-1)
   , m_SavePreStepStatus(-1)
   , m_SavePostStepStatus(-1)
@@ -79,6 +80,7 @@ EICG4ZDCSteppingAction::EICG4ZDCSteppingAction(EICG4ZDCDetector *detector, const
   , m_BlackHoleFlag(m_Params->get_int_param("blackhole"))
   , m_EdepSum(0)
   , m_EionSum(0)
+  , m_LightYield(0)
 {
 
 }
@@ -116,6 +118,8 @@ bool EICG4ZDCSteppingAction::UserSteppingAction(const G4Step *aStep,bool was_use
   // collect energy and track length step by step
   G4double edep = aStep->GetTotalEnergyDeposit() / GeV;
   G4double eion = (aStep->GetTotalEnergyDeposit() - aStep->GetNonIonizingEnergyDeposit()) / GeV;
+  G4double light_yield = 0;
+  if(whichactive>0) light_yield = GetVisibleEnergyDeposition(aStep);
   const G4Track *aTrack = aStep->GetTrack();
   // if this detector stops everything, just put all kinetic energy into edep
   if (m_BlackHoleFlag)
@@ -134,7 +138,8 @@ bool EICG4ZDCSteppingAction::UserSteppingAction(const G4Step *aStep,bool was_use
   /*------------------------------------------------*/
 
   int detflag = -1;
-  if(whichactive>0) detflag = m_Detector->GetVolumeInfo(volume);
+  if(whichactive>0) detflag = m_Detector->GetActiveVolumeInfo(volume);
+  else if (whichactive<0) detflag = m_Detector->GetAbsorberVolumeInfo(volume);
   int detector_id = detflag%100;  
   int detector_layer = (detflag%10000)/100;
   int detector_nlyrbox =(detflag%1000000)/10000;
@@ -168,6 +173,14 @@ bool EICG4ZDCSteppingAction::UserSteppingAction(const G4Step *aStep,bool was_use
 	int nlyr  = detector_nlyrbox;
 	layer_id = detector_layer + zid + boxid *nlyr;
       }
+    }
+  }
+
+  if(whichactive<0){
+    layer_id = detector_layer;
+    if(detector_system == ZDCID::HCSciLayer){
+      int boxid = touch->GetCopyNumber(2);
+      layer_id = detector_layer + boxid * detector_nlyrbox;
     }
   }
       
@@ -248,7 +261,9 @@ bool EICG4ZDCSteppingAction::UserSteppingAction(const G4Step *aStep,bool was_use
     {
       m_EionSum = 0;  // assuming the ionization energy is only needed for active
                       // volumes (scintillators)
-      m_Hit->set_eion(0);
+      m_LightYield = 0;
+      m_Hit->set_eion(0)
+      m_Hit->set_light_yield(0);;
       m_SaveHitContainer = m_HitContainer;
     }
     else
@@ -263,7 +278,8 @@ bool EICG4ZDCSteppingAction::UserSteppingAction(const G4Step *aStep,bool was_use
       if (PHG4TrackUserInfoV1 *pp = dynamic_cast<PHG4TrackUserInfoV1 *>(p))
       {
         m_Hit->set_trkid(pp->GetUserTrackId());
-        pp->GetShower()->add_g4hit_id(m_SaveHitContainer->GetID(), m_Hit->get_hit_id());
+	m_Hit->set_shower_id(pp->GetShower()->get_id());
+	m_SaveShower=pp->GetShower();
       }
     }
     break;
@@ -318,6 +334,7 @@ bool EICG4ZDCSteppingAction::UserSteppingAction(const G4Step *aStep,bool was_use
   m_EdepSum += edep;
   if (whichactive > 0) {
     m_EionSum += eion;
+    m_LightYield += light_yield;
   }
 
   // if any of these conditions is true this is the last step in
@@ -354,6 +371,7 @@ bool EICG4ZDCSteppingAction::UserSteppingAction(const G4Step *aStep,bool was_use
                               // geantinos survive the g4hit compression
         if (whichactive > 0){
           m_Hit->set_eion(-1);
+	  m_Hit->set_light_yield(-1);
         }
       } else {
 	  m_Hit->set_edep(m_EdepSum);
@@ -365,9 +383,14 @@ bool EICG4ZDCSteppingAction::UserSteppingAction(const G4Step *aStep,bool was_use
       m_Hit->set_index_j(yid);
       m_Hit->set_hit_type(detector_id);
       m_Hit->set_eion(m_EionSum);
-     
+      m_Hit->set_light_yield(m_LightYield);
       
       m_SaveHitContainer->AddHit(detector_id, m_Hit);
+      if (m_SaveShower)
+      {
+	m_SaveShower->add_g4hit_id(m_SaveHitContainer->GetID(), m_Hit->get_hit_id());
+      }
+
       // ownership has been transferred to container, set to null
       // so we will create a new hit for the next track
       m_Hit = nullptr;

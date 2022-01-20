@@ -7,6 +7,7 @@ namespace ZDCID{
   const int SI_PAD    = 3;
   const int Scintillator  = 4;
 
+  const int Materials    = 7;
   const int Abs_Tungsten = 8;
   const int Abs_Pb       = 9;
 

@@ -33,7 +33,8 @@ class EICG4ZDCDetector : public PHG4Detector
   //@{
   int IsInDetector(G4VPhysicalVolume *) const;
   //@}
-  int GetVolumeInfo(G4VPhysicalVolume *volume);
+  int GetActiveVolumeInfo(G4VPhysicalVolume *volume);
+  int GetAbsorberVolumeInfo(G4VPhysicalVolume *volume);
 
   void SuperDetector(const std::string &name) { m_SuperDetector = name; }
   const std::string SuperDetector() const { return m_SuperDetector; }
@@ -45,8 +46,9 @@ class EICG4ZDCDetector : public PHG4Detector
   std::set<G4LogicalVolume *> m_AbsorberLogicalVolumesSet;
 
   // active volumes
-  std::set<G4VPhysicalVolume *> m_PhysicalVolumesSet;
+  //  std::set<G4VPhysicalVolume *> m_PhysicalVolumesSet;
   std::map<G4LogicalVolume*, int> m_ActiveLogicalVolumeInfoMap;
+  std::map<G4LogicalVolume*, int> m_AbsorberLogicalVolumeInfoMap;
 
   std::string m_SuperDetector;
 };
