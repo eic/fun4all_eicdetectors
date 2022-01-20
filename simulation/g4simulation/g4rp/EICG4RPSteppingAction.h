@@ -39,6 +39,7 @@ class EICG4RPSteppingAction : public PHG4SteppingAction
   virtual void SaveAllHits(bool i = true) { m_SaveAllHitsFlag = i; }
 
   virtual void HitNodeName(const std::string& name) { m_HitNodeName = name; }
+  virtual void HitNodeNameVirt(const std::string& name) { m_HitNodeNameVirt = name; }
 
  private:
   //! pointer to the detector
@@ -48,6 +49,7 @@ class EICG4RPSteppingAction : public PHG4SteppingAction
   const PHParameters* m_Params;
   //! pointer to hit container
   PHG4HitContainer* m_HitContainer;
+  PHG4HitContainer* m_HitContainerVirt;
   PHG4Hit* m_Hit;
   PHG4Shower* m_SaveShower;
   G4VPhysicalVolume* m_SaveVolPre;
@@ -69,6 +71,7 @@ class EICG4RPSteppingAction : public PHG4SteppingAction
   double m_EabsSum;
   double m_EionSum;
   std::string m_HitNodeName;
+  std::string m_HitNodeNameVirt;
 };
 
 #endif  // EICG4RPSTEPPINGACTION_H
