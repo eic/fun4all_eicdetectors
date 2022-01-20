@@ -262,7 +262,7 @@ bool EICG4ZDCSteppingAction::UserSteppingAction(const G4Step *aStep,bool was_use
       m_EionSum = 0;  // assuming the ionization energy is only needed for active
                       // volumes (scintillators)
       m_LightYield = 0;
-      m_Hit->set_eion(0)
+      m_Hit->set_eion(0);
       m_Hit->set_light_yield(0);;
       m_SaveHitContainer = m_HitContainer;
     }
