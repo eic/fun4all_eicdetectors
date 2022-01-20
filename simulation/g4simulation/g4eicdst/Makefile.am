@@ -11,6 +11,7 @@ libg4eicdst_la_LDFLAGS = \
   -L$(libdir) \
   -L$(OFFLINE_MAIN)/lib \
   -lg4dst \
+  -leiczdcbase \
   -leicpidbase
 
 libg4eicdst_la_SOURCES = \
