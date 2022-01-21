@@ -70,7 +70,7 @@ void  AllSi_Al_support_Detector::addDetectorSection( G4LogicalVolume *logicWorld
 		rout [i] *= 10.;
 	}
 
-	G4Material * G4_mat = G4Material::GetMaterial("G4_Al");
+	G4Material * G4_mat = GetDetectorMaterial("G4_Al");
 
 	G4RotationMatrix *rotm = new G4RotationMatrix();
 	rotm->rotateX(0);
