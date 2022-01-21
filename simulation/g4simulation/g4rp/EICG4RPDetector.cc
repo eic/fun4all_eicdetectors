@@ -185,7 +185,7 @@ void EICG4RPDetector::ConstructMe(G4LogicalVolume *logicWorld)
 	G4SubtractionSolid *solidRP = new G4SubtractionSolid( "EICG4RPSolid", FullPlate, polygonCutOut);
 	
 	G4LogicalVolume *logicalRP = new G4LogicalVolume( solidRP,
-				G4Material::GetMaterial( "G4_Si" ), "EICG4RPLogical");
+				GetDetectorMaterial( "G4_Si" ), "EICG4RPLogical");
 
 	G4VisAttributes *vis = new G4VisAttributes( G4Color(1.0, 1.0, 0.0, 1.0) );
 	vis->SetForceSolid(true);
@@ -215,7 +215,7 @@ void EICG4RPDetector::ConstructMe(G4LogicalVolume *logicWorld)
 	G4ExtrudedSolid *polygonCutOutCu = new G4ExtrudedSolid("ExtrudedCu", polygon, zsectionsCu);
 	G4SubtractionSolid *solidCu = new G4SubtractionSolid( "EICG4RPCuSolid", CuPlate, polygonCutOutCu);
 	G4LogicalVolume *logicalCu = new G4LogicalVolume( solidCu,
-				G4Material::GetMaterial( "G4_Cu" ), "EICG4RPCuLogical");
+				GetDetectorMaterial( "G4_Cu" ), "EICG4RPCuLogical");
 
 	G4VisAttributes *visCu = new G4VisAttributes( G4Color(1.0, 0.0, 1.0, 0.5) );
 	visCu->SetForceSolid(true);
@@ -235,7 +235,7 @@ void EICG4RPDetector::ConstructMe(G4LogicalVolume *logicWorld)
 	// Virtual plane with no beam hole. In front of active layer
 	G4Box *VirtPlate = new G4Box("VirtPlate",overallSize_X/2., overallSize_Y/2., virtPlaneDepth/2.);
 	G4LogicalVolume *logicalVirt = new G4LogicalVolume( VirtPlate,
-				G4Material::GetMaterial( "G4_Galactic" ), "EICG4RPVirtualLogical");
+				GetDetectorMaterial( "G4_Galactic" ), "EICG4RPVirtualLogical");
 
 	G4VisAttributes *visVirt = new G4VisAttributes( G4Color(1.0, 1.0, 1.0, 0.0) );
 	visVirt->SetForceSolid(true);
