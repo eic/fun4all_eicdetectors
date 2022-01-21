@@ -150,7 +150,7 @@ PHG4mRICHDetector::BoxPar::BoxPar()
 {
   std::fill(std::begin(halfXYZ), std::end(halfXYZ), (G4double) 0 * mm);
   pos = G4ThreeVector(0 * mm, 0 * mm, 0 * mm);
-  material = G4Material::GetMaterial("G4_AIR");
+  material = GetDetectorMaterial("G4_AIR");
   sensitivity = 0;
 
   color = G4Colour(0, 0, 0, 0);
@@ -168,7 +168,7 @@ PHG4mRICHDetector::PolyPar::PolyPar()
   , theta(0.)
   , numSide(0)
   , num_zLayer(0)
-  , material(G4Material::GetMaterial("G4_AIR"))
+  , material(GetDetectorMaterial("G4_AIR"))
   , sensitivity(0)
   , color(G4Colour(0, 0, 0, 0))
   , visibility(false)
@@ -189,7 +189,7 @@ PHG4mRICHDetector::LensPar::LensPar()
   , centerThickness(0.)
   , grooveWidth(0.)
   , pos(G4ThreeVector(0 * mm, 0 * mm, 0 * mm))
-  , material(G4Material::GetMaterial("G4_AIR"))
+  , material(GetDetectorMaterial("G4_AIR"))
   , sensitivity(0.)
   , color(G4Colour(0, 0, 0, 0))
   , visibility(false)
@@ -370,9 +370,9 @@ PHG4mRICHDetector::mRichParameter::mRichParameter()
   holderBox->name = "mRICH_module";
   for (i = 0; i < 3; i++) holderBox->halfXYZ[i] = acrylicBox_halfXYZ[i];
   holderBox->pos = G4ThreeVector(0 * cm, 0 * cm, 0 * cm);
-  //holderBox->material=G4Material::GetMaterial("G4_Al");
-  //holderBox->material=G4Material::GetMaterial("CFRP_INTTxxxxx"); // carbon fiber
-  holderBox->material = G4Material::GetMaterial("CFRP_INTT");  // carbon fiber
+  //holderBox->material=GetDetectorMaterial("G4_Al");
+  //holderBox->material=GetDetectorMaterial("CFRP_INTTxxxxx"); // carbon fiber
+  holderBox->material = GetDetectorMaterial("CFRP_INTT");  // carbon fiber
   holderBox->sensitivity = 0;
 
   holderBox->color = G4Colour(0.0, 0.0, 0.0);
@@ -386,7 +386,7 @@ PHG4mRICHDetector::mRichParameter::mRichParameter()
   hollowVolume->name = "HollowVolume";
   for (i = 0; i < 3; i++) hollowVolume->halfXYZ[i] = hollow_halfXYZ[i];
   hollowVolume->pos = hollow_pos;
-  hollowVolume->material = G4Material::GetMaterial("mRICH_Air_Opt");
+  hollowVolume->material = GetDetectorMaterial("mRICH_Air_Opt");
 
   hollowVolume->sensitivity = 0;
 
@@ -401,7 +401,7 @@ PHG4mRICHDetector::mRichParameter::mRichParameter()
   foamHolderBox->name = "FoamHolder";
   for (i = 0; i < 3; i++) foamHolderBox->halfXYZ[i] = foamHolder_halfXYZ[i];
   foamHolderBox->pos = G4ThreeVector(0.0 * cm, 0.0 * cm, foamHolder_posz);
-  foamHolderBox->material = G4Material::GetMaterial("mRICH_Air_Opt");
+  foamHolderBox->material = GetDetectorMaterial("mRICH_Air_Opt");
   foamHolderBox->sensitivity = 0;
 
   foamHolderBox->color = G4Colour(0.2, 0.498, 0.369);
@@ -428,7 +428,7 @@ PHG4mRICHDetector::mRichParameter::mRichParameter()
   foamHolderPoly->router[0] = foamHolderPoly->rinner[0] + foamHolderThicknessXYZ[0];
   foamHolderPoly->router[1] = foamHolderPoly->rinner[1] + foamHolderThicknessXYZ[0];
 
-  foamHolderPoly->material = G4Material::GetMaterial("mRICH_Air_Opt");
+  foamHolderPoly->material = GetDetectorMaterial("mRICH_Air_Opt");
   foamHolderPoly->sensitivity = 0;
 
   foamHolderPoly->color = G4Colour(0.298, 0.6, 0.471);
@@ -443,7 +443,7 @@ PHG4mRICHDetector::mRichParameter::mRichParameter()
   aerogel->name = "Aerogel";
   for (i = 0; i < 3; i++) aerogel->halfXYZ[i] = agel_halfXYZ[i];
   aerogel->pos = G4ThreeVector(0, 0, agel_posz);
-  aerogel->material = G4Material::GetMaterial("mRICH_Aerogel2");
+  aerogel->material = GetDetectorMaterial("mRICH_Aerogel2");
   aerogel->sensitivity = 0;
   aerogel->color = G4Colour(1.0, 0.65, 0.0);
   aerogel->visibility = true;
@@ -458,7 +458,7 @@ PHG4mRICHDetector::mRichParameter::mRichParameter()
   //----------
   fresnelLens->name = "FresnelLens";
   fresnelLens->pos = G4ThreeVector(0, 0, lens_z);
-  fresnelLens->material = G4Material::GetMaterial("mRICH_Acrylic");
+  fresnelLens->material = GetDetectorMaterial("mRICH_Acrylic");
   fresnelLens->sensitivity = 0;
   fresnelLens->color = G4Colour(0.0, 1.0, 1.0);
   fresnelLens->visibility = true;
@@ -484,7 +484,7 @@ PHG4mRICHDetector::mRichParameter::mRichParameter()
   mirror->router[0] = mirror->rinner[0] + mirrorThickness;
   mirror->router[1] = mirror->rinner[1] + mirrorThickness;
 
-  mirror->material = G4Material::GetMaterial("G4_Al");
+  mirror->material = GetDetectorMaterial("G4_Al");
   mirror->sensitivity = 0;
 
   mirror->color = G4Colour(1.0, 1.0, 0.0);
@@ -499,7 +499,7 @@ PHG4mRICHDetector::mRichParameter::mRichParameter()
   glassWindow->pos = G4ThreeVector(glassWindow_halfXYZ[0] + sensorGap,  //the position of the first sensor module.
                                    glassWindow_halfXYZ[0] + sensorGap,  //the position of other sensor module will
                                    glassWindow_z);                      //be set glass window position in another func.
-  glassWindow->material = G4Material::GetMaterial("mRICH_Borosilicate");
+  glassWindow->material = GetDetectorMaterial("mRICH_Borosilicate");
   glassWindow->sensitivity = 0;
 
   glassWindow->color = G4Colour(0.101, 0.737, 0.612);
@@ -513,7 +513,7 @@ PHG4mRICHDetector::mRichParameter::mRichParameter()
   sensor->name = "sensor";
   for (i = 0; i < 3; i++) sensor->halfXYZ[i] = phodet_halfXYZ[i];
   sensor->pos = G4ThreeVector(0, 0, phodet_z);  //temporary. will be set in another func.
-  sensor->material = G4Material::GetMaterial("mRICH_Air_Opt");
+  sensor->material = GetDetectorMaterial("mRICH_Air_Opt");
   sensor->sensitivity = 0;
 
   sensor->color = G4Colour(0.0, 0.0, 0.63);
@@ -540,7 +540,7 @@ PHG4mRICHDetector::mRichParameter::mRichParameter()
   readout->router[0] = readout->rinner[0] + readoutThickness;
   readout->router[1] = readout->router[0];
 
-  readout->material = G4Material::GetMaterial("G4_Al");
+  readout->material = GetDetectorMaterial("G4_Al");
   readout->sensitivity = 0;
 
   readout->color = G4Colour(1.0, 0.0, 0.0);

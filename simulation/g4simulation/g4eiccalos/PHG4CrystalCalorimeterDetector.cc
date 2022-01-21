@@ -88,7 +88,7 @@ void PHG4CrystalCalorimeterDetector::ConstructMe(G4LogicalVolume* logicWorld)
 
   /* Create the cone envelope = 'world volume' for the crystal calorimeter */
   recoConsts* rc = recoConsts::instance();
-  G4Material* WorldMaterial = G4Material::GetMaterial(rc->get_StringFlag("WorldMaterial"));
+  G4Material* WorldMaterial = GetDetectorMaterial(rc->get_StringFlag("WorldMaterial"));
 
   G4VSolid* eemc_envelope_solid = new G4Cons("eemc_envelope_solid",
                                              m_Params->get_double_param("rMin1") * cm, m_Params->get_double_param("rMax1") * cm,
@@ -141,7 +141,7 @@ PHG4CrystalCalorimeterDetector::ConstructTower()
 
   /* create logical volume for single tower */
   recoConsts* rc = recoConsts::instance();
-  G4Material* WorldMaterial = G4Material::GetMaterial(rc->get_StringFlag("WorldMaterial"));
+  G4Material* WorldMaterial = GetDetectorMaterial(rc->get_StringFlag("WorldMaterial"));
 
   G4VSolid* single_tower_solid = new G4Box(G4String("single_tower_solid"),
                                            tower_dx / 2.0,
@@ -180,7 +180,7 @@ PHG4CrystalCalorimeterDetector::ConstructTower()
                                                                   G4ThreeVector(0.00 * mm, 0.00 * mm, 0.00 * mm));
 
   /* create logical volumes for crystal inside single_tower */
-  G4Material* material_crystal = G4Material::GetMaterial(m_Params->get_string_param("material"));
+  G4Material* material_crystal = GetDetectorMaterial(m_Params->get_string_param("material"));
 
   G4LogicalVolume* logic_crystal = new G4LogicalVolume(solid_crystal,
                                                        material_crystal,
@@ -430,7 +430,7 @@ int PHG4CrystalCalorimeterDetector::ParseParametersFromTable()
 G4Material* PHG4CrystalCalorimeterDetector::GetCarbonFiber()
 {
   static string matname = "CrystalCarbonFiber";
-  G4Material* carbonfiber = G4Material::GetMaterial(matname, false);  // false suppresses warning that material does not exist
+  G4Material* carbonfiber = GetDetectorMaterial(matname, false);  // false suppresses warning that material does not exist
   if (!carbonfiber)
   {
     G4double density_carbon_fiber = 1.44 * g / cm3;

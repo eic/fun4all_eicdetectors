@@ -150,7 +150,7 @@ void EICG4B0ECALDetector::ConstructMe(G4LogicalVolume *logicWorld)
   /* Read parameters for detector construction and mappign from file */
   ParseParametersFromTable();
   recoConsts *rc = recoConsts::instance();
-  G4Material *WorldMaterial = G4Material::GetMaterial(rc->get_StringFlag("WorldMaterial"));
+  G4Material *WorldMaterial = GetDetectorMaterial(rc->get_StringFlag("WorldMaterial"));
   G4LogicalVolume *b0_ecal_log = new G4LogicalVolume(solidB0,
                                                      WorldMaterial,
                                                      "B0ECAL_envelope",
@@ -195,7 +195,7 @@ G4LogicalVolume *EICG4B0ECALDetector::ConstructTower()
   }
 
   /* create logical volume for single tower */
-  G4Material *EcalMaterial = G4Material::GetMaterial(m_Params->get_string_param("material"));
+  G4Material *EcalMaterial = GetDetectorMaterial(m_Params->get_string_param("material"));
   double TowerDx = m_Params->get_double_param("tower_size") * cm;
   double TowerDy = m_Params->get_double_param("tower_size") * cm;
   double TowerDz = m_Params->get_double_param("length") * cm;

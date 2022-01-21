@@ -100,7 +100,7 @@ void PHG4LFHcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
 
   /* Create the cone envelope = 'world volume' for the crystal calorimeter */
   recoConsts* rc = recoConsts::instance();
-  G4Material* WorldMaterial = G4Material::GetMaterial(rc->get_StringFlag("WorldMaterial"));
+  G4Material* WorldMaterial = GetDetectorMaterial(rc->get_StringFlag("WorldMaterial"));
 
   G4VSolid* beampipe_cutout = new G4Cons("LFHCAL_beampipe_cutout",
                                          0, m_Params->get_double_param("rMin1") * cm,
@@ -165,10 +165,10 @@ PHG4LFHcalDetector::ConstructTower()
   G4double thickness_absorber = m_Params->get_double_param("thickness_absorber") * cm;
   G4double thickness_scintillator = m_Params->get_double_param("thickness_scintillator") * cm;
   G4int nlayers = TowerDz / (thickness_absorber + thickness_scintillator);
-  G4Material* material_scintillator = GetScintillatorMaterial();  //G4Material::GetMaterial(m_Params->get_string_param("scintillator"));
-  G4Material* material_absorber = G4Material::GetMaterial(m_Params->get_string_param("absorber"));
-  G4Material* material_absorber_W = G4Material::GetMaterial(m_Params->get_string_param("absorber_W"));
-  G4Material* material_wls = GetWLSFiberMaterial();  //G4Material::GetMaterial(m_Params->get_string_param("scintillator"));
+  G4Material* material_scintillator = GetScintillatorMaterial();  //GetDetectorMaterial(m_Params->get_string_param("scintillator"));
+  G4Material* material_absorber = GetDetectorMaterial(m_Params->get_string_param("absorber"));
+  G4Material* material_absorber_W = GetDetectorMaterial(m_Params->get_string_param("absorber_W"));
+  G4Material* material_wls = GetWLSFiberMaterial();  //GetDetectorMaterial(m_Params->get_string_param("scintillator"));
   int embed_fiber = m_Params->get_int_param("embed_fiber");
   G4double fiber_thickness = 0.2 * mm;
   // G4double fiber_thickness        = 1.0*mm;
@@ -176,7 +176,7 @@ PHG4LFHcalDetector::ConstructTower()
   /* create logical volume for single tower */
   //**********************************************************************************************
   recoConsts* rc = recoConsts::instance();
-  G4Material* WorldMaterial = G4Material::GetMaterial(rc->get_StringFlag("WorldMaterial"));
+  G4Material* WorldMaterial = GetDetectorMaterial(rc->get_StringFlag("WorldMaterial"));
   G4VSolid* single_tower_solid = new G4Box("single_tower_solid",
                                            TowerDx / 2.0,
                                            TowerDy / 2.0,
@@ -398,7 +398,7 @@ PHG4LFHcalDetector::ConstructTower()
   //**********************************************************************************************
   if (thin_frame_width > 0)
   {
-    G4Material* material_frame = G4Material::GetMaterial("G4_Fe");
+    G4Material* material_frame = GetDetectorMaterial("G4_Fe");
 
     G4VSolid* solid_frame_plate = new G4Box("single_plate_frame",
                                             (thin_frame_width) / 2, (TowerDy - 2 * thick_frame_width) / 2, TowerDz / 2);
@@ -579,7 +579,7 @@ PHG4LFHcalDetector::ConstructTower()
                                                  (SteelTowerLength + WTowerLength - ilay * (thickness_absorber + thickness_scintillator) - thickness_absorber - thickness_scintillator / 2 - thickness_absorber / 2) / 2.0);
 
           G4LogicalVolume* logic_spacer_tmp = new G4LogicalVolume(solid_spacer_tmp,
-                                                                  G4Material::GetMaterial("CFRP_INTT"),  // carbon fiber + epoxy
+                                                                  GetDetectorMaterial("CFRP_INTT"),  // carbon fiber + epoxy
                                                                   "logic_spacer_tmp" + std::to_string(ilay),
                                                                   0, 0, 0);
           new G4PVPlacement(0, G4ThreeVector((TowerDx - WlsDw / 2) / 2.0 - thin_frame_width, TowerDy / 2 - thick_frame_width - fiber_thickness - (ilay + 0.5) * (1.01 * fiber_thickness) - extraspacing - add_spacing / 2, (ilay * (thickness_absorber + thickness_scintillator) + thickness_absorber + thickness_scintillator / 2 + thickness_absorber / 2) / 2.0),
@@ -631,8 +631,8 @@ G4Material* PHG4LFHcalDetector::GetScintillatorMaterial()
   G4double density;
   G4int ncomponents;
   G4Material* material_ScintFEMC = new G4Material("PolystyreneFEMC", density = 1.03 * g / cm3, ncomponents = 2);
-  material_ScintFEMC->AddElement(G4Element::GetElement("C"), 8);
-  material_ScintFEMC->AddElement(G4Element::GetElement("H"), 8);
+  material_ScintFEMC->AddElement(GetDetectorElement("C"), 8);
+  material_ScintFEMC->AddElement(GetDetectorElement("H"), 8);
 
   if (m_doLightProp)
   {
@@ -704,8 +704,8 @@ G4Material* PHG4LFHcalDetector::GetCoatingMaterial()
   G4double density, fractionmass;
   G4int ncomponents;
   G4Material* material_TiO2 = new G4Material("TiO2_FEMC", density = 1.52 * g / cm3, ncomponents = 2);
-  material_TiO2->AddElement(G4Element::GetElement("Ti"), 1);
-  material_TiO2->AddElement(G4Element::GetElement("O"), 2);
+  material_TiO2->AddElement(GetDetectorElement("Ti"), 1);
+  material_TiO2->AddElement(GetDetectorElement("O"), 2);
 
   //--------------------------------------------------
   // Scintillator Coating - 15% TiO2 and 85% polystyrene by weight.
@@ -713,7 +713,7 @@ G4Material* PHG4LFHcalDetector::GetCoatingMaterial()
   //Coating_FEMC (Glass + Epoxy)
   density = 1.86 * g / cm3;
   G4Material* Coating_FEMC = new G4Material("Coating_FEMC", density, ncomponents = 2);
-  Coating_FEMC->AddMaterial(G4Material::GetMaterial("Epoxy"), fractionmass = 0.80);
+  Coating_FEMC->AddMaterial(GetDetectorMaterial("Epoxy"), fractionmass = 0.80);
   Coating_FEMC->AddMaterial(material_TiO2, fractionmass = 0.20);
 
   return Coating_FEMC;
@@ -756,9 +756,9 @@ G4Material* PHG4LFHcalDetector::GetWLSFiberMaterial()
   G4int ncomponents;
 
   G4Material* material_WLSFiberFEMC = new G4Material("WLSFiberFEMC", density = 1.18 * g / cm3, ncomponents = 3);
-  material_WLSFiberFEMC->AddElement(G4Element::GetElement("C"), 5);
-  material_WLSFiberFEMC->AddElement(G4Element::GetElement("H"), 8);
-  material_WLSFiberFEMC->AddElement(G4Element::GetElement("O"), 2);
+  material_WLSFiberFEMC->AddElement(GetDetectorElement("C"), 5);
+  material_WLSFiberFEMC->AddElement(GetDetectorElement("H"), 8);
+  material_WLSFiberFEMC->AddElement(GetDetectorElement("O"), 2);
   if (m_doLightProp)
   {
     const G4int nEntries = 50;

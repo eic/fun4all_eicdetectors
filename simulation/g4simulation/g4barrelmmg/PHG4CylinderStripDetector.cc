@@ -90,7 +90,7 @@ bool PHG4CylinderStripDetector::IsInTileZ(G4VPhysicalVolume *volume) const
 void PHG4CylinderStripDetector::ConstructMe(G4LogicalVolume *logicWorld)
 {
   BuildMaterials();
-  G4Material *TrackerMaterial = G4Material::GetMaterial(m_Params->get_string_param("gas"));
+  G4Material *TrackerMaterial = GetDetectorMaterial(m_Params->get_string_param("gas"));
 
   if (!TrackerMaterial)
   {
@@ -149,18 +149,18 @@ void PHG4CylinderStripDetector::ConstructMe(G4LogicalVolume *logicWorld)
 
   // media
   map<int, G4Material *> media;
-  media[coverlay] = G4Material::GetMaterial("myKapton");
-  media[CuGround] = G4Material::GetMaterial("myCopper");
-  media[PCB] = G4Material::GetMaterial("myFR4");
-  media[CuStrips] = G4Material::GetMaterial("myMMStrips");
-  media[KaptonStrips] = G4Material::GetMaterial("myKapton");
-  media[ResistiveStrips] = G4Material::GetMaterial("myMMResistivePaste");
+  media[coverlay] = GetDetectorMaterial("myKapton");
+  media[CuGround] = GetDetectorMaterial("myCopper");
+  media[PCB] = GetDetectorMaterial("myFR4");
+  media[CuStrips] = GetDetectorMaterial("myMMStrips");
+  media[KaptonStrips] = GetDetectorMaterial("myKapton");
+  media[ResistiveStrips] = GetDetectorMaterial("myMMResistivePaste");
   media[Gas1] = TrackerMaterial;
-  media[Mesh] = G4Material::GetMaterial("myMMMesh");
+  media[Mesh] = GetDetectorMaterial("myMMMesh");
   media[Gas2] = TrackerMaterial;
-  media[DriftCuElectrode] = G4Material::GetMaterial("myCopper");
-  media[DriftKapton] = G4Material::GetMaterial("myKapton");
-  media[DriftCuGround] = G4Material::GetMaterial("myCopper");
+  media[DriftCuElectrode] = GetDetectorMaterial("myCopper");
+  media[DriftKapton] = GetDetectorMaterial("myKapton");
+  media[DriftCuGround] = GetDetectorMaterial("myCopper");
 
   // color
   map<int, G4Colour> color;
@@ -205,11 +205,11 @@ void PHG4CylinderStripDetector::ConstructMe(G4LogicalVolume *logicWorld)
 
   // media
   map<int, G4Material *> media_meca;
-  media_meca[Cu1_meca] = G4Material::GetMaterial("myCopper");
-  media_meca[FR4_1_meca] = G4Material::GetMaterial("myFR4");
-  media_meca[Cu2_meca] = G4Material::GetMaterial("myCopper");
-  media_meca[FR4_2_meca] = G4Material::GetMaterial("myFR4");
-  media_meca[Cu3_meca] = G4Material::GetMaterial("myCopper");
+  media_meca[Cu1_meca] = GetDetectorMaterial("myCopper");
+  media_meca[FR4_1_meca] = GetDetectorMaterial("myFR4");
+  media_meca[Cu2_meca] = GetDetectorMaterial("myCopper");
+  media_meca[FR4_2_meca] = GetDetectorMaterial("myFR4");
+  media_meca[Cu3_meca] = GetDetectorMaterial("myCopper");
 
   // color
   map<int, G4Colour> color_meca;
@@ -261,7 +261,7 @@ void PHG4CylinderStripDetector::ConstructMe(G4LogicalVolume *logicWorld)
                                         radius + thickness * nCZlayer + gap + 0.001 * mm + spaceforhollowbar / 2,
                                         m_Params->get_double_param("length") * cm / 2. + barwidth + 2 * mm, 0, twopi);
   G4LogicalVolume *cylinder_logic = new G4LogicalVolume(cylinder_solid,
-                                                        G4Material::GetMaterial("myAir"),
+                                                        GetDetectorMaterial("myAir"),
                                                         G4String(GetName()));
   G4VisAttributes *vis = new G4VisAttributes(G4Color(G4Colour::Grey()));  // grey is good to see the tracks in the display
   vis->SetForceSolid(false);
@@ -303,7 +303,7 @@ void PHG4CylinderStripDetector::ConstructMe(G4LogicalVolume *logicWorld)
                                 radius + thickness * nCZlayer + gap + 0.001 * mm + spaceforhollowbar / 2,
                                 m_Params->get_double_param("length") * cm / 2. + barwidth + 2 * mm, 0, 360. / Ntiles * deg - 0.01 * deg);
   G4LogicalVolume *tile_o_logic = new G4LogicalVolume(tile_o,
-                                                      G4Material::GetMaterial("myAir"),
+                                                      GetDetectorMaterial("myAir"),
                                                       G4String(GetName()) + "_tile_logic");
   tile_o_logic->SetVisAttributes(vis);
 
@@ -338,7 +338,7 @@ void PHG4CylinderStripDetector::ConstructMe(G4LogicalVolume *logicWorld)
   u1 = new G4UnionSolid("MM+bar1+bar2+arch1+arch2+meca", u1, mecaPCB_solid);
   // logic volume filled with carbon fiber
   G4LogicalVolume *u1_C_logic = new G4LogicalVolume(u1,
-                                                    G4Material::GetMaterial("myCfiber"),
+                                                    GetDetectorMaterial("myCfiber"),
                                                     "u1_C_logic");
 
   vis = new G4VisAttributes(G4Color(G4Colour::Grey()));  // grey is good to see the tracks in the display
@@ -469,7 +469,7 @@ void PHG4CylinderStripDetector::ConstructMe(G4LogicalVolume *logicWorld)
     RM_meca = Rm_meca;
     // logic volume filled with carbon fiber
     G4LogicalVolume *u1_Z_logic = new G4LogicalVolume(u1,
-                                                      G4Material::GetMaterial("myCfiber"),
+                                                      GetDetectorMaterial("myCfiber"),
                                                       "u1_Z_logic");
     vis = new G4VisAttributes(G4Color(G4Colour::Grey()));  // grey is good to see the tracks in the display
     vis->SetForceSolid(false);
@@ -606,17 +606,17 @@ void PHG4CylinderStripDetector::BuildMaterials()
 
   // get the list of NIST materials
   // ---------------------------------
-  G4Material *G4_N = G4Material::GetMaterial("G4_N");
-  G4Material *G4_O = G4Material::GetMaterial("G4_O");
-  G4Material *G4_C = G4Material::GetMaterial("G4_C");
-  G4Material *G4_H = G4Material::GetMaterial("G4_H");
-  G4Material *G4_Si = G4Material::GetMaterial("G4_Si");
-  G4Material *G4_Ar = G4Material::GetMaterial("G4_Ar");
-  G4Material *G4_Cr = G4Material::GetMaterial("G4_Cr");
-  G4Material *G4_Fe = G4Material::GetMaterial("G4_Fe");
-  G4Material *G4_Mn = G4Material::GetMaterial("G4_Mn");
-  G4Material *G4_Ni = G4Material::GetMaterial("G4_Ni");
-  G4Material *G4_Cu = G4Material::GetMaterial("G4_Cu");
+  G4Material *G4_N = GetDetectorMaterial("G4_N");
+  G4Material *G4_O = GetDetectorMaterial("G4_O");
+  G4Material *G4_C = GetDetectorMaterial("G4_C");
+  G4Material *G4_H = GetDetectorMaterial("G4_H");
+  G4Material *G4_Si = GetDetectorMaterial("G4_Si");
+  G4Material *G4_Ar = GetDetectorMaterial("G4_Ar");
+  G4Material *G4_Cr = GetDetectorMaterial("G4_Cr");
+  G4Material *G4_Fe = GetDetectorMaterial("G4_Fe");
+  G4Material *G4_Mn = GetDetectorMaterial("G4_Mn");
+  G4Material *G4_Ni = GetDetectorMaterial("G4_Ni");
+  G4Material *G4_Cu = GetDetectorMaterial("G4_Cu");
 
   // combine elements
   // ----------------
@@ -626,7 +626,7 @@ void PHG4CylinderStripDetector::BuildMaterials()
   G4double pressure = 1. * atmosphere;
 
   // air
-  if (!G4Material::GetMaterial("myAir", false))
+  if (!GetDetectorMaterial("myAir", false))
   {
     G4Material *myAir = new G4Material("myAir", 0.001205 * g / cm3, ncomponents = 2, kStateGas, temperature, pressure);
     myAir->AddMaterial(G4_N, fraction = 0.77);
@@ -634,7 +634,7 @@ void PHG4CylinderStripDetector::BuildMaterials()
   }
 
   // FR4
-  if (!G4Material::GetMaterial("myFR4", false))
+  if (!GetDetectorMaterial("myFR4", false))
   {
     G4Material *myFR4 = new G4Material("myFR4", 1.860 * g / cm3, ncomponents = 4, kStateSolid);
     myFR4->AddMaterial(G4_C, fraction = 0.43550);
@@ -644,7 +644,7 @@ void PHG4CylinderStripDetector::BuildMaterials()
   }
 
   // Kapton
-  if (!G4Material::GetMaterial("myKapton", false))
+  if (!GetDetectorMaterial("myKapton", false))
   {
     G4Material *myKapton = new G4Material("myKapton", 1.420 * g / cm3, ncomponents = 4, kStateSolid);
     myKapton->AddMaterial(G4_C, 0.6911330);
@@ -654,7 +654,7 @@ void PHG4CylinderStripDetector::BuildMaterials()
   }
 
   // MMgas
-  if (!G4Material::GetMaterial("myMMGas", false))
+  if (!GetDetectorMaterial("myMMGas", false))
   {
     G4Material *myMMGas = new G4Material("myMMGas", 0.00170335 * g / cm3, ncomponents = 3, kStateGas, temperature, pressure);
     myMMGas->AddMaterial(G4_Ar, 0.900);
@@ -663,7 +663,7 @@ void PHG4CylinderStripDetector::BuildMaterials()
   }
 
   // MMMesh
-  if (!G4Material::GetMaterial("myMMMesh", false))
+  if (!GetDetectorMaterial("myMMMesh", false))
   {
     G4Material *myMMMesh = new G4Material("myMMMesh", 2.8548 * g / cm3, ncomponents = 5, kStateSolid);
     myMMMesh->AddMaterial(G4_Cr, 0.1900);
@@ -674,28 +674,28 @@ void PHG4CylinderStripDetector::BuildMaterials()
   }
 
   // MMStrips
-  if (!G4Material::GetMaterial("myMMStrips", false))
+  if (!GetDetectorMaterial("myMMStrips", false))
   {
     G4Material *myMMStrips = new G4Material("myMMStrips", 5.248414 * g / cm3, G4_Cu, kStateSolid);
     cout << myMMStrips->GetName() << endl;
   }
 
   // MMResistivePaste
-  if (!G4Material::GetMaterial("myMMResistivePaste", false))
+  if (!GetDetectorMaterial("myMMResistivePaste", false))
   {
     G4Material *myMMResistivePaste = new G4Material("myMMResistivePaste", 0.77906 * g / cm3, G4_C, kStateSolid);
     cout << myMMResistivePaste->GetName() << endl;
   }
 
   // Copper
-  if (!G4Material::GetMaterial("myCopper", false))
+  if (!GetDetectorMaterial("myCopper", false))
   {
     G4Material *myCopper = new G4Material("myCopper", 8.9600 * g / cm3, G4_Cu, kStateSolid);
     cout << myCopper->GetName() << endl;
   }
 
   // Carbon fiber
-  if (!G4Material::GetMaterial("myCfiber", false))
+  if (!GetDetectorMaterial("myCfiber", false))
   {
     G4Material *myCfiber = new G4Material("myCfiber", 1.80 * g / cm3, G4_C, kStateSolid);
     cout << myCfiber->GetName() << endl;

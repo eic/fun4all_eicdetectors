@@ -46,7 +46,7 @@ PHG4FCalDetector::PHG4FCalDetector(PHG4Subsystem* subsys, PHCompositeNode* Node,
 G4Material* PHG4FCalDetector::SetMaterial(G4String material)
 {
   // search the material by its name and assign if found
-  if (G4Material* material_ptr = G4Material::GetMaterial(material))
+  if (G4Material* material_ptr = GetDetectorMaterial(material))
   {
     return material_ptr;
   }
@@ -75,7 +75,7 @@ unsigned int PHG4FCalDetector::computeIndex(unsigned int layer, G4double x, G4do
 
 void PHG4FCalDetector::ConstructMe(G4LogicalVolume* logicWorld)
 {
-  //   const G4MaterialTable* mattab = G4Material::GetMaterialTable();
+  //   const G4MaterialTable* mattab = GetDetectorMaterialTable();
   //   for(unsigned int i=0;i<mattab->size();i++)
   //   {
   //     cout<<mattab->at(i)->GetName()<<endl;

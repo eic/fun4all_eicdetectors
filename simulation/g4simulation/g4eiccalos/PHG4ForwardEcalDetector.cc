@@ -112,7 +112,7 @@ void PHG4ForwardEcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
 
   /* Create the cone envelope = 'world volume' for the crystal calorimeter */
   recoConsts* rc = recoConsts::instance();
-  G4Material* WorldMaterial = G4Material::GetMaterial(rc->get_StringFlag("WorldMaterial"));
+  G4Material* WorldMaterial = GetDetectorMaterial(rc->get_StringFlag("WorldMaterial"));
 
   G4double tower_readout_dz = m_Params->get_double_param("tower_readout_dz") * cm;
 
@@ -179,7 +179,7 @@ PHG4ForwardEcalDetector::ConstructTower(int type)
   }
   /* create logical volume for single tower */
   recoConsts* rc = recoConsts::instance();
-  G4Material* WorldMaterial = G4Material::GetMaterial(rc->get_StringFlag("WorldMaterial"));
+  G4Material* WorldMaterial = GetDetectorMaterial(rc->get_StringFlag("WorldMaterial"));
 
   /* create geometry volumes for scintillator and absorber plates to place inside single_tower */
   // PHENIX EMCal JGL 3/27/2016
@@ -191,8 +191,8 @@ PHG4ForwardEcalDetector::ConstructTower(int type)
   G4double thickness_scintillator = 4.0 * mm;  // 4mm scintillator
   // notched in TiO2 coating in scintillator plate
   G4double width_coating = m_Params->get_double_param("width_coating") * cm;  // 4mm scintillator
-  G4Material* material_scintillator = GetScintillatorMaterial();              //G4Material::GetMaterial("G4_POLYSTYRENE");
-  G4Material* material_absorber = G4Material::GetMaterial("G4_Pb");
+  G4Material* material_scintillator = GetScintillatorMaterial();              //GetDetectorMaterial("G4_POLYSTYRENE");
+  G4Material* material_absorber = GetDetectorMaterial("G4_Pb");
   G4int nFibers = m_Params->get_int_param("nFibers");
   G4double fiber_diam = m_Params->get_double_param("fiber_diam") * cm;  // 4mm scintillator
   G4double fiber_extra_length = 0.0;
@@ -268,7 +268,7 @@ PHG4ForwardEcalDetector::ConstructTower(int type)
                                        m_TowerDy[2] / 2.0,
                                        clamp_plate_width / 2.0);
     G4LogicalVolume* logic_clampplate = new G4LogicalVolume(solid_clamp1,
-                                                            G4Material::GetMaterial("G4_Fe"),
+                                                            GetDetectorMaterial("G4_Fe"),
                                                             "logic_clampplate",
                                                             0, 0, 0);
     m_AbsorberLogicalVolSet.insert(logic_clampplate);
@@ -316,7 +316,7 @@ PHG4ForwardEcalDetector::ConstructTower(int type)
       solid_clamp2 = new G4SubtractionSolid(G4String("solid_clamp2_cu4"), solid_clamp2, cutoutfiber_solid, 0, G4ThreeVector(m_TowerDx[2] / 4.0, -m_TowerDy[2] / 4.0, 0.));
       solid_clamp2 = new G4SubtractionSolid(G4String("solid_clamp2_cu5"), solid_clamp2, cutoutfiber_solid, 0, G4ThreeVector(-m_TowerDx[2] / 4.0, -m_TowerDy[2] / 4.0, 0.));
       G4LogicalVolume* logic_clampplate2 = new G4LogicalVolume(solid_clamp2,
-                                                               G4Material::GetMaterial("G4_Fe"),
+                                                               GetDetectorMaterial("G4_Fe"),
                                                                "logic_clampplate2",
                                                                0, 0, 0);
       m_AbsorberLogicalVolSet.insert(logic_clampplate2);
@@ -502,8 +502,8 @@ G4Material* PHG4ForwardEcalDetector::GetScintillatorMaterial()
   G4double density;
   G4int ncomponents;
   G4Material* material_ScintFEMC = new G4Material("PolystyreneFEMC", density = 1.03 * g / cm3, ncomponents = 2);
-  material_ScintFEMC->AddElement(G4Element::GetElement("C"), 8);
-  material_ScintFEMC->AddElement(G4Element::GetElement("H"), 8);
+  material_ScintFEMC->AddElement(GetDetectorElement("C"), 8);
+  material_ScintFEMC->AddElement(GetDetectorElement("H"), 8);
 
   if (m_doLightProp)
   {
@@ -540,8 +540,8 @@ G4Material* PHG4ForwardEcalDetector::GetCoatingMaterial()
   G4double density, fractionmass;
   G4int ncomponents;
   G4Material* material_TiO2 = new G4Material("TiO2_FEMC", density = 1.52 * g / cm3, ncomponents = 2);
-  material_TiO2->AddElement(G4Element::GetElement("Ti"), 1);
-  material_TiO2->AddElement(G4Element::GetElement("O"), 2);
+  material_TiO2->AddElement(GetDetectorElement("Ti"), 1);
+  material_TiO2->AddElement(GetDetectorElement("O"), 2);
 
   //--------------------------------------------------
   // Scintillator Coating - 15% TiO2 and 85% polystyrene by weight.
@@ -549,7 +549,7 @@ G4Material* PHG4ForwardEcalDetector::GetCoatingMaterial()
   //Coating_FEMC (Glass + Epoxy)
   density = 1.86 * g / cm3;
   G4Material* Coating_FEMC = new G4Material("Coating_FEMC", density, ncomponents = 2);
-  Coating_FEMC->AddMaterial(G4Material::GetMaterial("Epoxy"), fractionmass = 0.80);
+  Coating_FEMC->AddMaterial(GetDetectorMaterial("Epoxy"), fractionmass = 0.80);
   Coating_FEMC->AddMaterial(material_TiO2, fractionmass = 0.20);
 
   return Coating_FEMC;
@@ -592,9 +592,9 @@ G4Material* PHG4ForwardEcalDetector::GetWLSFiberFEMCMaterial()
   G4int ncomponents;
 
   G4Material* material_WLSFiberFEMC = new G4Material("WLSFiberFEMC", density = 1.18 * g / cm3, ncomponents = 3);
-  material_WLSFiberFEMC->AddElement(G4Element::GetElement("C"), 5);
-  material_WLSFiberFEMC->AddElement(G4Element::GetElement("H"), 8);
-  material_WLSFiberFEMC->AddElement(G4Element::GetElement("O"), 2);
+  material_WLSFiberFEMC->AddElement(GetDetectorElement("C"), 5);
+  material_WLSFiberFEMC->AddElement(GetDetectorElement("H"), 8);
+  material_WLSFiberFEMC->AddElement(GetDetectorElement("O"), 2);
   if (m_doLightProp)
   {
     const G4int ntab = 4;

@@ -130,7 +130,7 @@ void PHG4ForwardDualReadoutDetector::ConstructMe(G4LogicalVolume* logicWorld)
   ParseParametersFromTable();
 
   //Create the cone envelope = 'world volume' for the calorimeter
-  G4Material* Air = G4Material::GetMaterial("G4_AIR");
+  G4Material* Air = GetDetectorMaterial("G4_AIR");
 
   G4VSolid* drcalo_envelope_solid;
   if(_quadratic_detector){
@@ -178,7 +178,7 @@ void PHG4ForwardDualReadoutDetector::ConstructMe(G4LogicalVolume* logicWorld)
   else singletower = ConstructTower(0); //4x4 fibre tower with 2 scint and 2 Cherenkov fibres
 
 
-  G4Material* material_air = G4Material::GetMaterial("G4_AIR");
+  G4Material* material_air = GetDetectorMaterial("G4_AIR");
  // number of towers in radial direction (on y axis)
   int rowNtow = (int) ( (_rMax1-(_tower_dy/2)) / _tower_dy);
   for(int row=rowNtow;row>=-rowNtow;row--){
@@ -311,7 +311,7 @@ PHG4ForwardDualReadoutDetector::ConstructTower(int type)
   }
 
   //create logical volume for single tower
-  G4Material* material_air = G4Material::GetMaterial("G4_AIR");
+  G4Material* material_air = GetDetectorMaterial("G4_AIR");
   // constructed tower base element
   G4VSolid* base_tower_solid = new G4Box(G4String("base_tower_solid"),
                                           _tower_dx / 2.0,
@@ -571,7 +571,7 @@ PHG4ForwardDualReadoutDetector::ConstructTowerFCStyle(int type)
   }
 
   //create logical volume for single tower
-  G4Material* material_air = G4Material::GetMaterial("G4_AIR");
+  G4Material* material_air = GetDetectorMaterial("G4_AIR");
   // 2x2 tower base element
   G4VSolid* base_tower_solid = new G4Box(G4String("base_tower_solid"),
                                           _tower_dx / 2.0,
@@ -797,7 +797,7 @@ PHG4ForwardDualReadoutDetector::GetScintillatorMaterial()
 
 	G4double density;
 	G4int ncomponents;
-  // G4Material* material_G4_POLYSTYRENE = G4Material::GetMaterial(_materialScintillator.c_str());
+  // G4Material* material_G4_POLYSTYRENE = GetDetectorMaterial(_materialScintillator.c_str());
   G4Material* material_G4_POLYSTYRENE = new G4Material("G4_POLYSTYRENE", density = 1.05 * g / cm3, ncomponents = 2);
   material_G4_POLYSTYRENE->AddElement(G4Element::GetElement("C"), 8);
   material_G4_POLYSTYRENE->AddElement(G4Element::GetElement("H"), 8);
@@ -876,7 +876,7 @@ PHG4ForwardDualReadoutDetector::GetQuartzMaterial()
 	G4double density;
 	G4int ncomponents;
 
-  // G4Material* material_Quartz = G4Material::GetMaterial("Quartz");
+  // G4Material* material_Quartz = GetDetectorMaterial("Quartz");
   G4Material *material_Quartz = new G4Material("Quartz", density = 2.200 * g / cm3, ncomponents = 2);
   material_Quartz->AddElement(G4Element::GetElement("Si"), 1);
   material_Quartz->AddElement(G4Element::GetElement("O"), 2);

@@ -15,6 +15,8 @@
 #include <g4main/PHG4DisplayAction.h>  // for PHG4DisplayAction
 #include <g4main/PHG4Subsystem.h>               // for PHG4Subsystem
 
+#include <TSystem.h>
+
 #include <Geant4/G4Cons.hh>
 #include <Geant4/G4DisplacedSolid.hh>  // for G4DisplacedSolid
 #include <Geant4/G4IntersectionSolid.hh>
@@ -36,12 +38,14 @@
 #include <Geant4/G4Tubs.hh>
 #include <Geant4/G4Types.hh>                    // for G4double, G4int
 #include <Geant4/G4VPhysicalVolume.hh>  // for G4VPhysicalVolume
+#include <Geant4/G4NistManager.hh>
 
 #include <cassert>
 #include <cmath>
 #include <iostream>
 #include <sstream>
 #include <string>  // for operator+, operator<<
+#include <boost/stacktrace.hpp>
 
 class G4VSolid;
 
@@ -156,7 +160,7 @@ ePHENIXRICHConstruction::Construct_RICH(G4LogicalVolume *WorldLog)
                                                  RICHSecBox_ConeSec, RICHSphereBoundary);
 
   G4LogicalVolume *RICHSecLog = new G4LogicalVolume(RICHSecBox,
-                                                    G4Material::GetMaterial(geom.get_RICH_gas_mat()), "RICHSecLogical",
+                                                    GetDetectorMaterial(geom.get_RICH_gas_mat()), "RICHSecLogical",
                                                     0, 0, 0);
   RegisterLogicalVolume(RICHSecLog);
 
@@ -188,7 +192,7 @@ ePHENIXRICHConstruction::Construct_RICH(G4LogicalVolume *WorldLog)
   G4VSolid *RICHMirror = new G4IntersectionSolid("RICHMirror",
                                                  RICHSecBox_ConeSec, RICHMirrorSphereBoundary_place);
   G4LogicalVolume *RICHMirrorLog = new G4LogicalVolume(RICHMirror,
-                                                       G4Material::GetMaterial(geom.get_RICH_Mirror_mat()),
+                                                       GetDetectorMaterial(geom.get_RICH_Mirror_mat()),
                                                        "RICHMirrorLog");
   RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(), RICHMirrorLog, "RICHMirrorPhysical",
                                            RICHSecLog, false, 0, overlapcheck_rich));
@@ -215,7 +219,7 @@ ePHENIXRICHConstruction::Construct_RICH(G4LogicalVolume *WorldLog)
   G4VSolid *RICHBackWindow = new G4IntersectionSolid("RICHBackWindow",
                                                      RICHSecBox_ConeSec, RICHBackWindowSphereBoundary_place);
   G4LogicalVolume *RICHBackWindowLog = new G4LogicalVolume(RICHBackWindow,
-                                                           G4Material::GetMaterial(geom.get_RICH_Gas_Window_mat()),
+                                                           GetDetectorMaterial(geom.get_RICH_Gas_Window_mat()),
                                                            "RICHBackWindowLog");
   RegisterLogicalVolume(RICHBackWindowLog);
   RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(), RICHBackWindowLog,
@@ -239,7 +243,7 @@ ePHENIXRICHConstruction::Construct_RICH(G4LogicalVolume *WorldLog)
   G4VSolid *RICHFrontWindow = new G4IntersectionSolid("RICHFrontWindow",
                                                       RICHSecBox_ConeSec, RICHFrontWindowSphereBoundary_place);
   G4LogicalVolume *RICHFrontWindowLog = new G4LogicalVolume(RICHFrontWindow,
-                                                            G4Material::GetMaterial(geom.get_RICH_Gas_Window_mat()),
+                                                            GetDetectorMaterial(geom.get_RICH_Gas_Window_mat()),
                                                             "RICHFrontWindowLog");
   RegisterLogicalVolume(RICHFrontWindowLog);
   RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(), RICHFrontWindowLog,
@@ -284,7 +288,7 @@ ePHENIXRICHConstruction::Construct_HBD(G4LogicalVolume *RICHSecLog)
   );
 
   G4LogicalVolume *RICHHBDLog = new G4LogicalVolume(RICHHBDBox,
-                                                    G4Material::GetMaterial(geom.get_RICH_gas_mat()), "RICHHBDLog");
+                                                    GetDetectorMaterial(geom.get_RICH_gas_mat()), "RICHHBDLog");
   RegisterLogicalVolume(RICHHBDLog);
 
   G4Transform3D transform1 = G4Translate3D(0, geom.get_R_Tip_HBD(),
@@ -405,7 +409,7 @@ ePHENIXRICHConstruction::Construct_HBD_Layers(G4LogicalVolume *RICHHBDLog,
   );
 
   G4LogicalVolume *Log = new G4LogicalVolume(box,
-                                             G4Material::GetMaterial(material),  //
+                                             GetDetectorMaterial(material),  //
                                              G4String("RICHHBD") + name + G4String("Log"));
   RegisterLogicalVolume(Log);
 
@@ -529,3 +533,29 @@ int ePHENIXRICHConstruction::is_in_sector(G4VPhysicalVolume *volume) const
   else
     return -1;
 }
+
+
+G4Material *ePHENIXRICHConstruction::GetDetectorMaterial(const std::string &name, const bool quit)
+{
+  G4Material *thismaterial =  G4Material::GetMaterial(name,false);
+  if (thismaterial)
+  {
+    return thismaterial;
+  }
+  thismaterial = G4NistManager::Instance()->FindOrBuildMaterial(name);
+  if (!thismaterial)
+  {
+    if (!quit)
+    {
+      return nullptr;
+    }
+    std::cout << "PHG4Detector::GetDetectorMaterial: Could not locate " << name << " in NIST DB or create it" << std::endl;
+    std::cout << boost::stacktrace::stacktrace();
+    std::cout << std::endl;
+    std::cout << "read the above stack trace who is calling this material" << std::endl;
+    gSystem->Exit(1);
+    exit(1); // so coverity gets it
+  }
+  return thismaterial;
+}
+

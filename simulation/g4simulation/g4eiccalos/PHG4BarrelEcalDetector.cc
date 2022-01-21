@@ -24,6 +24,7 @@
 #include <Geant4/G4Tubs.hh>
 #include <Geant4/G4Types.hh>            // for G4double, G4int
 #include <Geant4/G4VPhysicalVolume.hh>  // for G4VPhysicalVolume
+#include <Geant4/G4NistManager.hh>
 
 #include <g4gdml/PHG4GDMLConfig.hh>
 #include <g4gdml/PHG4GDMLUtility.hh>
@@ -154,7 +155,7 @@ void PHG4BarrelEcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
 
   G4VSolid* cylinder_solid = new G4SubtractionSolid("BCAL_SOLID", cylinder_solid4, cone2, 0, shift_cone2);
 
-  G4Material* cylinder_mat = G4Material::GetMaterial("G4_AIR");
+  G4Material* cylinder_mat = GetDetectorMaterial("G4_AIR");
   assert(cylinder_mat);
 
   G4LogicalVolume* cylinder_logic = new G4LogicalVolume(cylinder_solid, cylinder_mat,
@@ -499,12 +500,12 @@ PHG4BarrelEcalDetector::ConstructGlass(std::map<std::string, towerposition>::ite
 G4Material* PHG4BarrelEcalDetector::GetCarbonFiber()
 {
   static string matname = "CrystalCarbonFiber";
-  G4Material* carbonfiber = G4Material::GetMaterial(matname, false);  // false suppresses warning that material does not exist
+  G4Material* carbonfiber = GetDetectorMaterial(matname, false);  // false suppresses warning that material does not exist
   if (!carbonfiber)
   {
     G4double density_carbon_fiber = 1.44 * g / cm3;
     carbonfiber = new G4Material(matname, density_carbon_fiber, 1);
-    carbonfiber->AddElement(G4Element::GetElement("C"), 1);
+    carbonfiber->AddElement(GetDetectorElement("C"), 1);
   }
   return carbonfiber;
 }
@@ -512,17 +513,19 @@ G4Material* PHG4BarrelEcalDetector::GetCarbonFiber()
 G4Material* PHG4BarrelEcalDetector::GetSciGlass()
 {
   static string matname = "sciglass";
-  G4Material* sciglass = G4Material::GetMaterial(matname, false);  // false suppresses warning that material does not exist
+  G4Material* sciglass = GetDetectorMaterial(matname, false);  // false suppresses warning that material does not exist
   if (!sciglass)
   {
     G4double density;
     G4int ncomponents;
+
     sciglass = new G4Material(matname, density = 4.22 * g / cm3, ncomponents = 4, kStateSolid);
-    sciglass->AddElement(G4Element::GetElement("Ba"), 0.3875);
-    sciglass->AddElement(G4Element::GetElement("Gd"), 0.2146);
-    sciglass->AddElement(G4Element::GetElement("Si"), 0.1369);
-    sciglass->AddElement(G4Element::GetElement("O"), 0.2610);
+    sciglass->AddElement(GetDetectorElement("Ba"), 0.3875);
+    sciglass->AddElement(GetDetectorElement("Gd"), 0.2146);
+    sciglass->AddElement(GetDetectorElement("Si"), 0.1369);
+    sciglass->AddElement(GetDetectorElement("O"), 0.2610);
   }
+
   return sciglass;
 }
 
@@ -606,7 +609,7 @@ G4LogicalVolume*
 PHG4BarrelEcalDetector::ConstructSi(std::map<std::string, towerposition>::iterator iterator)
 {
   G4Trap* block_solid = GetSiTrap(iterator);
-  G4Material* material_si = G4Material::GetMaterial("G4_POLYSTYRENE");
+  G4Material* material_si = GetDetectorMaterial("G4_POLYSTYRENE");
   assert(material_si);
   G4LogicalVolume* block_logic = new G4LogicalVolume(block_solid, material_si,
                                                      G4String(string(iterator->first) + string("_solid_Si")), 0, 0,
@@ -636,7 +639,7 @@ G4LogicalVolume*
 PHG4BarrelEcalDetector::ConstructKapton(std::map<std::string, towerposition>::iterator iterator)
 {
   G4Trap* block_solid = GetKaptonTrap(iterator);
-  G4Material* material_kapton = G4Material::GetMaterial("G4_KAPTON");
+  G4Material* material_kapton = GetDetectorMaterial("G4_KAPTON");
   assert(material_kapton);
   G4LogicalVolume* block_logic = new G4LogicalVolume(block_solid, material_kapton,
                                                      G4String(string(iterator->first) + string("_solid_Si")), 0, 0,
@@ -667,7 +670,7 @@ G4LogicalVolume*
 PHG4BarrelEcalDetector::ConstructSIO2(std::map<std::string, towerposition>::iterator iterator)
 {
   G4Trap* block_solid = GetSIO2Trap(iterator);
-  G4Material* material_SIO2 = G4Material::GetMaterial("Quartz");
+  G4Material* material_SIO2 = GetDetectorMaterial("Quartz");
   assert(material_SIO2);
   G4LogicalVolume* block_logic = new G4LogicalVolume(block_solid, material_SIO2,
                                                      G4String(string(iterator->first) + string("_solid_material_SIO2")), 0, 0,
@@ -699,7 +702,7 @@ G4LogicalVolume*
 PHG4BarrelEcalDetector::ConstructCarbon(std::map<std::string, towerposition>::iterator iterator)
 {
   G4Trap* block_solid = GetCarbonTrap(iterator);
-  G4Material* material_Carbon = G4Material::GetMaterial("G4_C");
+  G4Material* material_Carbon = GetDetectorMaterial("G4_C");
   assert(material_Carbon);
   G4LogicalVolume* block_logic = new G4LogicalVolume(block_solid, material_Carbon,
                                                      G4String(string(iterator->first) + string("_solid_material_C")), 0, 0,

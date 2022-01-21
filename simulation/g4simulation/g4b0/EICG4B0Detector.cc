@@ -140,7 +140,7 @@ void EICG4B0Detector::ConstructMe(G4LogicalVolume *logicWorld)
   G4SubtractionSolid *solidB0 = new G4SubtractionSolid("EICG4B0Solid", solids2, solidPipeHole1, 0, G4ThreeVector(m_Params->get_double_param("pipe_x") * cm, m_Params->get_double_param("pipe_y") * cm, m_Params->get_double_param("pipe_z") * cm));
   G4RotationMatrix *rotm = new G4RotationMatrix();
   G4LogicalVolume *logical = new G4LogicalVolume(solidB0,
-                                                 G4Material::GetMaterial(m_Params->get_string_param("material")),
+                                                 GetDetectorMaterial(m_Params->get_string_param("material")),
                                                  "EICG4B0Logical");
 
   G4VisAttributes *vis = new G4VisAttributes(G4Color(0.8, 0.4, 0.2, 1.0));

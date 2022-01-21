@@ -131,7 +131,7 @@ void G4JLeicBeamLineMagnetDetector::ConstructMe(G4LogicalVolume *logicMother)
 					   params->get_double_param("outer_radius") * cm,
                                         params->get_double_param("length") * cm / 2., 0, twopi);
   G4LogicalVolume *magnet_iron_logic = new G4LogicalVolume(magnet_iron_solid,
-							G4Material::GetMaterial("G4_Fe"),
+							GetDetectorMaterial("G4_Fe"),
                                                         G4String(GetName().c_str()),
                                                         0, 0, 0);
   m_DisplayAction->AddVolume(magnet_iron_logic,magnettype);
@@ -146,7 +146,7 @@ void G4JLeicBeamLineMagnetDetector::ConstructMe(G4LogicalVolume *logicMother)
                                       params->get_double_param("length") * cm / 2., 0, twopi);
 
   G4LogicalVolume *magnet_logic = new G4LogicalVolume(magnet_solid,
-                                                      G4Material::GetMaterial("G4_Galactic"),
+                                                      GetDetectorMaterial("G4_Galactic"),
                                                       G4String(GetName().c_str()),
                                                       0, 0, 0);
 

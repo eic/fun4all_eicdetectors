@@ -134,12 +134,12 @@ void EicFRichDetector::Print(const std::string &what) const
 }
 // ======================================================================================================
 G4Material *  EicFRichDetector::element_material( std::string identifier ){
-	G4Material * G4_mat = G4Material::GetMaterial("G4_AIR");
+	G4Material * G4_mat = GetDetectorMaterial("G4_AIR");
 	G4double density;
 	G4int ncomponents, natoms;
 
 	if(identifier=="mylar"){
-		G4_mat = G4Material::GetMaterial("G4_MYLAR");
+		G4_mat = GetDetectorMaterial("G4_MYLAR");
 	}
 	else if(identifier=="C2F6"){	
 		G4_mat = new G4Material("C2F6", density = 0.0057 * g / cm3, ncomponents = 2);
@@ -162,7 +162,7 @@ G4Material *  EicFRichDetector::element_material( std::string identifier ){
 		SiO2Aerogel->AddElement(G4Element::GetElement("Si"), 1);
 		SiO2Aerogel->AddElement(G4Element::GetElement("O" ), 2);
 
-		G4Material *air = G4Material::GetMaterial("G4_AIR");
+		G4Material *air = GetDetectorMaterial("G4_AIR");
 
 		G4double fracMass;
 		G4_mat = new G4Material("aerogel", density = 0.094 * g / cm3 , ncomponents = 2);
@@ -183,7 +183,7 @@ G4Material *  EicFRichDetector::element_material( std::string identifier ){
 		Epoxy->AddElement(elC, 15); // Carbon
 
 		G4_mat = new G4Material("CarbonFiber",  density =  1.750*g/cm3, natoms=2);
-		G4_mat->AddMaterial(G4Material::GetMaterial("G4_C"), 74.5*perCent);  // Carbon
+		G4_mat->AddMaterial(GetDetectorMaterial("G4_C"), 74.5*perCent);  // Carbon
 		G4_mat->AddMaterial(Epoxy,                           25.5*perCent);  // Epoxy (scotch)
 	}
 	return G4_mat;

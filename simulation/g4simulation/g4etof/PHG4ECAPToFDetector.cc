@@ -111,7 +111,7 @@ void PHG4ECAPToFDetector::ConstructMe(G4LogicalVolume *logicWorld)
     std::cout << " tot_thick :" << tot_thick << std::endl;
     std::cout << " mid pos :" << posz << std::endl;
   }
-  G4Material *tof_mother_mat = G4Material::GetMaterial(m_Params->get_string_param("material"));
+  G4Material *tof_mother_mat = GetDetectorMaterial(m_Params->get_string_param("material"));
 
   G4Tubs *Solid = new G4Tubs("ToF_GVol_Solid", Rin, Rout, tot_thick / 2., 0., 360. * deg);
   G4LogicalVolume *Logic = new G4LogicalVolume(Solid, tof_mother_mat, "ToF_GVol_Logic", 0, 0, 0);
@@ -121,15 +121,15 @@ void PHG4ECAPToFDetector::ConstructMe(G4LogicalVolume *logicWorld)
   Logic->SetVisAttributes(attr_ToF_GVol);
   Phys = new G4PVPlacement(0, G4ThreeVector(0, 0, posz), Logic, "E_CAP_ToF_Physics", logicWorld, 0, false, OverlapCheck());
 
-  G4Material *G4_O = G4Material::GetMaterial("G4_O");
-  G4Material *G4_Si = G4Material::GetMaterial("G4_Si");
-  G4Material *G4_Na = G4Material::GetMaterial("G4_Na");
-  G4Material *G4_Ca = G4Material::GetMaterial("G4_Ca");
-  G4Material *G4_Cu = G4Material::GetMaterial("G4_Cu");
-  G4Material *G4_FR4 = G4Material::GetMaterial("FR4");
-  G4Material *G4_Nomex = G4Material::GetMaterial("NOMEX");
-  G4Material *G4_Mylar = G4Material::GetMaterial("G4_MYLAR");
-  G4Material *G4_gas = G4Material::GetMaterial("G4_Ar");
+  G4Material *G4_O = GetDetectorMaterial("G4_O");
+  G4Material *G4_Si = GetDetectorMaterial("G4_Si");
+  G4Material *G4_Na = GetDetectorMaterial("G4_Na");
+  G4Material *G4_Ca = GetDetectorMaterial("G4_Ca");
+  G4Material *G4_Cu = GetDetectorMaterial("G4_Cu");
+  G4Material *G4_FR4 = GetDetectorMaterial("FR4");
+  G4Material *G4_Nomex = GetDetectorMaterial("NOMEX");
+  G4Material *G4_Mylar = GetDetectorMaterial("G4_MYLAR");
+  G4Material *G4_gas = GetDetectorMaterial("G4_Ar");
 
   //Plate Glass material
   G4Material *plateglass = new G4Material("plateglass", 2.4 * g / cm3, 4, kStateSolid);

@@ -46,7 +46,7 @@ PHG4FPbScDetector::PHG4FPbScDetector(PHG4Subsystem* subsys, PHCompositeNode* Nod
 G4Material* PHG4FPbScDetector::SetMaterial(G4String material)
 {
   // search the material by its name and assign if found
-  if (G4Material* material_ptr = G4Material::GetMaterial(material))
+  if (G4Material* material_ptr = GetDetectorMaterial(material))
   {
     return material_ptr;
   }
