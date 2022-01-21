@@ -94,7 +94,7 @@ void PHG4ProjCrystalCalorimeterDetector::ConstructMe(G4LogicalVolume *logicWorld
 
   /* Create the cone envelope = 'world volume' for the crystal calorimeter */
   recoConsts *rc = recoConsts::instance();
-  G4Material *WorldMaterial = G4Material::GetMaterial(rc->get_StringFlag("WorldMaterial"));
+  G4Material *WorldMaterial = GetDetectorMaterial(rc->get_StringFlag("WorldMaterial"));
 
   G4VSolid *ecal_envelope_cone = new G4Cons("eEcal_envelope_solid",
                                             GetParams()->get_double_param("rMin1") * cm, GetParams()->get_double_param("rMax1") * cm,
@@ -141,10 +141,10 @@ int PHG4ProjCrystalCalorimeterDetector::Fill4x4Unit(G4LogicalVolume *crystal_log
   //*************************************
 
   //Crystal Material (Default is Lead Tungstate)
-  G4Material *material_crystal = G4Material::GetMaterial(GetParams()->get_string_param("material"));
+  G4Material *material_crystal = GetDetectorMaterial(GetParams()->get_string_param("material"));
 
   recoConsts *rc = recoConsts::instance();
-  G4Material *WorldMaterial = G4Material::GetMaterial(rc->get_StringFlag("WorldMaterial"));
+  G4Material *WorldMaterial = GetDetectorMaterial(rc->get_StringFlag("WorldMaterial"));
 
   //*************************************
   //**********Build First Crystal********
@@ -518,10 +518,10 @@ int PHG4ProjCrystalCalorimeterDetector::FillSpecialUnit(G4LogicalVolume *crystal
   //*************************************
 
   //Crystal Material (Default is Lead Tungstate)
-  G4Material *material_crystal = G4Material::GetMaterial(GetParams()->get_string_param("material"));
+  G4Material *material_crystal = GetDetectorMaterial(GetParams()->get_string_param("material"));
 
   recoConsts *rc = recoConsts::instance();
-  G4Material *WorldMaterial = G4Material::GetMaterial(rc->get_StringFlag("WorldMaterial"));
+  G4Material *WorldMaterial = GetDetectorMaterial(rc->get_StringFlag("WorldMaterial"));
 
   //*************************************
   //**********Build First Crystal********
@@ -1117,7 +1117,7 @@ int PHG4ProjCrystalCalorimeterDetector::ConstructProjectiveCrystals(G4LogicalVol
                                       dz);  //Half length in z
 
   recoConsts *rc = recoConsts::instance();
-  G4Material *WorldMaterial = G4Material::GetMaterial(rc->get_StringFlag("WorldMaterial"));
+  G4Material *WorldMaterial = GetDetectorMaterial(rc->get_StringFlag("WorldMaterial"));
 
   G4LogicalVolume *crystal_logic = new G4LogicalVolume(crystal_solid,
                                                        WorldMaterial,
