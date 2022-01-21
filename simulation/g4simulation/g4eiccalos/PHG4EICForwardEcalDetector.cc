@@ -53,7 +53,7 @@ void PHG4EICForwardEcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
   ParseParametersFromTable();
 
   /* Create the cone envelope = 'world volume' for the crystal calorimeter */
-  G4Material* Air = G4Material::GetMaterial("G4_AIR");
+  G4Material* Air = GetDetectorMaterial("G4_AIR");
 
   G4VSolid* ecal_envelope_solid = new G4Cons("hEcal_envelope_solid",
                                              GetRMin(0), GetRMax(0),
@@ -99,7 +99,7 @@ PHG4EICForwardEcalDetector::ConstructTower()
   }
 
   /* create logical volume for single tower */
-  G4Material* material_air = G4Material::GetMaterial("G4_AIR");
+  G4Material* material_air = GetDetectorMaterial("G4_AIR");
 
   G4VSolid* single_tower_solid = new G4Box(G4String("single_tower_solid"),
                                            _tower_dx / 2.0,
@@ -133,8 +133,8 @@ PHG4EICForwardEcalDetector::ConstructTower()
                                            thickness_scintillator / 2.0);
 
   /* create logical volumes for scintillator and absorber plates to place inside single_tower */
-  G4Material* material_scintillator = G4Material::GetMaterial(_materialScintillator.c_str());
-  G4Material* material_absorber = G4Material::GetMaterial(_materialAbsorber.c_str());
+  G4Material* material_scintillator = GetDetectorMaterial(_materialScintillator.c_str());
+  G4Material* material_absorber = GetDetectorMaterial(_materialAbsorber.c_str());
 
   G4LogicalVolume* logic_absorber = new G4LogicalVolume(solid_absorber,
                                                         material_absorber,
