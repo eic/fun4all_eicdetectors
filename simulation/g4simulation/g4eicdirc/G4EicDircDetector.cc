@@ -76,7 +76,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume* logicWorld)
 {
   // ---------- DIRC supoort stucture ---------------
 
-  //G4Material *Air = G4Material::GetMaterial("G4_AIR");
+  //G4Material *Air = GetDetectorMaterial("G4_AIR");
 
   // positions
   /*G4double rMin = m_Params->get_double_param("rMin");  // center location of Al support plate
@@ -128,7 +128,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume* logicWorld)
                                         support_width / 2, support_width / 2,                                                        // length
                                         support_height * 0.73 / 2);                                                                  // height
 
-  Log_End_Support = new G4LogicalVolume(Sol_End_Support, G4Material::GetMaterial("G4_Fe"), "Log_End_Support_Raw");
+  Log_End_Support = new G4LogicalVolume(Sol_End_Support, GetDetectorMaterial("G4_Fe"), "Log_End_Support_Raw");
 
   // place End side and back side support structure for the segment
   // RegisterPhysicalVolume( new G4PVPlacement(0, G4ThreeVector(0, segmentlength/2-support_width/2, -support_height/2), Log_End_Support,
@@ -143,7 +143,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume* logicWorld)
                                                  segmentlength / 2 - 1 * mm, segmentlength / 2 - 1 * mm,  // length
                                                  support_height * 0.73 / 2);                              // height
 
-  Log_Longitudinal_Support = new G4LogicalVolume(Sol_Longitudinal_Support, G4Material::GetMaterial("G4_Fe"), "Log_Longitudinal_Support_Raw");
+  Log_Longitudinal_Support = new G4LogicalVolume(Sol_Longitudinal_Support, GetDetectorMaterial("G4_Fe"), "Log_Longitudinal_Support_Raw");
 
   G4RotationMatrix *supportrot = new G4RotationMatrix();
   supportrot->rotateY(-M_PI / 12.);
@@ -224,7 +224,7 @@ void G4EicDircDetector::ConstructMe(G4LogicalVolume* logicWorld)
   // build components of single segment here
   G4VSolid *Sol_End_Support_inner = new G4Trd("Sol_End_Support_inner", sin(M_PI / 12.) * (rMin_inner - support_height * 0.9) - 2 * mm, sin(M_PI / 12.) * (rMin_inner) -4 * mm,  support_width / 2, support_width / 2, support_height * 0.73 / 2);                                                           
 
-  Log_End_Support_inner = new G4LogicalVolume(Sol_End_Support_inner, G4Material::GetMaterial("G4_Fe"), "Log_End_Support_Raw_inner");
+  Log_End_Support_inner = new G4LogicalVolume(Sol_End_Support_inner, GetDetectorMaterial("G4_Fe"), "Log_End_Support_Raw_inner");
   
   if (rMin_inner < 85 * cm)
     {
