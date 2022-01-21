@@ -98,7 +98,7 @@ void EICG4ZDCDetector::ConstructMe(G4LogicalVolume *logicWorld)
   double ydim = m_Params->get_double_param("size_y") * cm;
   double zdim = m_Params->get_double_param("size_z") * cm;
   G4VSolid *solidbox = new G4Box("ZDCSolid", xdim / 2., ydim / 2., zdim / 2.);
-  G4LogicalVolume *logical = new G4LogicalVolume(solidbox, G4Material::GetMaterial("G4_Galactic"), "ZDCLogical");
+  G4LogicalVolume *logical = new G4LogicalVolume(solidbox, GetDetectorMaterial("G4_Galactic"), "ZDCLogical");
 
   logical->SetVisAttributes(G4VisAttributes::Invisible);
   G4RotationMatrix *rotm = new G4RotationMatrix();
