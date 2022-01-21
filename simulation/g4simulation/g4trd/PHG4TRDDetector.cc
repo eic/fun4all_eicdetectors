@@ -72,7 +72,7 @@ void PHG4TRDDetector::ConstructMe(G4LogicalVolume *logicWorld)
 {
   // Generic mother volume
   //All other components of TRD will be in it
-  G4Material *TRDMaterial = G4Material::GetMaterial(m_Params->get_string_param("material"));
+  G4Material *TRDMaterial = GetDetectorMaterial(m_Params->get_string_param("material"));
 
   double RIn = m_Params->get_double_param("RIn") * cm;                // 20.* cm
   double ROut = m_Params->get_double_param("ROut") * cm;              // 200 * cm
@@ -110,11 +110,11 @@ void PHG4TRDDetector::ConstructMe(G4LogicalVolume *logicWorld)
 
   // ------ Define materials for radiator----------
 
-  //G4Material *Mylar = G4Material::GetMaterial("Mylar");
-  G4Material *Air = G4Material::GetMaterial("G4_AIR");
-  //G4Material *Al = G4Material::GetMaterial("G4_Al");
-  //G4Material *CH2 = G4Material::GetMaterial("G4_CH2");
-  //G4Material *He = G4Material::GetMaterial("He");
+  //G4Material *Mylar = GetDetectorMaterial("Mylar");
+  G4Material *Air = GetDetectorMaterial("G4_AIR");
+  //G4Material *Al = GetDetectorMaterial("G4_Al");
+  //G4Material *CH2 = GetDetectorMaterial("G4_CH2");
+  //G4Material *He = GetDetectorMaterial("He");
 
   double a_c = 12.0107 * g / mole;
   G4Element *Carbon = new G4Element("Carbon", "C", 6, a_c);
@@ -165,7 +165,7 @@ void PHG4TRDDetector::ConstructMe(G4LogicalVolume *logicWorld)
   //double off = 0.001*cm;
   // double window_pos_Z =  -1.0 * det_ThicknessZ/2 +  off;
   double window_pos_Z = fRadZ + fRadThick / 2. + window_th / 2.;
-  G4Material *window_Material = G4Material::GetMaterial("G4_MYLAR");
+  G4Material *window_Material = GetDetectorMaterial("G4_MYLAR");
 
   G4Tubs *MPGD_win_Solid = new G4Tubs("MPGD_win_Solid", det_RIn, det_ROut, window_th / 2., 0., 360 * deg);
   ;
@@ -181,8 +181,8 @@ void PHG4TRDDetector::ConstructMe(G4LogicalVolume *logicWorld)
   double det_ThicknessZ = 2.5 * cm;
   // double det_Pos_Z = fRadZ+ fRadThick/2. + det_ThicknessZ/2. ;
   double det_Pos_Z = window_pos_Z + window_th / 2. + det_ThicknessZ / 2.;
-  //G4Material *det_Material = G4Material::GetMaterial("G4_Xe");
-  G4Material *det_Material = G4Material::GetMaterial("G4_AIR");
+  //G4Material *det_Material = GetDetectorMaterial("G4_Xe");
+  G4Material *det_Material = GetDetectorMaterial("G4_AIR");
 
   G4Tubs *TRD_det_Solid = new G4Tubs("TRD_det_Solid", det_RIn, det_ROut, det_ThicknessZ / 2., 0., 360 * deg);
   ;
@@ -203,7 +203,7 @@ void PHG4TRDDetector::ConstructMe(G4LogicalVolume *logicWorld)
 
   double cat_th = 0.005 * cm;
   double dead_ar = 0.01 * cm;
-  G4Material *G4_Al = G4Material::GetMaterial("G4_Al");
+  G4Material *G4_Al = GetDetectorMaterial("G4_Al");
   G4Material *myCatMesh = new G4Material("myCatMesh", 0.9 * g / cm3, G4_Al, kStateSolid);  // Density of Al reduced considering it's a mesh
 
   G4Tubs *Cathode = new G4Tubs("Cathode", det_RIn, det_ROut, cat_th / 2., 0., 360 * deg);
@@ -219,7 +219,7 @@ void PHG4TRDDetector::ConstructMe(G4LogicalVolume *logicWorld)
 
   //construct active gas volume upto top GEM
   double gas_thick = 2.0 * cm;
-  G4Material *gas_act = G4Material::GetMaterial("G4_Xe");
+  G4Material *gas_act = GetDetectorMaterial("G4_Xe");
   G4Tubs *drift_gas = new G4Tubs("drift_gas", det_RIn, det_ROut, gas_thick / 2., 0., 360 * deg);
   G4LogicalVolume *gas_Logic = new G4LogicalVolume(drift_gas, gas_act, "gas_Logic", 0, 0, 0);
   G4VisAttributes *gas_att = new G4VisAttributes();
@@ -237,20 +237,20 @@ void PHG4TRDDetector::ConstructMe(G4LogicalVolume *logicWorld)
   // double dr_gap = 2.0*cm;
   double tr_gap = 0.2 * cm;
   double kap_th = 0.005 * cm;
-  G4Material *gem_cond = G4Material::GetMaterial("G4_Cu");
-  G4Material *gem_diel = G4Material::GetMaterial("G4_KAPTON");
+  G4Material *gem_cond = GetDetectorMaterial("G4_Cu");
+  G4Material *gem_diel = GetDetectorMaterial("G4_KAPTON");
 
   //MMG + below dimensions
   double av_gap = 0.014 * cm;
   double mesh_th = 0.0012 * cm;
 
-  G4Material *G4_Cr = G4Material::GetMaterial("G4_Cr");
-  G4Material *G4_Fe = G4Material::GetMaterial("G4_Fe");
-  G4Material *G4_Mn = G4Material::GetMaterial("G4_Mn");
-  G4Material *G4_Ni = G4Material::GetMaterial("G4_Ni");
-  G4Material *G4_Si = G4Material::GetMaterial("G4_Si");
-  G4Material *G4_O = G4Material::GetMaterial("G4_O");
-  G4Material *G4_H = G4Material::GetMaterial("G4_H");
+  G4Material *G4_Cr = GetDetectorMaterial("G4_Cr");
+  G4Material *G4_Fe = GetDetectorMaterial("G4_Fe");
+  G4Material *G4_Mn = GetDetectorMaterial("G4_Mn");
+  G4Material *G4_Ni = GetDetectorMaterial("G4_Ni");
+  G4Material *G4_Si = GetDetectorMaterial("G4_Si");
+  G4Material *G4_O = GetDetectorMaterial("G4_O");
+  G4Material *G4_H = GetDetectorMaterial("G4_H");
 
   G4Material *myMMMesh = new G4Material("myMMMesh", 2.8548 * g / cm3, 5, kStateSolid);
   myMMMesh->AddMaterial(G4_Cr, 0.1900);
@@ -264,10 +264,10 @@ void PHG4TRDDetector::ConstructMe(G4LogicalVolume *logicWorld)
   double pcb_th = 0.01 * cm;
   double cu_st_th = 0.0012 * cm;
 
-  G4Material *G4_C = G4Material::GetMaterial("G4_C");
+  G4Material *G4_C = GetDetectorMaterial("G4_C");
   G4Material *Reslay = new G4Material("Reslay", 0.77906 * g / cm3, G4_C, kStateSolid);
 
-  G4Material *G4_Cu = G4Material::GetMaterial("G4_Cu");
+  G4Material *G4_Cu = GetDetectorMaterial("G4_Cu");
   G4Material *MMstrips = new G4Material("MMstrips", 5.28414 * g / cm3, G4_Cu, kStateSolid);
 
   G4Material *myFR4 = new G4Material("myFR4", 1.860 * g / cm3, 4, kStateSolid);
