@@ -55,7 +55,7 @@ void G4JLeicDIRCDetector::ConstructMe(G4LogicalVolume *logicWorld)
   string solidname = "cb_DIRC_bars_Solid";
   G4VSolid *solid = new G4Box(solidname, cb_DIRC_bars_DX / 2., cb_DIRC_bars_DY / 2., cb_DIRC_bars_DZ / 2.);
   string logicname = "cb_DIRC_bars_Logic";
-  G4LogicalVolume *logical = new G4LogicalVolume(solid, G4Material::GetMaterial("Quartz"), logicname);
+  G4LogicalVolume *logical = new G4LogicalVolume(solid, GetDetectorMaterial("Quartz"), logicname);
   G4VisAttributes *vis = new G4VisAttributes(G4Color(0., 1., 0., 1.0));
   vis->SetForceSolid(true);
   logical->SetVisAttributes(vis);
