@@ -33,10 +33,7 @@ libEICG4Bwd_la_LDFLAGS  = \
   -lg4detectors_io \
   -lphg4hit\
   -lgsl \
-  -lgslcblas \
-  -lg4eval_io \
-  -lg4eval \
-  -leiceval
+  -lgslcblas
 
 libEICG4Bwd_la_LIBADD = \
   -lphool \
