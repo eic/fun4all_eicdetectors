@@ -127,7 +127,7 @@ G4LogicalVolume* PHG4HybridHomogeneousCalorimeterDetector::ConstructSupportFrame
                                                zPosSlice,
                                                rinPosSlice,
                                                routPosSlice);
-  G4LogicalVolume* frame_full_logic = new G4LogicalVolume(frame_full_solid, G4Material::GetMaterial("G4_Fe"), "frame_full_logic", 0, 0, 0);
+  G4LogicalVolume* frame_full_logic = new G4LogicalVolume(frame_full_solid, GetDetectorMaterial("G4_Fe"), "frame_full_logic", 0, 0, 0);
   GetDisplayAction()->AddVolume(frame_full_logic, "WIP");
 
   G4RotationMatrix* rotFrame = new G4RotationMatrix();
@@ -175,7 +175,7 @@ G4LogicalVolume* PHG4HybridHomogeneousCalorimeterDetector::ConstructTower()
   int carbon_frame_style = m_Params->get_int_param("carbon_frame_style");
 
   recoConsts* rc = recoConsts::instance();
-  G4Material* WorldMaterial = G4Material::GetMaterial(rc->get_StringFlag("WorldMaterial"));
+  G4Material* WorldMaterial = GetDetectorMaterial(rc->get_StringFlag("WorldMaterial"));
 
   /* create logical volume for single tower */
   // Building the single tower mother volume first
@@ -312,7 +312,7 @@ G4LogicalVolume* PHG4HybridHomogeneousCalorimeterDetector::ConstructTower()
   /* create logical volumes for crystal inside single_tower */
   G4double M_para = m_Params->get_double_param("material");
   // set default material for hom calo
-  G4Material* material_Scin = G4Material::GetMaterial("G4_PbWO4");
+  G4Material* material_Scin = GetDetectorMaterial("G4_PbWO4");
   if (M_para > 0) material_Scin = GetScintillatorMaterial(M_para);
 
   if (m_doLightProp)
@@ -338,7 +338,7 @@ G4LogicalVolume* PHG4HybridHomogeneousCalorimeterDetector::ConstructTower()
   if (doSensors)
   {
     G4VSolid* single_sensor_solid = new G4Box("single_sensor_solid", sensor_dimension / 2., sensor_dimension / 2., sensor_thickness / 2.);
-    G4Material* material_Sensor = G4Material::GetMaterial("G4_Si");
+    G4Material* material_Sensor = GetDetectorMaterial("G4_Si");
 
     G4LogicalVolume* single_sensor_logic = new G4LogicalVolume(single_sensor_solid, material_Sensor, "single_sensor_logic", 0, 0, 0);
     GetDisplayAction()->AddVolume(single_sensor_logic, "Sensor");
@@ -394,27 +394,27 @@ PHG4HybridHomogeneousCalorimeterDetector::GetScintillatorMaterial(float setting)
   G4Element* ele_Ba = new G4Element("Barium", "Ba", 56., 137.3 * g / mole);
   G4Element* ele_Gd = new G4Element("Gadolinium", "Gd", 64., 157.3 * g / mole);
 
-  G4Material* material_Scin = G4Material::GetMaterial("G4_PbWO4");
+  G4Material* material_Scin = GetDetectorMaterial("G4_PbWO4");
 
   if ((setting > 0.) && (setting < 1.))
   {
-    material_Scin = G4Material::GetMaterial("G4_PbWO4");
+    material_Scin = GetDetectorMaterial("G4_PbWO4");
     // g4MatData.push_back(0.0333333*mm/MeV);
     if (Verbosity()) cout << "Set G4_PbWO4..." << endl;
   }
   else if ((setting > 1.) && (setting < 2.))
   {
-    material_Scin = G4Material::GetMaterial("G4_GLASS_LEAD");
+    material_Scin = GetDetectorMaterial("G4_GLASS_LEAD");
     if (Verbosity()) cout << "Set G4_GLASS_LEAD..." << endl;
   }
   else if ((setting > 2.) && (setting < 3.))
   {
-    material_Scin = G4Material::GetMaterial("G4_BARIUM_SULFATE");
+    material_Scin = GetDetectorMaterial("G4_BARIUM_SULFATE");
     if (Verbosity()) cout << "Set G4_BARIUM_SULFATE..." << endl;
   }
   else if ((setting > 3.) && (setting < 4.))
   {
-    material_Scin = G4Material::GetMaterial("G4_CESIUM_IODIDE");
+    material_Scin = GetDetectorMaterial("G4_CESIUM_IODIDE");
     if (Verbosity()) cout << "Set G4_CESIUM_IODIDE..." << endl;
   }
   else if ((setting > 4.) && (setting < 5.))
@@ -558,7 +558,7 @@ void PHG4HybridHomogeneousCalorimeterDetector::MakeBoundary(G4VPhysicalVolume* c
 G4Material* PHG4HybridHomogeneousCalorimeterDetector::GetTedlarMaterial()
 {
   static string matname = "HybridHomogeneousTedlar";
-  G4Material* tedlar = G4Material::GetMaterial(matname, false);  // false suppresses warning that material does not exist
+  G4Material* tedlar = GetDetectorMaterial(matname, false);  // false suppresses warning that material does not exist
   if (!tedlar)
   {
     G4double density_tedlar = 1.43 * g / cm3;
@@ -573,7 +573,7 @@ G4Material* PHG4HybridHomogeneousCalorimeterDetector::GetTedlarMaterial()
 G4Material* PHG4HybridHomogeneousCalorimeterDetector::GetVM2000Material()
 {
   static string matname = "HybridHomogeneousVM2000";
-  G4Material* VM2000 = G4Material::GetMaterial(matname, false);  // false suppresses warning that material does not exist
+  G4Material* VM2000 = GetDetectorMaterial(matname, false);  // false suppresses warning that material does not exist
   if (!VM2000)
   {
     G4double density_VM2000 = 1.43 * g / cm3;
@@ -850,7 +850,7 @@ int PHG4HybridHomogeneousCalorimeterDetector::ParseParametersFromTable()
 G4Material* PHG4HybridHomogeneousCalorimeterDetector::GetCarbonFiber()
 {
   static string matname = "HybridHomogeneousCarbonFiber";
-  G4Material* carbonfiber = G4Material::GetMaterial(matname, false);  // false suppresses warning that material does not exist
+  G4Material* carbonfiber = GetDetectorMaterial(matname, false);  // false suppresses warning that material does not exist
   if (!carbonfiber)
   {
     G4double density_carbon_fiber = 1.44 * g / cm3;
