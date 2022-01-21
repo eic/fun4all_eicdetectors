@@ -88,7 +88,7 @@ void PHG4BackwardHcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
 
   /* Create the cone envelope = 'world volume' for the crystal calorimeter */
   recoConsts* rc = recoConsts::instance();
-  G4Material* WorldMaterial = G4Material::GetMaterial(rc->get_StringFlag("WorldMaterial"));
+  G4Material* WorldMaterial = GetDetectorMaterial(rc->get_StringFlag("WorldMaterial"));
 
   G4VSolid* hcal_envelope_solid = new G4Cons("hHcal_envelope_solid",
                                              m_Params->get_double_param("rMin1") * cm,
@@ -136,7 +136,7 @@ PHG4BackwardHcalDetector::ConstructTower()
 
   /* create logical volume for single tower */
   recoConsts* rc = recoConsts::instance();
-  G4Material* WorldMaterial = G4Material::GetMaterial(rc->get_StringFlag("WorldMaterial"));
+  G4Material* WorldMaterial = GetDetectorMaterial(rc->get_StringFlag("WorldMaterial"));
   double TowerDx = m_Params->get_double_param("tower_dx") * cm;
   double TowerDy = m_Params->get_double_param("tower_dy") * cm;
   double TowerDz = m_Params->get_double_param("tower_dz") * cm;
@@ -179,10 +179,10 @@ PHG4BackwardHcalDetector::ConstructTower()
                                             TowerDz / 2.0);
 
   /* create logical volumes for scintillator and absorber plates to place inside single_tower */
-  G4Material* material_scintillator = G4Material::GetMaterial(m_Params->get_string_param("scintillator"));
-  G4Material* material_absorber = G4Material::GetMaterial(m_Params->get_string_param("absorber"));
-  G4Material* material_wls = G4Material::GetMaterial(m_Params->get_string_param("scintillator"));
-  G4Material* material_support = G4Material::GetMaterial(m_Params->get_string_param("support"));
+  G4Material* material_scintillator = GetDetectorMaterial(m_Params->get_string_param("scintillator"));
+  G4Material* material_absorber = GetDetectorMaterial(m_Params->get_string_param("absorber"));
+  G4Material* material_wls = GetDetectorMaterial(m_Params->get_string_param("scintillator"));
+  G4Material* material_support = GetDetectorMaterial(m_Params->get_string_param("support"));
 
   G4LogicalVolume* logic_absorber = new G4LogicalVolume(solid_absorber,
                                                         material_absorber,
