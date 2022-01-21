@@ -96,7 +96,7 @@ void PHG4ForwardHcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
 
   /* Create the cone envelope = 'world volume' for the crystal calorimeter */
   recoConsts* rc = recoConsts::instance();
-  G4Material* WorldMaterial = G4Material::GetMaterial(rc->get_StringFlag("WorldMaterial"));
+  G4Material* WorldMaterial = GetDetectorMaterial(rc->get_StringFlag("WorldMaterial"));
 
   G4VSolid* beampipe_cutout = new G4Cons("FHCAL_beampipe_cutout",
                                          0, m_Params->get_double_param("rMin1") * cm,
@@ -148,7 +148,7 @@ PHG4ForwardHcalDetector::ConstructTower()
 
   /* create logical volume for single tower */
   recoConsts* rc = recoConsts::instance();
-  G4Material* WorldMaterial = G4Material::GetMaterial(rc->get_StringFlag("WorldMaterial"));
+  G4Material* WorldMaterial = GetDetectorMaterial(rc->get_StringFlag("WorldMaterial"));
   double TowerDx = m_Params->get_double_param("tower_dx") * cm;
   double TowerDy = m_Params->get_double_param("tower_dy") * cm;
   double TowerDz = m_Params->get_double_param("tower_dz") * cm;
@@ -191,18 +191,18 @@ PHG4ForwardHcalDetector::ConstructTower()
                                             TowerDz / 2.0);
 
   /* create logical volumes for scintillator and absorber plates to place inside single_tower */
-  G4Material* material_scintillator = G4Material::GetMaterial(m_Params->get_string_param("scintillator"));
-  G4Material* material_absorber = G4Material::GetMaterial(m_Params->get_string_param("absorber"));
-  G4Material* material_wls = G4Material::GetMaterial(m_Params->get_string_param("scintillator"));
-  G4Material* material_support = G4Material::GetMaterial(m_Params->get_string_param("support"));
+  G4Material* material_scintillator = GetDetectorMaterial(m_Params->get_string_param("scintillator"));
+  G4Material* material_absorber = GetDetectorMaterial(m_Params->get_string_param("absorber"));
+  G4Material* material_wls = GetDetectorMaterial(m_Params->get_string_param("scintillator"));
+  G4Material* material_support = GetDetectorMaterial(m_Params->get_string_param("support"));
 
   if (m_Params->get_int_param("absorber_FeTungsten") == 1)
   {
     G4double density;
     G4int natoms;
     material_absorber = new G4Material("FeTungstenMix", density = 10.1592 * g / cm3, natoms = 2);
-    material_absorber->AddMaterial(G4Material::GetMaterial("G4_Fe"), 80 * perCent);  // Steel
-    material_absorber->AddMaterial(G4Material::GetMaterial("G4_W"), 20 * perCent);   // Tungsten
+    material_absorber->AddMaterial(GetDetectorMaterial("G4_Fe"), 80 * perCent);  // Steel
+    material_absorber->AddMaterial(GetDetectorMaterial("G4_W"), 20 * perCent);   // Tungsten
   }
   G4LogicalVolume* logic_absorber = new G4LogicalVolume(solid_absorber,
                                                         material_absorber,
