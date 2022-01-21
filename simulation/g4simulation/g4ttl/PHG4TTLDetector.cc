@@ -94,7 +94,7 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
   G4Element *elC = new G4Element("Carbon", symbol = "C", 6., 12.01 * g / mole);
   G4Element *elN = new G4Element("Nitrogen", symbol = "N", 7., 14.01 * g / mole);
   G4Element *elO = new G4Element("Oxygen", symbol = "O", 8., 16.00 * g / mole);
-  G4Material *mat_Epoxy = G4Material::GetMaterial("EpoxyTTL");
+  G4Material *mat_Epoxy = GetDetectorMaterial("EpoxyTTL",false);
   if (!mat_Epoxy)
   {
     mat_Epoxy = new G4Material("EpoxyTTL", density = 1.16 * g / cm3, natoms = 4);
@@ -102,9 +102,9 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
     mat_Epoxy->AddElement(elN, 2);   // Nitrogen
     mat_Epoxy->AddElement(elO, 4);   // Oxygen
     mat_Epoxy->AddElement(elC, 15);  // Carbon
-    // G4Material *mat_Epoxy = G4Material::GetMaterial("Epoxy");
+    // G4Material *mat_Epoxy = GetDetectorMaterial("Epoxy");
   }
-  G4Material *mat_ALN = G4Material::GetMaterial("AluminiumNitrate");
+  G4Material *mat_ALN = GetDetectorMaterial("AluminiumNitrate",false);
   if (!mat_ALN)
   {
     mat_ALN = new G4Material("AluminiumNitrate", density = 3.255 * g / cm3, ncomponents = 2);
@@ -112,12 +112,12 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
     mat_ALN->AddElement(G4Element::GetElement("Al"), 1);
     mat_ALN->AddElement(G4Element::GetElement("N"), 1);
   }
-  G4Material *mat_Solder_Tin = G4Material::GetMaterial("Tin");
+  G4Material *mat_Solder_Tin = GetDetectorMaterial("Tin",false);
   if (!mat_Solder_Tin)
   {
     mat_Solder_Tin = new G4Material("Tin", z = 50., a = 118.7 * g / mole, density = 7.310 * g / cm3);
   }
-  G4Material *Air = G4Material::GetMaterial("G4_AIR");
+  G4Material *Air = GetDetectorMaterial("G4_AIR");
 
   // Carbon fiber 190 width + 65 microns scotch , overall 255 microns
   G4Material *CarbonFiber = new G4Material("CarbonFiber",  density =  1.750*g/cm3, ncomponents=2);
@@ -158,8 +158,8 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
                                           cooling_plate_height / 2);
   // std::cout << "top plate: " << sin(M_PI / 12.) * (rCenter + diameter_coolingtube / 2 + cooling_plate_height / 2) << std::endl;
   // std::cout << "bottom plate: " << sin(M_PI / 12.) * (rCenter - diameter_coolingtube / 2 - cooling_plate_height / 2) << std::endl;
-  G4LogicalVolume *log_cooling_plate_top = new G4LogicalVolume(sol_cooling_plate_top, G4Material::GetMaterial("G4_Al"), "log_cooling_plate_barrel_top");
-  G4LogicalVolume *log_cooling_plate_bottom = new G4LogicalVolume(sol_cooling_plate_bottom, G4Material::GetMaterial("G4_Al"), "log_cooling_plate_barrel_bottom");
+  G4LogicalVolume *log_cooling_plate_top = new G4LogicalVolume(sol_cooling_plate_top, GetDetectorMaterial("G4_Al"), "log_cooling_plate_barrel_top");
+  G4LogicalVolume *log_cooling_plate_bottom = new G4LogicalVolume(sol_cooling_plate_bottom, GetDetectorMaterial("G4_Al"), "log_cooling_plate_barrel_bottom");
 
   RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(0, 0, diameter_coolingtube/2+cooling_plate_height/2), log_cooling_plate_top,
                                             "physical_cooling_plate_top", log_module_envelope, false, 0, overlapcheck_sector),false);
@@ -181,7 +181,7 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
                                           (segmentlength - 0.2 * mm) / 2);
   sol_cooling_tube = new G4SubtractionSolid(G4String("sol_cooling_tube"), sol_cooling_tube, sol_cutout_tube, 0, G4ThreeVector(0,0,0));
 
-  G4LogicalVolume *Log_cooling_tube = new G4LogicalVolume(sol_cooling_tube, G4Material::GetMaterial("G4_Al"), "Log_cooling_tube");
+  G4LogicalVolume *Log_cooling_tube = new G4LogicalVolume(sol_cooling_tube, GetDetectorMaterial("G4_Al"), "Log_cooling_tube");
   RegisterLogicalVolume(Log_cooling_tube);
   m_DisplayAction->AddVolume(Log_cooling_tube, "Cooling_tube");
 
@@ -190,7 +190,7 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
                                           0.99*(diameter_coolingtube - 2*wallthickness_coolingtube) / 2,
                                           (segmentlength - 0.2 * mm) / 2);
   G4LogicalVolume *Log_water_cooling = new G4LogicalVolume(sol_water_cooling,  //
-                                                           G4Material::GetMaterial("G4_WATER"), "Log_water_cooling");
+                                                           GetDetectorMaterial("G4_WATER"), "Log_water_cooling");
   RegisterLogicalVolume(Log_water_cooling);
   m_DisplayAction->AddVolume(Log_water_cooling, "Water_cooling");
 
@@ -259,12 +259,12 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
       "Sensor",
       "Epoxy",
       "AIN"};
-  G4Material *materialLayer[nLayers] = {G4Material::GetMaterial("G4_GRAPHITE"),
+  G4Material *materialLayer[nLayers] = {GetDetectorMaterial("G4_GRAPHITE"),
                                         mat_ALN,
-                                        G4Material::GetMaterial("G4_GRAPHITE"),
-                                        G4Material::GetMaterial("G4_PLEXIGLASS"),
+                                        GetDetectorMaterial("G4_GRAPHITE"),
+                                        GetDetectorMaterial("G4_PLEXIGLASS"),
                                         mat_Solder_Tin,
-                                        G4Material::GetMaterial("G4_Si"),
+                                        GetDetectorMaterial("G4_Si"),
                                         mat_Epoxy,
                                         mat_ALN};
   G4double thicknessLayer[nLayers] = {0.25 * mm, 0.79 * mm, 0.08 * mm, 0.25 * mm, 0.03 * mm, 0.3 * mm, 0.08 * mm, 0.51 * mm};
@@ -404,10 +404,10 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
       "ConnectorSpace",
       "Powerboard"};
   G4Material *materialLayer_SH[nLayers_SH] = {
-      G4Material::GetMaterial("G4_GRAPHITE"),
-      G4Material::GetMaterial("G4_POLYSTYRENE"),
-      G4Material::GetMaterial("G4_AIR"),
-      G4Material::GetMaterial("G4_POLYSTYRENE")};
+      GetDetectorMaterial("G4_GRAPHITE"),
+      GetDetectorMaterial("G4_POLYSTYRENE"),
+      GetDetectorMaterial("G4_AIR"),
+      GetDetectorMaterial("G4_POLYSTYRENE")};
   G4double thicknessLayer_SH[nLayers_SH] = {
       0.25 * mm,
       1.00 * mm,
@@ -584,7 +584,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
   G4Element *elC = new G4Element("Carbon", symbol = "C", 6., 12.01 * g / mole);
   G4Element *elN = new G4Element("Nitrogen", symbol = "N", 7., 14.01 * g / mole);
   G4Element *elO = new G4Element("Oxygen", symbol = "O", 8., 16.00 * g / mole);
-  G4Material *mat_Epoxy = G4Material::GetMaterial("EpoxyTTL");
+  G4Material *mat_Epoxy = GetDetectorMaterial("EpoxyTTL");
   if (!mat_Epoxy)
   {
     mat_Epoxy = new G4Material("EpoxyTTL", density = 1.16 * g / cm3, natoms = 4);
@@ -592,9 +592,9 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
     mat_Epoxy->AddElement(elN, 2);   // Nitrogen
     mat_Epoxy->AddElement(elO, 4);   // Oxygen
     mat_Epoxy->AddElement(elC, 15);  // Carbon
-    // G4Material *mat_Epoxy = G4Material::GetMaterial("Epoxy");
+    // G4Material *mat_Epoxy = GetDetectorMaterial("Epoxy");
   }
-  G4Material *mat_ALN = G4Material::GetMaterial("AluminiumNitrate");
+  G4Material *mat_ALN = GetDetectorMaterial("AluminiumNitrate");
   if (!mat_ALN)
   {
     mat_ALN = new G4Material("AluminiumNitrate", density = 3.255 * g / cm3, ncomponents = 2);
@@ -602,7 +602,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
     mat_ALN->AddElement(G4Element::GetElement("Al"), 1);
     mat_ALN->AddElement(G4Element::GetElement("N"), 1);
   }
-  G4Material *mat_Solder_Tin = G4Material::GetMaterial("Tin");
+  G4Material *mat_Solder_Tin = GetDetectorMaterial("Tin");
   if (!mat_Solder_Tin)
   {
     mat_Solder_Tin = new G4Material("Tin", z = 50., a = 118.7 * g / mole, density = 7.310 * g / cm3);
@@ -611,7 +611,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
   G4double det_height = 2.0 * cm;
 
   //Create the envelope = 'world volume' for the calorimeter
-  G4Material *Air = G4Material::GetMaterial("G4_AIR");
+  G4Material *Air = GetDetectorMaterial("G4_AIR");
 
   G4double rMin = m_Params->get_double_param("rMin");
   G4double rMax = m_Params->get_double_param("rMax");
@@ -667,7 +667,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
                                             0, 2 * M_PI);
   sol_cooling_plate = new G4SubtractionSolid(G4String("sol_cooling_plate"), sol_cooling_plate, beampipe_cutout, 0, G4ThreeVector(xoffset, 0, 0.));
 
-  G4LogicalVolume *log_cooling_plate = new G4LogicalVolume(sol_cooling_plate, G4Material::GetMaterial("G4_Al"), "log_cooling_plate");
+  G4LogicalVolume *log_cooling_plate = new G4LogicalVolume(sol_cooling_plate, GetDetectorMaterial("G4_Al"), "log_cooling_plate");
   RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(0, 0, diameter_coolingtube/2+cooling_plate_height/2), log_cooling_plate,
                                             "physical_cooling_plate_f", log_module_envelope, false, 0, overlapcheck_sector), false);
   RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(0, 0, -diameter_coolingtube/2-cooling_plate_height/2), log_cooling_plate,
@@ -692,7 +692,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
       "Sensor",
       "Epoxy",
       "AIN"};
-  G4Material *materialLayer[nLayers] = {G4Material::GetMaterial("G4_GRAPHITE"), mat_ALN, G4Material::GetMaterial("G4_GRAPHITE"), G4Material::GetMaterial("G4_PLEXIGLASS"), mat_Solder_Tin, G4Material::GetMaterial("G4_Si"), mat_Epoxy, mat_ALN};
+  G4Material *materialLayer[nLayers] = {GetDetectorMaterial("G4_GRAPHITE"), mat_ALN, GetDetectorMaterial("G4_GRAPHITE"), GetDetectorMaterial("G4_PLEXIGLASS"), mat_Solder_Tin, GetDetectorMaterial("G4_Si"), mat_Epoxy, mat_ALN};
   G4double thicknessLayer[nLayers] = {
       0.25 * mm, 0.79 * mm, 0.08 * mm, 0.25 * mm, 0.03 * mm, 0.3 * mm, 0.08 * mm, 0.51 * mm};
   G4double widthLayer[nLayers] = {
@@ -770,10 +770,10 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
       "ConnectorSpace",
       "Powerboard"};
   G4Material *materialLayer_SH[nLayers_SH] = {
-      G4Material::GetMaterial("G4_GRAPHITE"),
-      G4Material::GetMaterial("G4_POLYSTYRENE"),
-      G4Material::GetMaterial("G4_AIR"),
-      G4Material::GetMaterial("G4_POLYSTYRENE")};
+      GetDetectorMaterial("G4_GRAPHITE"),
+      GetDetectorMaterial("G4_POLYSTYRENE"),
+      GetDetectorMaterial("G4_AIR"),
+      GetDetectorMaterial("G4_POLYSTYRENE")};
   G4double thicknessLayer_SH[nLayers_SH] = {
       0.25 * mm,
       1.00 * mm,
@@ -897,7 +897,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
                                                 diameter_coolingtube / 2);
         sol_cooling_tube_left = new G4SubtractionSolid(G4String("sol_cooling_tube_left" + std::to_string(row)), sol_cooling_tube_left, sol_cutout_tube_left, 0, G4ThreeVector(0,0,0));
         G4LogicalVolume *Log_cooling_tube_left = new G4LogicalVolume(sol_cooling_tube_left,  //
-                                                              G4Material::GetMaterial("G4_Al"), "Log_cooling_tube_left" + std::to_string(row));
+                                                              GetDetectorMaterial("G4_Al"), "Log_cooling_tube_left" + std::to_string(row));
         RegisterLogicalVolume(Log_cooling_tube_left);
         m_DisplayAction->AddVolume(Log_cooling_tube_left, "Cooling_tube");
 
@@ -906,7 +906,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
                                                 0.99*(diameter_coolingtube - 2*wallthickness_coolingtube) / 2,
                                                 0.99*(diameter_coolingtube - 2*wallthickness_coolingtube) / 2);
         G4LogicalVolume *Log_water_cooling_left = new G4LogicalVolume(sol_water_cooling_left,  //
-                                                              G4Material::GetMaterial("G4_WATER"), "Log_water_cooling_left" + std::to_string(row));
+                                                              GetDetectorMaterial("G4_WATER"), "Log_water_cooling_left" + std::to_string(row));
         RegisterLogicalVolume(Log_water_cooling_left);
         m_DisplayAction->AddVolume(Log_water_cooling_left, "Water_cooling");
 
@@ -941,7 +941,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
                                                 diameter_coolingtube / 2);
         sol_cooling_tube_right = new G4SubtractionSolid(G4String("sol_cooling_tube_right" + std::to_string(row)), sol_cooling_tube_right, sol_cutout_tube_right, 0, G4ThreeVector(0,0,0));
         G4LogicalVolume *Log_cooling_tube_right = new G4LogicalVolume(sol_cooling_tube_right,  //
-                                                              G4Material::GetMaterial("G4_Al"), "Log_cooling_tube_right" + std::to_string(row));
+                                                              GetDetectorMaterial("G4_Al"), "Log_cooling_tube_right" + std::to_string(row));
         RegisterLogicalVolume(Log_cooling_tube_right);
         m_DisplayAction->AddVolume(Log_cooling_tube_right, "Cooling_tube");
 
@@ -950,7 +950,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
                                                 0.99*(diameter_coolingtube - 2*wallthickness_coolingtube) / 2,
                                                 0.99*(diameter_coolingtube - 2*wallthickness_coolingtube) / 2);
         G4LogicalVolume *Log_water_cooling_right = new G4LogicalVolume(sol_water_cooling_right,  //
-                                                              G4Material::GetMaterial("G4_WATER"), "Log_water_cooling_right" + std::to_string(row));
+                                                              GetDetectorMaterial("G4_WATER"), "Log_water_cooling_right" + std::to_string(row));
         RegisterLogicalVolume(Log_water_cooling_right);
         m_DisplayAction->AddVolume(Log_water_cooling_right, "Water_cooling");
 
@@ -1005,7 +1005,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
                                                 diameter_coolingtube / 2);
         sol_cooling_tube_bothsides = new G4SubtractionSolid(G4String("sol_cooling_tube_bothsides" + std::to_string(row)), sol_cooling_tube_bothsides, sol_cutout_tube_bothsides, 0, G4ThreeVector(0,0,0));
         G4LogicalVolume *Log_cooling_tube_bothsides = new G4LogicalVolume(sol_cooling_tube_bothsides,  //
-                                                              G4Material::GetMaterial("G4_Al"), "Log_cooling_tube_bothsides" + std::to_string(row));
+                                                              GetDetectorMaterial("G4_Al"), "Log_cooling_tube_bothsides" + std::to_string(row));
         RegisterLogicalVolume(Log_cooling_tube_bothsides);
         m_DisplayAction->AddVolume(Log_cooling_tube_bothsides, "Cooling_tube");
 
@@ -1014,7 +1014,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
                                                 0.99*(diameter_coolingtube - 2*wallthickness_coolingtube) / 2,
                                                 0.99*(diameter_coolingtube - 2*wallthickness_coolingtube) / 2);
         G4LogicalVolume *Log_water_cooling_bothsides = new G4LogicalVolume(sol_water_cooling_bothsides,  //
-                                                              G4Material::GetMaterial("G4_WATER"), "Log_water_cooling_bothsides" + std::to_string(row));
+                                                              GetDetectorMaterial("G4_WATER"), "Log_water_cooling_bothsides" + std::to_string(row));
         RegisterLogicalVolume(Log_water_cooling_bothsides);
         m_DisplayAction->AddVolume(Log_water_cooling_bothsides, "Water_cooling");
 
@@ -1060,7 +1060,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
                                                 diameter_coolingtube / 2);
         sol_cooling_tube = new G4SubtractionSolid(G4String("sol_cooling_tube" + std::to_string(row)), sol_cooling_tube, sol_cutout_tube, 0, G4ThreeVector(0,0,0));
         G4LogicalVolume *Log_cooling_tube = new G4LogicalVolume(sol_cooling_tube,  //
-                                                              G4Material::GetMaterial("G4_Al"), "Log_cooling_tube" + std::to_string(row));
+                                                              GetDetectorMaterial("G4_Al"), "Log_cooling_tube" + std::to_string(row));
         RegisterLogicalVolume(Log_cooling_tube);
         m_DisplayAction->AddVolume(Log_cooling_tube, "Cooling_tube");
 
@@ -1069,7 +1069,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
                                                 0.99*(diameter_coolingtube - 2*wallthickness_coolingtube) / 2,
                                                 0.99*(diameter_coolingtube - 2*wallthickness_coolingtube) / 2);
         G4LogicalVolume *Log_water_cooling = new G4LogicalVolume(sol_water_cooling,  //
-                                                              G4Material::GetMaterial("G4_WATER"), "Log_water_cooling" + std::to_string(row));
+                                                              GetDetectorMaterial("G4_WATER"), "Log_water_cooling" + std::to_string(row));
         RegisterLogicalVolume(Log_water_cooling);
         m_DisplayAction->AddVolume(Log_water_cooling, "Water_cooling");
 
