@@ -27,6 +27,7 @@ class G4OpticalSurface;
 class G4PVPlacement;
 class PHG4RICHDisplayAction;
 class PHG4Subsystem;
+class G4Material;
 
 namespace ePHENIXRICH
 {
@@ -421,6 +422,8 @@ class ePHENIXRICHConstruction
   PHG4RICHDisplayAction* GetDisplayAction() { return m_DisplayAction; }
 
  protected:
+  static G4Material *GetDetectorMaterial(const std::string &name, const bool quit = true);
+
   G4LogicalVolume*
   RegisterLogicalVolume(G4LogicalVolume*);
 
