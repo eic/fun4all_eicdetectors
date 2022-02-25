@@ -74,8 +74,10 @@ class PHG4BarrelEcalDetector : public PHG4Detector
   struct towerposition
   {
     G4double size_xin;
+    G4double size_xinl;
     G4double size_height;
     G4double size_xout;
+    G4double size_xoutl;
     G4double sizey2;
     G4double sizez;
     G4double pTheta;
@@ -87,6 +89,7 @@ class PHG4BarrelEcalDetector : public PHG4Detector
     G4double rotz;
     int idx_j;
     int idx_k;
+    int etaFlip;
   };
 
   G4Material *GetCarbonFiber();

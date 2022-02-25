@@ -251,14 +251,14 @@ bool RawTowerBuilderByHitIndexBECAL::ReadGeometryFromTable()
 
     if (line_mapping.find("BECALtower ") != string::npos)
     {
-      unsigned idphi_j, ideta_k;
+      unsigned idphi_j, ideta_k, etaFlip;
       G4double cx, cy, cz;
       G4double rot_z, rot_y, rot_x;
-      G4double size_height, size_xin, size_xout;
+      G4double size_height, size_xin, size_xout, size_xinl, size_xoutl;
       std::string dummys;
       // cout << "BECALtower " << itow << " " << 0 << " " << Lin << " " << Lout << " " << height << " " << xgrav << " " << ygrav << " " << zgrav << " " << theta0+theta1 << endl;
 
-      if (!(iss >> dummys >> ideta_k >> idphi_j >> size_xin >> size_xout >> size_height >> cx >> cy >> cz >> rot_x >> rot_y >> rot_z))
+      if (!(iss >> dummys >> ideta_k >> idphi_j >> size_xin >> size_xinl >> size_xout >> size_xoutl >> size_height >> cx >> cy >> cz >> rot_x >> rot_y >> rot_z >> etaFlip))
       {
         std::cout << "ERROR in RawTowerBuilderByHitIndexBECAL: Failed to read line in mapping file " << m_MappingTowerFile << std::endl;
         exit(1);

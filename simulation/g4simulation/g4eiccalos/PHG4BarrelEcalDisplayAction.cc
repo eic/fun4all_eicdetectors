@@ -41,8 +41,9 @@ void PHG4BarrelEcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
     m_VisAttVec.push_back(visatt);  // for later deletion
     if (it.second == "BCalCylinder")
     {
-      visatt->SetColour(G4Colour::White());
-      visatt->SetForceWireframe(true);
+      // visatt->SetColour(G4Colour::Red());
+      visatt->SetColour(152. / 255, 1. / 255, 1. / 255, 1.0);
+      // visatt->SetForceWireframe(true);
       visatt->SetVisibility(false);
     }
     else if (it.second == "Block1")
@@ -55,7 +56,21 @@ void PHG4BarrelEcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
     {
       visatt->SetColour(G4Colour::Blue());
       // visatt->SetColour(0., 0.0, 1., 0.6);
-      visatt->SetForceWireframe(true);
+      // visatt->SetForceWireframe(true);
+    }
+    else if (it.second == "Carbon1")
+    {
+      double scale = 0.7;
+      visatt->SetColour(G4Colour(scale*1., scale*0.5, 0.));
+      // visatt->SetColour(1., 0.5, 0., 0.6);
+      // visatt->SetForceWireframe(true);
+    }
+    else if (it.second == "Carbon2")
+    {
+      double scale = 0.7;
+      // visatt->SetColour(G4Colour::Blue());
+      visatt->SetColour(G4Colour(0., 0, scale*1.));
+      // visatt->SetForceWireframe(true);
     }
     else if (it.second == "Glass")
     {
