@@ -153,7 +153,7 @@ void PHG4BarrelEcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
                              Radius - 1, Radius - 1,
                              cone2_dz, 0, 2 * M_PI);
 
-  G4ThreeVector shift_cone2 = G4ThreeVector(0, 0, -becal_length / 2 + cone2_dz);
+  G4ThreeVector shift_cone2 = G4ThreeVector(0, 0, -becal_length / 2 + cone2_dz - 3*cm);
 
   G4VSolid* cylinder_solid = new G4SubtractionSolid("BCAL_SOLID", cylinder_solid4, cone2, 0, shift_cone2);
 
@@ -268,12 +268,14 @@ PHG4BarrelEcalDetector::ConstructTower(std::map<std::string, towerposition>::ite
   if (iterator->second.idx_k % 2 == 0)
   {
     m_DisplayAction->AddVolume(glass_logic, "Block1");
+  m_DisplayAction->AddVolume(shell_logic, "Carbon1");
   }
   else
   {
     m_DisplayAction->AddVolume(glass_logic, "Block2");
+  m_DisplayAction->AddVolume(shell_logic, "Carbon2");
   }
-  m_DisplayAction->AddVolume(shell_logic, "Carbon");
+  // m_DisplayAction->AddVolume(shell_logic, "Carbon");
 
   m_AbsorberLogicalVolSet.insert(shell_logic);
   m_ScintiLogicalVolSet.insert(glass_logic);
@@ -315,16 +317,34 @@ G4GenericTrap* PHG4BarrelEcalDetector::GetTowerTrap(std::map<std::string, towerp
 {
   G4double zheight = iterator->second.size_height;
   std::vector<G4TwoVector> trapcoords(8);
-  trapcoords[0] = G4TwoVector(-iterator->second.size_xin, -iterator->second.size_xin);
-  trapcoords[1] = G4TwoVector(-iterator->second.size_xin, iterator->second.size_xin);
-  trapcoords[2] = G4TwoVector(iterator->second.size_xin, iterator->second.size_xin);
-  trapcoords[3] = G4TwoVector(iterator->second.size_xin, -iterator->second.size_xin);
+  G4double margin = m_Params->get_double_param("margin") * cm;
+  G4double x_inner = iterator->second.size_xin-margin;
+  G4double x_inner_long = iterator->second.size_xinl-margin;
+  G4double x_outer = iterator->second.size_xout-margin;
+  G4double x_outer_long = iterator->second.size_xoutl-margin;
 
-  trapcoords[4] = G4TwoVector(-iterator->second.size_xout, -iterator->second.size_xout);
-  trapcoords[5] = G4TwoVector(-iterator->second.size_xout, iterator->second.size_xout);
-  trapcoords[6] = G4TwoVector(iterator->second.size_xout, iterator->second.size_xout);
-  trapcoords[7] = G4TwoVector(iterator->second.size_xout, -iterator->second.size_xout);
+  int etaFlip = iterator->second.etaFlip;
 
+  if(!etaFlip){
+    trapcoords[0] = G4TwoVector(-x_inner_long, -x_inner);
+    trapcoords[1] = G4TwoVector(-x_inner, x_inner);
+    trapcoords[2] = G4TwoVector(x_inner, x_inner);
+    trapcoords[3] = G4TwoVector(x_inner_long, -x_inner);
+
+    trapcoords[4] = G4TwoVector(-x_outer_long, -x_outer);
+    trapcoords[5] = G4TwoVector(-x_outer, x_outer);
+    trapcoords[6] = G4TwoVector(x_outer, x_outer);
+    trapcoords[7] = G4TwoVector(x_outer_long, -x_outer);
+  } else {
+    trapcoords[0] = G4TwoVector(-x_inner, -x_inner);
+    trapcoords[1] = G4TwoVector(-x_inner_long, x_inner);
+    trapcoords[2] = G4TwoVector(x_inner_long, x_inner);
+    trapcoords[3] = G4TwoVector(x_inner, -x_inner);
+    trapcoords[4] = G4TwoVector(-x_outer, -x_outer);
+    trapcoords[5] = G4TwoVector(-x_outer_long, x_outer);
+    trapcoords[6] = G4TwoVector(x_outer_long, x_outer);
+    trapcoords[7] = G4TwoVector(x_outer, -x_outer);
+  }
   G4GenericTrap* block_tower = new G4GenericTrap("solid_tower",
     zheight / 2, trapcoords
   );
@@ -336,18 +356,40 @@ G4GenericTrap* PHG4BarrelEcalDetector::GetGlassTrap(std::map<std::string, towerp
 {
   G4double carbon_wall = m_Params->get_double_param("thickness_wall") * cm;
   G4double zheight = iterator->second.size_height;
-  if(forSubtraction) zheight+=0.01*cm;
+  G4double x_inner = iterator->second.size_xin-carbon_wall;
+  G4double x_outer = iterator->second.size_xout-carbon_wall;
+  G4double x_inner_long = iterator->second.size_xinl-carbon_wall;
+  G4double x_outer_long = iterator->second.size_xoutl-carbon_wall;
+  if(forSubtraction){
+    zheight+=0.1/50 * cm;
+    x_inner+=0.1/50 * cm;
+    x_outer+=0.1/50 * cm;
+    x_inner_long+=0.1/50 * cm;
+    x_outer_long+=0.1/50 * cm;
+  }
   std::vector<G4TwoVector> trapcoords(8);
-  trapcoords[0] = G4TwoVector(-(iterator->second.size_xin-carbon_wall), -(iterator->second.size_xin-carbon_wall));
-  trapcoords[1] = G4TwoVector(-(iterator->second.size_xin-carbon_wall), (iterator->second.size_xin-carbon_wall));
-  trapcoords[2] = G4TwoVector((iterator->second.size_xin-carbon_wall), (iterator->second.size_xin-carbon_wall));
-  trapcoords[3] = G4TwoVector((iterator->second.size_xin-carbon_wall), -(iterator->second.size_xin-carbon_wall));
+  int etaFlip = iterator->second.etaFlip;
 
-  trapcoords[4] = G4TwoVector(-(iterator->second.size_xout-carbon_wall), -(iterator->second.size_xout-carbon_wall));
-  trapcoords[5] = G4TwoVector(-(iterator->second.size_xout-carbon_wall), (iterator->second.size_xout-carbon_wall));
-  trapcoords[6] = G4TwoVector((iterator->second.size_xout-carbon_wall), (iterator->second.size_xout-carbon_wall));
-  trapcoords[7] = G4TwoVector((iterator->second.size_xout-carbon_wall), -(iterator->second.size_xout-carbon_wall));
+  if(!etaFlip){
+    trapcoords[0] = G4TwoVector(-x_inner_long, -x_inner);
+    trapcoords[1] = G4TwoVector(-x_inner, x_inner);
+    trapcoords[2] = G4TwoVector(x_inner, x_inner);
+    trapcoords[3] = G4TwoVector(x_inner_long, -x_inner);
 
+    trapcoords[4] = G4TwoVector(-x_outer_long, -x_outer);
+    trapcoords[5] = G4TwoVector(-x_outer, x_outer);
+    trapcoords[6] = G4TwoVector(x_outer, x_outer);
+    trapcoords[7] = G4TwoVector(x_outer_long, -x_outer);
+  } else {
+    trapcoords[0] = G4TwoVector(-x_inner, -x_inner);
+    trapcoords[1] = G4TwoVector(-x_inner_long, x_inner);
+    trapcoords[2] = G4TwoVector(x_inner_long, x_inner);
+    trapcoords[3] = G4TwoVector(x_inner, -x_inner);
+    trapcoords[4] = G4TwoVector(-x_outer, -x_outer);
+    trapcoords[5] = G4TwoVector(-x_outer_long, x_outer);
+    trapcoords[6] = G4TwoVector(x_outer_long, x_outer);
+    trapcoords[7] = G4TwoVector(x_outer, -x_outer);
+  }
   G4GenericTrap* block_tower = new G4GenericTrap("solid_tower_glass",
     zheight / 2, trapcoords
   );
@@ -375,14 +417,14 @@ int PHG4BarrelEcalDetector::ParseParametersFromTable()
 
     if (line_mapping.find("BECALtower ") != string::npos)
     {
-      unsigned idphi_j, ideta_k;
+      unsigned idphi_j, ideta_k, etaFlip;
       G4double cx, cy, cz;
       G4double rot_z, rot_y, rot_x;
-      G4double size_height, size_xin, size_xout;
+      G4double size_height, size_xin, size_xout, size_xinl, size_xoutl;
       std::string dummys;
       // cout << "BECALtower " << itow << " " << 0 << " " << Lin << " " << Lout << " " << height << " " << xgrav << " " << ygrav << " " << zgrav << " " << theta0+theta1 << endl;
 
-      if (!(iss >> dummys >> ideta_k >> idphi_j >> size_xin >> size_xout >> size_height >> cx >> cy >> cz >> rot_x >> rot_y >> rot_z))
+      if (!(iss >> dummys >> ideta_k >> idphi_j >> size_xin >> size_xinl >> size_xout >> size_xoutl >> size_height >> cx >> cy >> cz >> rot_x >> rot_y >> rot_z >> etaFlip))
       {
         std::cout << "ERROR in PHG4BarrelEcalDetector: Failed to read line in mapping file " << m_Params->get_string_param("mapping_file") << std::endl;
         gSystem->Exit(1);
@@ -397,10 +439,13 @@ int PHG4BarrelEcalDetector::ParseParametersFromTable()
       /* insert tower into tower map */
       towerposition tower_new;
       tower_new.size_xin = size_xin * cm;
+      tower_new.size_xinl = size_xinl * cm;
       tower_new.size_xout = size_xout * cm;
+      tower_new.size_xoutl = size_xoutl * cm;
       tower_new.size_height = size_height * cm;
       tower_new.sizey2 = 0 * cm;
       tower_new.sizez = 0 * cm;
+      tower_new.etaFlip = etaFlip;
       tower_new.pTheta = 0;
       tower_new.centerx = cx * cm;
       tower_new.centery = cy * cm;
@@ -474,6 +519,11 @@ int PHG4BarrelEcalDetector::ParseParametersFromTable()
       if (parit != m_GlobalParameterMap.end())
       {
         m_Params->set_double_param("thickness_wall", parit->second);  // in cm
+      }
+      parit = m_GlobalParameterMap.find("margin");
+      if (parit != m_GlobalParameterMap.end())
+      {
+        m_Params->set_double_param("margin", parit->second);  // in cm
       }
       parit = m_GlobalParameterMap.find("silicon_width_half");
       if (parit != m_GlobalParameterMap.end())

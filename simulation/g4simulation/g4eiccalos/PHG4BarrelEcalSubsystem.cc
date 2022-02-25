@@ -146,6 +146,7 @@ void PHG4BarrelEcalSubsystem::SetDefaultParameters()
   set_default_double_param("cone2_h", 20.5);
   set_default_double_param("cone2_dz", 25.5);
   set_default_double_param("thickness_wall", 0.1);
+  set_default_double_param("margin", 0.01);
   set_default_double_param("silicon_width_half", 0.05);
   set_default_double_param("kapton_width_half", 0.05);
   set_default_double_param("SIO2_width_half", 0.05);
