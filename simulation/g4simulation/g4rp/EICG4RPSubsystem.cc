@@ -152,10 +152,69 @@ void EICG4RPSubsystem::SetDefaultParameters()
   set_default_int_param("use_g4steps", 0);
   set_default_double_param("tmin", NAN);
   set_default_double_param("tmax", NAN);
+
+  set_default_double_param("Number_layers"   	 , 0);
+  set_default_double_param("Sensor_size"   	 , 0);
+
+  set_default_double_param("Layer1_pos_x"   	 , 0);
+  set_default_double_param("Layer1_pos_y" 	 , 0);
+  set_default_double_param("Layer1_pos_z" 	 , 0);
+  set_default_double_param("Layer1_size_x" 	 , 0);
+  set_default_double_param("Layer1_size_y" 	 , 0);
+  set_default_double_param("Layer1_10sigma_x"    , 0);
+  set_default_double_param("Layer1_10sigma_y"    , 0);
+  set_default_double_param("Layer1_Si_size_z"    , 0);
+  set_default_double_param("Layer1_Cu_size_z"    , 0);
+  set_default_double_param("Layer1_rot_y"        , 0); 	
+
+  set_default_double_param("Layer2_pos_x"   	 , 0);
+  set_default_double_param("Layer2_pos_y" 	 , 0);
+  set_default_double_param("Layer2_pos_z" 	 , 0);
+  set_default_double_param("Layer2_size_x" 	 , 0);
+  set_default_double_param("Layer2_size_y" 	 , 0);
+  set_default_double_param("Layer2_10sigma_x"    , 0);
+  set_default_double_param("Layer2_10sigma_y"    , 0);
+  set_default_double_param("Layer2_Si_size_z"    , 0);
+  set_default_double_param("Layer2_Cu_size_z"    , 0);
+  set_default_double_param("Layer2_rot_y"        , 0);
+
 }
 
 //_______________________________________________________________________
 void EICG4RPSubsystem::SetParameterFile(std::string &filename)
 {
   set_string_param("parameter_file", filename );
+
+  std::ifstream infile;
+  std::string line;
+
+  std::string paramFile = filename;   
+  infile.open( paramFile );
+
+  if(!infile.is_open()) {
+    std::cout << "ERROR in EICG4RPDetector: Failed to open parameter file " << paramFile << std::endl;
+   gSystem->Exit(1);
+  }
+
+  while( std::getline(infile, line) ) {
+  
+    std::string name;
+    double value;
+  
+    std::istringstream iss( line );
+  
+    // skip comment lines
+    if( line.find("#") != std::string::npos ) { continue; }
+  
+    if( !(iss >> name >> value) ) {
+      std::cout << "Could not decode " << line << std::endl;
+      gSystem->Exit(1);
+    }
+
+    set_double_param(name, value);
+
+  }
+
+  infile.close();
+
 }
