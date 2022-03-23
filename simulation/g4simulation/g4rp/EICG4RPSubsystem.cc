@@ -178,6 +178,28 @@ void EICG4RPSubsystem::SetDefaultParameters()
   set_default_double_param("Layer2_Cu_size_z"    , 0);
   set_default_double_param("Layer2_rot_y"        , 0);
 
+  set_default_double_param("Layer3_pos_x"   	 , 0);
+  set_default_double_param("Layer3_pos_y" 	 , 0);
+  set_default_double_param("Layer3_pos_z" 	 , 0);
+  set_default_double_param("Layer3_size_x" 	 , 0);
+  set_default_double_param("Layer3_size_y" 	 , 0);
+  set_default_double_param("Layer3_10sigma_x"    , 0);
+  set_default_double_param("Layer3_10sigma_y"    , 0);
+  set_default_double_param("Layer3_Si_size_z"    , 0);
+  set_default_double_param("Layer3_Cu_size_z"    , 0);
+  set_default_double_param("Layer3_rot_y"        , 0);
+
+  set_default_double_param("Layer4_pos_x"   	 , 0);
+  set_default_double_param("Layer4_pos_y" 	 , 0);
+  set_default_double_param("Layer4_pos_z" 	 , 0);
+  set_default_double_param("Layer4_size_x" 	 , 0);
+  set_default_double_param("Layer4_size_y" 	 , 0);
+  set_default_double_param("Layer4_10sigma_x"    , 0);
+  set_default_double_param("Layer4_10sigma_y"    , 0);
+  set_default_double_param("Layer4_Si_size_z"    , 0);
+  set_default_double_param("Layer4_Cu_size_z"    , 0);
+  set_default_double_param("Layer4_rot_y"        , 0);
+
 }
 
 //_______________________________________________________________________
