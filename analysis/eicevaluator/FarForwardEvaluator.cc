@@ -192,6 +192,11 @@ int FarForwardEvaluator::Init(PHCompositeNode* topNode)
   h1_RP_E_abs = new TH1F("RP_E_abs", "E Absorbed", 120, 0.0, 60.0);
 
   std::string paramFile = std::string(getenv("CALIBRATIONROOT")) + "/RomanPots/RP_parameters_IP6.dat";
+  if (_ip_str != "IP6")
+  {
+    paramFile = std::string(getenv("CALIBRATIONROOT")) + "/RomanPots/RP_parameters_IP8.dat";
+  }
+  
   int Nlayers = GetParameterFromFile <int> (paramFile, "Number_layers");
 
   for( int layer = 0; layer < Nlayers; layer++ ) {
@@ -307,7 +312,9 @@ int FarForwardEvaluator::process_g4hits_RomanPots(PHCompositeNode* topNode)
     {
       h2_RP_XY->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
       
-      h2_RP_layers_XY[ hit_iter->second->get_layer() ]->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
+      if( h2_RP_layers_XY[ hit_iter->second->get_layer() ] ) {
+        h2_RP_layers_XY[ hit_iter->second->get_layer() ]->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
+      }
 
       g4rphitntuple->Fill(hit_iter->second->get_layer(),
                           hit_iter->second->get_hit_type(),
@@ -334,8 +341,10 @@ int FarForwardEvaluator::process_g4hits_RomanPots(PHCompositeNode* topNode)
 
 	  for (PHG4HitContainer::ConstIterator hit_iter = hit_range.first; hit_iter != hit_range.second; hit_iter++)
 	  {
-		  h2_RP_virtlayers_XY[ hit_iter->second->get_layer() ]->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
-	  }
+            if( h2_RP_virtlayers_XY[ hit_iter->second->get_layer() ] ) {	  
+              h2_RP_virtlayers_XY[ hit_iter->second->get_layer() ]->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
+            }
+          }
 
   }
 
