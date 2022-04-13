@@ -156,54 +156,24 @@ void EICG4RPSubsystem::SetDefaultParameters()
   set_default_double_param("Number_layers"   	 , 0);
   set_default_double_param("Sensor_size"   	 , 0);
 
-  set_default_double_param("Layer1_pos_x"   	 , 0);
-  set_default_double_param("Layer1_pos_y" 	 , 0);
-  set_default_double_param("Layer1_pos_z" 	 , 0);
-  set_default_double_param("Layer1_size_x" 	 , 0);
-  set_default_double_param("Layer1_size_y" 	 , 0);
-  set_default_double_param("Layer1_10sigma_x"    , 0);
-  set_default_double_param("Layer1_10sigma_y"    , 0);
-  set_default_double_param("Layer1_Si_size_z"    , 0);
-  set_default_double_param("Layer1_Cu_size_z"    , 0);
-  set_default_double_param("Layer1_rot_y"        , 0); 	
-
-  set_default_double_param("Layer2_pos_x"   	 , 0);
-  set_default_double_param("Layer2_pos_y" 	 , 0);
-  set_default_double_param("Layer2_pos_z" 	 , 0);
-  set_default_double_param("Layer2_size_x" 	 , 0);
-  set_default_double_param("Layer2_size_y" 	 , 0);
-  set_default_double_param("Layer2_10sigma_x"    , 0);
-  set_default_double_param("Layer2_10sigma_y"    , 0);
-  set_default_double_param("Layer2_Si_size_z"    , 0);
-  set_default_double_param("Layer2_Cu_size_z"    , 0);
-  set_default_double_param("Layer2_rot_y"        , 0);
-
-  set_default_double_param("Layer3_pos_x"   	 , 0);
-  set_default_double_param("Layer3_pos_y" 	 , 0);
-  set_default_double_param("Layer3_pos_z" 	 , 0);
-  set_default_double_param("Layer3_size_x" 	 , 0);
-  set_default_double_param("Layer3_size_y" 	 , 0);
-  set_default_double_param("Layer3_10sigma_x"    , 0);
-  set_default_double_param("Layer3_10sigma_y"    , 0);
-  set_default_double_param("Layer3_Si_size_z"    , 0);
-  set_default_double_param("Layer3_Cu_size_z"    , 0);
-  set_default_double_param("Layer3_rot_y"        , 0);
-
-  set_default_double_param("Layer4_pos_x"   	 , 0);
-  set_default_double_param("Layer4_pos_y" 	 , 0);
-  set_default_double_param("Layer4_pos_z" 	 , 0);
-  set_default_double_param("Layer4_size_x" 	 , 0);
-  set_default_double_param("Layer4_size_y" 	 , 0);
-  set_default_double_param("Layer4_10sigma_x"    , 0);
-  set_default_double_param("Layer4_10sigma_y"    , 0);
-  set_default_double_param("Layer4_Si_size_z"    , 0);
-  set_default_double_param("Layer4_Cu_size_z"    , 0);
-  set_default_double_param("Layer4_rot_y"        , 0);
-
+  // maximum of 4 layers for the IP8 config, only layers 1 and 2 used for IP6
+  for( int l=1; l <= 4; l++ ) {
+    set_default_double_param(Form("Layer%i_pos_x", l)   	, 0);
+    set_default_double_param(Form("Layer%i_pos_y", l) 	        , 0);
+    set_default_double_param(Form("Layer%i_pos_z", l) 	        , 0);
+    set_default_double_param(Form("Layer%i_size_x", l) 	        , 0);
+    set_default_double_param(Form("Layer%i_size_y", l) 	        , 0);
+    set_default_double_param(Form("Layer%i_beamHoleHW_x", l)    , 0);
+    set_default_double_param(Form("Layer%i_beamHoleHW_y", l)    , 0);
+    set_default_double_param(Form("Layer%i_Si_size_z", l)       , 0);
+    set_default_double_param(Form("Layer%i_Cu_size_z", l)       , 0);
+    set_default_double_param(Form("Layer%i_rot_y", l)           , 0); 	
+  }     
+  
 }
 
 //_______________________________________________________________________
-void EICG4RPSubsystem::SetParameterFile(std::string &filename)
+void EICG4RPSubsystem::SetParametersFromFile( std::string filename )
 {
   set_string_param("parameter_file", filename );
 
@@ -214,26 +184,86 @@ void EICG4RPSubsystem::SetParameterFile(std::string &filename)
   infile.open( paramFile );
 
   if(!infile.is_open()) {
-    std::cout << "ERROR in EICG4RPDetector: Failed to open parameter file " << paramFile << std::endl;
-   gSystem->Exit(1);
+    std::cout << "ERROR in EICG4RPSubsystem: Failed to open parameter file " << paramFile << std::endl;
+    gSystem->Exit(1);
   }
 
   while( std::getline(infile, line) ) {
-  
+
     std::string name;
     double value;
-  
+
     std::istringstream iss( line );
-  
+
     // skip comment lines
     if( line.find("#") != std::string::npos ) { continue; }
-  
+
+    // grab the line
     if( !(iss >> name >> value) ) {
       std::cout << "Could not decode " << line << std::endl;
       gSystem->Exit(1);
     }
 
-    set_double_param(name, value);
+    // simply set all parameters NOT related to the beam hole
+    if( name.find("beamHoleHW") == std::string::npos ) {
+      set_double_param( name, value );
+    }
+    else { // parse beam hole size based on chosen beam energy and config
+
+      std::string prefix = name.substr( 0, name.find("__") ); // LayerN_beamHoleHW_x(or)y
+      std::string expected_string = prefix;
+
+      if( m_beamProfile.find("eA") != std::string::npos ) { // Heavy ions
+        expected_string += "__eA";
+
+        double ionE_diff_1 = fabs( m_ionE - 110 );
+        double ionE_diff_2 = fabs( m_ionE - 41 );
+        double elecE_diff_1 = fabs( m_elecE - 18 );
+        double elecE_diff_2 = fabs( m_elecE - 10 );
+        double elecE_diff_3 = fabs( m_elecE - 5 );
+
+        if( ionE_diff_2 < ionE_diff_1 ) {
+          expected_string += "_41x5";
+        }
+        else {
+          if( elecE_diff_3 < elecE_diff_2 )      { expected_string += "_110x5"; }
+          else if( elecE_diff_2 < elecE_diff_1 ) { expected_string += "_110x10"; }
+          else                                   { expected_string += "_110x18"; }
+        }
+      }
+      else { // protons
+        if( m_beamProfile.find("high-acceptance") != std::string::npos ) { 
+          expected_string += "__epHA"; 
+        }
+        else { 
+          expected_string += "__epHD"; 
+        }
+
+        double ionE_diff_1 = fabs( m_ionE - 275 );
+        double ionE_diff_2 = fabs( m_ionE - 100 );
+        double ionE_diff_3 = fabs( m_ionE - 41 );
+        double elecE_diff_1 = fabs( m_elecE - 18 );
+        double elecE_diff_2 = fabs( m_elecE - 10 );
+        double elecE_diff_3 = fabs( m_elecE - 5 );
+
+        if( ionE_diff_3 < ionE_diff_2 ) { // 41 GeV protons
+          expected_string += "_41x5";
+        }
+        else if( ionE_diff_2 < ionE_diff_1 ) { // 100 GeV protons
+          if( elecE_diff_3 < elecE_diff_2 )  { expected_string += "_100x5"; }
+          else                               { expected_string += "_100x10"; }
+        }
+        else {
+          if( elecE_diff_2 < elecE_diff_1 )  { expected_string += "_275x10"; }
+          else                               { expected_string += "_275x18"; }
+        }
+      }
+
+      // skip undesired beam hole configuration
+      if( name.compare( expected_string ) != 0 ) { continue; }
+      
+      set_double_param( prefix, value);
+    }
 
   }
 

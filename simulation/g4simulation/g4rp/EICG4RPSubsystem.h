@@ -52,7 +52,10 @@ class EICG4RPSubsystem : public PHG4DetectorSubsystem
 
   void SaveAllHits(bool i = true) { m_SaveAllHitsFlag = i; }
 
-  void SetParameterFile( std::string &filename );
+  void SetParametersFromFile( std::string filename );
+  void SetBeamConfig( std::string val ) { m_beamProfile = val; }
+  void SetIonBeamEnergy( double val ) { m_ionE = val; }
+  void SetElectronBeamEnergy( double val ) { m_elecE = val; }
 
  protected:
   // \brief Set default parameter values
@@ -68,6 +71,10 @@ class EICG4RPSubsystem : public PHG4DetectorSubsystem
   PHG4SteppingAction* m_SteppingAction;
 
   bool m_SaveAllHitsFlag = false;
+
+  std::string m_beamProfile;
+  double m_ionE;
+  double m_elecE;
 };
 
-#endif  // EICG4B0SUBSYSTEM_H
+#endif  // EICG4RPSUBSYSTEM_H
