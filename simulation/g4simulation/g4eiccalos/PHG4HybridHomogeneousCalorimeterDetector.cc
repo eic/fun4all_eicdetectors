@@ -11,6 +11,7 @@
 
 #include <Geant4/G4Box.hh>
 #include <Geant4/G4Cons.hh>
+#include <Geant4/G4NistManager.hh>
 #include <Geant4/G4Element.hh>  // for G4Element
 #include <Geant4/G4LogicalBorderSurface.hh>
 #include <Geant4/G4LogicalSkinSurface.hh>

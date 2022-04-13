@@ -138,14 +138,14 @@ void PHG4ForwardDualReadoutDetector::ConstructMe(G4LogicalVolume* logicWorld)
     G4VSolid* beampipe_cutout = new G4Cons("hdrcalo_beampipe_cutout",
                                         0, _rMin1,
                                         0, _rMin1,
-                                        _dZ / 2.0,
+                                        2*_dZ / 2.0,
                                         _sPhi, _dPhi);
     drcalo_envelope_solid = new G4Box("hdrcalo_envelope_solid_precut",
                                         _rMax1,
                                         _rMax1,
                                         _tower_dz / 2.0);
     drcalo_envelope_solid = new G4SubtractionSolid(G4String("hdrcalo_envelope_solid"), drcalo_envelope_solid, beampipe_cutout
-                                                            , 0 ,G4ThreeVector( 0 , 0 ,0.));
+                                                            , 0 ,G4ThreeVector( _center_offset_x , 0 ,0.));
   } else {
     drcalo_envelope_solid = new G4Cons("hdrcalo_envelope_solid",
                                         _rMin1, _rMax1,
@@ -156,7 +156,7 @@ void PHG4ForwardDualReadoutDetector::ConstructMe(G4LogicalVolume* logicWorld)
 
   G4LogicalVolume* drcalo_envelope_log = new G4LogicalVolume(drcalo_envelope_solid, Air, G4String("hdrcalo_envelope"), 0, 0, 0);
 
-  m_DisplayAction->AddVolume(drcalo_envelope_log, "FdrcaloEnvelope");
+  m_DisplayAction->AddVolume(drcalo_envelope_log, "Invisible");
 
   //Define rotation attributes for envelope cone
   G4RotationMatrix drcalo_rotm;
@@ -215,7 +215,7 @@ void PHG4ForwardDualReadoutDetector::ConstructMe(G4LogicalVolume* logicWorld)
         // replicate singletower tower design currRowNtow times along x-axis
         new G4PVReplica("DRCalRowLeftPhysical" + std::to_string(row),singletower,DRCalRowLeftLogical,
                         kXAxis,((currRowNtowMod - currRowNtowInner) / 2 + offsetrows),_tower_dx);
-
+        m_DisplayAction->AddVolume(DRCalRowLeftLogical, "FdrcaloEnvelope");
         ostringstream name_row_twr_left;
         name_row_twr_left.str("");
         name_row_twr_left << _towerlogicnameprefix << "_row_" << row << "_left" << endl;
@@ -228,6 +228,7 @@ void PHG4ForwardDualReadoutDetector::ConstructMe(G4LogicalVolume* logicWorld)
         // replicate singletower tower design currRowNtow times along x-axis
         new G4PVReplica("DRCalRowRightPhysical" + std::to_string(row),singletower,DRCalRowRightLogical,
                         kXAxis,((currRowNtowMod - currRowNtowInner) / 2 - offsetrows ),_tower_dx);
+        m_DisplayAction->AddVolume(DRCalRowRightLogical, "FdrcaloEnvelope");
 
         ostringstream name_row_twr_right;
         name_row_twr_right.str("");
@@ -251,6 +252,7 @@ void PHG4ForwardDualReadoutDetector::ConstructMe(G4LogicalVolume* logicWorld)
         // replicate singletower tower design currRowNtow times along x-axis
         new G4PVReplica("DRCalRowPhysical" + std::to_string(row),singletower,DRCalRowLogical,
                         kXAxis,(currRowNtowMod - currRowNtowInner) / 2,_tower_dx);
+        m_DisplayAction->AddVolume(DRCalRowLogical, "FdrcaloEnvelope");
 
         ostringstream name_row_twr;
         name_row_twr.str("");
@@ -274,6 +276,7 @@ void PHG4ForwardDualReadoutDetector::ConstructMe(G4LogicalVolume* logicWorld)
         // replicate singletower tower design currRowNtow times along x-axis
         new G4PVReplica("DRCalRowPhysical" + std::to_string(row),singletower,DRCalRowLogical,
                         kXAxis,2 * rowNtow,_tower_dx);
+        m_DisplayAction->AddVolume(DRCalRowLogical, "FdrcaloEnvelope");
 
         ostringstream name_row_twr;
         name_row_twr.str("");
@@ -288,6 +291,7 @@ void PHG4ForwardDualReadoutDetector::ConstructMe(G4LogicalVolume* logicWorld)
         // replicate singletower tower design currRowNtow times along x-axis
         new G4PVReplica("DRCalRowPhysical" + std::to_string(row),singletower,DRCalRowLogical,
                         kXAxis,currRowNtow,_tower_dx);
+        m_DisplayAction->AddVolume(DRCalRowLogical, "FdrcaloEnvelope");
 
         ostringstream name_row_twr;
         name_row_twr.str("");
@@ -322,6 +326,8 @@ PHG4ForwardDualReadoutDetector::ConstructTower(int type)
                                                             material_air,
                                                             "base_tower_logic",
                                                             0, 0, 0);
+  m_DisplayAction->AddVolume(base_tower_logic, "Invisible");
+
   int maxsubtow = (int) ( (_tower_dx) / (_tower_readout));
   G4double addtowsize = (_tower_dx - (maxsubtow * _tower_readout))/maxsubtow;
   // 2x2 fiber tower base element
@@ -335,7 +341,7 @@ PHG4ForwardDualReadoutDetector::ConstructTower(int type)
                                                             "single_tower_logic",
                                                             0, 0, 0);
 
-  m_DisplayAction->AddVolume(single_tower_logic, "FdrcaloEnvelope");
+  m_DisplayAction->AddVolume(single_tower_logic, "Invisible");
   //create geometry volumes to place inside single_tower
 
   G4double diameter_fiber = _scintFiber_diam;
@@ -545,7 +551,7 @@ PHG4ForwardDualReadoutDetector::ConstructTower(int type)
       new G4PVReplica("DRCalRowPhysicalBase" + std::to_string(row),single_tower_logic,DRCalRowLogical,
                       kXAxis, rowNtow, _tower_readout + addtowsize);
 
-      m_DisplayAction->AddVolume(DRCalRowLogical, "FdrcaloEnvelope");
+      m_DisplayAction->AddVolume(DRCalRowLogical, "Invisible");
       ostringstream name_row_twr;
       name_row_twr.str("");
       name_row_twr << _towerlogicnameprefix << "_row_" << row << endl;
@@ -582,6 +588,7 @@ PHG4ForwardDualReadoutDetector::ConstructTowerFCStyle(int type)
                                                             material_air,
                                                             "base_tower_logic",
                                                             0, 0, 0);
+  m_DisplayAction->AddVolume(base_tower_logic, "Invisible");
   G4double copperTubeDiam = _tower_readout / 2;
   int maxsubtow = (int) ( (_tower_dx) / (2 * copperTubeDiam));
   G4double addtowsize = (_tower_dx - (maxsubtow * 2 * copperTubeDiam))/maxsubtow;
@@ -596,7 +603,7 @@ PHG4ForwardDualReadoutDetector::ConstructTowerFCStyle(int type)
                                                             "single_tower_logic",
                                                             0, 0, 0);
 
-  m_DisplayAction->AddVolume(single_tower_logic, "FdrcaloEnvelope");
+  m_DisplayAction->AddVolume(single_tower_logic, "Invisible");
   //create geometry volumes to place inside single_tower
 
   G4double diameter_fiber = _scintFiber_diam;
@@ -729,7 +736,7 @@ PHG4ForwardDualReadoutDetector::ConstructTowerFCStyle(int type)
       new G4PVReplica("DRCalRowPhysical",single_tower_logic,DRCalRowLogical,
                       kXAxis, rowNtow, 2 * copperTubeDiam + addtowsize);
 
-      m_DisplayAction->AddVolume(DRCalRowLogical, "FdrcaloEnvelope");
+      m_DisplayAction->AddVolume(DRCalRowLogical, "Invisible");
       ostringstream name_row_twr;
       name_row_twr.str("");
       name_row_twr << _towerlogicnameprefix << "_row_" << row << endl;

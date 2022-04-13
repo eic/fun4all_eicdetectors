@@ -133,7 +133,6 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
 
   //Create the envelope = 'world volume' for the calorimeter
   G4AssemblyVolume* assemblyDetector = new G4AssemblyVolume();
-
   // Single module with length based on readout (contains 14 LGADs [counting across both sides] in x-direction and 6 in z-direction)
   G4double baseplate_length = 43.1 * mm;
   G4double baseplate_width = 56.5 * mm / 2;
