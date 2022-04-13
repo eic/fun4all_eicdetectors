@@ -302,11 +302,15 @@ G4Material* PHG4BarrelEcalDetector::GetSciGlass()
   G4Material* sciglass = G4Material::GetMaterial(matname, false);  // false suppresses warning that material does not exist
   if (!sciglass)
   {
+    G4Element* ele_Ba = new G4Element("Barium", "Ba", 56., 137.3 * g / mole);
+    G4Element* ele_Gd = new G4Element("Gadolinium", "Gd", 64., 157.3 * g / mole);
     G4double density;
     G4int ncomponents;
     sciglass = new G4Material(matname, density = 4.22 * g / cm3, ncomponents = 4, kStateSolid);
-    sciglass->AddElement(G4Element::GetElement("Ba"), 0.3875);
-    sciglass->AddElement(G4Element::GetElement("Gd"), 0.2146);
+    sciglass->AddElement(ele_Ba, 0.3875);
+    sciglass->AddElement(ele_Gd, 0.2146);
+    // sciglass->AddElement(G4Element::GetElement("Ba"), 0.3875);
+    // sciglass->AddElement(G4Element::GetElement("Gd"), 0.2146);
     sciglass->AddElement(G4Element::GetElement("Si"), 0.1369);
     sciglass->AddElement(G4Element::GetElement("O"), 0.2610);
   }

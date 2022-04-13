@@ -39,15 +39,23 @@ void PHG4ForwardDualReadoutDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *
     }
     G4VisAttributes *visatt = new G4VisAttributes();
     visatt->SetVisibility(true);
+    visatt->SetVisibility(false);
     visatt->SetForceSolid(true);
     m_VisAttVec.push_back(visatt);  // for later deletion
     if (it.second == "Absorber")
     {
       visatt->SetColour(G4Colour::Gray());
+      visatt->SetVisibility(true);
+    }
+    else if (it.second == "Invisible")
+    {
+      visatt->SetVisibility(false);
     }
     else if (it.second == "FdrcaloEnvelope")
     {
-      visatt->SetVisibility(false);
+      visatt->SetVisibility(true);
+      visatt->SetForceWireframe(true);
+      visatt->SetColour(G4Colour::Gray());
     }
     else if (it.second == "TestScint")
     {

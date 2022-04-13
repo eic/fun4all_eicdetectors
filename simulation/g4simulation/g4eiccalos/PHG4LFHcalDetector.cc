@@ -166,9 +166,9 @@ PHG4LFHcalDetector::ConstructTower()
   G4double thickness_scintillator = m_Params->get_double_param("thickness_scintillator") * cm;
   G4int nlayers = TowerDz / (thickness_absorber + thickness_scintillator);
   G4Material* material_scintillator = GetScintillatorMaterial();  //G4Material::GetMaterial(m_Params->get_string_param("scintillator"));
-  G4Material* material_absorber = G4Material::GetMaterial(m_Params->get_string_param("absorber"));
-  G4Material* material_absorber_W = G4Material::GetMaterial(m_Params->get_string_param("absorber_W"));
-  G4Material* material_wls = GetWLSFiberMaterial();  //G4Material::GetMaterial(m_Params->get_string_param("scintillator"));
+  G4Material* material_absorber = GetDetectorMaterial(m_Params->get_string_param("absorber"));
+  G4Material* material_absorber_W = GetDetectorMaterial(m_Params->get_string_param("absorber_W"));
+  G4Material* material_wls = GetWLSFiberMaterial();  //GetDetectorMaterial(m_Params->get_string_param("scintillator"));
   int embed_fiber = m_Params->get_int_param("embed_fiber");
   G4double fiber_thickness = 0.2 * mm;
   // G4double fiber_thickness        = 1.0*mm;
@@ -398,7 +398,7 @@ PHG4LFHcalDetector::ConstructTower()
   //**********************************************************************************************
   if (thin_frame_width > 0)
   {
-    G4Material* material_frame = G4Material::GetMaterial("G4_Fe");
+    G4Material* material_frame = GetDetectorMaterial("G4_Fe");
 
     G4VSolid* solid_frame_plate = new G4Box("single_plate_frame",
                                             (thin_frame_width) / 2, (TowerDy - 2 * thick_frame_width) / 2, TowerDz / 2);
@@ -702,9 +702,12 @@ G4Material* PHG4LFHcalDetector::GetCoatingMaterial()
   // TiO2
   //--------------------------------------------------
   G4double density, fractionmass;
+  G4double a, z;
   G4int ncomponents;
   G4Material* material_TiO2 = new G4Material("TiO2_FEMC", density = 1.52 * g / cm3, ncomponents = 2);
-  material_TiO2->AddElement(G4Element::GetElement("Ti"), 1);
+  G4Element* Ti = new G4Element("Titanium", "Ti", z=22, a=  47.8670*g/mole);
+  material_TiO2->AddElement(Ti, 1);
+  // material_TiO2->AddElement(G4Element::GetElement("Ti"), 1);
   material_TiO2->AddElement(G4Element::GetElement("O"), 2);
 
   //--------------------------------------------------

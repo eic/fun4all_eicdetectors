@@ -32,10 +32,13 @@ void G4EicDircDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
   for (auto it : m_LogicalVolumeMap)
   {
     m_MyVolume = it.first;
-    if (m_MyVolume->GetVisAttributes())
-    {
-      continue;
-    }
+    // if (m_MyVolume->GetVisAttributes())
+    // {
+    //   m_VisAtt = new G4VisAttributes();
+    //   m_VisAtt->SetForceWireframe(false);
+    //   m_VisAtt->SetForceSolid(true);
+    //   continue;
+    // }
     m_VisAtt = new G4VisAttributes();
     if (m_Params->get_int_param("blackhole"))
     {
@@ -47,6 +50,7 @@ void G4EicDircDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
     {
       PHG4Utils::SetColour(m_VisAtt, m_Params->get_string_param("material"));
       m_VisAtt->SetVisibility(true);
+      m_VisAtt->SetForceWireframe(false);
       m_VisAtt->SetForceSolid(true);
     }
     if (m_Colour)
@@ -55,6 +59,7 @@ void G4EicDircDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
                           m_Colour->GetGreen(),
                           m_Colour->GetBlue(),
                           m_Colour->GetAlpha());
+      m_VisAtt->SetForceWireframe(false);
       m_VisAtt->SetVisibility(true);
       m_VisAtt->SetForceSolid(true);
     }

@@ -256,6 +256,8 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   , _track_x(0)
   , _track_y(0)
   , _track_z(0)
+  , _track_ndf(0)
+  , _track_chi2(0)
   , _track_dca(0)
   , _track_dca_2d(0)
   , _track_trueID(0)
@@ -484,6 +486,8 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   _track_x = new float[_maxNTracks];
   _track_y = new float[_maxNTracks];
   _track_z = new float[_maxNTracks];
+  _track_ndf = new float[_maxNTracks];
+  _track_chi2 = new float[_maxNTracks];
   _track_dca = new float[_maxNTracks];
   _track_dca_2d = new float[_maxNTracks];
   _track_source = new unsigned short[_maxNTracks];
@@ -583,6 +587,8 @@ int EventEvaluatorEIC::Init(PHCompositeNode* topNode)
     _event_tree->Branch("tracks_x", _track_x, "tracks_x[nTracks]/F");
     _event_tree->Branch("tracks_y", _track_y, "tracks_y[nTracks]/F");
     _event_tree->Branch("tracks_z", _track_z, "tracks_z[nTracks]/F");
+    _event_tree->Branch("tracks_ndf", _track_ndf, "tracks_ndf[nTracks]/F");
+    _event_tree->Branch("tracks_chi2", _track_chi2, "tracks_chi2[nTracks]/F");
     _event_tree->Branch("tracks_dca", _track_dca, "tracks_dca[nTracks]/F");
     _event_tree->Branch("tracks_dca_2d", _track_dca_2d, "tracks_dca_2d[nTracks]/F");
     _event_tree->Branch("tracks_trueID", _track_trueID, "tracks_trueID[nTracks]/F");
@@ -3196,6 +3202,8 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
             _track_x[_nTracks] = track->get_x();
             _track_y[_nTracks] = track->get_y();
             _track_z[_nTracks] = track->get_z();
+            _track_ndf[_nTracks] = track->get_ndf();
+            _track_chi2[_nTracks] = track->get_chisq();
             // Ideally, would be dca3d_xy and dca3d_z, but these don't seem to be calculated properly in the
             // current (June 2021) simulations (they return NaN). So we take dca (seems to be ~ the 3d distance)
             // and dca_2d (seems to be ~ the distance in the transverse plane).
@@ -4367,6 +4375,8 @@ void EventEvaluatorEIC::resetBuffer()
       _track_x[itrk] = 0;
       _track_y[itrk] = 0;
       _track_z[itrk] = 0;
+      _track_ndf[itrk] = 0;
+      _track_chi2[itrk] = 0;
       _track_dca[itrk] = 0;
       _track_dca_2d[itrk] = 0;
       _track_source[itrk] = 0;

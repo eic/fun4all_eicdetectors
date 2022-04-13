@@ -11,6 +11,7 @@
 
 #include <Geant4/G4Box.hh>
 #include <Geant4/G4Cons.hh>
+#include <Geant4/G4NistManager.hh>
 #include <Geant4/G4Element.hh>  // for G4Element
 #include <Geant4/G4LogicalBorderSurface.hh>
 #include <Geant4/G4LogicalSkinSurface.hh>
@@ -312,7 +313,7 @@ G4LogicalVolume* PHG4HybridHomogeneousCalorimeterDetector::ConstructTower()
   /* create logical volumes for crystal inside single_tower */
   G4double M_para = m_Params->get_double_param("material");
   // set default material for hom calo
-  G4Material* material_Scin = G4Material::GetMaterial("G4_PbWO4");
+  G4Material* material_Scin = G4NistManager::Instance()->FindOrBuildMaterial("G4_PbWO4");
   if (M_para > 0) material_Scin = GetScintillatorMaterial(M_para);
 
   if (m_doLightProp)
@@ -394,11 +395,11 @@ PHG4HybridHomogeneousCalorimeterDetector::GetScintillatorMaterial(float setting)
   G4Element* ele_Ba = new G4Element("Barium", "Ba", 56., 137.3 * g / mole);
   G4Element* ele_Gd = new G4Element("Gadolinium", "Gd", 64., 157.3 * g / mole);
 
-  G4Material* material_Scin = G4Material::GetMaterial("G4_PbWO4");
+  G4Material* material_Scin = G4NistManager::Instance()->FindOrBuildMaterial("G4_PbWO4");
 
   if ((setting > 0.) && (setting < 1.))
   {
-    material_Scin = G4Material::GetMaterial("G4_PbWO4");
+    material_Scin = G4NistManager::Instance()->FindOrBuildMaterial("G4_PbWO4");
     // g4MatData.push_back(0.0333333*mm/MeV);
     if (Verbosity()) cout << "Set G4_PbWO4..." << endl;
   }

@@ -1100,7 +1100,7 @@ void G4EicDircDetector::SetVisualization()
   lDirc->SetVisAttributes(waDirc);
   */
   G4VisAttributes* waFd = new G4VisAttributes(DircColour);
-  waFd->SetForceWireframe(true);
+  // waFd->SetForceWireframe(true);
   lFd->SetVisAttributes(waFd);
 
   G4VisAttributes* waBar = new G4VisAttributes(G4Colour(0., 153./255, 0., 1));  //0.05
@@ -1130,7 +1130,7 @@ void G4EicDircDetector::SetVisualization()
     lLens1->SetVisAttributes(vaLens);
     G4VisAttributes* vaLens2 = new G4VisAttributes(G4Colour(0., 1., 1., transp));
     vaLens2->SetColour(G4Colour(0., 0.5, 1., transp));
-    vaLens2->SetForceWireframe(true);
+    // vaLens2->SetForceWireframe(true);
     lLens2->SetVisAttributes(vaLens2);
     if (fLensId == 3 || fLensId == 6) lLens3->SetVisAttributes(vaLens);
   }
