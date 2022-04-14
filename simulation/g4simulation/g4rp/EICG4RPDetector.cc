@@ -43,12 +43,12 @@ using namespace std;
 
 //_______________________________________________________________
 EICG4RPDetector::EICG4RPDetector(PHG4Subsystem *subsys,
-                                 PHCompositeNode *Node,
-                                 PHParameters *parameters,
-                                 const std::string &dnam, const int lyr)
+    PHCompositeNode *Node,
+    PHParameters *parameters,
+    const std::string &dnam, const int lyr)
   : PHG4Detector(subsys, Node, dnam)
   , m_Params(parameters)
-  , m_Layer(lyr)
+    , m_Layer(lyr)
 {
 }
 
@@ -57,9 +57,9 @@ int EICG4RPDetector::IsInDetector(G4VPhysicalVolume *volume) const
 {
 
   if( m_ActivePhysicalVolumesMap.find( volume ) != m_ActivePhysicalVolumesMap.end() ) {
-      return 1;
+    return 1;
   }
-  
+
   return 0;
 }
 
@@ -68,9 +68,9 @@ int EICG4RPDetector::IsInVirtualDetector(G4VPhysicalVolume *volume) const
 {
 
   if( m_VirtualPhysicalVolumesMap.find( volume ) != m_VirtualPhysicalVolumesMap.end() ) {
-      return 1;
+    return 1;
   }
-  
+
   return 0;
 }
 
@@ -88,206 +88,167 @@ int EICG4RPDetector::GetDetId(G4VPhysicalVolume *volume) const
 //_______________________________________________________________
 void EICG4RPDetector::ConstructMe(G4LogicalVolume *logicWorld)
 {
-	// Do not forget to multiply the parameters with their respective CLHEP/G4 unit !
+  // Do not forget to multiply the parameters with their respective CLHEP/G4 unit !
 
-	if (Verbosity() > 1) { std::cout << "Creating Roman Pots" << std::endl; }
+  if (Verbosity() > 1) { std::cout << "Creating Roman Pots" << std::endl; }
 
-        SetParametersFromFile();
+  int layer = m_Params->get_int_param( "layerNumber" );
+  std::string prefix = "Layer" + std::to_string(layer) + "_";
 
-        int layer = m_Params->get_int_param( "layerNumber" );
-	std::string prefix = "Layer" + std::to_string(layer) + "_";
+  double center_X = m_Params->get_double_param( prefix + "pos_x" ) * cm;
+  double center_Y = m_Params->get_double_param( prefix + "pos_y" ) * cm;
+  double center_Z = m_Params->get_double_param( prefix + "pos_z" ) * cm;
+  double overallSize_X = m_Params->get_double_param( prefix + "size_x" ) * cm;
+  double overallSize_Y = m_Params->get_double_param( prefix + "size_y" ) * cm;
+  double enclosureCenter = m_Params->get_double_param( "FFenclosure_center" ) * cm;
+  double rotAngle = m_Params->get_double_param( prefix + "rot_y") * rad;
 
-	double center_X = m_Params->get_double_param( prefix + "pos_x" ) * cm;
-	double center_Y = m_Params->get_double_param( prefix + "pos_y" ) * cm;
-	double center_Z = m_Params->get_double_param( prefix + "pos_z" ) * cm;
-	double overallSize_X = m_Params->get_double_param( prefix + "size_x" ) * cm;
-	double overallSize_Y = m_Params->get_double_param( prefix + "size_y" ) * cm;
-	double enclosureCenter = m_Params->get_double_param( "FFenclosure_center" ) * cm;
-	double rotAngle = m_Params->get_double_param( prefix + "rot_y") * rad;
+  double sensorWidth =  m_Params->get_double_param( "Sensor_size" ) * cm;
+  double sensorDepth =  m_Params->get_double_param( prefix + "Si_size_z" ) * cm;
+  double CuDepth =  m_Params->get_double_param( prefix + "Cu_size_z" ) * cm;
+  double tenSigma_X = m_Params->get_double_param( prefix + "beamHoleHW_x" ) * cm;
+  double tenSigma_Y = m_Params->get_double_param( prefix + "beamHoleHW_y" ) * cm;
+  // Minimum size is set to 100 microns.  Zero causes problems with G4ExtrudedSolid below
+  if( tenSigma_X < 0.01 * cm || tenSigma_Y < 0.01 * cm ) {
+    tenSigma_X = 0.01 * cm;
+    tenSigma_Y = 0.01 * cm;
+  }
 
-	double sensorWidth =  m_Params->get_double_param( "Sensor_size" ) * cm;
-	double sensorDepth =  m_Params->get_double_param( prefix + "Si_size_z" ) * cm;
-	double CuDepth =  m_Params->get_double_param( prefix + "Cu_size_z" ) * cm;
-	double tenSigma_X = m_Params->get_double_param( prefix + "10sigma_x" ) * cm;
-	double tenSigma_Y = m_Params->get_double_param( prefix + "10sigma_y" ) * cm;
+  double virtPlaneDepth = 0.001 * cm;
 
-	double virtPlaneDepth = 0.001 * cm;
+  // Derived quantities	  
+  int NsegmentsOffCenter = int( (tenSigma_X - 0.5*sensorWidth) / sensorWidth + 0.5 );
+  int NhorizontalSegments = 4*NsegmentsOffCenter + 2;
 
-	// Derived quantities	  
-	int NsegmentsOffCenter = int( (tenSigma_X - 0.5*sensorWidth) / sensorWidth + 0.5 );
-	int NhorizontalSegments = 4*NsegmentsOffCenter + 2;
+  double x1 = -sensorWidth/2.0;
+  double x2 = sensorWidth/2.0;
+  double y = tenSigma_Y;
 
-	double x1 = -sensorWidth/2.0;
-	double x2 = sensorWidth/2.0;
-	double y = tenSigma_Y;
+  // Construct polygon xy beam-hole cutout
+  std::vector<G4TwoVector> polygon;	
 
-	// Construct polygon xy beam-hole cutout
-	std::vector<G4TwoVector> polygon;	
-	
-	if( NhorizontalSegments == 2 ) { // simple case where sensor size is larger than 10sigma
-		// Cutout in X given by minimum sensor size
-		//polygon.push_back({x1, y});
-		//polygon.push_back({x2, y});
-		//polygon.push_back({x2, -y});
-		//polygon.push_back({x1, -y});
-		
-		// Cutout given by 10sigma
-		polygon.push_back({-tenSigma_X, y});
-		polygon.push_back({tenSigma_X, y});
-		polygon.push_back({tenSigma_X, -y});
-		polygon.push_back({-tenSigma_X, -y});
-	}
-	else { // case where sensors are placed at different y positions to get closer to beam 	
+  if( NhorizontalSegments == 2 ) { // simple case where sensor size is larger than 10sigma
+    // Cutout given by 10sigma
+    polygon.push_back({-tenSigma_X, y});
+    polygon.push_back({tenSigma_X, y});
+    polygon.push_back({tenSigma_X, -y});
+    polygon.push_back({-tenSigma_X, -y});
+  }
+  else { // case where sensors are placed at different y positions to get closer to beam 	
 
-		for( int i = 1; i <= NhorizontalSegments; i++ ) {
+    for( int i = 1; i <= NhorizontalSegments; i++ ) {
 
-			if( i == 1 ) { } // top center
-			else if( i <= 1 + NsegmentsOffCenter ) { // (top) going right
-				// ellipse equation
-				y = tenSigma_Y * sqrt(fabs( 1 - pow( x1/tenSigma_X, 2) ));
-				x2 = x1 + sensorWidth;
-			}
-			else if( i <= 1 + 2*NsegmentsOffCenter ) { // (bottom) going left
-				if( x1 > tenSigma_X ) { y *= -1; }
-				else { y = -tenSigma_Y * sqrt(fabs( 1 - pow( (x1-sensorWidth)/tenSigma_X, 2) ));}
-				x2 = x1 - sensorWidth;
-			}
-			else if( i == 2 + 2*NsegmentsOffCenter ) { // bottom center
-				y = -tenSigma_Y;	
-				x2 = x1 - sensorWidth;
-			}
-			else if( i <= 2 + 3*NsegmentsOffCenter ) { // (bottom) going left
-				// ellipse equation
-				y = -tenSigma_Y * sqrt(fabs( 1 - pow( x1/tenSigma_X, 2) ));
-				x2 = x1 - sensorWidth; 
-			}
-			else { // (top) going right
-				if( x1 < -tenSigma_X ) { y *= -1; }
-				else { y = tenSigma_Y * sqrt(fabs( 1 - pow( (x1+sensorWidth)/tenSigma_X, 2) )); }
-				x2 = x1 + sensorWidth;
-			}
+      if( i == 1 ) { } // top center
+      else if( i <= 1 + NsegmentsOffCenter ) { // (top) going right
+        // ellipse equation
+        y = tenSigma_Y * sqrt(fabs( 1 - pow( x1/tenSigma_X, 2) ));
+        x2 = x1 + sensorWidth;
+      }
+      else if( i <= 1 + 2*NsegmentsOffCenter ) { // (bottom) going left
+        if( x1 > tenSigma_X ) { y *= -1; }
+        else { y = -tenSigma_Y * sqrt(fabs( 1 - pow( (x1-sensorWidth)/tenSigma_X, 2) ));}
+        x2 = x1 - sensorWidth;
+      }
+      else if( i == 2 + 2*NsegmentsOffCenter ) { // bottom center
+        y = -tenSigma_Y;	
+        x2 = x1 - sensorWidth;
+      }
+      else if( i <= 2 + 3*NsegmentsOffCenter ) { // (bottom) going left
+        // ellipse equation
+        y = -tenSigma_Y * sqrt(fabs( 1 - pow( x1/tenSigma_X, 2) ));
+        x2 = x1 - sensorWidth; 
+      }
+      else { // (top) going right
+        if( x1 < -tenSigma_X ) { y *= -1; }
+        else { y = tenSigma_Y * sqrt(fabs( 1 - pow( (x1+sensorWidth)/tenSigma_X, 2) )); }
+        x2 = x1 + sensorWidth;
+      }
 
-			polygon.push_back({x1, y});
-			polygon.push_back({x2, y});
-			x1 = x2;
-		}
-	}
+      polygon.push_back({x1, y});
+      polygon.push_back({x2, y});
+      x1 = x2;
+    }
+  }
 
 
-	// Extrude the xy polygon in z based on sensorDepth (a little more than 1/2 depth)
-	std::vector<G4ExtrudedSolid::ZSection> zsections = { 
-			{-0.51*sensorDepth, {0,0}, 1.0}, {+0.51*sensorDepth, {0,0}, 1.0} };
+  // Extrude the xy polygon in z based on sensorDepth (a little more than 1/2 depth)
+  std::vector<G4ExtrudedSolid::ZSection> zsections = { 
+    {-0.51*sensorDepth, {0,0}, 1.0}, {+0.51*sensorDepth, {0,0}, 1.0} };
 
-	G4ExtrudedSolid *polygonCutOut = new G4ExtrudedSolid("Extruded", polygon, zsections);
+  G4ExtrudedSolid *polygonCutOut = new G4ExtrudedSolid("Extruded", polygon, zsections);
 
-	G4Box *FullPlate = new G4Box("FullPlate",overallSize_X/2., overallSize_Y/2., sensorDepth/2.);
-	
-	G4SubtractionSolid *solidRP = new G4SubtractionSolid( "EICG4RPSolid", FullPlate, polygonCutOut);
-	
-	G4LogicalVolume *logicalRP = new G4LogicalVolume( solidRP,
-				GetDetectorMaterial( "G4_Si" ), "EICG4RPLogical");
+  G4Box *FullPlate = new G4Box("FullPlate",overallSize_X/2., overallSize_Y/2., sensorDepth/2.);
 
-	G4VisAttributes *vis = new G4VisAttributes( G4Color(1.0, 1.0, 0.0, 1.0) );
-	vis->SetForceSolid(true);
-	logicalRP->SetVisAttributes(vis);
+  G4SubtractionSolid *solidRP = new G4SubtractionSolid("EICG4RPSolid", FullPlate, polygonCutOut);
 
-	G4RotationMatrix *rotm = new G4RotationMatrix();
-	rotm->rotateY( rotAngle );
-	
-	G4ThreeVector position = G4ThreeVector( 
-			center_X,
-			center_Y,
-			center_Z - enclosureCenter );
+  G4LogicalVolume *logicalRP = new G4LogicalVolume( solidRP,
+      GetDetectorMaterial( "G4_Si" ), "EICG4RPLogical");
 
-	G4VPhysicalVolume *physicalRP = new G4PVPlacement( rotm, position, logicalRP, "EICG4RP", 
-			logicWorld, 0, false, OverlapCheck());
-	
-	// Add it to the list of active volumes so the IsInDetector method picks them up
-	m_ActivePhysicalVolumesMap.insert({physicalRP, layer + 1});
-	
-	///////////////////////////
-	// Cu cooling/readout
-        
-	G4Box *CuPlate = (G4Box*)FullPlate->Clone();
-        CuPlate->SetZHalfLength( CuDepth/2.0 );
-	std::vector<G4ExtrudedSolid::ZSection> zsectionsCu = { 
-			{-0.51*CuDepth, {0,0}, 1.0}, {+0.51*CuDepth, {0,0}, 1.0} };
-	G4ExtrudedSolid *polygonCutOutCu = new G4ExtrudedSolid("ExtrudedCu", polygon, zsectionsCu);
-	G4SubtractionSolid *solidCu = new G4SubtractionSolid( "EICG4RPCuSolid", CuPlate, polygonCutOutCu);
-	G4LogicalVolume *logicalCu = new G4LogicalVolume( solidCu,
-				GetDetectorMaterial( "G4_Cu" ), "EICG4RPCuLogical");
+  G4VisAttributes *vis = new G4VisAttributes( G4Color(1.0, 1.0, 0.0, 1.0) );
+  vis->SetForceSolid(true);
+  logicalRP->SetVisAttributes(vis);
 
-	G4VisAttributes *visCu = new G4VisAttributes( G4Color(1.0, 0.0, 1.0, 0.5) );
-	visCu->SetForceSolid(true);
-	logicalCu->SetVisAttributes(visCu);
-	G4ThreeVector positionCu = G4ThreeVector( 
-			center_X,
-			center_Y,
-			center_Z + sensorDepth + CuDepth/2.0 - enclosureCenter );
+  G4RotationMatrix *rotm = new G4RotationMatrix();
+  rotm->rotateY( rotAngle );
 
-	G4VPhysicalVolume *physicalCu = new G4PVPlacement( rotm, positionCu, logicalCu, "EICG4RPCu", 
-			logicWorld, 0, false, OverlapCheck());
+  G4ThreeVector position = G4ThreeVector( 
+      center_X,
+      center_Y,
+      center_Z - enclosureCenter );
 
-	// Add it as a passive volume (secondaries created by no hits stored)
-        m_PassivePhysicalVolumesSet.insert(physicalCu);
+  G4VPhysicalVolume *physicalRP = new G4PVPlacement( rotm, position, logicalRP, "EICG4RP", 
+      logicWorld, 0, false, OverlapCheck());
 
-	/////////////////////////////
-	// Virtual plane with no beam hole. In front of active layer
-	G4Box *VirtPlate = new G4Box("VirtPlate",overallSize_X/2., overallSize_Y/2., virtPlaneDepth/2.);
-	G4LogicalVolume *logicalVirt = new G4LogicalVolume( VirtPlate,
-				GetDetectorMaterial( "G4_Galactic" ), "EICG4RPVirtualLogical");
+  // Add it to the list of active volumes so the IsInDetector method picks them up
+  m_ActivePhysicalVolumesMap.insert({physicalRP, layer + 1});
 
-	G4VisAttributes *visVirt = new G4VisAttributes( G4Color(1.0, 1.0, 1.0, 0.0) );
-	visVirt->SetForceSolid(true);
-	logicalVirt->SetVisAttributes(visVirt);
-	G4ThreeVector positionVirt = G4ThreeVector( 
-			center_X,
-			center_Y,
-			center_Z - sensorDepth/2.0 - virtPlaneDepth/2.0 - enclosureCenter );
+  ///////////////////////////
+  // Cu cooling/readout
 
-	G4VPhysicalVolume *physicalVirt = new G4PVPlacement( rotm, positionVirt, logicalVirt, "EICG4RPVirt", 
-			logicWorld, 0, false, OverlapCheck());
+  G4Box *CuPlate = (G4Box*)FullPlate->Clone();
+  CuPlate->SetZHalfLength( CuDepth/2.0 );
+  std::vector<G4ExtrudedSolid::ZSection> zsectionsCu = { 
+    {-0.51*CuDepth, {0,0}, 1.0}, {+0.51*CuDepth, {0,0}, 1.0} };
+  G4ExtrudedSolid *polygonCutOutCu = new G4ExtrudedSolid("ExtrudedCu", polygon, zsectionsCu);
+  G4SubtractionSolid *solidCu = new G4SubtractionSolid( "EICG4RPCuSolid", CuPlate, polygonCutOutCu);
+  G4LogicalVolume *logicalCu = new G4LogicalVolume( solidCu,
+      GetDetectorMaterial( "G4_Cu" ), "EICG4RPCuLogical");
 
-	// Add it to the virtual volume
-        m_VirtualPhysicalVolumesMap.insert({physicalVirt, layer + 1});
-	
-	return;
-}
+  G4VisAttributes *visCu = new G4VisAttributes( G4Color(1.0, 0.0, 1.0, 0.5) );
+  visCu->SetForceSolid(true);
+  logicalCu->SetVisAttributes(visCu);
+  G4ThreeVector positionCu = G4ThreeVector( 
+      center_X,
+      center_Y,
+      center_Z + sensorDepth + CuDepth/2.0 - enclosureCenter );
 
-//_______________________________________________________________
-void EICG4RPDetector::SetParametersFromFile()
-{
+  G4VPhysicalVolume *physicalCu = new G4PVPlacement( rotm, positionCu, logicalCu, "EICG4RPCu", 
+      logicWorld, 0, false, OverlapCheck());
 
-	std::ifstream infile;
-        std::string line;
+  // Add it as a passive volume (secondaries created by no hits stored)
+  m_PassivePhysicalVolumesSet.insert(physicalCu);
 
-        std::string paramFile = m_Params->get_string_param("parameter_file");   
-	infile.open( paramFile );
+  /////////////////////////////
+  // Virtual plane with no beam hole. In front of active layer
+  G4Box *VirtPlate = new G4Box("VirtPlate",overallSize_X/2., overallSize_Y/2., virtPlaneDepth/2.);
+  G4LogicalVolume *logicalVirt = new G4LogicalVolume( VirtPlate,
+      GetDetectorMaterial( "G4_Galactic" ), "EICG4RPVirtualLogical");
 
-	if( ! infile.is_open() ) 
-	{
-		std::cout << "ERROR in EICG4RPDetector: Failed to open parameter file " << paramFile << std::endl;
-		gSystem->Exit(1);
-	}
+  G4VisAttributes *visVirt = new G4VisAttributes( G4Color(1.0, 1.0, 1.0, 0.0) );
+  visVirt->SetForceSolid(true);
+  logicalVirt->SetVisAttributes(visVirt);
+  G4ThreeVector positionVirt = G4ThreeVector( 
+      center_X,
+      center_Y,
+      center_Z - sensorDepth/2.0 - virtPlaneDepth/2.0 - enclosureCenter );
 
-	while( std::getline(infile, line) ) {
+  G4VPhysicalVolume *physicalVirt = new G4PVPlacement( rotm, positionVirt, logicalVirt, "EICG4RPVirt", 
+      logicWorld, 0, false, OverlapCheck());
 
-	    std::string name;
-	    double value;
+  // Add it to the virtual volume
+  m_VirtualPhysicalVolumesMap.insert({physicalVirt, layer + 1});
 
-	    std::istringstream iss( line );
-
-	    // skip comment lines
-	    if( line.find("#") != std::string::npos ) { continue; }
-
-	    if( !(iss >> name >> value) ) {
-		std::cout << "Could not decode " << line << std::endl;
-		gSystem->Exit(1);
-	    }
-
-            m_Params->set_double_param(name, value);
-	    
-	}
+  return;
 }
 
 //_______________________________________________________________
