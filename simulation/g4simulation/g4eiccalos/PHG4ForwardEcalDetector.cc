@@ -192,7 +192,7 @@ PHG4ForwardEcalDetector::ConstructTower(int type)
   // notched in TiO2 coating in scintillator plate
   G4double width_coating = m_Params->get_double_param("width_coating") * cm;  // 4mm scintillator
   G4Material* material_scintillator = GetScintillatorMaterial();              //G4Material::GetMaterial("G4_POLYSTYRENE");
-  G4Material* material_absorber = G4Material::GetMaterial("G4_Pb");
+  G4Material* material_absorber = GetDetectorMaterial("G4_Pb");
   G4int nFibers = m_Params->get_int_param("nFibers");
   G4double fiber_diam = m_Params->get_double_param("fiber_diam") * cm;  // 4mm scintillator
   G4double fiber_extra_length = 0.0;
@@ -268,7 +268,7 @@ PHG4ForwardEcalDetector::ConstructTower(int type)
                                        m_TowerDy[2] / 2.0,
                                        clamp_plate_width / 2.0);
     G4LogicalVolume* logic_clampplate = new G4LogicalVolume(solid_clamp1,
-                                                            G4Material::GetMaterial("G4_Fe"),
+                                                            GetDetectorMaterial("G4_Fe"),
                                                             "logic_clampplate",
                                                             0, 0, 0);
     m_AbsorberLogicalVolSet.insert(logic_clampplate);
@@ -316,7 +316,7 @@ PHG4ForwardEcalDetector::ConstructTower(int type)
       solid_clamp2 = new G4SubtractionSolid(G4String("solid_clamp2_cu4"), solid_clamp2, cutoutfiber_solid, 0, G4ThreeVector(m_TowerDx[2] / 4.0, -m_TowerDy[2] / 4.0, 0.));
       solid_clamp2 = new G4SubtractionSolid(G4String("solid_clamp2_cu5"), solid_clamp2, cutoutfiber_solid, 0, G4ThreeVector(-m_TowerDx[2] / 4.0, -m_TowerDy[2] / 4.0, 0.));
       G4LogicalVolume* logic_clampplate2 = new G4LogicalVolume(solid_clamp2,
-                                                               G4Material::GetMaterial("G4_Fe"),
+                                                               GetDetectorMaterial("G4_Fe"),
                                                                "logic_clampplate2",
                                                                0, 0, 0);
       m_AbsorberLogicalVolSet.insert(logic_clampplate2);
