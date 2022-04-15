@@ -201,7 +201,7 @@ int FarForwardEvaluator::Init(PHCompositeNode* topNode)
 
   for( int layer = 0; layer < Nlayers; layer++ ) {
 	h2_RP_layers_XY.push_back( new TH2F(Form("RP_XY_layer%i",layer),"RP XY;X (cm);Y (cm)", 400, -200, 200, 200, -50, 50) );
-	h2_RP_virtlayers_XY.push_back( new TH2F(Form("RP_XY_virtlayer%i",layer),"RP XY;X (cm);Y (cm)", 2000, -200, 0, 200, -10, 10) );
+	h2_RP_virtlayers_XY.push_back( new TH2F(Form("RP_XY_virtlayer%i",layer),"RP XY;X (cm);Y (cm)", 4000, -200, 200, 200, -10, 10) );
   }
 
   gDirectory->cd("/");
