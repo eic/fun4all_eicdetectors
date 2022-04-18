@@ -3364,7 +3364,6 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
       {
         PHG4Particle* g4particle = truth_itr->second;
         if (!g4particle) continue;
-
         int mcSteps = 0;
         PHG4Particle* g4particleMother = truth_itr->second;
         if (g4particle->get_parent_id() != 0)
@@ -3376,7 +3375,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
             mcSteps += 1;
           }
         }
-        if (mcSteps > _depth_MCstack) continue;
+        if (g4particle->get_parent_id()<0 && mcSteps > _depth_MCstack) continue;
 
         // evaluating true primary vertex
         if (_do_VERTEX && _nMCPart == 0)
