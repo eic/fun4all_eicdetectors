@@ -37,7 +37,8 @@ class EventEvaluatorEIC : public SubsysReco
     all = 0,
     inner = 1,
     silicon = 2,
-    ttl = 3
+    ttl = 3,
+    defecce = 4
   };
 
   EventEvaluatorEIC(const std::string& name = "EventEvaluatorEIC",

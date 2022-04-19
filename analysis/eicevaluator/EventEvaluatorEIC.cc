@@ -3171,7 +3171,8 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
         {"TrackMap", TrackSource_t::all},
         {"InnerTrackMap", TrackSource_t::inner},
         {"SiliconTrackMap", TrackSource_t::silicon},
-        {"TTLTrackMap", TrackSource_t::ttl}
+        {"TTLTrackMap", TrackSource_t::ttl},
+        {"DefaultTrackMap", TrackSource_t::defecce}
     };
     bool foundAtLeastOneTrackSource = false;
     for (const auto& trackMapInfo : trackMapPairs)
@@ -3288,7 +3289,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
             if (_do_PID_LogLikelihood)
             {
               // perform PID matching
-              if (trackMapInfo.second == TrackSource_t::all and pidcontainer != nullptr)
+              if ((trackMapInfo.second == TrackSource_t::all || trackMapInfo.second == TrackSource_t::defecce) and pidcontainer != nullptr)
               {
                 // only do so for the TrackSource_t::all
                 const EICPIDParticle* pid_particle =
