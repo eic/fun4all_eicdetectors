@@ -138,7 +138,7 @@ void EICG4RPSubsystem::SetDefaultParameters()
   
   if ( calibroot.empty() )
   {    
-    std::cout << "no CALIBRATIONROOT environment variable" << std::endl;
+    std::cout << PHWHERE << "no CALIBRATIONROOT environment variable" << std::endl;
     gSystem->Exit(1);
   }
 
@@ -184,7 +184,7 @@ void EICG4RPSubsystem::SetParametersFromFile( std::string filename )
   infile.open( paramFile );
 
   if(!infile.is_open()) {
-    std::cout << "ERROR in EICG4RPSubsystem: Failed to open parameter file " << paramFile << std::endl;
+    std::cout << PHWHERE << "ERROR in EICG4RPSubsystem: Failed to open parameter file " << paramFile << std::endl;
     gSystem->Exit(1);
   }
 
@@ -197,10 +197,11 @@ void EICG4RPSubsystem::SetParametersFromFile( std::string filename )
 
     // skip comment lines
     if( line.find("#") != std::string::npos ) { continue; }
+    if( line.empty() == true ) { continue; }
 
     // grab the line
     if( !(iss >> name >> value) ) {
-      std::cout << "Could not decode " << line << std::endl;
+      std::cout << PHWHERE << " RP parameters: could not decode " << line << std::endl;
       gSystem->Exit(1);
     }
 
