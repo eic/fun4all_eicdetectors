@@ -60,7 +60,13 @@ class RawTowerBuilderDRCALO : public SubsysReco
   {
     m_SimTowerNodePrefix = simTowerNodePrefix;
   }
-
+  /** Set time window allowed for tower aggregation.
+   */
+  void
+  set_hit_time_window(const double tmax)
+  {
+    m_Tmax = tmax;
+  }
  private:
   /** Create nodes for output.
    *
@@ -88,6 +94,7 @@ class RawTowerBuilderDRCALO : public SubsysReco
   double m_GlobalPlaceInZ;
 
   double m_Emin;
+  double m_Tmax;
 
   std::map<std::string, double> m_GlobalParameterMap;
 };

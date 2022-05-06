@@ -203,6 +203,32 @@ PHG4ForwardEcalDetector::ConstructTower(int type)
   // depth of readout (4cm)
   G4double tower_readout_dz = m_Params->get_double_param("tower_readout_dz") * cm;
 
+  std::cout << "m_TowerType : " << m_TowerType << std::endl;
+  std::cout << "m_TowerType : " << m_TowerType << std::endl;
+  std::cout << "m_TowerType : " << m_TowerType << std::endl;
+  std::cout << "m_TowerType : " << m_TowerType << std::endl;
+  if(m_TowerType==1337){
+    nlayers = 77;
+    thickness_layer = m_TowerDz[2] / (float) nlayers;
+    // update layer thickness with https://doi.org/10.1016/S0168-9002(02)01954-X
+    thickness_absorber = 1.44 * mm;     // 1.55mm absorber
+    thickness_scintillator = 1.76 * mm;  // 4mm scintillator
+    thickness_cell = thickness_absorber + thickness_scintillator;
+    // notched in TiO2 coating in scintillator plate
+    width_coating = m_Params->get_double_param("width_coating") * cm;  // 4mm scintillator
+    material_scintillator = GetScintillatorMaterial();              //G4Material::GetMaterial("G4_POLYSTYRENE");
+    material_absorber = GetDetectorMaterial("G4_Pb");
+    nFibers = 36;
+    fiber_diam = 0.1 * cm;  // 4mm scintillator
+    // G4double fiber_extra_length = 0.0;
+    // additional fiber length at end of calorimeter
+    // if (fiber_diam > 0) fiber_extra_length = 0.5 * cm;
+    // width of plate in front of FEMC for clamping all layers
+    clamp_plate_width = m_Params->get_double_param("clamp_plate_width") * cm;
+    // depth of readout (4cm)
+    tower_readout_dz = m_Params->get_double_param("tower_readout_dz") * cm;
+  }
+
   G4VSolid* single_tower_solid = new G4Box("single_tower_solid2",
                                            m_TowerDx[2] / 2.0,
                                            m_TowerDy[2] / 2.0,
@@ -224,7 +250,7 @@ PHG4ForwardEcalDetector::ConstructTower(int type)
     std::cout << " m_TowerDz[2] = " << m_TowerDz[2] << " thickness_layer = " << thickness_layer << " thickness_cell = " << thickness_cell << std::endl;
   }
 
-  if (thickness_layer <= thickness_cell)
+  if (thickness_layer <= thickness_cell && m_TowerType!=1337)
   {
     std::cout << __PRETTY_FUNCTION__
               << "Tower size z (m_TowerDz[2) from database is too thin. "
@@ -315,6 +341,45 @@ PHG4ForwardEcalDetector::ConstructTower(int type)
       solid_clamp2 = new G4SubtractionSolid(G4String("solid_clamp2_cu3"), solid_clamp2, cutoutfiber_solid, 0, G4ThreeVector(m_TowerDx[2] / 4.0, m_TowerDy[2] / 4.0, 0.));
       solid_clamp2 = new G4SubtractionSolid(G4String("solid_clamp2_cu4"), solid_clamp2, cutoutfiber_solid, 0, G4ThreeVector(m_TowerDx[2] / 4.0, -m_TowerDy[2] / 4.0, 0.));
       solid_clamp2 = new G4SubtractionSolid(G4String("solid_clamp2_cu5"), solid_clamp2, cutoutfiber_solid, 0, G4ThreeVector(-m_TowerDx[2] / 4.0, -m_TowerDy[2] / 4.0, 0.));
+      G4LogicalVolume* logic_clampplate2 = new G4LogicalVolume(solid_clamp2,
+                                                               GetDetectorMaterial("G4_Fe"),
+                                                               "logic_clampplate2",
+                                                               0, 0, 0);
+      m_AbsorberLogicalVolSet.insert(logic_clampplate2);
+      GetDisplayAction()->AddVolume(logic_clampplate2, "Clamp");
+      std::string name_clamp = m_TowerLogicNamePrefix + "_single_plate_clamp2";
+
+      new G4PVPlacement(0, G4ThreeVector(0, 0, (tower_readout_dz) / 2.0 - clamp_plate_width - m_TowerDz[2] / 2.0 - clamp_plate_width / 2.0),
+                        logic_clampplate2,
+                        name_clamp,
+                        single_tower_logic,
+                        0, 0, OverlapCheck());
+    }
+  }
+  if (nFibers > 0 && nFibers == 36 && fiber_diam > 0)
+  {
+    G4VSolid* cutoutfiber_solid = new G4Tubs("cutoutfiber_solid",
+                                             0.0, 1.01 * fiber_diam / 2.0, m_TowerDz[2], 0.0, 2 * M_PI);
+    for(int ifiberx = 0; ifiberx<6; ifiberx++){
+      for(int ifibery = 0; ifibery<6; ifibery++){
+        single_tower_solid_replica = new G4SubtractionSolid(G4String(Form("single_tower_solid_replica_cu_%d_%d",ifiberx,ifibery )), single_tower_solid_replica, cutoutfiber_solid, 0, G4ThreeVector(-m_TowerDx[2] / 2 + ifiberx * (m_TowerDx[2] / 6) + (m_TowerDx[2] / 12),  -m_TowerDx[2] / 2 + ifibery * (m_TowerDx[2] / 6) + (m_TowerDx[2] / 12), 0.));
+
+        solid_absorber = new G4SubtractionSolid(G4String(Form("solid_absorber_%d_%d",ifiberx,ifibery )), solid_absorber, cutoutfiber_solid, 0, G4ThreeVector(-m_TowerDx[2] / 2 + ifiberx * (m_TowerDx[2] / 6) + (m_TowerDx[2] / 12), -m_TowerDx[2] / 2 + ifibery * (m_TowerDx[2] / 6) + (m_TowerDx[2] / 12), 0.));
+
+        solid_scintillator = new G4SubtractionSolid(G4String(Form("solid_scintillator_%d_%d",ifiberx,ifibery )), solid_scintillator, cutoutfiber_solid, 0, G4ThreeVector(-m_TowerDx[2] / 2 + ifiberx * (m_TowerDx[2] / 6) + (m_TowerDx[2] / 12), -m_TowerDx[2] / 2 + ifibery * (m_TowerDx[2] / 6) + (m_TowerDx[2] / 12), 0.));
+      }
+    }
+    if (clamp_plate_width > 0)
+    {
+      G4VSolid* solid_clamp2 = new G4Box("single_plate_clamp_solid2",
+                                         m_TowerDx[2] / 2.0,
+                                         m_TowerDy[2] / 2.0,
+                                         clamp_plate_width / 2.0);
+      for(int ifiberx = 0; ifiberx<6; ifiberx++){
+        for(int ifibery = 0; ifibery<6; ifibery++){
+          solid_clamp2 = new G4SubtractionSolid(G4String(Form("solid_clamp2_%d_%d",ifiberx,ifibery )), solid_clamp2, cutoutfiber_solid, 0, G4ThreeVector(-m_TowerDx[2] / 2 + ifiberx * (m_TowerDx[2] / 6) + (m_TowerDx[2] / 12), -m_TowerDx[2] / 2 + ifibery * (m_TowerDx[2] / 6) + (m_TowerDx[2] / 12), 0.));
+        }
+      }
       G4LogicalVolume* logic_clampplate2 = new G4LogicalVolume(solid_clamp2,
                                                                GetDetectorMaterial("G4_Fe"),
                                                                "logic_clampplate2",
@@ -457,6 +522,37 @@ PHG4ForwardEcalDetector::ConstructTower(int type)
                       name_scintillator + "_br",
                       single_tower_logic,
                       0, 0, OverlapCheck());
+  }
+  if (nFibers > 0 && nFibers == 36 && fiber_diam > 0)
+  {
+    std::string fiberName = "single_fiber_scintillator_solid" + std::to_string(type);
+    G4VSolid* single_scintillator_solid = new G4Tubs(fiberName,
+                                                     0.0, fiber_diam / 2.0, (m_TowerDz[2] + fiber_extra_length) / 2, 0.0, 2 * M_PI);
+
+    /* create logical volumes for scintillator and absorber plates to place inside single_tower */
+    G4Material* material_WLSFiber = GetWLSFiberFEMCMaterial();
+
+    std::string fiberLogicName = "hEcal_scintillator_fiber_logic" + std::to_string(type);
+    G4LogicalVolume* single_scintillator_logic = new G4LogicalVolume(single_scintillator_solid,
+                                                                     material_WLSFiber,
+                                                                     fiberLogicName,
+                                                                     0, 0, 0);
+    m_ScintiLogicalVolSet.insert(single_scintillator_logic);
+    GetDisplayAction()->AddVolume(single_scintillator_logic, "Fiber");
+
+    std::string name_scintillator = m_TowerLogicNamePrefix + "_single_fiber_scintillator" + std::to_string(type);
+
+
+
+    for(int ifiberx = 0; ifiberx<6; ifiberx++){
+      for(int ifibery = 0; ifibery<6; ifibery++){
+        new G4PVPlacement(0, G4ThreeVector(-m_TowerDx[2] / 2 + ifiberx * (m_TowerDx[2] / 6) + (m_TowerDx[2] / 12), -m_TowerDx[2] / 2 + ifibery * (m_TowerDx[2] / 6) + (m_TowerDx[2] / 12), -fiber_extra_length / 2 + tower_readout_dz / 2 - clamp_plate_width),
+                          single_scintillator_logic,
+                          name_scintillator + Form("_fbr_%d_%d", ifiberx, ifibery),
+                          single_tower_logic,
+                          0, 0, OverlapCheck());
+      }
+    }
   }
 
   if (Verbosity() > 0)
@@ -772,11 +868,16 @@ int PHG4ForwardEcalDetector::ParseParametersFromTable()
   {
     m_ZRot = parit->second;
   }
-  parit = m_GlobalParameterMap.find("tower_type");
+  parit = m_GlobalParameterMap.find("Gtype");
   if (parit != m_GlobalParameterMap.end())
   {
     m_TowerType = parit->second;
   }
+  // parit = m_GlobalParameterMap.find("tower_type");
+  // if (parit != m_GlobalParameterMap.end())
+  // {
+  //   m_TowerType = parit->second;
+  // }
 
   parit = m_GlobalParameterMap.find("xoffset");
   if (parit != m_GlobalParameterMap.end())

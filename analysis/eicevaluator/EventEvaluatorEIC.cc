@@ -1209,6 +1209,8 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
           (GetProjectionNameFromIndex(iIndex).find("LBLVTX") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("BARR") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("FST") != std::string::npos) ||
+          (GetProjectionNameFromIndex(iIndex).find("SVTX") != std::string::npos) ||
+          (GetProjectionNameFromIndex(iIndex).find("EST") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("ZDCsurrogate") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("rpTruth") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("rpTruth2") != std::string::npos) ||  // needed for IP8
@@ -3642,6 +3644,13 @@ int EventEvaluatorEIC::GetProjectionIndex(std::string projname)
   else if (projname.find("LBLVTX_BACKWARD_34") != std::string::npos)
     return 34;
 
+  else if (projname.find("hpDIRC") != std::string::npos)
+    return 35;
+  else if (projname.find("mRICH") != std::string::npos)
+    return 36;
+  else if (projname.find("RICH") != std::string::npos)
+    return 37;
+
   else if (projname.find("BARREL_0") != std::string::npos)
     return 40;
   else if (projname.find("BARREL_1") != std::string::npos)
@@ -3858,6 +3867,13 @@ std::string EventEvaluatorEIC::GetProjectionNameFromIndex(int projindex)
     return "LBLVTX_BACKWARD_33";
   case 34:
     return "LBLVTX_BACKWARD_34";
+
+  case 35:
+    return "hpDIRC";
+  case 36:
+    return "mRICH";
+  case 37:
+    return "RICH";
 
   case 40:
     return "BARREL_0";

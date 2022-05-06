@@ -47,6 +47,7 @@ RawTowerBuilderByHitIndexBECAL::RawTowerBuilderByHitIndexBECAL(const std::string
   , m_MappingTowerFile("default.txt")
   , m_CaloId(RawTowerDefs::NONE)
   , m_Emin(1e-6)
+  , m_Tmax(1e5)
 {
 }
 
@@ -100,13 +101,13 @@ int RawTowerBuilderByHitIndexBECAL::process_event(PHCompositeNode *topNode)
   // loop over all hits in the event
   PHG4HitContainer::ConstIterator hiter;
   PHG4HitContainer::ConstRange hit_begin_end = g4hit->getHits();
-
   for (hiter = hit_begin_end.first; hiter != hit_begin_end.second; hiter++)
   {
     PHG4Hit *g4hit_i = hiter->second;
 
     // Don't include hits with zero energy
     if (g4hit_i->get_edep() <= 0 && g4hit_i->get_edep() != -1) continue;
+    if (g4hit_i->get_t(0) > m_Tmax) continue;
 
     /* encode CaloTowerID from j, k indexBECAL of tower / hit and calorimeter ID */
     RawTowerDefs::keytype calotowerid = RawTowerDefs::encode_towerid(m_CaloId,

@@ -53,6 +53,7 @@ RawTowerBuilderDRCALO::RawTowerBuilderDRCALO(const std::string &name)
   , m_GlobalPlaceInY(0)
   , m_GlobalPlaceInZ(0)
   , m_Emin(1e-6)
+  , m_Tmax(1e6)
 {
 }
 
@@ -113,6 +114,7 @@ int RawTowerBuilderDRCALO::process_event(PHCompositeNode *topNode)
 
     // Don't include hits with zero energy
     if (g4hit_i->get_edep() <= 0 && g4hit_i->get_edep() != -1) continue;
+    if (g4hit_i->get_t(0) > m_Tmax) continue;
     // cout << g4hit_i->get_index_j() << "\t" << g4hit_i->get_index_k() << "\t"  << endl;
     // encode CaloTowerID from j, k index of tower / hit and calorimeter ID
     RawTowerDefs::keytype calotowerid = RawTowerDefs::encode_towerid(m_CaloId,

@@ -62,7 +62,13 @@ class RawTowerBuilderByHitIndexBECAL : public SubsysReco
   {
     m_SimTowerNodePrefix = simTowerNodePrefix;
   }
-
+  /** Set time window allowed for tower aggregation.
+   */
+  void
+  set_hit_time_window(const double tmax)
+  {
+    m_Tmax = tmax;
+  }
  private:
   /** Create nodes for output.
    *
@@ -89,6 +95,7 @@ class RawTowerBuilderByHitIndexBECAL : public SubsysReco
   double tower_length = 45.5;
 
   double m_Emin;
+  double m_Tmax;
 
   std::map<std::string, double> m_GlobalParameterMap;
 };

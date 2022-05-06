@@ -38,12 +38,13 @@ void PHG4BarrelEcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
     G4VisAttributes *visatt = new G4VisAttributes();
     visatt->SetVisibility(true);
     visatt->SetForceSolid(true);
+    // visatt->SetForceWireframe(true);
     m_VisAttVec.push_back(visatt);  // for later deletion
     if (it.second == "BCalCylinder")
     {
       // visatt->SetColour(G4Colour::Red());
-      visatt->SetColour(152. / 255, 1. / 255, 1. / 255, 1.0);
-      // visatt->SetForceWireframe(true);
+      visatt->SetColour(152. / 255, 1. / 255, 1. / 255, 0.3);
+      // visatt->SetForceWireframe(false);
       visatt->SetVisibility(false);
     }
     else if (it.second == "Block1")
