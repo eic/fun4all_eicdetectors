@@ -339,7 +339,7 @@ G4LogicalVolume* PHG4HybridHomogeneousCalorimeterDetector::ConstructTower()
   if (doSensors)
   {
     G4VSolid* single_sensor_solid = new G4Box("single_sensor_solid", sensor_dimension / 2., sensor_dimension / 2., sensor_thickness / 2.);
-    G4Material* material_Sensor = G4Material::GetMaterial("G4_Si");
+    G4Material* material_Sensor = GetDetectorMaterial("G4_Si");
 
     G4LogicalVolume* single_sensor_logic = new G4LogicalVolume(single_sensor_solid, material_Sensor, "single_sensor_logic", 0, 0, 0);
     GetDisplayAction()->AddVolume(single_sensor_logic, "Sensor");

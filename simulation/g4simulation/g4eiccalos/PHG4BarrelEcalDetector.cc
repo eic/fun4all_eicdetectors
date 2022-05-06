@@ -113,6 +113,8 @@ void PHG4BarrelEcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
   G4double cone2_h = m_Params->get_double_param("cone2_h") * cm;
   G4double cone2_dz = m_Params->get_double_param("cone2_dz") * cm;
 
+  int isprojective = m_Params->get_int_param("projective");
+
   silicon_width_half = m_Params->get_double_param("silicon_width_half") * cm;
   kapton_width_half = m_Params->get_double_param("kapton_width_half") * cm;
   SIO2_width_half = m_Params->get_double_param("SIO2_width_half") * cm;
@@ -128,7 +130,7 @@ void PHG4BarrelEcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
   G4double pos_z1 = 0 * cm;
 
   G4Tubs* cylinder_solid1 = new G4Tubs("BCAL_SOLID1",
-                                       Radius, max_radius,
+                                       Radius-1*cm, max_radius,
                                        becal_length / 2, 0, 2 * M_PI);
 
   G4Tubs* cylinder_solid2 = new G4Tubs("BCAL_SOLID2",
@@ -160,9 +162,11 @@ void PHG4BarrelEcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
   G4Material* cylinder_mat = G4Material::GetMaterial("G4_AIR");
   assert(cylinder_mat);
 
-  G4LogicalVolume* cylinder_logic = new G4LogicalVolume(cylinder_solid, cylinder_mat,
-                                                        "BCAL_SOLID", 0, 0, 0);
-
+  G4LogicalVolume* cylinder_logic = new G4LogicalVolume(cylinder_solid, cylinder_mat,  "BCAL_SOLID", 0, 0, 0);
+  if(!isprojective){
+    cylinder_logic = new G4LogicalVolume(cylinder_solid1, cylinder_mat, "BCAL_SOLID", 0, 0, 0);
+    pos_z1 = CenterZ_Shift;
+  }
   m_DisplayAction->AddVolume(cylinder_logic, "BCalCylinder");
 
   std::string name_envelope = m_TowerLogicNamePrefix + "_envelope";
@@ -179,6 +183,7 @@ void PHG4BarrelEcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
 
 int PHG4BarrelEcalDetector::PlaceTower(G4LogicalVolume* sec)
 {
+  G4double CenterZ_Shift = m_Params->get_double_param("CenterZ_Shift") * cm;
   /* Loop over all tower positions in vector and place tower */
   for (std::map<std::string, towerposition>::iterator iterator = m_TowerPostionMap.begin(); iterator != m_TowerPostionMap.end(); ++iterator)
   {
@@ -206,7 +211,7 @@ int PHG4BarrelEcalDetector::PlaceTower(G4LogicalVolume* sec)
     becal_rotm.rotateY(iterator->second.roty);
     becal_rotm.rotateZ(iterator->second.rotz);
 
-    new G4PVPlacement(G4Transform3D(becal_rotm, G4ThreeVector(iterator->second.centerx, iterator->second.centery, iterator->second.centerz)),
+    new G4PVPlacement(G4Transform3D(becal_rotm, G4ThreeVector(iterator->second.centerx, iterator->second.centery, iterator->second.centerz-CenterZ_Shift)),
                       block_logic,
                       G4String(string(iterator->first) + string("_TT")),
                       sec,
@@ -329,25 +334,38 @@ G4GenericTrap* PHG4BarrelEcalDetector::GetTowerTrap(std::map<std::string, towerp
 
   int etaFlip = iterator->second.etaFlip;
 
-  if(!etaFlip){
+  int isprojective = m_Params->get_int_param("projective");
+  if(isprojective){
+    if(!etaFlip){
+      trapcoords[0] = G4TwoVector(-x_inner_long, -x_inner);
+      trapcoords[1] = G4TwoVector(-x_inner, x_inner);
+      trapcoords[2] = G4TwoVector(x_inner, x_inner);
+      trapcoords[3] = G4TwoVector(x_inner_long, -x_inner);
+
+      trapcoords[4] = G4TwoVector(-x_outer_long, -x_outer);
+      trapcoords[5] = G4TwoVector(-x_outer, x_outer);
+      trapcoords[6] = G4TwoVector(x_outer, x_outer);
+      trapcoords[7] = G4TwoVector(x_outer_long, -x_outer);
+    } else {
+      trapcoords[0] = G4TwoVector(-x_inner, -x_inner);
+      trapcoords[1] = G4TwoVector(-x_inner_long, x_inner);
+      trapcoords[2] = G4TwoVector(x_inner_long, x_inner);
+      trapcoords[3] = G4TwoVector(x_inner, -x_inner);
+      trapcoords[4] = G4TwoVector(-x_outer, -x_outer);
+      trapcoords[5] = G4TwoVector(-x_outer_long, x_outer);
+      trapcoords[6] = G4TwoVector(x_outer_long, x_outer);
+      trapcoords[7] = G4TwoVector(x_outer, -x_outer);
+    }
+  } else {
     trapcoords[0] = G4TwoVector(-x_inner_long, -x_inner);
     trapcoords[1] = G4TwoVector(-x_inner, x_inner);
     trapcoords[2] = G4TwoVector(x_inner, x_inner);
     trapcoords[3] = G4TwoVector(x_inner_long, -x_inner);
 
     trapcoords[4] = G4TwoVector(-x_outer_long, -x_outer);
-    trapcoords[5] = G4TwoVector(-x_outer, x_outer);
-    trapcoords[6] = G4TwoVector(x_outer, x_outer);
-    trapcoords[7] = G4TwoVector(x_outer_long, -x_outer);
-  } else {
-    trapcoords[0] = G4TwoVector(-x_inner, -x_inner);
-    trapcoords[1] = G4TwoVector(-x_inner_long, x_inner);
-    trapcoords[2] = G4TwoVector(x_inner_long, x_inner);
-    trapcoords[3] = G4TwoVector(x_inner, -x_inner);
-    trapcoords[4] = G4TwoVector(-x_outer, -x_outer);
     trapcoords[5] = G4TwoVector(-x_outer_long, x_outer);
     trapcoords[6] = G4TwoVector(x_outer_long, x_outer);
-    trapcoords[7] = G4TwoVector(x_outer, -x_outer);
+    trapcoords[7] = G4TwoVector(x_outer_long, -x_outer);
   }
   G4GenericTrap* block_tower = new G4GenericTrap("solid_tower",
     zheight / 2, trapcoords
@@ -374,25 +392,38 @@ G4GenericTrap* PHG4BarrelEcalDetector::GetGlassTrap(std::map<std::string, towerp
   std::vector<G4TwoVector> trapcoords(8);
   int etaFlip = iterator->second.etaFlip;
 
-  if(!etaFlip){
+  int isprojective = m_Params->get_int_param("projective");
+  if(isprojective){
+    if(!etaFlip){
+      trapcoords[0] = G4TwoVector(-x_inner_long, -x_inner);
+      trapcoords[1] = G4TwoVector(-x_inner, x_inner);
+      trapcoords[2] = G4TwoVector(x_inner, x_inner);
+      trapcoords[3] = G4TwoVector(x_inner_long, -x_inner);
+
+      trapcoords[4] = G4TwoVector(-x_outer_long, -x_outer);
+      trapcoords[5] = G4TwoVector(-x_outer, x_outer);
+      trapcoords[6] = G4TwoVector(x_outer, x_outer);
+      trapcoords[7] = G4TwoVector(x_outer_long, -x_outer);
+    } else {
+      trapcoords[0] = G4TwoVector(-x_inner, -x_inner);
+      trapcoords[1] = G4TwoVector(-x_inner_long, x_inner);
+      trapcoords[2] = G4TwoVector(x_inner_long, x_inner);
+      trapcoords[3] = G4TwoVector(x_inner, -x_inner);
+      trapcoords[4] = G4TwoVector(-x_outer, -x_outer);
+      trapcoords[5] = G4TwoVector(-x_outer_long, x_outer);
+      trapcoords[6] = G4TwoVector(x_outer_long, x_outer);
+      trapcoords[7] = G4TwoVector(x_outer, -x_outer);
+    }
+  } else {
     trapcoords[0] = G4TwoVector(-x_inner_long, -x_inner);
     trapcoords[1] = G4TwoVector(-x_inner, x_inner);
     trapcoords[2] = G4TwoVector(x_inner, x_inner);
     trapcoords[3] = G4TwoVector(x_inner_long, -x_inner);
 
     trapcoords[4] = G4TwoVector(-x_outer_long, -x_outer);
-    trapcoords[5] = G4TwoVector(-x_outer, x_outer);
-    trapcoords[6] = G4TwoVector(x_outer, x_outer);
-    trapcoords[7] = G4TwoVector(x_outer_long, -x_outer);
-  } else {
-    trapcoords[0] = G4TwoVector(-x_inner, -x_inner);
-    trapcoords[1] = G4TwoVector(-x_inner_long, x_inner);
-    trapcoords[2] = G4TwoVector(x_inner_long, x_inner);
-    trapcoords[3] = G4TwoVector(x_inner, -x_inner);
-    trapcoords[4] = G4TwoVector(-x_outer, -x_outer);
     trapcoords[5] = G4TwoVector(-x_outer_long, x_outer);
     trapcoords[6] = G4TwoVector(x_outer_long, x_outer);
-    trapcoords[7] = G4TwoVector(x_outer, -x_outer);
+    trapcoords[7] = G4TwoVector(x_outer_long, -x_outer);
   }
   G4GenericTrap* block_tower = new G4GenericTrap("solid_tower_glass",
     zheight / 2, trapcoords
@@ -560,6 +591,11 @@ int PHG4BarrelEcalDetector::ParseParametersFromTable()
         m_Params->set_int_param("useLeadGlass", parit->second);
         m_useLeadGlass = m_Params->get_int_param("useLeadGlass");
         if(m_useLeadGlass) std::cout << "using lead glass as tower material" << std::endl;
+      }
+      parit = m_GlobalParameterMap.find("projective");
+      if (parit != m_GlobalParameterMap.end())
+      {
+        m_Params->set_int_param("projective", parit->second);
       }
     }
   }

@@ -53,6 +53,7 @@ RawTowerBuilderByHitIndexLHCal::RawTowerBuilderByHitIndexLHCal(const std::string
   , m_RotInY(0)
   , m_RotInZ(0)
   , m_Emin(1e-9)
+  , m_Tmax(1e5)
   , m_TowerDepth(0)
   , m_ThicknessAbsorber(0)
   , m_ThicknessScintilator(0)
@@ -119,6 +120,8 @@ int RawTowerBuilderByHitIndexLHCal::process_event(PHCompositeNode *topNode)
 
     // Don't include hits with zero energy
     if (g4hit_i->get_edep() <= 0 && g4hit_i->get_edep() != -1) continue;
+    // Don't include hits at large times
+    if (g4hit_i->get_t(0) > m_Tmax) continue;
 
     /* encode CaloTowerID from j, k index of tower / hit and calorimeter ID */
     RawTowerDefs::keytype calotowerid = RawTowerDefs::encode_towerid(m_CaloId,
