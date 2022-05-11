@@ -183,7 +183,9 @@ void PHG4BarrelEcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
 
 int PHG4BarrelEcalDetector::PlaceTower(G4LogicalVolume* sec)
 {
-  G4double CenterZ_Shift = m_Params->get_double_param("CenterZ_Shift") * cm;
+  int isprojective = m_Params->get_int_param("projective");
+  G4double CenterZ_Shift = 0.0;
+  if(!isprojective) CenterZ_Shift = m_Params->get_double_param("CenterZ_Shift") * cm;
   /* Loop over all tower positions in vector and place tower */
   for (std::map<std::string, towerposition>::iterator iterator = m_TowerPostionMap.begin(); iterator != m_TowerPostionMap.end(); ++iterator)
   {
