@@ -142,7 +142,8 @@ void PHG4BSTDetector::ConstructMe(G4LogicalVolume* logicWorld)
 
   G4LogicalVolume* bst_envelope_log = new G4LogicalVolume(bst_envelope_solid, Air, G4String("hbst_envelope"), 0, 0, 0);
 
-  m_DisplayAction->AddVolume(bst_envelope_log, "FbstEnvelope");
+  m_DisplayAction->AddVolume(bst_envelope_log, "Invisible");
+  // m_DisplayAction->AddVolume(bst_envelope_log, "FbstEnvelope");
 
   //Define rotation attributes for envelope cone
   G4RotationMatrix bst_rotm;
