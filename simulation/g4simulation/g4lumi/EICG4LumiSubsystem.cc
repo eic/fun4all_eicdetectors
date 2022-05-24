@@ -52,8 +52,9 @@ int EICG4LumiSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
     PHCompositeNode *dstNode = dynamic_cast<PHCompositeNode *>(iter.findFirst("PHCompositeNode", "DST"));
   
      std::string nodename_prefix;
-     std::string nodename_photonCAL;
-     std::string nodename_virtExitWindow;
+     std::string nodename_CAL;
+     std::string nodename_tracking;
+     std::string nodename_virt;
    
     if (SuperDetector() != "NONE")
     {
@@ -70,35 +71,42 @@ int EICG4LumiSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
    
        nodename_prefix = "G4HIT_" + SuperDetector();
     }
- 
     else
     {
        nodename_prefix = "G4HIT_" + Name();
     }
     
-    nodename_photonCAL = nodename_prefix + "_photonCAL";
-    nodename_virtExitWindow = nodename_prefix + "_virtExitWindow";
+    nodename_CAL = nodename_prefix + "_CAL";
+    nodename_tracking = nodename_prefix + "_tracking";
+    nodename_virt = nodename_prefix + "_virt";
     
     // Grab hit container if it exists
-    PHG4HitContainer *PhotonCAL_hits = findNode::getClass<PHG4HitContainer>(topNode, nodename_photonCAL);
-    PHG4HitContainer *VirtExitWindow_hits = findNode::getClass<PHG4HitContainer>(topNode, nodename_virtExitWindow);
+    PHG4HitContainer *CAL_hits = findNode::getClass<PHG4HitContainer>(topNode, nodename_CAL);
+    PHG4HitContainer *Tracking_hits = findNode::getClass<PHG4HitContainer>(topNode, nodename_tracking);
+    PHG4HitContainer *Virt_hits = findNode::getClass<PHG4HitContainer>(topNode, nodename_virt);
     // Create it if it doesn't exist
-    if( ! PhotonCAL_hits )
+    if( ! CAL_hits )
     {
-      dstNode->addNode( new PHIODataNode<PHObject>( PhotonCAL_hits = new PHG4HitContainer(nodename_photonCAL), nodename_photonCAL, "PHObject"));
+      dstNode->addNode( new PHIODataNode<PHObject>( CAL_hits = new PHG4HitContainer(nodename_CAL), nodename_CAL, "PHObject"));
     }
-    if( ! VirtExitWindow_hits )
+    if( ! Tracking_hits )
     {
-      dstNode->addNode( new PHIODataNode<PHObject>( VirtExitWindow_hits = new PHG4HitContainer(nodename_virtExitWindow), nodename_virtExitWindow, "PHObject"));
+      dstNode->addNode( new PHIODataNode<PHObject>( Tracking_hits = new PHG4HitContainer(nodename_tracking), nodename_tracking, "PHObject"));
+    }
+    if( ! Virt_hits )
+    {
+      dstNode->addNode( new PHIODataNode<PHObject>( Virt_hits = new PHG4HitContainer(nodename_virt), nodename_virt, "PHObject"));
     }
 
-    PhotonCAL_hits->AddLayer( GetLayer() );
-    VirtExitWindow_hits->AddLayer( GetLayer() );
+    CAL_hits->AddLayer( GetLayer() );
+    Tracking_hits->AddLayer( GetLayer() );
+    Virt_hits->AddLayer( GetLayer() );
     
     // Create stepping action
     auto *tmp = new EICG4LumiSteppingAction( this, m_Detector, GetParams() );
-    tmp->HitNodeNameVirt( nodename_virtExitWindow) ;
-    tmp->HitNodeName( nodename_photonCAL );
+    tmp->HitNodeNameCAL( nodename_CAL );
+    tmp->HitNodeNameTracking( nodename_tracking );
+    tmp->HitNodeNameVirt( nodename_virt);
     
     m_SteppingAction = tmp;
 
@@ -151,7 +159,7 @@ void EICG4LumiSubsystem::SetDefaultParameters()
   	set_default_string_param("parameter_file", "");
   	set_default_int_param("layerNumber", 1);
   	set_default_double_param("detid", 0.);     //detector id
-  	set_default_int_param("lightyield", 0);
+  	set_default_int_param("lightyield", 1);
   	set_default_int_param("use_g4steps", 0);
   	set_default_double_param("tmin", NAN);
   	set_default_double_param("tmax", NAN);
