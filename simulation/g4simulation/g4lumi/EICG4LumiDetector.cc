@@ -190,9 +190,18 @@ void EICG4LumiDetector::ConstructMe(G4LogicalVolume *logicWorld)
   //AddVirtualLayer( "Virt_AfterLumiDipole", G4TwoVector(3*LumiMag_outer, 3*LumiMag_outer), G4ThreeVector(0., 0., LumiMag_Z - LumiMag_DZ/2. - 60*cm), logicWorld );
 
 
-
-  AddCAL( "TopSpecCAL", G4ThreeVector(0., 100/2.*mm + LumiSpec_XY/2., LumiSpec_Z), logicWorld );
-  AddCAL( "BottomSpecCAL", G4ThreeVector(0., -(100/2.*mm + LumiSpec_XY/2.), LumiSpec_Z), logicWorld );
+  double Y_Tr2 = 100/2.*mm + LumiSpec_XY/2.;
+  AddCAL( "TopSpecCAL", G4ThreeVector(0., Y_Tr2, LumiSpec_Z), logicWorld );
+  AddCAL( "BottomSpecCAL", G4ThreeVector(0., -Y_Tr2, LumiSpec_Z), logicWorld );
+  double Z_Tr2 = LumiSpec_Z + 170/2.*mm + 50*mm;
+  AddTracker( "TopSpecTracker2", G4ThreeVector(0., Y_Tr2, Z_Tr2), logicWorld );
+  AddTracker( "BottomSpecTracker2", G4ThreeVector(0., -Y_Tr2, Z_Tr2), logicWorld );
+  double Y_Tr1 = (Y_Tr2)/2.;
+  double Z_Tr1 = ((LumiSpec_Z + 170/2.*mm) + LumiMag_Z)/2.;
+  AddTracker( "TopSpecTracker1", G4ThreeVector(0., Y_Tr1, Z_Tr1), logicWorld );
+  AddTracker( "BottomSpecTracker1", G4ThreeVector(0., -Y_Tr1, Z_Tr1), logicWorld );
+  
+  //AddTracker( "TestTracker", G4ThreeVector(0., 0, LumiMag_Z + LumiMag_DZ), logicWorld );
 
    //AddVirtualLayer( "Virt_UpperPhotonSpec", G4TwoVector(LumiSpec_XY, LumiSpec_XY), G4ThreeVector(0., LumiSpec_XY/2. + LumiPhotonCAL_XY/2. + 0.01*cm , LumiSpec_Z), logicWorld ); 
   //AddVirtualLayer( "Virt_LowerPhotonSpec", G4TwoVector(LumiSpec_XY, LumiSpec_XY), G4ThreeVector(0., -(LumiSpec_XY/2. + LumiPhotonCAL_XY/2. + 0.01*cm) , LumiSpec_Z), logicWorld );
@@ -333,6 +342,26 @@ void EICG4LumiDetector::AddCAL( std::string name, G4ThreeVector pos, G4LogicalVo
     }
   }
 
+
+}
+
+//_______________________________________________________________
+void EICG4LumiDetector::AddTracker( std::string name, G4ThreeVector pos, G4LogicalVolume *logicWorld )
+{
+
+  G4Box *sheetSolid = new G4Box(name + "_g4solid", 200/2.*mm, 200/2.*mm, 0.3*mm);
+
+  G4LogicalVolume *sheetLogic = new G4LogicalVolume( sheetSolid, 
+      G4NistManager::Instance()->FindOrBuildMaterial("G4_Si"), name + "_g4logic");
+
+  G4VisAttributes *vis = new G4VisAttributes( G4Color(1.0, 1.0, 0.0, 1.0) );
+  vis->SetForceSolid(true);
+  sheetLogic->SetVisAttributes(vis);
+
+  G4VPhysicalVolume *sheetPhysical = new G4PVPlacement( 0, G4ThreeVector(pos.x(), pos.y(), pos.z()), sheetLogic, 
+    name + "_g4physical", logicWorld, false, 0, OverlapCheck() );
+
+  m_ActivePhysicalVolumesSet.insert( sheetPhysical );
 
 }
 

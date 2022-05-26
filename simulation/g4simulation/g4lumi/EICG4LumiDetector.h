@@ -77,6 +77,7 @@ class EICG4LumiDetector : public PHG4Detector
   void SetParametersFromFile();
   void AddVirtualLayer( std::string name, G4TwoVector size, G4ThreeVector pos, G4LogicalVolume *logicWorld );
   void AddCAL( std::string name, G4ThreeVector pos, G4LogicalVolume *logicWorld );
+  void AddTracker( std::string name, G4ThreeVector pos, G4LogicalVolume *logicWorld );
   G4LogicalVolume* MakeTower(G4double calorSizeXY, G4double calorEMZ);
 
   PHParameters *getParams();
