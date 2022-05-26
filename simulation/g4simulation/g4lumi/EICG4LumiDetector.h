@@ -40,6 +40,11 @@
 #include <set> //?
 #include <string>  // for string
 
+#include <Geant4/G4CSGSolid.hh>
+#include <Geant4/G4Trap.hh>
+#include <Geant4/G4NistManager.hh>
+
+
 class G4LogicalVolume;
 class G4VPhysicalVolume;
 class PHCompositeNode;
