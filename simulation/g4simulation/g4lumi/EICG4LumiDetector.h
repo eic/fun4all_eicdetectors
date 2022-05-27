@@ -79,7 +79,16 @@ class EICG4LumiDetector : public PHG4Detector
   int get_Layer() const { return m_Layer; }
 
   void SetParametersFromFile();
+
+  //___________________________________________________________The detector components____________________________________________________
+
   void AddVirtualLayer( std::string name, G4TwoVector size, G4ThreeVector pos, G4LogicalVolume *logicWorld );
+  void AddLumiWindow(std::string name, G4ThreeVector size, G4ThreeVector pos, double angle, std::string material, G4LogicalVolume *logicWorld);
+  void AddLumiMag_OuterVessel(std::string name, G4ThreeVector size, G4ThreeVector pos, std::string material, G4LogicalVolume *logicWorld);
+  void AddLumiMag_MagCore(std::string name, G4ThreeVector size, G4ThreeVector pos, double Bx, std::string material, G4LogicalVolume *logicWorld);
+  void AddTriangularTrapezoid(std::string name, G4ThreeVector size, G4ThreeVector pos, double angle, std::string material, G4LogicalVolume *logicWorld);
+  void AddCuboid(std::string name, G4ThreeVector Wsize, G4ThreeVector Wpos, G4ThreeVector Msize, G4ThreeVector Mpos, double angle, std::string material, G4LogicalVolume *logicWorld);
+  void AddRectangularCone(G4ThreeVector Wsize, G4ThreeVector Wpos, G4ThreeVector Msize, G4ThreeVector Mpos, double eeXY, double phXY, double eeZ, double angle, G4LogicalVolume *logicWorld);
 
   PHParameters *getParams();
 

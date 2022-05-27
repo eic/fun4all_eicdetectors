@@ -174,57 +174,28 @@ void EICG4LumiDetector::ConstructMe(G4LogicalVolume *logicWorld)
 
   //___________________________________________________DETECTOR CONSTRUCTION_____________________________________________________
 
-  //.............................................................................................................................
-  // 1st Exit Window (/1st Converter)
+  //Luminosity Window (1st exit window / converter)
+  G4ThreeVector size_lw = G4ThreeVector(LumiWin_Length, LumiWin_Height, LumiWin_Thickness );
+  G4ThreeVector pos_lw = G4ThreeVector(LumiWin_X, LumiWin_Y, LumiWin_Z);
+  AddLumiWindow("LumiWindow", size_lw, pos_lw, LumiWin_Tilt, LumiWin_Material, logicWorld);
 
-  //solid-volume
-  G4Box *window = new G4Box("LumiWin", LumiWin_Length/2., LumiWin_Height/2., LumiWin_Thickness/2.);
+  // Luminosity Magnet - Outer Vessel
+  G4ThreeVector size_ov = G4ThreeVector(LumiMag_inner, LumiMag_outer, LumiMag_DZ); //x - inner radius, y - outer radius and z - length of cylinder vessel.
+  G4ThreeVector pos_ov = G4ThreeVector(LumiWin_X, LumiWin_Y, LumiMag_Z); //same axis as the lumi window.
+  AddLumiMag_OuterVessel("LumiMag_OuterVessel",size_ov,pos_ov, LumiMag_VesselMaterial, logicWorld);
 
-   //logical-volume
-  G4LogicalVolume *logical_window = new G4LogicalVolume( window, GetDetectorMaterial( LumiWin_Material ), "LumiWin");
-  G4VisAttributes *vis_window = new G4VisAttributes( G4Color(0, 1, 0, 0.5) );
-  vis_window->SetForceSolid( true );
-  logical_window->SetVisAttributes( vis_window );
+  //Luminosity Magnet - Magnetic Core (NOTE : center position same as outer vessel)
+  G4ThreeVector size_mc = G4ThreeVector(0., LumiMag_inner, LumiMag_DZ); //x - inner radius, y - outer radius and z - length of cylindrical core.
+  AddLumiMag_MagCore("LumiMag_MagCore",size_mc, pos_ov, LumiMag_B, "G4_Galactic",logicWorld);
 
-  //physical-window
+  //The triangular - trapezoid just after the 1st exit window (converter). Function accepts the size, postion and angle of tilt of LumiWindow.
+  AddTriangularTrapezoid("Traingular_Trapezoid", size_lw, pos_lw, LumiWin_Tilt,"G4_Galactic",logicWorld);
 
-  // the roation of the exit window; axis of rot. is y axis.
-  G4RotationMatrix *rot_win = new G4RotationMatrix( G4ThreeVector(0, 1, 0), LumiWin_Tilt ); //is typedef to CLHEP::HepRotation
+  //Cuboid box after the traingular_trapezoid.
+  AddCuboid("Cuboid",size_lw, pos_lw, size_ov, pos_ov, LumiWin_Tilt,"G4_Galactic", logicWorld); 
 
-  G4VPhysicalVolume *physical_win = new G4PVPlacement( rot_win, G4ThreeVector(LumiWin_X, LumiWin_Y, LumiWin_Z ), logical_window, "LumiWin", logicWorld, 0, false, OverlapCheck());
-  m_PassivePhysicalVolumesSet.insert( physical_win );
-
-  //.........................................................................................................................
-  // Spectrometer Dipole Magnet
-
-  //solid-volume
-  G4Tubs *core = new G4Tubs("LumiDipoleCore", 0., LumiMag_inner, LumiMag_DZ/2., 0., 360.*deg);
-  G4Tubs *vessel = new G4Tubs("LumiDipoleVessel", LumiMag_inner, LumiMag_outer, LumiMag_DZ/2., 0., 360.*deg);
-
-  //logical-volume
-  // spectrometer dipole := outer vessel
-  G4LogicalVolume *logical_vessel = new G4LogicalVolume( vessel, GetDetectorMaterial( LumiMag_VesselMaterial ), "LumiDipoleVessel");
-  G4VisAttributes *vis_vessel = new G4VisAttributes( G4Color(0, 1, 0, 0.5) );
-  vis_vessel->SetForceSolid( true );
-  logical_vessel->SetVisAttributes( vis_vessel );
-
-
-  // spectrometer dipole := inner magnetic core
-  G4LogicalVolume *logical_core = new G4LogicalVolume( core, GetDetectorMaterial( "G4_Galactic" ), "LumiDipoleCore");
-  logical_core->SetVisAttributes( G4VisAttributes::GetInvisible() );
- 
-  G4UniformMagField *field = new G4UniformMagField( G4ThreeVector( LumiMag_B, 0, 0 ) );
-  G4FieldManager *fman = new G4FieldManager();
-  fman->SetDetectorField( field );
-  fman->CreateChordFinder( field );
-  logical_core->SetFieldManager(fman, true);
-
-  //physical-volume
-  G4VPhysicalVolume *physical_vessel = new G4PVPlacement( 0, G4ThreeVector(0., 0., LumiMag_Z), logical_vessel, "LumiDipoleVessel", logicWorld, 0, false, OverlapCheck() );
-  m_PassivePhysicalVolumesSet.insert( physical_vessel );
-
-  G4VPhysicalVolume *physical_core = new G4PVPlacement( 0, G4ThreeVector(0., 0., LumiMag_Z), logical_core, "LumiDipoleCore", logicWorld, 0, false, OverlapCheck() );
-  m_PassivePhysicalVolumesSet.insert( physical_core );
+  //rectangular cone ( or conical flask shaped := _cf) after the rectangular box to the e+/e- calorimeters
+  AddRectangularCone( size_lw, pos_lw, size_ov, pos_ov,LumiSpec_XY,LumiPhotonCAL_XY, LumiSpec_Z, LumiWin_Tilt, logicWorld);
 
   //.....................................................................................................................................
   //Virtual Planes 
@@ -234,92 +205,12 @@ void EICG4LumiDetector::ConstructMe(G4LogicalVolume *logicWorld)
   //AddVirtualLayer( "Virt_AfterLumiDipole", G4TwoVector(3*LumiMag_outer, 3*LumiMag_outer), G4ThreeVector(0., 0., LumiMag_Z - LumiMag_DZ/2. - 60*cm), logicWorld );
 
   // virtual layers for calorimeters position
-  AddVirtualLayer( "Virt_UpperPhotonSpec", G4TwoVector(LumiSpec_XY, LumiSpec_XY), G4ThreeVector(0., LumiSpec_XY/2. + LumiPhotonCAL_XY/2. + 0.01*cm , LumiSpec_Z), logicWorld ); 
-  AddVirtualLayer( "Virt_LowerPhotonSpec", G4TwoVector(LumiSpec_XY, LumiSpec_XY), G4ThreeVector(0., -(LumiSpec_XY/2. + LumiPhotonCAL_XY/2. + 0.01*cm) , LumiSpec_Z), logicWorld );
+  //AddVirtualLayer( "Virt_UpperPhotonSpec", G4TwoVector(LumiSpec_XY, LumiSpec_XY), G4ThreeVector(0., LumiSpec_XY/2. + LumiPhotonCAL_XY/2. + 0.01*cm , LumiSpec_Z), logicWorld ); 
+  //AddVirtualLayer( "Virt_LowerPhotonSpec", G4TwoVector(LumiSpec_XY, LumiSpec_XY), G4ThreeVector(0., -(LumiSpec_XY/2. + LumiPhotonCAL_XY/2. + 0.01*cm) , LumiSpec_Z), logicWorld );
   AddVirtualLayer( "Virt_PhotonSpec", G4TwoVector(LumiPhotonCAL_XY, LumiPhotonCAL_XY), G4ThreeVector(0., 0., LumiPhotonCAL_Z), logicWorld );
 
-
-  //....................................................................................................................................................................
-  //The triangular - trapezoid (_tt) just after the 1st exit window (converter). Construct the triangle in x-y plane, extrude in the z-axis and finally rotate it by -90 deg via x -axis.
- 
-  //creating the triangle
-  std::vector<G4TwoVector> polygon_tt;
-
-  double x1 = -1*(LumiWin_Length/2.0)*TMath::Cos(LumiWin_Tilt);
-  double y1 = -1*(LumiWin_Length/2.0)*TMath::Sin(LumiWin_Tilt);
-
-  double x2 = (LumiWin_Length/2.0)*TMath::Cos(LumiWin_Tilt);
-  double y2 = -1*(LumiWin_Length/2.0)*TMath::Sin(LumiWin_Tilt);
-
-  double x3 = (LumiWin_Length/2.0)*TMath::Cos(LumiWin_Tilt);
-  double y3 = (LumiWin_Length/2.0)*TMath::Sin(LumiWin_Tilt);
-  
-  polygon_tt.push_back({x1, y1});
-  polygon_tt.push_back({x2, y2});
-  polygon_tt.push_back({x3, y3});
-
- // Extrude the triange - solid-volume
-  std::vector<G4ExtrudedSolid::ZSection> zsections = { 
-    {-1*LumiWin_Height/2.0, {0,0}, 1.0}, {LumiWin_Height/2.0, {0,0}, 1.0} };
-
-  G4ExtrudedSolid *solid_tt = new G4ExtrudedSolid("Extruded", polygon_tt, zsections);
- 
-  // logical-volume
-  G4LogicalVolume *logical_tt = new G4LogicalVolume(solid_tt, GetDetectorMaterial( "G4_Galactic" ), "EICG4LumiLogical");
-
-  G4VisAttributes *vis_tt = new G4VisAttributes( G4Color(1, 1, 0, 0.3) ); // ( red , green , blue , transperancy ) all in percent.
-  vis_tt->SetForceSolid(true);
-  logical_tt->SetVisAttributes(vis_tt);
-
-  //Physical volume 
-  G4RotationMatrix *rot_tt = new G4RotationMatrix( G4ThreeVector(1, 0, 0), -1*TMath::Pi()/2.0 ); 
-  G4ThreeVector pos_tt = G4ThreeVector( 0.0, 0.0, LumiWin_Z ); //center-position same as that of exit-window.
-  G4VPhysicalVolume *physical_tt = new G4PVPlacement( rot_tt, pos_tt, logical_tt, "EICG4Lumi", logicWorld, 0, false, OverlapCheck());
-
-  // Add it to the list of active volumes so the IsInDetector method picks them up
-  m_PassivePhysicalVolumesSet.insert(physical_tt);
-
-  //...................................................................................................................................................
-  //square rectangle box (_rb) after the traingular_trapezoid.
-  
-  //solid-volume
-  double dz_rb = TMath::Abs(LumiMag_Z - (LumiMag_DZ/2.0)) - ( TMath::Abs(LumiWin_Z) + ((LumiWin_Length/2.0)*TMath::Sin(LumiWin_Tilt)));
-  G4Box *solid_rb = new G4Box("Solid_rb",(LumiWin_Length/2.0)*TMath::Cos(LumiWin_Tilt), LumiWin_Height/2.0, dz_rb/2.0);
-
-  //logical-volume
-  G4LogicalVolume *logical_rb = new G4LogicalVolume(solid_rb, GetDetectorMaterial( "G4_Galactic" ), "Lumi_rb");
-  G4VisAttributes *vis_rb = new G4VisAttributes( G4Color(0, 0, 1, 0.3) );
-  vis_rb->SetForceSolid( true );
-  logical_rb->SetVisAttributes( vis_rb );
-
-  //physical-volume
-  double zpos_rb = LumiWin_Z - (LumiWin_Length/2.0)*TMath::Sin(LumiWin_Tilt) - dz_rb/2.0 ;
-  G4ThreeVector pos_rb = G4ThreeVector( 0.0, 0.0, zpos_rb);
-  G4VPhysicalVolume *physical_rb = new G4PVPlacement(0, pos_rb, logical_rb, "Lumi_rb", logicWorld, 0, false, OverlapCheck());
-  m_PassivePhysicalVolumesSet.insert( physical_rb );
-
-  
-  //................................................................................................................................................
-  //rectangular cone ( or conical flask shaped := _cf) after the rectangular box to the e+/e- calorimeters
-  
-  //solid-volume
-  double dz_cf = TMath::Abs(LumiSpec_Z - LumiMag_Z + LumiMag_DZ/2.0);
-  G4Trd *solid_cf = new G4Trd("solid_cf",LumiSpec_XY/2.0,(LumiWin_Length/2.0)*TMath::Cos(LumiWin_Tilt), LumiSpec_XY + LumiPhotonCAL_XY/2.0 + 0.01*cm, LumiWin_Height/2.0, dz_cf/2.0 );
-
-  //logical-volume
-  G4LogicalVolume *logical_cf = new G4LogicalVolume(solid_cf, GetDetectorMaterial( "G4_Galactic" ), "Lumi_cf");
-  G4VisAttributes *vis_cf = new G4VisAttributes( G4Color(0, 1, 1, 0.3) );
-  vis_cf->SetForceSolid( true );
-  logical_cf->SetVisAttributes( vis_cf );
-
-  //physical-volume
-  G4ThreeVector pos_cf = G4ThreeVector( 0.0, 0.0, (zpos_rb - (dz_rb/2.0) - (dz_cf/2.0)) ); 
-  G4VPhysicalVolume *physical_cf = new G4PVPlacement(0, pos_cf, logical_cf, "Lumi_cf", logicWorld, 0, false, OverlapCheck());
-  m_PassivePhysicalVolumesSet.insert( physical_cf);
-
-  //...............................................................................................................................................
-
-  return;
+     
+return;
 }
 
 //______________________________________________________________..
@@ -393,6 +284,7 @@ PHParameters *EICG4LumiDetector::getParams()
 }
 
 //_______________________________________________________________
+
 void EICG4LumiDetector::AddVirtualLayer( std::string name, G4TwoVector size, G4ThreeVector pos, G4LogicalVolume *logicWorld ) 
 {
   double virtPlaneDepth = 0.001 * cm;
@@ -412,3 +304,166 @@ void EICG4LumiDetector::AddVirtualLayer( std::string name, G4TwoVector size, G4T
   m_VirtualPhysicalVolumesMap.insert( {physical_virt, 1} );
 
 }
+
+//______________________________________________________________________
+
+//The first exit window / converter for the bremstrahlung photons.
+
+void EICG4LumiDetector::AddLumiWindow(std::string name, G4ThreeVector size, G4ThreeVector pos, double angle, std::string material, G4LogicalVolume *logicWorld)
+{
+  
+  //solid-volume
+  G4Box *solid = new G4Box(name, size.x()/2.0, size.y()/2.0, size.z()/2.0);
+
+   //logical-volume
+  G4LogicalVolume *logical = new G4LogicalVolume( solid, GetDetectorMaterial(material), name);
+  G4VisAttributes *vis = new G4VisAttributes( G4Color(0, 1, 0, 0.5) );
+  vis->SetForceSolid( true );
+  logical->SetVisAttributes( vis );
+
+  //physical-window
+
+  G4ThreeVector rot_axis = G4ThreeVector(0,1,0); //Y-axis
+  G4RotationMatrix *rot_matrix = new G4RotationMatrix(rot_axis , angle); //is typedef to CLHEP::HepRotation
+
+  G4VPhysicalVolume *physical = new G4PVPlacement( rot_matrix, pos, logical, name, logicWorld, 0, false, OverlapCheck());
+  m_PassivePhysicalVolumesSet.insert( physical );
+
+}
+
+//__________________________________________________________________________
+
+//Luminosity Monitor Magnet - Outer Vessel
+
+void EICG4LumiDetector::AddLumiMag_OuterVessel(std::string name, G4ThreeVector size, G4ThreeVector pos, std::string material, G4LogicalVolume *logicWorld)
+{
+  //Solid Volume (x - inner radius, y- outer radius and z - length of tube. Theta coverage 0 - 360 deg)
+  G4Tubs *solid = new G4Tubs(name, size.x(), size.y(), size.z()/2., 0., 360.*deg);
+
+  //Logical Volume
+  G4LogicalVolume *logical = new G4LogicalVolume(solid, GetDetectorMaterial(material), name);
+  G4VisAttributes *vis = new G4VisAttributes( G4Color(0, 1, 0, 0.5) );
+  vis->SetForceSolid( true );
+  logical->SetVisAttributes( vis );
+
+  //Physical Volume
+  G4VPhysicalVolume *physical = new G4PVPlacement( 0, pos, logical, name, logicWorld, 0, false, OverlapCheck() );
+  m_PassivePhysicalVolumesSet.insert( physical);
+
+}
+
+//Luminosity Monitor Magnet - Magnetic Core
+
+void EICG4LumiDetector::AddLumiMag_MagCore(std::string name, G4ThreeVector size, G4ThreeVector pos, double Bx, std::string material, G4LogicalVolume *logicWorld)
+  {
+  //Solid Volume ( x - inner radius, y - outer radius, z - length of the cylindrical core. Theta coverage 0- 360 deg)
+  G4Tubs *solid = new G4Tubs(name, size.x(), size.y(), size.z()/2.0, 0., 360.*deg);
+
+  //Logical Volume
+  G4LogicalVolume *logical = new G4LogicalVolume( solid, GetDetectorMaterial(material), name);
+  logical->SetVisAttributes( G4VisAttributes::GetInvisible() );
+ 
+  G4UniformMagField *field = new G4UniformMagField( G4ThreeVector(Bx, 0, 0 ) ); //Mag field stregth along x-direction
+  G4FieldManager *fman = new G4FieldManager();
+  fman->SetDetectorField( field );
+  fman->CreateChordFinder( field );
+  logical->SetFieldManager(fman, true);
+
+  //Physical Volume
+  G4VPhysicalVolume *physical = new G4PVPlacement( 0, pos, logical, name, logicWorld, 0, false, OverlapCheck() );
+  m_PassivePhysicalVolumesSet.insert( physical);
+
+  }
+
+//_______________________________________________________________________________
+
+//Triangular trapezoid with the Lumi Window.
+void EICG4LumiDetector::AddTriangularTrapezoid(std::string name, G4ThreeVector size, G4ThreeVector pos, double angle, std::string material, G4LogicalVolume *logicWorld)
+{
+ //Construct the triangle in x-y plane, extrude in the z-axis and finally rotate it by -90 deg via x -axis.
+
+  std::vector<G4TwoVector> polygon;
+
+  double x1 = -1*(size.x()/2.0)*TMath::Cos(angle);
+  double y1 = -1*(size.x()/2.0)*TMath::Sin(angle);
+
+  double x2 = (size.x()/2.0)*TMath::Cos(angle);
+  double y2 = -1*(size.x()/2.0)*TMath::Sin(angle);
+
+  double x3 = (size.x()/2.0)*TMath::Cos(angle);
+  double y3 = (size.x()/2.0)*TMath::Sin(angle);
+  
+  polygon.push_back({x1, y1});
+  polygon.push_back({x2, y2});
+  polygon.push_back({x3, y3});
+
+ // Extrude the triange - Solid-Volume
+  std::vector<G4ExtrudedSolid::ZSection> zsections = { 
+    {-1*size.y()/2.0, {0,0}, 1.0}, {size.y()/2.0, {0,0}, 1.0} };
+
+  G4ExtrudedSolid *solid = new G4ExtrudedSolid("Extruded", polygon, zsections);
+ 
+  // Logical-Volume
+  G4LogicalVolume *logical = new G4LogicalVolume(solid, GetDetectorMaterial(material), name);
+
+  G4VisAttributes *vis = new G4VisAttributes( G4Color(1, 1, 0, 0.3) ); // ( red , green , blue , transperancy ) all in percent.
+  vis->SetForceSolid(true);
+  logical->SetVisAttributes(vis);
+
+  //Physical Volume (Rotate the volume by -90' about x-axis)
+  G4RotationMatrix *rot_matrix = new G4RotationMatrix( G4ThreeVector(1, 0, 0), -1*TMath::Pi()/2.0 );  
+  //G4ThreeVector pos = G4ThreeVector( 0.0, 0.0, pos.z() ); //center-position same as that of exit-window.
+  G4VPhysicalVolume *physical = new G4PVPlacement( rot_matrix, pos, logical, name, logicWorld, 0, false, OverlapCheck());
+
+  // Add it to the list of active volumes so the IsInDetector method picks them up
+  m_PassivePhysicalVolumesSet.insert(physical); 
+}
+//________________________________________________________________________________
+
+//Cuboid Box after Triangular Trapezoid.
+
+void EICG4LumiDetector::AddCuboid(std::string name, G4ThreeVector Wsize, G4ThreeVector Wpos, G4ThreeVector Msize, G4ThreeVector Mpos, double angle, std::string material, G4LogicalVolume *logicWorld)
+{
+ //solid-volume
+  double dz_cuboid = -1*Mpos.z() + (Msize.z()/2.0) - ( -1*Wpos.z() + ((Wsize.x()/2.0)*TMath::Sin(angle)));
+  G4Box *solid = new G4Box("Solid",(Wsize.x()/2.0)*TMath::Cos(angle), Wsize.y()/2.0, dz_cuboid/2.0);
+
+  //logical-volume
+  G4LogicalVolume *logical = new G4LogicalVolume(solid, GetDetectorMaterial(material),name);
+  G4VisAttributes *vis = new G4VisAttributes( G4Color(0, 0, 1, 0.3) );
+  vis->SetForceSolid( true );
+  logical->SetVisAttributes( vis );
+
+  //physical-volume
+  double zpos_cuboid = Wpos.z() - (Wsize.x()/2.0)*TMath::Sin(angle) - dz_cuboid/2.0 ;
+  G4ThreeVector pos_cuboid = G4ThreeVector( Wpos.x(), Wpos.y(), zpos_cuboid);
+  G4VPhysicalVolume *physical = new G4PVPlacement(0, pos_cuboid, logical, name, logicWorld, 0, false, OverlapCheck());
+  m_PassivePhysicalVolumesSet.insert( physical);
+
+}
+
+//________________________________________________________________________________
+
+//Rectangular Cone after Cuboid.
+void EICG4LumiDetector::AddRectangularCone(G4ThreeVector Wsize, G4ThreeVector Wpos, G4ThreeVector Msize, G4ThreeVector Mpos, double eeXY, double phXY, double eeZ, double angle, G4LogicalVolume *logicWorld)
+{
+
+//solid-volume
+  double dz_cuboid = -1*Mpos.z() + (Msize.z()/2.0) - ( -1*Wpos.z() + ((Wsize.x()/2.0)*TMath::Sin(angle)));
+  double zpos_cuboid = Wpos.z() - (Wsize.x()/2.0)*TMath::Sin(angle) - dz_cuboid/2.0 ;
+  double dz_rec_cone = TMath::Abs(eeZ - Mpos.z() + Msize.z()/2.0);
+  G4Trd *solid = new G4Trd("solid",eeXY/2.0,(Wsize.x()/2.0)*TMath::Cos(angle), eeXY + phXY/2.0 + 0.01*cm, Wsize.y()/2.0, dz_rec_cone/2.0 );
+
+  //logical-volume
+  G4LogicalVolume *logical = new G4LogicalVolume(solid, GetDetectorMaterial("G4_Galactic"), "Lumi_RectangularCone");
+  G4VisAttributes *vis = new G4VisAttributes( G4Color(0, 1, 1, 0.3) );
+  vis->SetForceSolid( true );
+  logical->SetVisAttributes( vis);
+
+  //physical-volume
+  G4ThreeVector pos_rec_cone = G4ThreeVector( Wpos.x(), Wpos.y(), (zpos_cuboid - (dz_cuboid/2.0) - (dz_rec_cone/2.0)) ); 
+  G4VPhysicalVolume *physical = new G4PVPlacement(0, pos_rec_cone, logical, "Lumi_RectangularCone", logicWorld, 0, false, OverlapCheck());
+  m_PassivePhysicalVolumesSet.insert( physical);
+
+}
+
