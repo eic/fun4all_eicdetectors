@@ -29,6 +29,7 @@
 #include <Geant4/G4VisAttributes.hh>
 #include <Geant4/G4UniformMagField.hh>
 #include <Geant4/G4FieldManager.hh>
+#include <Geant4/G4NistManager.hh>
 
 #include <cmath>
 #include <iostream>
@@ -89,6 +90,9 @@ class EICG4LumiDetector : public PHG4Detector
   void AddTriangularTrapezoid(std::string name, G4ThreeVector size, G4ThreeVector pos, double angle, std::string material, G4LogicalVolume *logicWorld);
   void AddCuboid(std::string name, G4ThreeVector Wsize, G4ThreeVector Wpos, G4ThreeVector Msize, G4ThreeVector Mpos, double angle, std::string material, G4LogicalVolume *logicWorld);
   void AddRectangularCone(G4ThreeVector Wsize, G4ThreeVector Wpos, G4ThreeVector Msize, G4ThreeVector Mpos, double eeXY, double phXY, double eeZ, double angle, G4LogicalVolume *logicWorld);
+void AddCAL( std::string name, G4ThreeVector pos, G4LogicalVolume *logicWorld );
+  void AddTracker( std::string name, G4ThreeVector pos, G4LogicalVolume *logicWorld );
+  G4LogicalVolume* MakeTower(G4double calorSizeXY, G4double calorEMZ);
 
   PHParameters *getParams();
 
@@ -97,7 +101,7 @@ class EICG4LumiDetector : public PHG4Detector
   PHParameters *m_Params;
    
     // active volumes (e.g. G4_Si)
-    std::map<G4VPhysicalVolume *, int> m_ActivePhysicalVolumesMap;
+    std::set<G4VPhysicalVolume *> m_ActivePhysicalVolumesSet;
     // virtual volumes (e.g. G4_Galactic)
     std::map<G4VPhysicalVolume *, int> m_VirtualPhysicalVolumesMap;
     // passive volumes
@@ -105,6 +109,8 @@ class EICG4LumiDetector : public PHG4Detector
     
   int m_Layer;
   std::string m_SuperDetector;
+
+  std::string m_Name;
 
 };
 
