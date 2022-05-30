@@ -126,7 +126,7 @@ void EICG4LumiDetector::ConstructMe(G4LogicalVolume *logicWorld)
 
   double enclosureCenter = m_Params->get_double_param( "FBenclosure_center" ) * cm;
   
-  // exit window
+  //Lumi Window
   double LumiWin_X = m_Params->get_double_param( "LumiWin_X" ) * cm;
   double LumiWin_Y = m_Params->get_double_param( "LumiWin_Y" ) * cm;
   double LumiWin_Z = m_Params->get_double_param( "LumiWin_Z" ) * cm - enclosureCenter;
@@ -135,7 +135,10 @@ void EICG4LumiDetector::ConstructMe(G4LogicalVolume *logicWorld)
   double LumiWin_Height = m_Params->get_double_param( "LumiWin_Height" ) * cm;
   double LumiWin_Length = m_Params->get_double_param( "LumiWin_Length" ) * cm;
   std::string LumiWin_Material = m_Params->get_string_param( "LumiWin_Material" );
-  
+
+  G4ThreeVector size_lw = G4ThreeVector(LumiWin_Length, LumiWin_Height, LumiWin_Thickness );
+  G4ThreeVector pos_lw = G4ThreeVector(LumiWin_X, LumiWin_Y, LumiWin_Z);
+
   // spectrometer dipole
   double LumiMag_Z = m_Params->get_double_param( "LumiMag_Z" ) * cm - enclosureCenter;
   double LumiMag_inner = m_Params->get_double_param( "LumiMag_innerR" ) * cm;
@@ -147,20 +150,15 @@ void EICG4LumiDetector::ConstructMe(G4LogicalVolume *logicWorld)
  // virtual planes in e-e+ & photon Cals
   double LumiSpec_Z = m_Params->get_double_param( "LumiSpec_Z" ) * cm - enclosureCenter;
   double LumiSpec_XY = m_Params->get_double_param( "LumiSpec_XY" ) * cm;
-  double LumiPhotonCAL_Z = m_Params->get_double_param( "LumiPhotonCAL_Z" ) * cm - enclosureCenter;
+  //double LumiPhotonCAL_Z = m_Params->get_double_param( "LumiPhotonCAL_Z" ) * cm - enclosureCenter;
   double LumiPhotonCAL_XY = m_Params->get_double_param( "LumiPhotonCAL_XY" ) * cm;
 
   //double LumiSpec_DZ = m_Params->get_double_param( "LumiSpec_DZ" ) * cm;
   //double LumiSpec_YS = m_Params->get_double_param( "LumiSpec_YS" ) * cm;
   //double LumiPhotonCAL_DZ = m_Params->get_double_param( "LumiPhotonCAL_DZ" ) * cm;
 
-  //___________________________________________________DETECTOR CONSTRUCTION_____________________________________________________
-
-  //Luminosity Window (1st exit window / converter)
-  G4ThreeVector size_lw = G4ThreeVector(LumiWin_Length, LumiWin_Height, LumiWin_Thickness );
-  G4ThreeVector pos_lw = G4ThreeVector(LumiWin_X, LumiWin_Y, LumiWin_Z);
-  AddLumiWindow("LumiWindow", size_lw, pos_lw, LumiWin_Tilt, LumiWin_Material, logicWorld);
-
+  //___________________________________________________LUMI MONITOR MOTHER VOLUME CONSTRUCTION_____________________________________________________
+  
   // Luminosity Magnet - Outer Vessel
   G4ThreeVector size_ov = G4ThreeVector(LumiMag_inner, LumiMag_outer, LumiMag_DZ); //x - inner radius, y - outer radius and z - length of cylinder vessel.
   G4ThreeVector pos_ov = G4ThreeVector(LumiWin_X, LumiWin_Y, LumiMag_Z); //same axis as the lumi window.
@@ -170,14 +168,53 @@ void EICG4LumiDetector::ConstructMe(G4LogicalVolume *logicWorld)
   G4ThreeVector size_mc = G4ThreeVector(0., LumiMag_inner, LumiMag_DZ); //x - inner radius, y - outer radius and z - length of cylindrical core.
   AddLumiMag_MagCore("LumiMag_MagCore",size_mc, pos_ov, LumiMag_B, "G4_Galactic",logicWorld);
 
+  /* 
+   *Selection based on different version of Luminosity Monitor. Here, exit window also refer the end point of vaccum region.
+   *1st : Only 1 thick Exit Window.
+   *2nd : Thin Lumi Window, Thick converter before magnet, Exit Window after the magnet.
+   *3rd : Thin Lumi Window, Thick Converter before magnet, Exit window at the e+-e- calorimeters.
+ */
+
+ int Version = 3;
+
+ if(Version == 1)
+ {
+   //Luminosity Window (onlt one THICK exit window)
+    AddLumiWindow("LumiWindow", size_lw, pos_lw, LumiWin_Tilt, LumiWin_Material, logicWorld);
+ }
+ else if((Version >1 ) && (Version <=3))
+ {
+  //Luminosity Window (Thin 1st converter)
+  AddLumiWindow("LumiWindow", size_lw, pos_lw, LumiWin_Tilt, LumiWin_Material, logicWorld);
+
   //The triangular - trapezoid just after the 1st exit window (converter). Function accepts the size, postion and angle of tilt of LumiWindow.
   AddTriangularTrapezoid("Traingular_Trapezoid", size_lw, pos_lw, LumiWin_Tilt,"G4_Galactic",logicWorld);
 
+  //add a thick converter on the mid way to the magnet
+  G4ThreeVector pos_mc = G4ThreeVector(0.0,0.0,-2350*cm-enclosureCenter);
+  AddMidwayConverter("LumiMidwayConverter",size_lw, pos_mc, LumiWin_Tilt,LumiWin_Material, logicWorld);
+  
   //Cuboid box after the traingular_trapezoid.
-  AddCuboid("Cuboid",size_lw, pos_lw, size_ov, pos_ov, LumiWin_Tilt,"G4_Galactic", logicWorld); 
+  AddCuboid("Cuboid",size_lw, pos_lw, size_ov, pos_ov, LumiWin_Tilt,"G4_Galactic", logicWorld);
 
-  //rectangular cone ( or conical flask shaped := _cf) after the rectangular box to the e+/e- calorimeters
-  AddRectangularCone( size_lw, pos_lw, size_ov, pos_ov,LumiSpec_XY,LumiPhotonCAL_XY, LumiSpec_Z, LumiWin_Tilt, logicWorld);
+   if(Version == 2)
+   {
+	//add a thick exit window after magnet.
+	AddExitWindowForV2("ExitWindowForV2", size_lw, size_ov, pos_ov, LumiWin_Tilt,"G4_Galactic", logicWorld);
+   }
+ 
+   if(Version == 3)
+   {
+     //rectangular cone ( or conical flask shaped := _cf) after the rectangular box to the e+/e- calorimetes.
+     AddRectangularCone( size_lw, pos_lw, size_ov, pos_ov,LumiSpec_XY,LumiPhotonCAL_XY, LumiSpec_Z, LumiWin_Tilt, logicWorld);
+     AddExitWindowForV3("ExitWindowForV3", size_lw, pos_lw, LumiSpec_Z, LumiSpec_XY, LumiPhotonCAL_XY,"G4_Galactic", logicWorld);
+
+   }
+ }
+ else
+ {
+   std::cout<<"WRONG CHOICE (ONLY 1 ,2 & 3 OPTION)"<<endl;
+ }
 
   //.....................................................................................................................................
   //Virtual Planes 
@@ -186,7 +223,7 @@ void EICG4LumiDetector::ConstructMe(G4LogicalVolume *logicWorld)
   //AddVirtualLayer( "Virt_BeforeLumiDipole", G4TwoVector(LumiMag_outer, LumiMag_outer), G4ThreeVector(0., 0., LumiMag_Z + LumiMag_DZ/2. + 0.1*cm), logicWorld ); 
   //AddVirtualLayer( "Virt_AfterLumiDipole", G4TwoVector(3*LumiMag_outer, 3*LumiMag_outer), G4ThreeVector(0., 0., LumiMag_Z - LumiMag_DZ/2. - 60*cm), logicWorld );
 
-
+ //_______________________________________________CALORIMETER CONSTRUCTION_________________________________________________
   double Y_Tr2 = 100/2.*mm + LumiSpec_XY/2.;
   AddCAL( "TopSpecCAL", G4ThreeVector(0., Y_Tr2, LumiSpec_Z), logicWorld );
   AddCAL( "BottomSpecCAL", G4ThreeVector(0., -Y_Tr2, LumiSpec_Z), logicWorld );
@@ -308,7 +345,7 @@ void EICG4LumiDetector::AddLumiWindow(std::string name, G4ThreeVector size, G4Th
   //solid-volume
   G4Box *solid = new G4Box(name, size.x()/2.0, size.y()/2.0, size.z()/2.0);
 
-   //logical-volume
+  //logical-volume
   G4LogicalVolume *logical = new G4LogicalVolume( solid, GetDetectorMaterial(material), name);
   G4VisAttributes *vis = new G4VisAttributes( G4Color(0, 1, 0, 0.5) );
   vis->SetForceSolid( true );
@@ -411,9 +448,51 @@ void EICG4LumiDetector::AddTriangularTrapezoid(std::string name, G4ThreeVector s
   // Add it to the list of active volumes so the IsInDetector method picks them up
   m_PassivePhysicalVolumesSet.insert(physical); 
 }
+
 //________________________________________________________________________________
 
-//Cuboid Box after Triangular Trapezoid.
+//Midway Photon Converter (For V 2 & 3 only)
+void EICG4LumiDetector::AddMidwayConverter(std::string name, G4ThreeVector Wsize, G4ThreeVector pos, double angle, std::string material, G4LogicalVolume *logicWorld)
+{
+
+  //solid-volume (W refers to LumiWindow parameters)
+  G4Box *solid = new G4Box("Solid",(Wsize.x()/2.0)*TMath::Cos(angle), Wsize.y()/2.0, Wsize.z()/2.0);
+
+  //logical-volume
+  G4LogicalVolume *logical = new G4LogicalVolume( solid, GetDetectorMaterial(material), name);
+  G4VisAttributes *vis = new G4VisAttributes( G4Color(1, 0, 0, 0.5) );
+  vis->SetForceSolid( true );
+  logical->SetVisAttributes( vis );
+
+  //physical-window
+  G4VPhysicalVolume *physical = new G4PVPlacement(0, pos, logical, name, logicWorld, 0, false, OverlapCheck());
+  m_PassivePhysicalVolumesSet.insert( physical);
+
+}
+
+//________________________________________________________________________________
+// Exit Window For V2
+
+void EICG4LumiDetector::AddExitWindowForV2(std::string name, G4ThreeVector Wsize, G4ThreeVector Msize, G4ThreeVector Mpos, double angle, std::string material, G4LogicalVolume *logicWorld)
+{
+ //solid-volume (W refers to LumiWindow parameters)
+  G4Box *solid = new G4Box("Solid",(Wsize.x()/2.0)*TMath::Cos(angle), Wsize.y()/2.0, Wsize.z()/2.0);
+
+  //logical-volume
+  G4LogicalVolume *logical = new G4LogicalVolume( solid, GetDetectorMaterial(material), name);
+  G4VisAttributes *vis = new G4VisAttributes( G4Color(1, 0, 0, 0.5) );
+  vis->SetForceSolid( true );
+  logical->SetVisAttributes( vis );
+
+  //physical-window
+  G4ThreeVector EWpos = G4ThreeVector(Mpos.x(), Mpos.y(), Mpos.z() - (Msize.z()/2.0) - (Wsize.z()/2.0) );
+  G4VPhysicalVolume *physical = new G4PVPlacement(0, EWpos, logical, name, logicWorld, 0, false, OverlapCheck());
+  m_PassivePhysicalVolumesSet.insert( physical);
+}
+
+//________________________________________________________________________________
+
+//Cuboid Box.
 
 void EICG4LumiDetector::AddCuboid(std::string name, G4ThreeVector Wsize, G4ThreeVector Wpos, G4ThreeVector Msize, G4ThreeVector Mpos, double angle, std::string material, G4LogicalVolume *logicWorld)
 {
@@ -423,7 +502,7 @@ void EICG4LumiDetector::AddCuboid(std::string name, G4ThreeVector Wsize, G4Three
 
   //logical-volume
   G4LogicalVolume *logical = new G4LogicalVolume(solid, GetDetectorMaterial(material),name);
-  G4VisAttributes *vis = new G4VisAttributes( G4Color(0, 0, 1, 0.3) );
+  G4VisAttributes *vis = new G4VisAttributes( G4Color(0, 1, 1, 0.3) );
   vis->SetForceSolid( true );
   logical->SetVisAttributes( vis );
 
@@ -437,11 +516,11 @@ void EICG4LumiDetector::AddCuboid(std::string name, G4ThreeVector Wsize, G4Three
 
 //________________________________________________________________________________
 
-//Rectangular Cone after Cuboid.
+//Rectangular Cone atlast
 void EICG4LumiDetector::AddRectangularCone(G4ThreeVector Wsize, G4ThreeVector Wpos, G4ThreeVector Msize, G4ThreeVector Mpos, double eeXY, double phXY, double eeZ, double angle, G4LogicalVolume *logicWorld)
 {
 
-//solid-volume
+  //solid-volume
   double dz_cuboid = -1*Mpos.z() + (Msize.z()/2.0) - ( -1*Wpos.z() + ((Wsize.x()/2.0)*TMath::Sin(angle)));
   double zpos_cuboid = Wpos.z() - (Wsize.x()/2.0)*TMath::Sin(angle) - dz_cuboid/2.0 ;
   double dz_rec_cone = TMath::Abs(eeZ - Mpos.z() + Msize.z()/2.0);
@@ -459,7 +538,31 @@ void EICG4LumiDetector::AddRectangularCone(G4ThreeVector Wsize, G4ThreeVector Wp
   m_PassivePhysicalVolumesSet.insert( physical);
 
 }
-//_______________________________________________________________
+//_______________________________________________________________________________
+
+// Exit Window For V3
+void EICG4LumiDetector::AddExitWindowForV3(std::string name, G4ThreeVector Wsize, G4ThreeVector Wpos, double eeZ, double eeXY, double phXY, std::string material, G4LogicalVolume *logicWorld)
+{
+
+  //solid-volume (W refers to LumiWindow parameters)
+  G4Box *solid = new G4Box("Solid",eeXY/2.0,eeXY + phXY/2.0 + 0.01*cm, Wsize.z()/2.0);
+
+  //logical-volume
+  G4LogicalVolume *logical = new G4LogicalVolume( solid, GetDetectorMaterial(material),name);
+  G4VisAttributes *vis = new G4VisAttributes( G4Color(1, 0, 0, 0.5) );
+  vis->SetForceSolid( true );
+  logical->SetVisAttributes( vis );
+
+  //physical-window
+  G4ThreeVector pos = G4ThreeVector(Wpos.x(), Wpos.y(), eeZ - (Wsize.z()/2.0) );
+  G4VPhysicalVolume *physical = new G4PVPlacement(0,pos, logical, name, logicWorld, 0, false, OverlapCheck());
+  m_PassivePhysicalVolumesSet.insert( physical);
+
+
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+//_________________________________________________________________________________________________
 void EICG4LumiDetector::AddCAL( std::string name, G4ThreeVector pos, G4LogicalVolume *logicWorld )
 {
 
