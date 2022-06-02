@@ -91,12 +91,14 @@ class EICG4LumiDetector : public PHG4Detector
   void AddMidwayConverter(std::string name, G4ThreeVector Wsize, G4ThreeVector pos, double angle, std::string material, G4LogicalVolume *logicWorld);
   void AddCuboid(std::string name, G4ThreeVector Wsize, G4ThreeVector Wpos, G4ThreeVector Msize, G4ThreeVector Mpos, double angle, std::string material, G4LogicalVolume *logicWorld);
   void AddExitWindowForV2(std::string name, G4ThreeVector Wsize, G4ThreeVector Msize, G4ThreeVector Mpos, double angle, std::string material, G4LogicalVolume *logicWorld);
-  void AddRectangularCone(G4ThreeVector Wsize, G4ThreeVector Wpos, G4ThreeVector Msize, G4ThreeVector Mpos, double eeXY, double phXY, double eeZ, double angle, G4LogicalVolume *logicWorld);
-  void AddExitWindowForV3(std::string name, G4ThreeVector Wsize, G4ThreeVector Wpos, double eeZ, double eeXY, double phXY, std::string material, G4LogicalVolume *logicWorld);
+  //void AddRectangularCone(G4ThreeVector Wsize, G4ThreeVector Wpos, G4ThreeVector Msize, G4ThreeVector Mpos, double eeXY, double phXY, double eeZ, double angle, G4LogicalVolume *logicWorld);
+  void AddRectangeCone(G4ThreeVector Wsize, G4ThreeVector Wpos, G4ThreeVector Msize, G4ThreeVector Mpos, G4ThreeVector Tr2size, G4ThreeVector Tr2pos, double angle, G4LogicalVolume *logicWorld);
+  //void AddExitWindowForV3(std::string name, G4ThreeVector Wsize, G4ThreeVector Wpos, double eeZ, double eeXY, double phXY, std::string material, G4LogicalVolume *logicWorld);
+  void AddExitWindowForV3(std::string name, G4ThreeVector Wsize, G4ThreeVector Wpos, G4ThreeVector Tr2size, G4ThreeVector Tr2pos, std::string material, G4LogicalVolume *logicWorld);
 
   //__________________________________________________________Calorimeter Components_________________________________________________________________
-  void AddCAL( std::string name, G4ThreeVector pos, G4LogicalVolume *logicWorld );
-  void AddTracker( std::string name, G4ThreeVector pos, G4LogicalVolume *logicWorld );
+  void AddCAL( std::string name, G4ThreeVector size, G4ThreeVector pos, int total_tower, G4LogicalVolume *logicWorld );
+  void AddTracker( std::string name, G4ThreeVector size, G4ThreeVector pos, G4LogicalVolume *logicWorld );
   G4LogicalVolume* MakeTower(G4double calorSizeXY, G4double calorEMZ);
 
   PHParameters *getParams();

@@ -187,6 +187,14 @@ void EICG4LumiSubsystem::SetDefaultParameters()
 //
 	set_default_double_param("LumiPhotonCAL_Z", -3700);
 	set_default_double_param("LumiPhotonCAL_XY", 16);
-	set_default_double_param("LumiPhotonCAL_DZ", 35);	
-
+	set_default_double_param("LumiPhotonCAL_DZ", 35);
+//
+	set_default_int_param("Version", 1);	
+//
+	set_default_double_param("LumiTracker2_XY", 0.06);
+	set_default_double_param("LumiTracker2_DZ", 20);
+//
+	set_default_double_param("LumiSpecTower_XY", 2.5);
+	set_default_double_param("LumiSpecTower_DZ", 17);
+	set_default_int_param("TotalLumiSpecTower",8);
 }
