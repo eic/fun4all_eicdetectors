@@ -194,6 +194,8 @@ void EICG4LumiSubsystem::SetDefaultParameters()
 	set_default_double_param("LumiTracker2_XY", 0.06);
 	set_default_double_param("LumiTracker2_DZ", 20);
 //
+	set_default_double_param("LumiTracker1Gap", 2.0);
+//
 	set_default_double_param("LumiSpecTower_XY", 2.5);
 	set_default_double_param("LumiSpecTower_DZ", 17);
 	set_default_int_param("TotalLumiSpecTower",8);
