@@ -634,7 +634,6 @@ G4Material* PHG4ForwardEcalDetector::GetCoatingMaterial()
   // TiO2
   //--------------------------------------------------
   G4double density, fractionmass;
-  G4double a, z;
   G4int ncomponents;
   G4Material* material_TiO2 = new G4Material("TiO2_FEMC", density = 1.52 * g / cm3, ncomponents = 2);
   material_TiO2->AddElement(GetDetectorElement("Ti"), 1);
