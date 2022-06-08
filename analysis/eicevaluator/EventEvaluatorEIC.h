@@ -42,7 +42,7 @@ class EventEvaluatorEIC : public SubsysReco
   };
 
   EventEvaluatorEIC(const std::string& name = "EventEvaluatorEIC",
-                    const std::string& filename = "g4eval_cemc.root");
+                    const std::string& filename = "g4eval_event.root");
   ~EventEvaluatorEIC() override{};
 
   int Init(PHCompositeNode* topNode) override;
@@ -58,9 +58,7 @@ class EventEvaluatorEIC : public SubsysReco
   void set_do_HCALOUT(bool b) { _do_HCALOUT = b; }
   void set_do_EHCAL(bool b) { _do_EHCAL = b; }
   void set_do_FEMC(bool b) { _do_FEMC = b; }
-  void set_do_CEMC(bool b) { _do_CEMC = b; }
   void set_do_EEMC(bool b) { _do_EEMC = b; }
-  void set_do_EEMCG(bool b) { _do_EEMCG = b; }
   void set_do_DRCALO(bool b) { _do_DRCALO = b; }
   void set_do_FOCAL(bool b) { _do_FOCAL = b; }
   void set_do_LFHCAL(bool b) { _do_LFHCAL = b; }
@@ -103,9 +101,7 @@ class EventEvaluatorEIC : public SubsysReco
   bool _do_HCALOUT;
   bool _do_EHCAL;
   bool _do_FEMC;
-  bool _do_CEMC;
   bool _do_EEMC;
-  bool _do_EEMCG;
   bool _do_DRCALO;
   bool _do_FOCAL;
   bool _do_LFHCAL;
@@ -212,18 +208,6 @@ class EventEvaluatorEIC : public SubsysReco
   int* _tower_EEMC_iPhi;
   int* _tower_EEMC_trueID;
 
-  int _nTowers_EEMCG;
-  float* _tower_EEMCG_E;
-  int* _tower_EEMCG_iEta;
-  int* _tower_EEMCG_iPhi;
-  int* _tower_EEMCG_trueID;
-
-  int _nTowers_CEMC;
-  float* _tower_CEMC_E;
-  int* _tower_CEMC_iEta;
-  int* _tower_CEMC_iPhi;
-  int* _tower_CEMC_trueID;
-
   // clusters
   int _nclusters_FHCAL;
   float* _cluster_FHCAL_E;
@@ -260,26 +244,12 @@ class EventEvaluatorEIC : public SubsysReco
   int* _cluster_FEMC_NTower;
   int* _cluster_FEMC_trueID;
 
-  int _nclusters_CEMC;
-  float* _cluster_CEMC_E;
-  float* _cluster_CEMC_Eta;
-  float* _cluster_CEMC_Phi;
-  int* _cluster_CEMC_NTower;
-  int* _cluster_CEMC_trueID;
-
   int _nclusters_EEMC;
   float* _cluster_EEMC_E;
   float* _cluster_EEMC_Eta;
   float* _cluster_EEMC_Phi;
   int* _cluster_EEMC_NTower;
   int* _cluster_EEMC_trueID;
-
-  int _nclusters_EEMCG;
-  float* _cluster_EEMCG_E;
-  float* _cluster_EEMCG_Eta;
-  float* _cluster_EEMCG_Phi;
-  int* _cluster_EEMCG_NTower;
-  int* _cluster_EEMCG_trueID;
 
   // vertex
   float _vertex_x;
@@ -389,9 +359,7 @@ class EventEvaluatorEIC : public SubsysReco
   CaloEvalStack* _caloevalstackFOCAL;
   CaloEvalStack* _caloevalstackLFHCAL;
   CaloEvalStack* _caloevalstackFEMC;
-  CaloEvalStack* _caloevalstackCEMC;
   CaloEvalStack* _caloevalstackEEMC;
-  CaloEvalStack* _caloevalstackEEMCG;
 
   //----------------------------------
   // evaluator output ntuples
@@ -433,12 +401,10 @@ class EventEvaluatorEIC : public SubsysReco
     kFEMC = 1,
     kDRCALO = 2,
     kEEMC = 3,
-    kCEMC = 4,
     kEHCAL = 5,
     kHCALIN = 6,
     kHCALOUT = 7,
     kLFHCAL = 8,
-    kEEMCG = 9,
     kBECAL = 10,
     kFOCAL = 11
   };
