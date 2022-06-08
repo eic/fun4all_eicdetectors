@@ -66,7 +66,6 @@ using namespace std;
 EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   : SubsysReco(name)
   , _do_store_event_info(false)
-  , _do_FHCAL(false)
   , _do_BECAL(false)
   , _do_HCALIN(false)
   , _do_HCALOUT(false)
@@ -74,7 +73,6 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   , _do_FEMC(false)
   , _do_EEMC(false)
   , _do_DRCALO(false)
-  , _do_FOCAL(false)
   , _do_LFHCAL(false)
   , _do_HITS(false)
   , _do_HITS_ABSORBER(false)
@@ -104,12 +102,6 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   , _hits_edep(0)
   , _hits_lightyield(0)
   , _hits_isAbsorber(0)
-
-  , _nTowers_FHCAL(0)
-  , _tower_FHCAL_E(0)
-  , _tower_FHCAL_iEta(0)
-  , _tower_FHCAL_iPhi(0)
-  , _tower_FHCAL_trueID(0)
 
   , _nTowers_BECAL(0)
   , _tower_BECAL_E(0)
@@ -143,14 +135,6 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   , _tower_DRCALO_iPhi(0)
   , _tower_DRCALO_trueID(0)
 
-  , _nTowers_FOCAL(0)
-  , _tower_FOCAL_E(0)
-  , _tower_FOCAL_NScint(0)
-  , _tower_FOCAL_NCerenkov(0)
-  , _tower_FOCAL_iEta(0)
-  , _tower_FOCAL_iPhi(0)
-  , _tower_FOCAL_trueID(0)
-
   , _nTowers_LFHCAL(0)
   , _tower_LFHCAL_E(0)
   , _tower_LFHCAL_iEta(0)
@@ -169,13 +153,6 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   , _tower_EEMC_iEta(0)
   , _tower_EEMC_iPhi(0)
   , _tower_EEMC_trueID(0)
-
-  , _nclusters_FHCAL(0)
-  , _cluster_FHCAL_E(0)
-  , _cluster_FHCAL_Eta(0)
-  , _cluster_FHCAL_Phi(0)
-  , _cluster_FHCAL_NTower(0)
-  , _cluster_FHCAL_trueID(0)
 
   , _nclusters_HCALIN(0)
   , _cluster_HCALIN_E(0)
@@ -301,13 +278,11 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   , _reco_e_threshold(0)
   , _reco_e_thresholdMC(0.001)
   , _depth_MCstack(0)
-  , _caloevalstackFHCAL(nullptr)
   , _caloevalstackBECAL(nullptr)
   , _caloevalstackHCALIN(nullptr)
   , _caloevalstackHCALOUT(nullptr)
   , _caloevalstackEHCAL(nullptr)
   , _caloevalstackDRCALO(nullptr)
-  , _caloevalstackFOCAL(nullptr)
   , _caloevalstackLFHCAL(nullptr)
   , _caloevalstackFEMC(nullptr)
   , _caloevalstackEEMC(nullptr)
@@ -319,10 +294,8 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   , _tfile_geometry(nullptr)
 {
   _reco_e_threshold = new float[_maxNCalo];
-  _reco_e_threshold[kFHCAL] = 0.05;
   _reco_e_threshold[kFEMC] = 0.005;
   _reco_e_threshold[kDRCALO] = 0.0;
-  _reco_e_threshold[kFOCAL] = 0.0;
   _reco_e_threshold[kEEMC] = 0.005;
   _reco_e_threshold[kEHCAL] = 0.05;
   _reco_e_threshold[kHCALIN] = 0.01;
@@ -342,16 +315,6 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   _hits_edep = new float[_maxNHits];
   _hits_lightyield = new float[_maxNHits];
   _hits_isAbsorber = new int[_maxNHits];
-
-  _tower_FHCAL_E = new float[_maxNTowers];
-  _tower_FHCAL_iEta = new int[_maxNTowers];
-  _tower_FHCAL_iPhi = new int[_maxNTowers];
-  _tower_FHCAL_trueID = new int[_maxNTowers];
-  _cluster_FHCAL_E = new float[_maxNclusters];
-  _cluster_FHCAL_Eta = new float[_maxNclusters];
-  _cluster_FHCAL_Phi = new float[_maxNclusters];
-  _cluster_FHCAL_NTower = new int[_maxNclusters];
-  _cluster_FHCAL_trueID = new int[_maxNclusters];
 
   _tower_BECAL_E = new float[_maxNTowers];
   _tower_BECAL_iEta = new int[_maxNTowers];
@@ -394,13 +357,6 @@ EventEvaluatorEIC::EventEvaluatorEIC(const string& name, const string& filename)
   _tower_DRCALO_iEta = new int[_maxNTowersDR];
   _tower_DRCALO_iPhi = new int[_maxNTowersDR];
   _tower_DRCALO_trueID = new int[_maxNTowersDR];
-
-  _tower_FOCAL_E = new float[_maxNTowersDR];
-  _tower_FOCAL_NScint = new int[_maxNTowersDR];
-  _tower_FOCAL_NCerenkov = new int[_maxNTowersDR];
-  _tower_FOCAL_iEta = new int[_maxNTowersDR];
-  _tower_FOCAL_iPhi = new int[_maxNTowersDR];
-  _tower_FOCAL_trueID = new int[_maxNTowersDR];
 
   _tower_LFHCAL_E = new float[_maxNTowers];
   _tower_LFHCAL_iEta = new int[_maxNTowers];
@@ -574,25 +530,6 @@ int EventEvaluatorEIC::Init(PHCompositeNode* topNode)
     _event_tree->Branch("track_TLP_true_z", _track_TLP_true_z, "track_TLP_true_z[nProjections]/F");
     _event_tree->Branch("track_TLP_true_t", _track_TLP_true_t, "track_TLP_true_t[nProjections]/F");
   }
-  if (_do_FHCAL)
-  {
-    // towers FHCAL
-    _event_tree->Branch("tower_FHCAL_N", &_nTowers_FHCAL, "tower_FHCAL_N/I");
-    _event_tree->Branch("tower_FHCAL_E", _tower_FHCAL_E, "tower_FHCAL_E[tower_FHCAL_N]/F");
-    _event_tree->Branch("tower_FHCAL_iEta", _tower_FHCAL_iEta, "tower_FHCAL_iEta[tower_FHCAL_N]/I");
-    _event_tree->Branch("tower_FHCAL_iPhi", _tower_FHCAL_iPhi, "tower_FHCAL_iPhi[tower_FHCAL_N]/I");
-    _event_tree->Branch("tower_FHCAL_trueID", _tower_FHCAL_trueID, "tower_FHCAL_trueID[tower_FHCAL_N]/I");
-    if (_do_CLUSTERS)
-    {
-      // clusters FHCAL
-      _event_tree->Branch("cluster_FHCAL_N", &_nclusters_FHCAL, "cluster_FHCAL_N/I");
-      _event_tree->Branch("cluster_FHCAL_E", _cluster_FHCAL_E, "cluster_FHCAL_E[cluster_FHCAL_N]/F");
-      _event_tree->Branch("cluster_FHCAL_Eta", _cluster_FHCAL_Eta, "cluster_FHCAL_Eta[cluster_FHCAL_N]/F");
-      _event_tree->Branch("cluster_FHCAL_Phi", _cluster_FHCAL_Phi, "cluster_FHCAL_Phi[cluster_FHCAL_N]/F");
-      _event_tree->Branch("cluster_FHCAL_NTower", _cluster_FHCAL_NTower, "cluster_FHCAL_NTower[cluster_FHCAL_N]/I");
-      _event_tree->Branch("cluster_FHCAL_trueID", _cluster_FHCAL_trueID, "cluster_FHCAL_trueID[cluster_FHCAL_N]/I");
-    }
-  }
   if (_do_BECAL)
   {
     // towers BECAL
@@ -669,17 +606,6 @@ int EventEvaluatorEIC::Init(PHCompositeNode* topNode)
     _event_tree->Branch("tower_DRCALO_iEta", _tower_DRCALO_iEta, "tower_DRCALO_iEta[tower_DRCALO_N]/I");
     _event_tree->Branch("tower_DRCALO_iPhi", _tower_DRCALO_iPhi, "tower_DRCALO_iPhi[tower_DRCALO_N]/I");
     _event_tree->Branch("tower_DRCALO_trueID", _tower_DRCALO_trueID, "tower_DRCALO_trueID[tower_DRCALO_N]/I");
-  }
-  if (_do_FOCAL)
-  {
-    // towers FOCAL
-    _event_tree->Branch("tower_FOCAL_N", &_nTowers_FOCAL, "tower_FOCAL_N/I");
-    _event_tree->Branch("tower_FOCAL_E", _tower_FOCAL_E, "tower_FOCAL_E[tower_FOCAL_N]/F");
-    _event_tree->Branch("tower_FOCAL_NScint", _tower_FOCAL_NScint, "tower_FOCAL_NScint[tower_FOCAL_N]/I");
-    _event_tree->Branch("tower_FOCAL_NCerenkov", _tower_FOCAL_NCerenkov, "tower_FOCAL_NCerenkov[tower_FOCAL_N]/I");
-    _event_tree->Branch("tower_FOCAL_iEta", _tower_FOCAL_iEta, "tower_FOCAL_iEta[tower_FOCAL_N]/I");
-    _event_tree->Branch("tower_FOCAL_iPhi", _tower_FOCAL_iPhi, "tower_FOCAL_iPhi[tower_FOCAL_N]/I");
-    _event_tree->Branch("tower_FOCAL_trueID", _tower_FOCAL_trueID, "tower_FOCAL_trueID[tower_FOCAL_N]/I");
   }
   if (_do_LFHCAL)
   {
@@ -808,17 +734,6 @@ int EventEvaluatorEIC::process_event(PHCompositeNode* topNode)
   if (Verbosity() > 0)
     std::cout << "entered process_event" << endl;
 
-  if (_do_FHCAL)
-  {
-    if (!_caloevalstackFHCAL)
-    {
-      _caloevalstackFHCAL = new CaloEvalStack(topNode, "FHCAL");
-      _caloevalstackFHCAL->set_strict(_strict);
-      _caloevalstackFHCAL->set_verbosity(Verbosity() + 1);
-    }
-    else
-      _caloevalstackFHCAL->next_event(topNode);
-  }
   if (_do_BECAL)
   {
     if (!_caloevalstackBECAL)
@@ -873,17 +788,6 @@ int EventEvaluatorEIC::process_event(PHCompositeNode* topNode)
     }
     else
       _caloevalstackDRCALO->next_event(topNode);
-  }
-  if (_do_FOCAL)
-  {
-    if (!_caloevalstackFOCAL)
-    {
-      _caloevalstackFOCAL = new CaloEvalStack(topNode, "FOCAL");
-      _caloevalstackFOCAL->set_strict(_strict);
-      _caloevalstackFOCAL->set_verbosity(Verbosity() + 1);
-    }
-    else
-      _caloevalstackFOCAL->next_event(topNode);
   }
   if (_do_LFHCAL)
   {
@@ -1270,117 +1174,6 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
           }
         }
       }
-    }
-  }
-  //----------------------
-  //    TOWERS FHCAL
-  //----------------------
-  if (_do_FHCAL)
-  {
-    CaloRawTowerEval* towerevalFHCAL = _caloevalstackFHCAL->get_rawtower_eval();
-    _nTowers_FHCAL = 0;
-    string towernodeFHCAL = "TOWER_CALIB_FHCAL";
-    RawTowerContainer* towersFHCAL = findNode::getClass<RawTowerContainer>(topNode, towernodeFHCAL.c_str());
-    if (towersFHCAL)
-    {
-      if (Verbosity() > 0)
-        std::cout << "saving HCAL towers" << endl;
-
-      string towergeomnodeFHCAL = "TOWERGEOM_FHCAL";
-      RawTowerGeomContainer* towergeomFHCAL = findNode::getClass<RawTowerGeomContainer>(topNode, towergeomnodeFHCAL.c_str());
-      if (towergeomFHCAL)
-      {
-        if (_do_GEOMETRY && !_geometry_done[kFHCAL])
-        {
-          RawTowerGeomContainer::ConstRange all_towers = towergeomFHCAL->get_tower_geometries();
-          for (RawTowerGeomContainer::ConstIterator it = all_towers.first;
-               it != all_towers.second; ++it)
-          {
-            _calo_ID = kFHCAL;
-            _calo_towers_iEta[_calo_towers_N] = it->second->get_bineta();
-            _calo_towers_iPhi[_calo_towers_N] = it->second->get_binphi();
-            _calo_towers_iL[_calo_towers_N] = -1;
-            _calo_towers_Eta[_calo_towers_N] = it->second->get_eta();
-            _calo_towers_Phi[_calo_towers_N] = it->second->get_phi();
-            _calo_towers_x[_calo_towers_N] = it->second->get_center_x();
-            _calo_towers_y[_calo_towers_N] = it->second->get_center_y();
-            _calo_towers_z[_calo_towers_N] = it->second->get_center_z();
-            _calo_towers_N++;
-          }
-          _geometry_done[kFHCAL] = 1;
-          _geometry_tree->Fill();
-          resetGeometryArrays();
-        }
-
-        RawTowerContainer::ConstRange begin_end = towersFHCAL->getTowers();
-        RawTowerContainer::ConstIterator rtiter;
-        for (rtiter = begin_end.first; rtiter != begin_end.second; ++rtiter)
-        {
-          RawTower* tower = rtiter->second;
-          if (tower)
-          {
-            // min energy cut
-            if (tower->get_energy() < _reco_e_threshold[kFHCAL]) continue;
-            // std::cout << "\tnew FHCAL tower" << endl;
-            _tower_FHCAL_iEta[_nTowers_FHCAL] = tower->get_bineta();
-            _tower_FHCAL_iPhi[_nTowers_FHCAL] = tower->get_binphi();
-            _tower_FHCAL_E[_nTowers_FHCAL] = tower->get_energy();
-
-            // PHG4TruthInfoContainer* truthinfocontainer = findNode::getClass<PHG4TruthInfoContainer>(topNode, "G4TruthInfo");
-            // RawTower::ShowerConstRange shower_range = tower->get_g4showers();
-            // for (RawTower::ShowerConstIterator iter = shower_range.first;
-            //     iter != shower_range.second;
-            //     ++iter)
-            // {
-            //   PHG4Shower* shower = truthinfocontainer->GetShower(iter->first);
-            //   // PHG4Particle* particleParent = truthinfocontainer->GetParticle(shower->get_parent_particle_id());
-            //     // if (particleParent)
-            //     // {
-            //     //   std::cout << "\t\tcurr shower parent id: " << shower->get_parent_particle_id()<< "\tPDG " << particleParent->get_pid() << "\tedep: " << shower->get_edep() << endl;
-            //     // } else {
-            //     //   std::cout << "\t\tcurr shower parent id: " << shower->get_parent_particle_id() << endl;
-            //     // }
-            //   // for (PHG4Shower::ParticleIdIter jter = shower->begin_g4particle_id();jter != shower->end_g4particle_id(); ++jter)
-            //   // {
-            //   //   int g4particle_id = *jter;
-            //   //   PHG4Particle* particle = truthinfocontainer->GetParticle(g4particle_id);
-            //   //   if (particle)
-            //   //   {
-            //   //     if(particle->get_e()>0.01*shower->get_edep()){
-            //   //       // std::cout << "\t\t\tparticle ID in shower: " << particle->get_track_id() << "\tPDG " << particle->get_pid() << "\tenergy: " << particle->get_e()<< endl;
-            //   //     }
-            //   //   }
-            //   // }
-            // }
-
-            PHG4Particle* primary = towerevalFHCAL->max_truth_primary_particle_by_energy(tower);
-            if (primary)
-            {
-              _tower_FHCAL_trueID[_nTowers_FHCAL] = primary->get_track_id();
-              // gflavor = primary->get_pid();
-              // efromtruth = towerevalFHCAL->get_energy_contribution(tower, primary);
-            }
-            else
-              _tower_FHCAL_trueID[_nTowers_FHCAL] = -10;
-
-            _nTowers_FHCAL++;
-          }
-        }
-      }
-      else
-      {
-        if (Verbosity() > 0)
-          std::cout << PHWHERE << " ERROR: Can't find " << towergeomnodeFHCAL << endl;
-        // return;
-      }
-      if (Verbosity() > 0)
-        std::cout << "saved\t" << _nTowers_FHCAL << "\tFHCAL towers" << endl;
-    }
-    else
-    {
-      if (Verbosity() > 0)
-        std::cout << PHWHERE << " ERROR: Can't find " << towernodeFHCAL << endl;
-      // return;
     }
   }
   //----------------------
@@ -1821,91 +1614,6 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
     }
   }
   //----------------------
-  //    TOWERS FOCAL
-  //----------------------
-  if (_do_FOCAL)
-  {
-    CaloRawTowerEval* towerevalFOCAL = _caloevalstackFOCAL->get_rawtower_eval();
-    _nTowers_FOCAL = 0;
-    string towernodeFOCAL = "TOWER_CALIB_FOCAL";
-    RawTowerContainer* towersFOCAL = findNode::getClass<RawTowerContainer>(topNode, towernodeFOCAL.c_str());
-    if (towersFOCAL)
-    {
-      if (Verbosity() > 0)
-        std::cout << "saving FOCAL towers" << endl;
-      string towergeomnodeFOCAL = "TOWERGEOM_FOCAL";
-      RawTowerGeomContainer* towergeomFOCAL = findNode::getClass<RawTowerGeomContainer>(topNode, towergeomnodeFOCAL.c_str());
-      if (towergeomFOCAL)
-      {
-        if (_do_GEOMETRY && !_geometry_done[kFOCAL])
-        {
-          RawTowerGeomContainer::ConstRange all_towers = towergeomFOCAL->get_tower_geometries();
-          for (RawTowerGeomContainer::ConstIterator it = all_towers.first;
-               it != all_towers.second; ++it)
-          {
-            _calo_ID = kFOCAL;
-            _calo_towers_iEta[_calo_towers_N] = it->second->get_bineta();
-            _calo_towers_iPhi[_calo_towers_N] = it->second->get_binphi();
-            _calo_towers_iL[_calo_towers_N] = -1;
-            _calo_towers_Eta[_calo_towers_N] = it->second->get_eta();
-            _calo_towers_Phi[_calo_towers_N] = it->second->get_phi();
-            _calo_towers_x[_calo_towers_N] = it->second->get_center_x();
-            _calo_towers_y[_calo_towers_N] = it->second->get_center_y();
-            _calo_towers_z[_calo_towers_N] = it->second->get_center_z();
-            _calo_towers_N++;
-          }
-          _geometry_done[kFOCAL] = 1;
-          _geometry_tree->Fill();
-          resetGeometryArrays();
-        }
-        if (Verbosity() > 0)
-          std::cout << "found FOCAL geom" << endl;
-        RawTowerContainer::ConstRange begin_end = towersFOCAL->getTowers();
-        RawTowerContainer::ConstIterator rtiter;
-        for (rtiter = begin_end.first; rtiter != begin_end.second; ++rtiter)
-        {
-          RawTower* tower = rtiter->second;
-          if (tower)
-          {
-            // min energy cut
-            if (tower->get_energy() < _reco_e_threshold[kFOCAL]) continue;
-
-            _tower_FOCAL_iEta[_nTowers_FOCAL] = tower->get_bineta();
-            _tower_FOCAL_iPhi[_nTowers_FOCAL] = tower->get_binphi();
-            _tower_FOCAL_E[_nTowers_FOCAL] = tower->get_energy();
-            _tower_FOCAL_NScint[_nTowers_FOCAL] = tower->get_scint_gammas();
-            _tower_FOCAL_NCerenkov[_nTowers_FOCAL] = tower->get_cerenkov_gammas();
-
-            PHG4Particle* primary = towerevalFOCAL->max_truth_primary_particle_by_energy(tower);
-            if (primary)
-            {
-              _tower_FOCAL_trueID[_nTowers_FOCAL] = primary->get_track_id();
-            }
-            else
-              _tower_FOCAL_trueID[_nTowers_FOCAL] = -10;
-            _nTowers_FOCAL++;
-          }
-        }
-        if (Verbosity() > 0)
-          std::cout << "finished FOCAL twr loop" << endl;
-      }
-      else
-      {
-        if (Verbosity() > 0)
-          std::cout << PHWHERE << " ERROR: Can't find " << towergeomnodeFOCAL << endl;
-        // return;
-      }
-      if (Verbosity() > 0)
-        std::cout << "saved\t" << _nTowers_FOCAL << "\tFOCAL towers" << endl;
-    }
-    else
-    {
-      if (Verbosity() > 0)
-        std::cout << PHWHERE << " ERROR: Can't find " << towernodeFOCAL << endl;
-      // return;
-    }
-  }
-  //----------------------
   //    TOWERS LFHCAL
   //----------------------
   if (_do_LFHCAL)
@@ -2186,65 +1894,6 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
     }
   }
 
- 
-  //------------------------
-  // CLUSTERS FHCAL
-  //------------------------
-  if (Verbosity() > 0)
-    std::cout << "saving clusters" << endl;
-  
-  if (_do_FHCAL && _do_CLUSTERS)
-  {
-    CaloRawClusterEval* clusterevalFHCAL = _caloevalstackFHCAL->get_rawcluster_eval();
-    _nclusters_FHCAL = 0;
-    if (Verbosity() > 1)
-      std::cout << "CaloEvaluator::filling gcluster ntuple..." << endl;
-  
-    string clusternodeFHCAL = "CLUSTER_FHCAL";
-    RawClusterContainer* clustersFHCAL = findNode::getClass<RawClusterContainer>(topNode, clusternodeFHCAL.c_str());
-    if (clustersFHCAL)
-    {
-      // for every cluster
-      for (const auto& iterator : clustersFHCAL->getClustersMap())
-      {
-        RawCluster* cluster = iterator.second;
-
-        if (cluster->get_energy() < _reco_e_threshold[kFHCAL]) continue;
-
-        _cluster_FHCAL_E[_nclusters_FHCAL] = cluster->get_energy();
-        _cluster_FHCAL_NTower[_nclusters_FHCAL] = cluster->getNTowers();
-        _cluster_FHCAL_Phi[_nclusters_FHCAL] = cluster->get_phi();
-
-        // require vertex for cluster eta calculation
-        if (vertexmap)
-        {
-          if (!vertexmap->empty())
-          {
-            SvtxVertex* vertex = (vertexmap->begin()->second);
-            _cluster_FHCAL_Eta[_nclusters_FHCAL] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(vertex->get_x(), vertex->get_y(), vertex->get_z()));
-          }
-          else
-            _cluster_FHCAL_Eta[_nclusters_FHCAL] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));
-        }
-        else
-          _cluster_FHCAL_Eta[_nclusters_FHCAL] = RawClusterUtility::GetPseudorapidity(*cluster, CLHEP::Hep3Vector(0, 0, 0));
-
-        PHG4Particle* primary = clusterevalFHCAL->max_truth_primary_particle_by_energy(cluster);
-
-        if (primary)
-          _cluster_FHCAL_trueID[_nclusters_FHCAL] = primary->get_track_id();
-        else
-          _cluster_FHCAL_trueID[_nclusters_FHCAL] = -10;
-
-        _nclusters_FHCAL++;
-      }
-    }
-    else
-      std::cerr << PHWHERE << " ERROR: Can't find " << clusternodeFHCAL << endl;
-      // return;
-    if (Verbosity() > 0)
-      std::cout << "saved\t" << _nclusters_FHCAL << "\tFHCAL clusters" << endl;
-  }
   //------------------------
   // CLUSTERS HCALIN
   //------------------------
@@ -2949,13 +2598,11 @@ int EventEvaluatorEIC::End(PHCompositeNode* topNode)
     std::cout << "===========================================================================" << endl;
   }
 
-  if (_caloevalstackFHCAL) delete _caloevalstackFHCAL;
   if (_caloevalstackBECAL) delete _caloevalstackBECAL;
   if (_caloevalstackHCALIN) delete _caloevalstackHCALIN;
   if (_caloevalstackHCALOUT) delete _caloevalstackHCALOUT;
   if (_caloevalstackEHCAL) delete _caloevalstackEHCAL;
   if (_caloevalstackDRCALO) delete _caloevalstackDRCALO;
-  if (_caloevalstackFOCAL) delete _caloevalstackFOCAL;
   if (_caloevalstackLFHCAL) delete _caloevalstackLFHCAL;
   if (_caloevalstackFEMC) delete _caloevalstackFEMC;
   if (_caloevalstackEEMC) delete _caloevalstackEEMC;
@@ -3016,9 +2663,7 @@ int EventEvaluatorEIC::GetProjectionIndex(std::string projname)
     return 63;
   else if (projname.find("BECAL") != std::string::npos)
     return 66;
-  // else if (projname.find("FHCAL") != std::string::npos)
-  //   return 67;
-
+ 
   else if (projname.find("ZDCsurrogate") != std::string::npos)
     return 70;
   else if (projname.find("rpTruth") != std::string::npos)
@@ -3391,31 +3036,6 @@ void EventEvaluatorEIC::resetBuffer()
     if (Verbosity() > 0)
       std::cout << "\t... hit variables reset" << endl;
   }
-  if (_do_FHCAL)
-  {
-    _nTowers_FHCAL = 0;
-    for (Int_t itow = 0; itow < _maxNTowers; itow++)
-    {
-      _tower_FHCAL_E[itow] = 0;
-      _tower_FHCAL_iEta[itow] = 0;
-      _tower_FHCAL_iPhi[itow] = 0;
-      _tower_FHCAL_trueID[itow] = 0;
-    }
-    if (_do_CLUSTERS)
-    {
-      _nclusters_FHCAL = 0;
-      for (Int_t itow = 0; itow < _maxNclusters; itow++)
-      {
-        _cluster_FHCAL_E[itow] = 0;
-        _cluster_FHCAL_Eta[itow] = 0;
-        _cluster_FHCAL_Phi[itow] = 0;
-        _cluster_FHCAL_NTower[itow] = 0;
-        _cluster_FHCAL_trueID[itow] = 0;
-      }
-    }
-    if (Verbosity() > 0)
-      std::cout << "\t... FHCAL variables reset" << endl;
-  }
   if (_do_BECAL)
   {
     _nTowers_BECAL = 0;
@@ -3554,24 +3174,6 @@ void EventEvaluatorEIC::resetBuffer()
     }
     if (Verbosity() > 0)
       std::cout << "\t... DRCALO variables reset" << endl;
-  }
-  if (_do_FOCAL)
-  {
-    if (Verbosity() > 0)
-      std::cout << "\t... resetting FOCAL variables" << endl;
-
-    _nTowers_FOCAL = 0;
-    for (Int_t itow = 0; itow < _maxNTowersDR; itow++)
-    {
-      _tower_FOCAL_E[itow] = 0;
-      _tower_FOCAL_NScint[itow] = 0;
-      _tower_FOCAL_NCerenkov[itow] = 0;
-      _tower_FOCAL_iEta[itow] = 0;
-      _tower_FOCAL_iPhi[itow] = 0;
-      _tower_FOCAL_trueID[itow] = 0;
-    }
-    if (Verbosity() > 0)
-      std::cout << "\t... FOCAL variables reset" << endl;
   }
 
   if (_do_LFHCAL)

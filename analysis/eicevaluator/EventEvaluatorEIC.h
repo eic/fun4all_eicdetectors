@@ -52,7 +52,6 @@ class EventEvaluatorEIC : public SubsysReco
   void set_strict(bool b) { _strict = b; }
 
   void set_do_store_event_level_info(bool b) { _do_store_event_info = b; }
-  void set_do_FHCAL(bool b) { _do_FHCAL = b; }
   void set_do_BECAL(bool b) { _do_BECAL = b; }
   void set_do_HCALIN(bool b) { _do_HCALIN = b; }
   void set_do_HCALOUT(bool b) { _do_HCALOUT = b; }
@@ -60,7 +59,6 @@ class EventEvaluatorEIC : public SubsysReco
   void set_do_FEMC(bool b) { _do_FEMC = b; }
   void set_do_EEMC(bool b) { _do_EEMC = b; }
   void set_do_DRCALO(bool b) { _do_DRCALO = b; }
-  void set_do_FOCAL(bool b) { _do_FOCAL = b; }
   void set_do_LFHCAL(bool b) { _do_LFHCAL = b; }
   void set_do_HITS(bool b) { _do_HITS = b; }
   void set_do_HITS_ABSORBER(bool b) { _do_HITS_ABSORBER = b; }
@@ -95,7 +93,6 @@ class EventEvaluatorEIC : public SubsysReco
 
  private:
   bool _do_store_event_info;
-  bool _do_FHCAL;
   bool _do_BECAL;
   bool _do_HCALIN;
   bool _do_HCALOUT;
@@ -103,7 +100,6 @@ class EventEvaluatorEIC : public SubsysReco
   bool _do_FEMC;
   bool _do_EEMC;
   bool _do_DRCALO;
-  bool _do_FOCAL;
   bool _do_LFHCAL;
   bool _do_HITS;
   bool _do_HITS_ABSORBER;
@@ -140,13 +136,6 @@ class EventEvaluatorEIC : public SubsysReco
   int* _hits_isAbsorber;
 
   // towers
-  int _nTowers_FHCAL;
-  float* _tower_FHCAL_E;
-  int* _tower_FHCAL_iEta;
-  int* _tower_FHCAL_iPhi;
-  int* _tower_FHCAL_trueID;
-
-  // towers
   int _nTowers_BECAL;
   float* _tower_BECAL_E;
   int* _tower_BECAL_iEta;
@@ -181,14 +170,6 @@ class EventEvaluatorEIC : public SubsysReco
   int* _tower_DRCALO_iPhi;
   int* _tower_DRCALO_trueID;
 
-  int _nTowers_FOCAL;
-  float* _tower_FOCAL_E;
-  int* _tower_FOCAL_NScint;
-  int* _tower_FOCAL_NCerenkov;
-  int* _tower_FOCAL_iEta;
-  int* _tower_FOCAL_iPhi;
-  int* _tower_FOCAL_trueID;
-
   int _nTowers_LFHCAL;
   float* _tower_LFHCAL_E;
   int* _tower_LFHCAL_iEta;
@@ -207,15 +188,7 @@ class EventEvaluatorEIC : public SubsysReco
   int* _tower_EEMC_iEta;
   int* _tower_EEMC_iPhi;
   int* _tower_EEMC_trueID;
-
-  // clusters
-  int _nclusters_FHCAL;
-  float* _cluster_FHCAL_E;
-  float* _cluster_FHCAL_Eta;
-  float* _cluster_FHCAL_Phi;
-  int* _cluster_FHCAL_NTower;
-  int* _cluster_FHCAL_trueID;
-
+ 
   int _nclusters_HCALIN;
   float* _cluster_HCALIN_E;
   float* _cluster_HCALIN_Eta;
@@ -350,13 +323,11 @@ class EventEvaluatorEIC : public SubsysReco
   float _reco_e_thresholdMC;
   int _depth_MCstack;
 
-  CaloEvalStack* _caloevalstackFHCAL;
   CaloEvalStack* _caloevalstackBECAL;
   CaloEvalStack* _caloevalstackHCALIN;
   CaloEvalStack* _caloevalstackHCALOUT;
   CaloEvalStack* _caloevalstackEHCAL;
   CaloEvalStack* _caloevalstackDRCALO;
-  CaloEvalStack* _caloevalstackFOCAL;
   CaloEvalStack* _caloevalstackLFHCAL;
   CaloEvalStack* _caloevalstackFEMC;
   CaloEvalStack* _caloevalstackEEMC;
@@ -397,7 +368,6 @@ class EventEvaluatorEIC : public SubsysReco
 
   enum calotype
   {
-    kFHCAL = 0,
     kFEMC = 1,
     kDRCALO = 2,
     kEEMC = 3,
@@ -406,7 +376,6 @@ class EventEvaluatorEIC : public SubsysReco
     kHCALOUT = 7,
     kLFHCAL = 8,
     kBECAL = 10,
-    kFOCAL = 11
   };
 };
 
