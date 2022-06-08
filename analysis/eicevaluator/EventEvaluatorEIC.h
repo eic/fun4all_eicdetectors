@@ -301,6 +301,8 @@ class EventEvaluatorEIC : public SubsysReco
   float* _track_y;
   float* _track_z;
   float* _track_ndf;
+  short* _track_nHits;
+  unsigned int* _track_hitsEncoded;
   float* _track_chi2;
   float* _track_dca;
   float* _track_dca_2d;
@@ -407,6 +409,7 @@ class EventEvaluatorEIC : public SubsysReco
   // subroutines
   int GetProjectionIndex(std::string projname);           ///< return track projection index for given track projection layer
   std::string GetProjectionNameFromIndex(int projindex);  ///< return track projection layer name from projection index (see GetProjectionIndex)
+  int GetExponentFromProjectionIndex(int projindex);      ///< return exponent for bitwise encoding of tracking layers
   void fillOutputNtuples(PHCompositeNode* topNode);       ///< dump the evaluator information into ntuple for external analysis
   void resetGeometryArrays();                             ///< reset the tree variables before filling for a new event
   void resetBuffer();                                     ///< reset the tree variables before filling for a new event

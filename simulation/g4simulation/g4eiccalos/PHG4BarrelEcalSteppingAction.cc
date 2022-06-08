@@ -77,7 +77,7 @@ bool PHG4BarrelEcalSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
     return false;
   }
 
-  unsigned int icopy = touch->GetVolume(1)->GetCopyNo();
+  unsigned int icopy = touch->GetVolume(0)->GetCopyNo();
   int idx_k = icopy >> 16;
   int idx_j = icopy & 0xFFFF;
 

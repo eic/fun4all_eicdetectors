@@ -104,80 +104,8 @@ void PHG4BarrelEcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
 
   ParseParametersFromTable();
 
-  G4double Radius = m_Params->get_double_param("radius") * cm;
-  G4double tower_length = m_Params->get_double_param("tower_length") * cm;
-  G4double becal_length = m_Params->get_double_param("becal_length") * cm;
-  G4double CenterZ_Shift = m_Params->get_double_param("CenterZ_Shift") * cm;
-  G4double cone1_h = m_Params->get_double_param("cone1_h") * cm;
-  G4double cone1_dz = m_Params->get_double_param("cone1_dz") * cm;
-  G4double cone2_h = m_Params->get_double_param("cone2_h") * cm;
-  G4double cone2_dz = m_Params->get_double_param("cone2_dz") * cm;
-
-  int isprojective = m_Params->get_int_param("projective");
-
-  silicon_width_half = m_Params->get_double_param("silicon_width_half") * cm;
-  kapton_width_half = m_Params->get_double_param("kapton_width_half") * cm;
-  SIO2_width_half = m_Params->get_double_param("SIO2_width_half") * cm;
-  Carbon_width_half = m_Params->get_double_param("Carbon_width_half") * cm;
-  support_length = m_Params->get_double_param("support_length") * cm;
-
-  G4double max_radius = Radius + tower_length + 2 * silicon_width_half + 2 * kapton_width_half + 2 * SIO2_width_half + 2 * Carbon_width_half + support_length + 8 * overlap;
-
-  //std::cout << Radius << "  " << max_radius << "====================================" << std::endl;
-
-  G4double pos_x1 = 0 * cm;
-  G4double pos_y1 = 0 * cm;
-  G4double pos_z1 = 0 * cm;
-
-  G4Tubs* cylinder_solid1 = new G4Tubs("BCAL_SOLID1",
-                                       Radius-1*cm, max_radius,
-                                       becal_length / 2, 0, 2 * M_PI);
-
-  G4Tubs* cylinder_solid2 = new G4Tubs("BCAL_SOLID2",
-                                       Radius - 1, max_radius + 1,
-                                       abs(CenterZ_Shift), 0, 2 * M_PI);
-
-  G4ThreeVector shift_cs2 = G4ThreeVector(0, 0, becal_length / 2);
-
-  G4VSolid* cylinder_solid3 = new G4SubtractionSolid("BCAL_SOLID3", cylinder_solid1, cylinder_solid2, 0, shift_cs2);
-
-  G4Cons* cone1 = new G4Cons("cone1",
-                             Radius - 1, Radius - 1,
-                             Radius - 1, Radius + cone1_h,
-                             cone1_dz, 0, 2 * M_PI);
-
-  G4ThreeVector shift_cone1 = G4ThreeVector(0, 0, becal_length / 2 - abs(CenterZ_Shift) - cone1_dz);
-
-  G4VSolid* cylinder_solid4 = new G4SubtractionSolid("BCAL_SOLID4", cylinder_solid3, cone1, 0, shift_cone1);
-
-  G4Cons* cone2 = new G4Cons("cone2",
-                             Radius - 1, Radius + cone2_h,
-                             Radius - 1, Radius - 1,
-                             cone2_dz, 0, 2 * M_PI);
-
-  G4ThreeVector shift_cone2 = G4ThreeVector(0, 0, -becal_length / 2 + cone2_dz - 3*cm);
-
-  G4VSolid* cylinder_solid = new G4SubtractionSolid("BCAL_SOLID", cylinder_solid4, cone2, 0, shift_cone2);
-
-  G4Material* cylinder_mat = G4Material::GetMaterial("G4_AIR");
-  assert(cylinder_mat);
-
-  G4LogicalVolume* cylinder_logic = new G4LogicalVolume(cylinder_solid, cylinder_mat,  "BCAL_SOLID", 0, 0, 0);
-  if(!isprojective){
-    cylinder_logic = new G4LogicalVolume(cylinder_solid1, cylinder_mat, "BCAL_SOLID", 0, 0, 0);
-    pos_z1 = CenterZ_Shift;
-  }
-  m_DisplayAction->AddVolume(cylinder_logic, "BCalCylinder");
-
-  std::string name_envelope = m_TowerLogicNamePrefix + "_envelope";
-
-  G4PVPlacement* phys_envelope =
-      new G4PVPlacement(0, G4ThreeVector(pos_x1, pos_y1, pos_z1), cylinder_logic, name_envelope,
-                        logicWorld, false, 0, OverlapCheck());
-
-  gdml_config->exclude_physical_vol(phys_envelope);
-  PlaceTower(cylinder_logic);
-
+  PlaceTower(logicWorld);
+  
   return;
 }
 
