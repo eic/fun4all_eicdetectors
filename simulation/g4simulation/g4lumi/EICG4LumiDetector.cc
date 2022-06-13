@@ -121,11 +121,12 @@ void EICG4LumiDetector::ConstructMe(G4LogicalVolume *logicWorld)
 
   //________________________________________PARAMETER INITIALISATION__________________________________________________________
 
-  SetParametersFromFile();
-
   double enclosureCenter = m_Params->get_double_param( "FBenclosure_center" ) * cm;
   
-  //Lumi Window
+  // Version # of the Luminosity Monitor Design.
+  int Version = m_Params->get_int_param( "Version" );
+  
+  // Primary Lumi Exit Window
   double LumiWin_X = m_Params->get_double_param( "LumiWin_X" ) * cm;
   double LumiWin_Y = m_Params->get_double_param( "LumiWin_Y" ) * cm;
   double LumiWin_Z = m_Params->get_double_param( "LumiWin_Z" ) * cm - enclosureCenter;
@@ -134,8 +135,7 @@ void EICG4LumiDetector::ConstructMe(G4LogicalVolume *logicWorld)
   double LumiWin_Height = m_Params->get_double_param( "LumiWin_Height" ) * cm;
   double LumiWin_Length = m_Params->get_double_param( "LumiWin_Length" ) * cm;
   
-  	
-  // spectrometer dipole
+  // Spectrometer dipole magnet
   double LumiMag_Z = m_Params->get_double_param( "LumiMag_Z" ) * cm - enclosureCenter;
   double LumiMag_inner = m_Params->get_double_param( "LumiMag_innerR" ) * cm;
   double LumiMag_outer = m_Params->get_double_param( "LumiMag_outerR" ) * cm;
@@ -147,161 +147,135 @@ void EICG4LumiDetector::ConstructMe(G4LogicalVolume *logicWorld)
   //double LumiPhotonCAL_Z = m_Params->get_double_param( "LumiPhotonCAL_Z" ) * cm - enclosureCenter;
   double LumiPhotonCAL_XY = m_Params->get_double_param( "LumiPhotonCAL_XY" ) * cm;
 
-  //Lumi ee Spectrometer single tower (Calorimeter) dimensions
+  // Lumi ee Spectrometer single tower (Calorimeter) dimensions
   double LumiSpecTower_XY = m_Params->get_double_param( "LumiSpecTower_XY" ) * cm;
   double LumiSpecTower_DZ = m_Params->get_double_param( "LumiSpecTower_DZ" ) * cm;
   int TotalLumiSpecTower = m_Params->get_int_param( "TotalLumiSpecTower" );
 
-  //Tracker2 Details
+  // Tracker1 Details
+  //double LumiTracker1Gap = m_Params->get_double_param( "LumiTracker1Gap" ) * cm; //Collimator dy dimension.
+
+  // Tracker2 Details
   double LumiTracker2_XY = m_Params->get_double_param( "LumiTracker2_XY" ) * cm;
   double LumiTracker2_DZ = m_Params->get_double_param( "LumiTracker2_DZ" ) * cm;
 
-  //Version # of the Luminosity Monitor Design.
-  int Version = m_Params->get_int_param( "Version" );
-
-  //Tracker1 Details
-  //double LumiTracker1Gap = m_Params->get_double_param( "LumiTracker1Gap" ) * cm; //Collimator dy dimension.
-    
-  //__________________________________________Definition of Air________________________________________________________ 
-  double a = 14.01*g/mole;
-  G4Element* elN = new G4Element("Nitrogen","N",7.0,a);
-  a = 16.00*g/mole;
-  G4Element* elO = new G4Element("Oxygen","O",8.0,a);
-  double density = 1.290*mg/cm3;
-  G4Material* Air = new G4Material("Air",density,2);
-  Air->AddElement(elN, 70.0*perCent);
-  Air->AddElement(elO, 30.0*perCent);
-
-  //__________________________________________________________________________________________________________________________
-
-  //LumiWin_Thickness*factor for different version exit window.
+  // LumiWin_Thickness*factor for different exit window versions.
   double factorV1 = 1.0; 
   double factorV2 = 1.0; 
   double factorV3 = 1.0; 
  
-  //initialisation of diff. volume region.
+  // Initialisation of diff. volume region.
   std::string LumiWin_Material = m_Params->get_string_param( "LumiWin_Material" );
   std::string LumiMag_VesselMaterial = m_Params->get_string_param( "LumiMag_VesselMaterial" );
-
-  std::string TrianTrapMaterial = "Air";
-  std::string CuboidMaterial = "Air";
-  std::string MagCoreMaterial = "Air";
-  std::string RecConeMaterial = "Air";
-  std::string ExitWinV2Material = "Air";
-  std::string ExitWinV3Material = "Air";
-  //std::string MidConvMaterial = "Air";
+    
+  std::string TrianTrapMaterial = "G4_AIR";
+  std::string CuboidMaterial = "G4_AIR";
+  std::string MagCoreMaterial = "G4_AIR";
+  std::string RecConeMaterial = "G4_AIR";
+  std::string ExitWinV2Material = "G4_AIR";
+  std::string ExitWinV3Material = "G4_AIR";
+  //std::string MidConvMaterial = "G4_AIR";
 
   //Change the material according to Version.
   switch(Version){
-	
-	case 1: //No change in material def.
-		break;
 
-	case 2: TrianTrapMaterial = "G4_Galactic";
-		CuboidMaterial = "G4_Galactic";
-		MagCoreMaterial = "G_Galactic";
-		//MidConvMaterial = LumiWin_Material;
-		ExitWinV2Material = LumiWin_Material;
-		break;
+    case 1: //No change in material def.
+      break;
 
-	case 3: TrianTrapMaterial = "G4_Galactic";
-		CuboidMaterial = "G4_Galactic";
-		MagCoreMaterial = "G4_Galactic";
-		RecConeMaterial = "G4_Galactic";
-		ExitWinV2Material = "G4_Galactic";
-		//MidConvMaterial = LumiWin_Material;	
-		ExitWinV3Material = LumiWin_Material;
-		break;
+    case 2: TrianTrapMaterial       = "G4_Galactic";
+            CuboidMaterial          = "G4_Galactic";
+            MagCoreMaterial         = "G4_Galactic";
+            //MidConvMaterial       = LumiWin_Material;
+            ExitWinV2Material       = LumiWin_Material;
+            factorV1                = 0.1;
+            break;
 
-	default : std::cout<<"WRONG CHOICE (ONLY 1, 2 & 3)"<<endl;
-		  break;
+    case 3: TrianTrapMaterial       = "G4_Galactic";
+            CuboidMaterial          = "G4_Galactic";
+            MagCoreMaterial         = "G4_Galactic";
+            RecConeMaterial         = "G4_Galactic";
+            ExitWinV2Material       = "G4_Galactic";
+            //MidConvMaterial       = LumiWin_Material;	
+            ExitWinV3Material       = LumiWin_Material;
+            factorV1                = 0.1;
+            break;
+
+    default : std::cout<<"WRONG CHOICE (ONLY 1, 2 & 3)"<<endl;
+              break;
 
   }
-  
-  //size and position (in world volume coordinates).
-  G4ThreeVector size_lw = G4ThreeVector(LumiWin_Length, LumiWin_Height, factorV1*LumiWin_Thickness ); //thickness is factorised A/Version 1
-  G4ThreeVector pos_lw = G4ThreeVector(LumiWin_X, LumiWin_Y, LumiWin_Z);
-  G4ThreeVector size_ov = G4ThreeVector(LumiMag_inner, LumiMag_outer, LumiMag_DZ); //x - inner radius, y - outer radius and z - length of cylinder vessel.
-  G4ThreeVector pos_ov = G4ThreeVector(LumiWin_X, LumiWin_Y, LumiMag_Z); //same axis as the lumi window.
-  G4ThreeVector size_mc = G4ThreeVector(0., LumiMag_inner, LumiMag_DZ); //x - inner radius, y - outer radius and z - length of cylindrical core.
-  G4ThreeVector size_tr2 = G4ThreeVector(LumiTracker2_XY, LumiTracker2_XY, LumiTracker2_DZ);
-  G4ThreeVector pos_tr2 = G4ThreeVector(LumiWin_X, pos_lw.y() + LumiPhotonCAL_XY/2.0 + size_tr2.y()/2.0 + 0.01*cm , LumiSpec_Z + LumiSpecTower_DZ/2.0 + LumiWin_Thickness + LumiTracker2_DZ/2.0); //tracker 2 pos 
-  G4ThreeVector size_st = G4ThreeVector(TotalLumiSpecTower*LumiSpecTower_XY, TotalLumiSpecTower*LumiSpecTower_XY, LumiSpecTower_DZ); //spectrometer tower size 
 
-  G4ThreeVector size_ewV2 = G4ThreeVector(LumiWin_Length, LumiWin_Height, factorV2*LumiWin_Thickness ); //thickness is factorised A/Version 2
-  G4ThreeVector size_ewV3 = G4ThreeVector(LumiWin_Length, LumiWin_Height, factorV3*LumiWin_Thickness ); //thickness is factorised A/Version 3
+  // sizes and positions (in mother volume coordinates)
+  // Main Lumi Window
+  G4ThreeVector size_lw = G4ThreeVector( LumiWin_Length, LumiWin_Height, factorV1*LumiWin_Thickness ); //thickness is factorised A/Version 1
+  G4ThreeVector pos_lw = G4ThreeVector( LumiWin_X, LumiWin_Y, LumiWin_Z );
  
-  //size and position (in mother volume coordinates)
-  double dz_tr2_daug = -1*pos_tr2.z()  - (-1*pos_ov.z() + size_ov.z()/2.0);
-  G4ThreeVector pos_ewV2_daug = G4ThreeVector(0.0, 0.0, dz_tr2_daug/2.0 - size_ewV2.z()/2.0);
-  G4ThreeVector pos_tr2_daug = G4ThreeVector(0.0, LumiPhotonCAL_XY/2.0 + size_tr2.y()/2.0, -1*(dz_tr2_daug/2.0) + size_tr2.z()/2.0 ); //tracker2 pos in recCone;
-  G4ThreeVector pos_tr1_daug = G4ThreeVector(0.0, pos_tr2.y()/2.0, 0.0); //tracker 1 position in RecCone.
+  // Outer Vessel
+  G4ThreeVector size_ov = G4ThreeVector( LumiMag_inner, LumiMag_outer, LumiMag_DZ ); //x - inner radius, y - outer radius and z - length of cylinder vessel.
+  G4ThreeVector pos_ov = G4ThreeVector( LumiWin_X, LumiWin_Y, LumiMag_Z ); //same axis as the lumi window.
+  
+  // Spectrometer Magnet Core
+  G4ThreeVector size_mc = G4ThreeVector( 0., LumiMag_inner, LumiMag_DZ ); //x - inner radius, y - outer radius and z - length of cylindrical core.
+  
+  // Exit Windows for V2 and V3
+  // thickness is factorised
+  G4ThreeVector size_ewV2 = G4ThreeVector( LumiWin_Length, LumiWin_Height, factorV2*LumiWin_Thickness );
+  G4ThreeVector size_ewV3 = G4ThreeVector( LumiWin_Length, LumiWin_Height, factorV3*LumiWin_Thickness );
+  
+  // Spectrometer Tracker 2
+  G4ThreeVector size_tr2 = G4ThreeVector( LumiTracker2_XY, LumiTracker2_XY, LumiTracker2_DZ );
+  G4ThreeVector pos_tr2 = G4ThreeVector( LumiWin_X, pos_lw.y() + LumiPhotonCAL_XY/2.0 + size_tr2.y()/2.0 + 0.01*cm, 
+      LumiSpec_Z + LumiSpecTower_DZ/2.0 + LumiWin_Thickness + LumiTracker2_DZ/2.0 ); //tracker 2 pos 
 
-  //____________________________________Components of Lumi Detector____________________________________________________________
-  AddLumiWindow(size_lw, pos_lw, LumiWin_Tilt, LumiWin_Material, logicWorld);
-  AddTriangularTrapezoid(size_lw, pos_lw, LumiWin_Tilt,TrianTrapMaterial,logicWorld);
-  AddCuboid(size_lw, pos_lw, size_ov, pos_ov, LumiWin_Tilt, CuboidMaterial, logicWorld);
-  AddLumiMag_OuterVessel(size_ov,pos_ov, LumiMag_VesselMaterial, logicWorld);
-  AddLumiMag_MagCore(size_mc, pos_ov, LumiMag_B, MagCoreMaterial, logicWorld);
-  G4LogicalVolume* logicRecCone = AddRecCone(size_lw, pos_lw, size_ov, pos_ov, size_tr2, pos_tr2, LumiWin_Tilt, RecConeMaterial, logicWorld);
-  AddExitWindowForV2(size_ewV2, pos_ewV2_daug, LumiWin_Tilt,ExitWinV2Material, logicRecCone);
-  AddLumiTracker( "TopSpecTracker1", G4ThreeVector( size_tr2.x()/2.0, size_tr2.y()/2.0, size_tr2.z() ), pos_tr1_daug, logicRecCone);
-  AddLumiTracker( "BottomSpecTracker1", G4ThreeVector( size_tr2.x()/2.0, size_tr2.y()/2.0, size_tr2.z() ), G4ThreeVector( pos_tr1_daug.x() , -1*pos_tr1_daug.y(), pos_tr1_daug.z() ), logicRecCone);
-  AddLumiTracker( "TopSpecTracker2", size_tr2, pos_tr2_daug, logicRecCone);
-  AddLumiTracker( "BottomSpecTracker2", size_tr2, G4ThreeVector( pos_tr2_daug.x(), -1*pos_tr2_daug.y(), pos_tr2_daug.z() ), logicRecCone);
-  AddExitWindowForV3(size_ewV3, pos_lw, size_tr2, pos_tr2, ExitWinV3Material, logicWorld);
+  // Spectrometer Tracker 1
+  double LumiTracker1_XY = pos_tr2.y() - size_ewV2.y()/2.;
+  G4ThreeVector size_tr1 = G4ThreeVector( LumiTracker1_XY, LumiTracker1_XY, LumiTracker2_DZ );
+
+  // Spectrometer Towers
+  G4ThreeVector size_st = G4ThreeVector( 
+      TotalLumiSpecTower*LumiSpecTower_XY, TotalLumiSpecTower*LumiSpecTower_XY, LumiSpecTower_DZ ); 
+ 
+  // 
+  double dz_tr2_daughter = -1*pos_tr2.z() - (-1*pos_ov.z() + size_ov.z()/2.0);
+  G4ThreeVector pos_ewV2_daughter = G4ThreeVector( 0.0, 0.0, dz_tr2_daughter/2.0 - size_ewV2.z()/2.0);
+  
+  G4ThreeVector pos_tr2_top = G4ThreeVector( 0.0, LumiPhotonCAL_XY/2.0 + size_tr2.y()/2.0, 
+      -1*(dz_tr2_daughter/2.0) + size_tr2.z()/2.0 ); //tracker2 pos in recCone;
+  G4ThreeVector pos_tr2_bot = G4ThreeVector( pos_tr2_top.x(), -1*pos_tr2_top.y(), pos_tr2_top.z() ); 
+
+  G4ThreeVector pos_tr1_top = G4ThreeVector( 0.0, pos_tr2.y()/2.0, 0.0 ); //tracker 1 position in RecCone.
+  G4ThreeVector pos_tr1_bot = G4ThreeVector( pos_tr1_top.x() , -1*pos_tr1_top.y(), pos_tr1_top.z() );
+
+  //-------------------------------------------------------
+  // Add Components of Lumi Detector
+  // magnet core material may be Air or Galactic depending on Version
+  AddLumiWindow(          size_lw, pos_lw, LumiWin_Tilt, LumiWin_Material, logicWorld);
+  AddTriangularTrapezoid( size_lw, pos_lw, LumiWin_Tilt, TrianTrapMaterial, logicWorld);
+  AddCuboid(              size_lw, pos_lw, size_ov, pos_ov, LumiWin_Tilt, CuboidMaterial, logicWorld);
+  AddLumiMag_OuterVessel( size_ov, pos_ov, LumiMag_VesselMaterial, logicWorld);
+  AddLumiMag_MagCore(     size_mc, pos_ov, LumiMag_B, MagCoreMaterial, logicWorld);
+  
+  // sub-mother volume for trackers and V2/V3 exit windows
+  G4LogicalVolume* logicRecCone = AddRecCone( size_lw, pos_lw, size_ov, pos_ov, 
+      size_tr2, pos_tr2, LumiWin_Tilt, RecConeMaterial, logicWorld );
+  
+  AddExitWindowForV2( size_ewV2, pos_ewV2_daughter, LumiWin_Tilt, ExitWinV2Material, logicRecCone );
+
+  //-------------------------------------------------------
+  // Spectrometer Trackers
+  AddLumiTracker( "TopSpecTracker1", 0, size_tr1, pos_tr1_top, logicRecCone);
+  AddLumiTracker( "BotSpecTracker1", 1, size_tr1, pos_tr1_bot, logicRecCone);
+  AddLumiTracker( "TopSpecTracker2", 2, size_tr2, pos_tr2_top, logicRecCone);
+  AddLumiTracker( "BotSpecTracker2", 3, size_tr2, pos_tr2_bot, logicRecCone);
+  
+  AddExitWindowForV3( size_ewV3, pos_lw, size_tr2, pos_tr2, ExitWinV3Material, logicWorld );
+  
+  //-------------------------------------------------------
+  // Spectrometer Calorimeter Towers
   AddCAL( "TopSpecTower", size_st, G4ThreeVector(LumiWin_X, pos_tr2.y(), LumiSpec_Z), TotalLumiSpecTower, logicWorld );
-  AddCAL( "BottomSpecTower",size_st, G4ThreeVector(LumiWin_X, -1*pos_tr2.y(), LumiSpec_Z),TotalLumiSpecTower, logicWorld );
+  AddCAL( "BotSpecTower", size_st, G4ThreeVector(LumiWin_X, -1*pos_tr2.y(), LumiSpec_Z), TotalLumiSpecTower, logicWorld );
   
  return;
-}
-
-//______________________________________________________________..
-void EICG4LumiDetector::SetParametersFromFile()
-{
-
-	std::ifstream infile;
-        std::string line;
-
-        std::string paramFile = m_Params->get_string_param("parameter_file");   
-	infile.open( paramFile );
-
-	if( ! infile.is_open() ) 
-	{
-		std::cout << "ERROR in EICG4LumiDetector: GetDetectorMaterFailed to open parameter file " << paramFile << std::endl;
-		gSystem->Exit(1);
-	}
-
-	while( std::getline(infile, line) ) {
-
-	    std::string name;
-	    std::string value;
-
-	    std::istringstream iss( line );
-
-	    // skip comment lines
-	    if( line.find("#") != std::string::npos ) { continue; }
-            std::cout<<line<<endl;
-	    if( !(iss >> name >> value) ) {
-		std::cout << "Could not decode " << line << std::endl;
-		gSystem->Exit(1);
-	    }
-
-            if( m_Params->exist_string_param( name ) ) {
-                m_Params->set_string_param(name, value);
-            }
-            else if( m_Params->exist_double_param( name ) ) {
-                m_Params->set_double_param(name, std::stod(value) );
-            }
-            else if( m_Params->exist_int_param( name ) ) {
-                m_Params->set_int_param(name, std::stoi(value) );
-            }
-            else { 
-                std::cout << "input parameter not recognized.  Exiting!" << std::endl;
-                gSystem->Exit(1);
-            }
-
-	}
 }
 
 //_______________________________________________________________
@@ -326,97 +300,96 @@ PHParameters *EICG4LumiDetector::getParams()
 
 //_____________________________________________________________________________________________________________________________________________
 void EICG4LumiDetector::AddLumiWindow(G4ThreeVector size, G4ThreeVector pos, double angle, std::string material, G4LogicalVolume *logicWorld){
-  
-	std::string name = "LumiWindow";
-	G4Box *solid = new G4Box(name + "_solid", (size.x()/2.0) + 0.3*cm, size.y()/2.0, size.z()/2.0 );
-	//G4Para *solid = new G4Para(name + "_solid", size.x()/2.0, size.y()/2.0, factor*(size.z()/2.0) , angle , angle , 0.);
 
-	G4LogicalVolume *logical = new G4LogicalVolume( solid, GetDetectorMaterial(material), name + "_logical");
-  	G4VisAttributes *vis = new G4VisAttributes( G4Color(1, 0, 0, 0.5) );
-  	vis->SetForceSolid( true );
-   	logical->SetVisAttributes(vis);
+  std::string name = "LumiWindow";
+  G4Box *solid = new G4Box(name + "_solid", (size.x()/2.0) + 0.3*cm, size.y()/2.0, size.z()/2.0 );
+  //G4Para *solid = new G4Para(name + "_solid", size.x()/2.0, size.y()/2.0, factor*(size.z()/2.0) , angle , angle , 0.);
 
-	G4ThreeVector rot_axis = G4ThreeVector(0,1,0); //Y-axis
-  	G4RotationMatrix *rot_matrix = new G4RotationMatrix(rot_axis , angle); //is typedef to CLHEP::HepRotation
-	//G4ThreeVector pos_new = G4ThreeVector(pos.x() - (size.z()/(2.0*TMath::Sin(angle))), pos.y() , pos.z() );
-	G4ThreeVector pos_new = G4ThreeVector(pos.x() - (size.z()/(2.0*TMath::Sin(angle)) ), pos.y(), pos.z() );
-  	G4VPhysicalVolume *physical = new G4PVPlacement(rot_matrix, pos_new, logical, name+"_physical", logicWorld, 0, false, OverlapCheck());
-  	//G4VPhysicalVolume *physical = new G4PVPlacement(0, pos, logical, name+"_physical", logicWorld, 0, false, OverlapCheck());
+  G4LogicalVolume *logical = new G4LogicalVolume( solid, GetDetectorMaterial(material), name + "_logical");
+  G4VisAttributes *vis = new G4VisAttributes( G4Color(1, 0, 0, 1) );
+  vis->SetForceSolid( true );
+  logical->SetVisAttributes(vis);
 
-  	m_PassivePhysicalVolumesSet.insert( physical );
+  G4ThreeVector rot_axis = G4ThreeVector(0,1,0); //Y-axis
+  G4RotationMatrix *rot_matrix = new G4RotationMatrix(rot_axis , angle); //is typedef to CLHEP::HepRotation
+  //G4ThreeVector pos_new = G4ThreeVector(pos.x() - (size.z()/(2.0*TMath::Sin(angle))), pos.y() , pos.z() );
+  G4ThreeVector pos_new = G4ThreeVector(pos.x() - (size.z()/(2.0*TMath::Sin(angle)) ), pos.y(), pos.z() );
+  G4VPhysicalVolume *physical = new G4PVPlacement(rot_matrix, pos_new, logical, name+"_physical", logicWorld, 0, false, OverlapCheck());
+  //G4VPhysicalVolume *physical = new G4PVPlacement(0, pos, logical, name+"_physical", logicWorld, 0, false, OverlapCheck());
+
+  m_PassivePhysicalVolumesSet.insert( physical );
 
 }
 
 //_____________________________________________________________________________________________________________________________________________
 G4ThreeVector EICG4LumiDetector::AddLumiExitWindow(G4ThreeVector size, G4ThreeVector pos, double factor, double angle, std::string material, G4LogicalVolume *logicWorld){
-  
-	std::string name = "LumiExitWindow";
 
-	//G4Box *solid = new G4Box(name + "_solid", size.x()/2.0, size.y()/2.0, factor*size.z()/2.0);
-	//G4Para *solid = new G4Para(name + "_solid", size.x()/2.0, size.y()/2.0, factor*(size.z()/2.0) - 0.01*cm, angle, angle, 0);
-	G4Box *solid = new G4Box(name + "_solid", size.x(), size.y(), size.z());
+  std::string name = "LumiExitWindow";
 
-	G4LogicalVolume *logical = new G4LogicalVolume( solid, GetDetectorMaterial(material), name + "_logical");
-  	G4VisAttributes *vis = new G4VisAttributes( G4Color(0, 1, 0, 0.5) );
-  	vis->SetForceSolid( true );
-   	logical->SetVisAttributes(vis);
+  //G4Box *solid = new G4Box(name + "_solid", size.x()/2.0, size.y()/2.0, factor*size.z()/2.0);
+  //G4Para *solid = new G4Para(name + "_solid", size.x()/2.0, size.y()/2.0, factor*(size.z()/2.0) - 0.01*cm, angle, angle, 0);
+  G4Box *solid = new G4Box(name + "_solid", size.x(), size.y(), size.z());
 
-	G4ThreeVector rot_axis = G4ThreeVector(0,1,0); //Y-axis
-  	G4RotationMatrix *rot_matrix = new G4RotationMatrix(rot_axis , angle); //is typedef to CLHEP::HepRotation
-	G4ThreeVector pos_new = G4ThreeVector(pos.x(), pos.y(), pos.z() - size.z() - factor);
-  	G4VPhysicalVolume *physical = new G4PVPlacement(rot_matrix, pos_new, logical, name+"_physical", logicWorld, 0, false, OverlapCheck());
-  	m_PassivePhysicalVolumesSet.insert( physical );
+  G4LogicalVolume *logical = new G4LogicalVolume( solid, GetDetectorMaterial(material), name + "_logical");
+  G4VisAttributes *vis = new G4VisAttributes( G4Color(0, 1, 0, 1) );
+  vis->SetForceSolid( true );
+  logical->SetVisAttributes(vis);
 
-	return pos_new;
+  G4ThreeVector rot_axis = G4ThreeVector(0,1,0); //Y-axis
+  G4RotationMatrix *rot_matrix = new G4RotationMatrix(rot_axis , angle); //is typedef to CLHEP::HepRotation
+  G4ThreeVector pos_new = G4ThreeVector(pos.x(), pos.y(), pos.z() - size.z() - factor);
+  G4VPhysicalVolume *physical = new G4PVPlacement(rot_matrix, pos_new, logical, name+"_physical", logicWorld, 0, false, OverlapCheck());
+  m_PassivePhysicalVolumesSet.insert( physical );
+
+  return pos_new;
 
 }
 
 //________________________________________________________________________________________________________________________________________
 void EICG4LumiDetector::AddLumiMag_OuterVessel( G4ThreeVector size, G4ThreeVector pos, std::string material, G4LogicalVolume *logicWorld)
- {
-	std::string name = "LumiMag_OuterVessel";
+{
+  std::string name = "LumiMag_OuterVessel";
 
-	//x - inner radius, y- outer radius and z - length of tube. Theta coverage 0 - 360 deg
-	G4Tubs *solid = new G4Tubs(name+"_solid", size.x(), size.y(), size.z()/2., 0., 360.*deg);
+  //x - inner radius, y- outer radius and z - length of tube. Theta coverage 0 - 360 deg
+  G4Tubs *solid = new G4Tubs(name+"_solid", size.x(), size.y(), size.z()/2., 0., 360.*deg);
 
-	G4LogicalVolume *logical = new G4LogicalVolume(solid, GetDetectorMaterial(material), name+"_logical");
-	G4VisAttributes *vis = new G4VisAttributes( G4Color(0, 1, 0, 0.5) );
-	vis->SetForceSolid( true );
-	logical->SetVisAttributes( vis );
+  G4LogicalVolume *logical = new G4LogicalVolume(solid, GetDetectorMaterial(material), name+"_logical");
+  G4VisAttributes *vis = new G4VisAttributes( G4Color(0, 1, 0, 0.5) );
+  vis->SetForceSolid( true );
+  logical->SetVisAttributes( vis );
 
-	G4VPhysicalVolume *physical = new G4PVPlacement( 0, pos, logical, name+"_physical", logicWorld, 0, false, OverlapCheck() );
-	m_PassivePhysicalVolumesSet.insert( physical);
+  G4VPhysicalVolume *physical = new G4PVPlacement( 0, pos, logical, name+"_physical", logicWorld, 0, false, OverlapCheck() );
+  m_PassivePhysicalVolumesSet.insert( physical);
 
- }
+}
 
 //______________________________________________________________________________________________________________________________________________
 void EICG4LumiDetector::AddLumiMag_MagCore(G4ThreeVector size, G4ThreeVector pos, double Bx, std::string material, G4LogicalVolume *logicWorld)
- {
-	std::string name = "LumiMag_MagCore";
+{
+  std::string name = "LumiMag_MagCore";
 
-	// x - inner radius, y - outer radius, z - length of the cylindrical core. Theta coverage 0- 360 deg
-	G4Tubs *solid = new G4Tubs(name, size.x(), size.y() - 0.01*cm, size.z()/2.0, 0., 360.*deg);
-	
-	G4LogicalVolume *logical = new G4LogicalVolume( solid, GetDetectorMaterial(material), name);
-	logical->SetVisAttributes( G4VisAttributes::GetInvisible() );
- 
-	G4UniformMagField *field = new G4UniformMagField( G4ThreeVector(Bx, 0, 0 ) ); //Mag field stregth along x-direction
-	G4FieldManager *fman = new G4FieldManager();
-	fman->SetDetectorField( field );
-	fman->CreateChordFinder( field );
-	logical->SetFieldManager(fman, true);
+  // x - inner radius, y - outer radius, z - length of the cylindrical core. Theta coverage 0- 360 deg
+  G4Tubs *solid = new G4Tubs(name, size.x(), size.y() - 0.01*cm, size.z()/2.0, 0., 360.*deg);
 
-	G4VPhysicalVolume *physical = new G4PVPlacement( 0, pos, logical, name, logicWorld, 0, false, OverlapCheck() );
-	m_PassivePhysicalVolumesSet.insert( physical);
+  G4LogicalVolume *logical = new G4LogicalVolume( solid, GetDetectorMaterial(material), name);
+  logical->SetVisAttributes( G4VisAttributes::GetInvisible() );
 
-	//return logical;
+  G4UniformMagField *field = new G4UniformMagField( G4ThreeVector(Bx, 0, 0 ) ); //Mag field stregth along x-direction
+  G4FieldManager *fman = new G4FieldManager();
+  fman->SetDetectorField( field );
+  fman->CreateChordFinder( field );
+  logical->SetFieldManager(fman, true);
 
+  G4VPhysicalVolume *physical = new G4PVPlacement( 0, pos, logical, name, logicWorld, 0, false, OverlapCheck() );
+  m_PassivePhysicalVolumesSet.insert( physical);
+
+  //return logical;
 }
 
 //______________________________________________________________________________________________________________________________________________
 void EICG4LumiDetector::AddTriangularTrapezoid(G4ThreeVector size, G4ThreeVector pos, double angle, std::string material, G4LogicalVolume *logicWorld)
 {
- //Construct the triangle in x-y plane, extrude in the z-axis and finally rotate it by -90 deg via x -axis.
+  // Construct the triangle in x-y plane, extrude in the z-axis and finally rotate it by -90 deg via x -axis.
 
   std::string name = "LumiTrainTrap"; 
   std::vector<G4TwoVector> polygon;
@@ -429,12 +402,12 @@ void EICG4LumiDetector::AddTriangularTrapezoid(G4ThreeVector size, G4ThreeVector
 
   double x3 = (size.x()/2.0)*TMath::Cos(angle);
   double y3 = (size.x()/2.0)*TMath::Sin(angle);
-  
+
   polygon.push_back({x1, y1});
   polygon.push_back({x2, y2});
   polygon.push_back({x3, y3});
 
- // Extrude the triange - Solid-Volume
+  // Extrude the triange - Solid-Volume
   std::vector<G4ExtrudedSolid::ZSection> zsections = { 
     {-1*size.y()/2.0, {0,0}, 1.0}, {size.y()/2.0, {0,0}, 1.0} };
 
@@ -445,7 +418,7 @@ void EICG4LumiDetector::AddTriangularTrapezoid(G4ThreeVector size, G4ThreeVector
   G4LogicalVolume *logical = new G4LogicalVolume(solid, GetDetectorMaterial(material), name+"_logical");
   //G4LogicalVolume *logical = new G4LogicalVolume(solid, material, name+"_logical");
 
-  G4VisAttributes *vis = new G4VisAttributes( G4Color(0, 1, 0, 0.5) ); // ( red , green , blue , transperancy ) all in percent.
+  G4VisAttributes *vis = new G4VisAttributes( G4Color(0, 1, 1, 0.3) ); // ( red , green , blue , transperancy ) all in percent.
   vis->SetForceSolid(true);
   logical->SetVisAttributes(vis);
 
@@ -478,7 +451,6 @@ void EICG4LumiDetector::AddCuboid(G4ThreeVector Wsize, G4ThreeVector Wpos, G4Thr
   m_PassivePhysicalVolumesSet.insert( physical);
 
   //return logical; //Used for Midway Convertor only.
-
 }
 
 //_____________________________________________________________________________________________________________
@@ -487,64 +459,63 @@ void EICG4LumiDetector::AddCuboid(G4ThreeVector Wsize, G4ThreeVector Wpos, G4Thr
 G4LogicalVolume* EICG4LumiDetector::AddRecCone(G4ThreeVector Wsize, G4ThreeVector Wpos, G4ThreeVector Msize, G4ThreeVector Mpos, G4ThreeVector Tr2size, G4ThreeVector Tr2pos, double angle, std::string material, G4LogicalVolume *logicWorld)
 {
 
- double dz_rec_cone = ( -1*Tr2pos.z() + Tr2size.z()/2.0 ) - (-1*Mpos.z() + Msize.z()/2.0);
- G4Trd *solid = new G4Trd("solid", Tr2size.x()/2.0 + 1*cm,(Wsize.x()/2.0)*TMath::Cos(angle), Tr2pos.y() + Tr2size.y()/2.0 + 2.0*cm, Wsize.y()/2.0, dz_rec_cone/2.0); //2.0cm to adjust the overlap due to conical shape.
+  double dz_rec_cone = ( -1*Tr2pos.z() + Tr2size.z()/2.0 ) - (-1*Mpos.z() + Msize.z()/2.0);
+  G4Trd *solid = new G4Trd("solid", Tr2size.x()/2.0 + 1*cm,(Wsize.x()/2.0)*TMath::Cos(angle), Tr2pos.y() + Tr2size.y()/2.0 + 2.0*cm, Wsize.y()/2.0, dz_rec_cone/2.0); //2.0cm to adjust the overlap due to conical shape.
 
- G4LogicalVolume *logical = new G4LogicalVolume(solid, GetDetectorMaterial("G4_Galactic"), "Lumi_RectangularCone");
- G4VisAttributes *vis = new G4VisAttributes( G4Color(0, 1, 1, 0.3) );
- vis->SetForceSolid( true );
- logical->SetVisAttributes( vis);
+  G4LogicalVolume *logical = new G4LogicalVolume(solid, GetDetectorMaterial("G4_Galactic"), "Lumi_RectangularCone");
+  G4VisAttributes *vis = new G4VisAttributes( G4Color(0, 1, 1, 0.3) );
+  vis->SetForceSolid( true );
+  logical->SetVisAttributes( vis);
 
- G4ThreeVector pos_rec_cone = G4ThreeVector(Wpos.x(), Wpos.y(), Mpos.z() - Msize.z()/2.0 - dz_rec_cone/2.0);
- G4VPhysicalVolume *physical = new G4PVPlacement(0, pos_rec_cone, logical, "Lumi_RectangularCone", logicWorld, 0, false, OverlapCheck());
- m_PassivePhysicalVolumesSet.insert( physical);
+  G4ThreeVector pos_rec_cone = G4ThreeVector(Wpos.x(), Wpos.y(), Mpos.z() - Msize.z()/2.0 - dz_rec_cone/2.0);
+  G4VPhysicalVolume *physical = new G4PVPlacement(0, pos_rec_cone, logical, "Lumi_RectangularCone", logicWorld, 0, false, OverlapCheck());
+  m_PassivePhysicalVolumesSet.insert( physical);
 
- return logical;
-
+  return logical;
 }
 
 //______________________________________________________________________________________________________________________________
-void EICG4LumiDetector::AddExitWindowForV2(G4ThreeVector Wsize, G4ThreeVector pos_daug, double angle, std::string material, G4LogicalVolume *logicRecCone)
+void EICG4LumiDetector::AddExitWindowForV2(G4ThreeVector Wsize, G4ThreeVector pos_daug, double angle, std::string material, G4LogicalVolume *logicWorld)
 {
   std::string name = "LumiExitWinV2";
   G4Box *solid = new G4Box(name+"solid",(Wsize.x()/2.0)*TMath::Cos(angle), Wsize.y()/2.0, Wsize.z()/2.0);
 
   G4LogicalVolume *logical = new G4LogicalVolume( solid, GetDetectorMaterial(material), name+"logical");
-  G4VisAttributes *vis = new G4VisAttributes( G4Color(1, 0, 0, 0.5) );
+  G4VisAttributes *vis = new G4VisAttributes( G4Color(1, 0, 0, 1) );
   vis->SetForceSolid( true );
   logical->SetVisAttributes( vis );
 
-  G4VPhysicalVolume *physical = new G4PVPlacement(0, pos_daug, logical, name+"physical", logicRecCone, 0, false, OverlapCheck());
+  G4VPhysicalVolume *physical = new G4PVPlacement(0, pos_daug, logical, name+"physical", logicWorld, 0, false, OverlapCheck());
   m_PassivePhysicalVolumesSet.insert( physical);
 }
 
 //_______________________________________________________________________________________________________
-void EICG4LumiDetector::AddLumiTracker( std::string name, G4ThreeVector size, G4ThreeVector pos, G4LogicalVolume *logicRecCone )
+void EICG4LumiDetector::AddLumiTracker( std::string name, int copyNum, G4ThreeVector size, G4ThreeVector pos, G4LogicalVolume *logicWorld )
 {
- 
-   G4Box *solid = new G4Box(name + "_solid", size.x()/2.0 , size.y()/2.0 , size.z()/2.0);
 
-   G4LogicalVolume *logical = new G4LogicalVolume( solid, G4NistManager::Instance()->FindOrBuildMaterial("G4_Si"), name + "_logical");
+  G4Box *solid = new G4Box(name + "_solid", size.x()/2.0 , size.y()/2.0 , size.z()/2.0);
 
-   G4VisAttributes *vis = new G4VisAttributes( G4Color(1.0, 1.0, 0.0, 1.0) );
-   vis->SetForceSolid(true);
-   logical->SetVisAttributes(vis);
+  G4LogicalVolume *logical = new G4LogicalVolume( solid, G4NistManager::Instance()->FindOrBuildMaterial("G4_Si"), name + "_logical");
 
-   G4VPhysicalVolume *physical = new G4PVPlacement( 0, pos, logical, name + "_physical", logicRecCone, 0, false, OverlapCheck() );
+  G4VisAttributes *vis = new G4VisAttributes( G4Color(1.0, 1.0, 0.0, 1.0) );
+  vis->SetForceSolid(true);
+  logical->SetVisAttributes(vis);
 
-   m_ActivePhysicalVolumesSet.insert( physical );
+  G4VPhysicalVolume *physical = new G4PVPlacement( 0, pos, logical, name + "_physical", logicWorld, false, copyNum, OverlapCheck() );
+
+  m_ActivePhysicalVolumesSet.insert( physical );
 
 }
 
 //____________________________________________________________________________________________________________________________________
 void EICG4LumiDetector::AddExitWindowForV3(G4ThreeVector Wsize, G4ThreeVector Wpos, G4ThreeVector Tr2size, G4ThreeVector Tr2pos, std::string material, G4LogicalVolume *logicWorld)
 {
-  
+
   std::string name = "LumiExitWinV3";
   G4Box *solid = new G4Box(name+"_solid",Tr2size.x()/2.0 + 1*cm, Tr2size.y() + Tr2pos.y()/2.0 + 2.0*cm, Wsize.z()/2.0);//2.0cm to adjust the overlap due to conical shape.
 
   G4LogicalVolume *logical = new G4LogicalVolume( solid, GetDetectorMaterial(material),name+"logical");
-  G4VisAttributes *vis = new G4VisAttributes( G4Color(1, 0, 0, 0.5) );
+  G4VisAttributes *vis = new G4VisAttributes( G4Color(1, 0, 0, 1) );
   vis->SetForceSolid( true );
   logical->SetVisAttributes( vis );
 
@@ -569,7 +540,7 @@ void EICG4LumiDetector::AddCAL( std::string name, G4ThreeVector size, G4ThreeVec
   //G4double zpos = pos.z();
   //geo->GetOptD(nam, "zpos", zpos, GeoParser::Unit(mm));
 
-    //geo->GetOptI(nam, "nxy", nxy);
+  //geo->GetOptI(nam, "nxy", nxy);
 
   //module size for tower assembly, increased to allow for tower rotation
   G4double modxy = size.x(); //  + 40*mm
@@ -585,6 +556,7 @@ void EICG4LumiDetector::AddCAL( std::string name, G4ThreeVector size, G4ThreeVec
   //modv->SetVisAttributes(new G4VisAttributes(G4Color(0, 0, 1)));
   modv->SetVisAttributes( G4VisAttributes::GetInvisible() );
 
+  // Construct individual towers
   G4LogicalVolume *towv = MakeTower(towerSizeXY, towerEMZ);
 
   G4int tcnt = 0;
@@ -596,7 +568,6 @@ void EICG4LumiDetector::AddCAL( std::string name, G4ThreeVector size, G4ThreeVec
       new G4PVPlacement(0, G4ThreeVector(xpos, ypos, 0), towv, towv->GetName(), modv, false, tcnt++, OverlapCheck());
     }
   }
-
 
 }
 
@@ -618,12 +589,15 @@ G4LogicalVolume* EICG4LumiDetector::MakeTower(G4double calorSizeXY, G4double cal
 
   G4Material* defaultMaterial = G4NistManager::Instance()->FindOrBuildMaterial("G4_Galactic");
   G4Material* gapMaterial2 = G4NistManager::Instance()->FindOrBuildMaterial("G4_POLYSTYRENE");
-  G4Material* EMCal_abs_mat=new G4Material("EMCal_fiber_mat",12.4*g/cm3,2);
-  G4double a=183.85*g/mole;
-  G4Element* elW=new G4Element("Tungsten","W",74.,a);
-  EMCal_abs_mat->AddElement(elW,96.0*perCent);
-  EMCal_abs_mat->AddMaterial(gapMaterial2,4.0*perCent);
-
+  G4double a = 183.85*g/mole;
+  G4Element* elW = new G4Element("Tungsten","W", 74., a);
+  
+  G4Material* EMCal_abs_mat = GetDetectorMaterial( "EMCal_fiber_mat", false ); // false suppress warnings
+  if( ! EMCal_abs_mat ) {
+    EMCal_abs_mat = new G4Material("EMCal_fiber_mat", 12.4*g/cm3, 2);
+    EMCal_abs_mat->AddElement(elW, 96.0*perCent);
+    EMCal_abs_mat->AddMaterial(gapMaterial2, 4.0*perCent);
+  }
 
   //EM
   G4LogicalVolume* calorEM;
@@ -682,9 +656,5 @@ G4LogicalVolume* EICG4LumiDetector::MakeTower(G4double calorSizeXY, G4double cal
   calorEM->SetVisAttributes(calorEMvis);
 
   return calorEM;
-
 }
-
-//__________________________________________________________________________________________________________________________________
-
 

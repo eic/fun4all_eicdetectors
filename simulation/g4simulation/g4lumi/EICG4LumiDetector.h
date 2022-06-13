@@ -79,19 +79,28 @@ class EICG4LumiDetector : public PHG4Detector
   const std::string SuperDetector() const { return m_SuperDetector; }
   int get_Layer() const { return m_Layer; }
 
-  void SetParametersFromFile();
-
   void AddLumiWindow(G4ThreeVector size, G4ThreeVector pos, double angle, std::string material, G4LogicalVolume *logicWorld);
+  
   G4ThreeVector AddLumiExitWindow(G4ThreeVector size, G4ThreeVector pos, double factor, double angle, std::string material, G4LogicalVolume *logicWorld);
+  
   void AddLumiMag_OuterVessel( G4ThreeVector size, G4ThreeVector pos, std::string material, G4LogicalVolume *logicWorld);
+  
   void AddLumiMag_MagCore(G4ThreeVector size, G4ThreeVector pos, double Bx, std::string material, G4LogicalVolume *logicWorld);
+  
   void AddTriangularTrapezoid(G4ThreeVector size, G4ThreeVector pos, double angle, std::string material, G4LogicalVolume *logicWorld);
+  
   void AddCuboid(G4ThreeVector Wsize, G4ThreeVector Wpos, G4ThreeVector Msize, G4ThreeVector Mpos, double angle, std::string material, G4LogicalVolume *logicWorld);
+  
   G4LogicalVolume* AddRecCone(G4ThreeVector Wsize, G4ThreeVector Wpos, G4ThreeVector Msize, G4ThreeVector Mpos, G4ThreeVector Tr2size, G4ThreeVector Tr2pos, double angle, std::string material, G4LogicalVolume *logicWorld);
+  
   void AddExitWindowForV2(G4ThreeVector size, G4ThreeVector pos_daug, double angle, std::string material, G4LogicalVolume *logicRecCone);
-  void AddLumiTracker( std::string name, G4ThreeVector size, G4ThreeVector pos, G4LogicalVolume *logicRecCone);
+  
+  void AddLumiTracker( std::string name, int copyNum, G4ThreeVector size, G4ThreeVector pos, G4LogicalVolume *logicRecCone);
+  
   void AddCAL( std::string name, G4ThreeVector size, G4ThreeVector pos, int total_tower, G4LogicalVolume *logicWorld );
+  
   G4LogicalVolume* MakeTower(G4double calorSizeXY, G4double calorEMZ);
+  
   void AddExitWindowForV3(G4ThreeVector Wsize, G4ThreeVector Wpos, G4ThreeVector Tr2size, G4ThreeVector Tr2pos, std::string material, G4LogicalVolume *logicWorld);
 
   PHParameters *getParams();

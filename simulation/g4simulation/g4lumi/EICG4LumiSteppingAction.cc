@@ -145,7 +145,11 @@ bool EICG4LumiSteppingAction::UserSteppingAction(const G4Step *aStep,bool was_us
 
   }
 
-  int layer_id = m_Detector->get_Layer();
+  // int layer_id = m_Detector->get_Layer();
+  int layer_id = touch->GetVolume(1)->GetCopyNo();
+  // To decompose into tower cells
+  //int idx_j = icopy >> 16;
+  //int idx_k = icopy & 0xFFFF;
 
   int layer_type = 1;
   if (!m_ActiveFlag)
@@ -213,6 +217,11 @@ bool EICG4LumiSteppingAction::UserSteppingAction(const G4Step *aStep,bool was_us
 
       // time in ns
       m_Hit->set_t(0, prePoint->GetGlobalTime() / nanosecond);
+
+      // set the tower index
+      //m_Hit->set_index_j(idx_j);
+      //m_Hit->set_index_k(idx_k);
+
       // set the track ID
       m_Hit->set_trkid(aTrack->GetTrackID());
       m_SaveTrackId = aTrack->GetTrackID();

@@ -53,8 +53,7 @@ class EICG4LumiSubsystem : public PHG4DetectorSubsystem
 
   void SaveAllHits(bool i = true){ m_SaveAllHitsFlag = i;}  
   //void SetTowerMappingFile(const std::string &filename);
-
-  void SetParameterFile( std::string &filename ) { set_string_param("parameter_file", filename ); } //////
+  void SetParametersFromFile( std::string filename );
 
  protected:
   // \brief Set default parameter values
