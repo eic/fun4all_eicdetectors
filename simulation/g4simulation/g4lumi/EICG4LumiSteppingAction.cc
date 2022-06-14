@@ -146,7 +146,7 @@ bool EICG4LumiSteppingAction::UserSteppingAction(const G4Step *aStep,bool was_us
   }
 
   // int layer_id = m_Detector->get_Layer();
-  int layer_id = touch->GetVolume(1)->GetCopyNo();
+  int layer_id = volume->GetCopyNo();
   // To decompose into tower cells
   //int idx_j = icopy >> 16;
   //int idx_k = icopy & 0xFFFF;
