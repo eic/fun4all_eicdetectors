@@ -15,15 +15,13 @@ AM_CPPFLAGS = \
   -isystem ${G4_MAIN}/include
 
 pkginclude_HEADERS = \
-  EICG4LumiSubsystem.h \
-  BwdRawTowerBuilderByHitIndex.h
+  EICG4LumiSubsystem.h
 
 libEICG4Lumi_la_SOURCES = \
   $(ROOT5_DICTS) \
   EICG4LumiSubsystem.cc \
   EICG4LumiDetector.cc \
-  EICG4LumiSteppingAction.cc \
-  BwdRawTowerBuilderByHitIndex.cc
+  EICG4LumiSteppingAction.cc
 
 libEICG4Lumi_la_LDFLAGS  = \
   -L$(libdir) \
