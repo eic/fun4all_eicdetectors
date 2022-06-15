@@ -583,7 +583,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
   G4Element *elC = new G4Element("Carbon", symbol = "C", 6., 12.01 * g / mole);
   G4Element *elN = new G4Element("Nitrogen", symbol = "N", 7., 14.01 * g / mole);
   G4Element *elO = new G4Element("Oxygen", symbol = "O", 8., 16.00 * g / mole);
-  G4Material *mat_Epoxy = GetDetectorMaterial("EpoxyTTL");
+  G4Material *mat_Epoxy = GetDetectorMaterial("EpoxyTTL",false);
   if (!mat_Epoxy)
   {
     mat_Epoxy = new G4Material("EpoxyTTL", density = 1.16 * g / cm3, natoms = 4);
@@ -593,7 +593,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
     mat_Epoxy->AddElement(elC, 15);  // Carbon
     // G4Material *mat_Epoxy = GetDetectorMaterial("Epoxy");
   }
-  G4Material *mat_ALN = GetDetectorMaterial("AluminiumNitrate");
+  G4Material *mat_ALN = GetDetectorMaterial("AluminiumNitrate",false);
   if (!mat_ALN)
   {
     mat_ALN = new G4Material("AluminiumNitrate", density = 3.255 * g / cm3, ncomponents = 2);
@@ -601,7 +601,7 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
     mat_ALN->AddElement(G4Element::GetElement("Al"), 1);
     mat_ALN->AddElement(G4Element::GetElement("N"), 1);
   }
-  G4Material *mat_Solder_Tin = GetDetectorMaterial("Tin");
+  G4Material *mat_Solder_Tin = GetDetectorMaterial("Tin",false);
   if (!mat_Solder_Tin)
   {
     mat_Solder_Tin = new G4Material("Tin", z = 50., a = 118.7 * g / mole, density = 7.310 * g / cm3);
