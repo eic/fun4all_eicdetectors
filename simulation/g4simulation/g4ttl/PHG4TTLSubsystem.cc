@@ -108,6 +108,7 @@ void PHG4TTLSubsystem::SetDefaultParameters()
   set_default_double_param("place_x", 0.);
   set_default_double_param("place_y", 0.);
   set_default_double_param("place_z", 375. * cm);
+  set_default_double_param("cooling_plate_height", -10 * cm);
   set_default_double_param("offset_x", 150. * cm);
   set_default_double_param("rMin", 20. * cm);
   set_default_double_param("rMax", 220. * cm);

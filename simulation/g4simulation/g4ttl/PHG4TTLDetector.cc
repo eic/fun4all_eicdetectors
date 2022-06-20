@@ -147,6 +147,8 @@ void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
 
   G4double diameter_coolingtube = 5 * mm;
   G4double cooling_plate_height = 1 * mm;
+  if(m_Params->get_double_param("cooling_plate_height")>0) cooling_plate_height = m_Params->get_double_param("cooling_plate_height");
+
   G4VSolid *sol_cooling_plate_top = new G4Box("sol_cooling_plate_top",
                                           sin(M_PI / 12.) * (rCenter + diameter_coolingtube / 2 ),
                                           segmentlength / 2,
@@ -642,6 +644,8 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
   m_DisplayAction->AddVolume(DetectorLog_Det, "DetectorBoxFwd");
 
   G4double cooling_plate_height = 1 * mm;
+  if(m_Params->get_double_param("cooling_plate_height")>0) cooling_plate_height = m_Params->get_double_param("cooling_plate_height");
+
   G4double diameter_coolingtube = 5*mm;
   G4double wallthickness_coolingtube = 1 * mm;
 
