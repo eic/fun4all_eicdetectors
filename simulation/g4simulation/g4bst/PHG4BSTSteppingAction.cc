@@ -85,95 +85,44 @@ PHG4BSTSteppingAction::~PHG4BSTSteppingAction()
 //____________________________________________________________________________..
 bool PHG4BSTSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
 {
+  // get volume of the current step
+  G4VPhysicalVolume* volume =
+      aStep->GetPreStepPoint()->GetTouchableHandle()->GetVolume();
+
   G4TouchableHandle touch = aStep->GetPreStepPoint()->GetTouchableHandle();
-  // G4TouchableHistory* theTouchable = (G4TouchableHistory*)( aStep->GetPreStepPoint()->GetTouchable() );  
-  G4VPhysicalVolume* volume = touch->GetVolume();
-  // G4LogicalVolume* volumeMother = volume->GetLogicalVolume();
-  // G4VSensitiveDetector* sensdet = volumeMother->GetSensitiveDetector();
-  // G4VSolid* volumeGMother = nullptr;
-  // if(volumeMother) volumeGMother = volumeMother->GetSolid();
-
-  // detector_->IsInForwardDualReadout(volume)
-  // returns
-  //  0 is outside of Forward HCAL
-  //  1 is inside scintillator
-  // -1 is inside absorber (dead material)
-
-  int whichactive = detector_->IsInForwardDualReadout(volume);
-
-
-  // if(whichactive){
-  // // // if(sensdet)
-  // // // cout << theTouchable->GetReplicaNumber() << "\t"<< theTouchable->GetReplicaNumber(1) << "\t"<< theTouchable->GetReplicaNumber(2) << "\t" << volume->GetName() << endl;
-  // // // cout << whichactive << "\t" << volume->GetName() << "\tSD:" << sensdet->GetName()  << endl;
-  // // // else if(volumeGMother)
-  // // // cout << whichactive << "\t" << volume->GetName() << "\tGM:" << volumeGMother->GetName()  << endl;
-  // // // else if(volumeMother)
-  // // // cout << whichactive << "\t" << volume->GetName() << "\tMM:" << volumeMother->GetName()  << endl;
-  // // // else 
-  // cout << whichactive << "\t" << volume->GetName() << endl;
-  // // // cout << whichactive << "\t" << touch->GetCopyNumber(2)<< "\t" << touch->GetCopyNumber(3) << endl;
-  // // // cout << "\tx: " << (aStep->GetPreStepPoint()->GetPosition()).x()<< "\ty: " << (aStep->GetPreStepPoint()->GetPosition()).y()<< "\tz: " << (aStep->GetPreStepPoint()->GetPosition()).z()<< endl;
-  // } else {
-  // cout << volume->GetCopyNo() << "\t" << volume->GetName() << endl;
-
-  // }
-
-
-  if (!whichactive)
-  {
-    return false;
-  }
-
-  int layer_id = detector_->get_Layer();
-  // unsigned int tower_id = -1;
-  int idx_j = -1;
-  int idx_k = -1;
-
-  // if (whichactive > 0)  // in sctintillator
-  // {
-  //   /* Find indizes of sctintillator / tower containing this step */
-  //   // FindTowerIndex(touch, idx_j, idx_k);
-  //   tower_id = touch->GetVolume(1)->GetCopyNo();
-  // }
-  // else
-  // {
-  //   tower_id = touch->GetVolume(1)->GetCopyNo();
-  // }
-
-  /* Get energy deposited by this step */
+  // collect energy and track length step by step
   G4double edep = aStep->GetTotalEnergyDeposit() / GeV;
   G4double eion = (aStep->GetTotalEnergyDeposit() - aStep->GetNonIonizingEnergyDeposit()) / GeV;
-  G4double light_yield = 0;
 
-  /* Get pointer to associated Geant4 track */
   const G4Track* aTrack = aStep->GetTrack();
 
-  // if this block stops everything, just put all kinetic energy into edep
-  if (detector_->IsBlackHole())
-  {
-    edep = aTrack->GetKineticEnergy() / GeV;
-    G4Track* killtrack = const_cast<G4Track*>(aTrack);
-    killtrack->SetTrackStatus(fStopAndKill);
-  }
 
-  /* Make sure we are in a volume */
-  if (detector_->IsActive())
+  if (detector_->IsInActiveSensorBST(volume))
   {
-    // int idx_l = -1;
-    /* Check if particle is 'geantino' */
+    
+    int layer_id = -1;
+    std::string bstLayerNameFind = "BST_";
+    if (volume->GetName().find(bstLayerNameFind) != std::string::npos) {
+      auto pos = volume->GetName().find(bstLayerNameFind);
+      layer_id = std::stoi(volume->GetName().substr(pos + bstLayerNameFind.size(), pos + bstLayerNameFind.size() + 1));
+    }
+    // cout << volume->GetName() << "\t" << layer_id << "\t" << layer_id << endl;
+
     bool geantino = false;
-    if (aTrack->GetParticleDefinition()->GetPDGEncoding() == 0 &&
-        aTrack->GetParticleDefinition()->GetParticleName().find("geantino") != string::npos)
+
+    // the check for the pdg code speeds things up, I do not want to make
+    // an expensive string compare for every track when we know
+    // geantino or chargedgeantino has pid=0
+    if (aTrack->GetParticleDefinition()->GetPDGEncoding() == 0 && aTrack->GetParticleDefinition()->GetParticleName().find("geantino") != std::string::npos)
     {
       geantino = true;
     }
-
-    /* Get Geant4 pre- and post-step points */
     G4StepPoint* prePoint = aStep->GetPreStepPoint();
     G4StepPoint* postPoint = aStep->GetPostStepPoint();
-    if(abs( prePoint->GetPosition().y() / cm)>(_detector_size*1.1)  || abs( prePoint->GetPosition().x() / cm)>(_detector_size*1.1)) return false;
-    // cout << "x: " << prePoint->GetPosition().x() << "\ty: "  << prePoint->GetPosition().y() << "\tz: "  << prePoint->GetPosition().z() << endl;
+    //       cout << "track id " << aTrack->GetTrackID() << endl;
+    //       cout << "time prepoint: " << prePoint->GetGlobalTime() << endl;
+    //       cout << "time postpoint: " << postPoint->GetGlobalTime() << endl;
+    //layer_id is sector number
     switch (prePoint->GetStepStatus())
     {
     case fGeomBoundary:
@@ -182,42 +131,14 @@ bool PHG4BSTSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
       {
         hit = new PHG4Hitv1();
       }
-      // hit->set_scint_id(tower_id);
-      FindTowerIndexFromPosition(prePoint, idx_j, idx_k);
-      // cout << idx_j << ":" << idx_k << endl;
-      /* Set hit location (tower index) */
-      hit->set_index_j(idx_j);
-      hit->set_index_k(idx_k);
-      // hit->set_index_l(idx_l);
-
-//       cout << "\tidj: " << idx_j << "\tidk: "  << idx_k << "\tz " << prePoint->GetPosition().z()/cm << endl;
-      // TODO use these positions for an index conversion
-      /* Set hit location (space point) */
+      //here we set the entrance values in cm
       hit->set_x(0, prePoint->GetPosition().x() / cm);
       hit->set_y(0, prePoint->GetPosition().y() / cm);
       hit->set_z(0, prePoint->GetPosition().z() / cm);
-
-      /* Set hit time */
+      // time in ns
       hit->set_t(0, prePoint->GetGlobalTime() / nanosecond);
-
       //set the track ID
       hit->set_trkid(aTrack->GetTrackID());
-      /* set intial energy deposit */
-      hit->set_edep(0);
-      hit->set_eion(0);
-      hit->set_property(PHG4Hit::PROPERTY::scint_gammas, (float)0.);
-      hit->set_property(PHG4Hit::PROPERTY::cerenkov_gammas, (float)0.);
-
-      /* Now add the hit to the hit collection */
-      if (whichactive > 0)
-      {
-        hitcontainer = hits_;
-        hit->set_light_yield(0);
-      }
-      else
-      {
-        hitcontainer = absorberhits_;
-      }
       if (G4VUserTrackInformation* p = aTrack->GetUserInformation())
       {
         if (PHG4TrackUserInfoV1* pp = dynamic_cast<PHG4TrackUserInfoV1*>(p))
@@ -227,159 +148,43 @@ bool PHG4BSTSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
           saveshower = pp->GetShower();
         }
       }
+
+      // std::cout << std::endl;
+      hit->set_index_i(layer_id);
+
+      //set the initial energy deposit
+      hit->set_edep(0);
+      hit->set_eion(0);  // only implemented for v5 otherwise empty
+      // std::cout << "layerid: " << layer_id << std::endl;
+      //        hit->set_light_yield(0);
+
       break;
     default:
       break;
     }
-
-    if (whichactive > 0)
-    {
-      if (light_scint_model)
-      {
-        light_yield = GetVisibleEnergyDeposition(aStep);  // for scintillator only, calculate light yields
-        static bool once = true;
-        if (once && edep > 0)
-        {
-          once = false;
-
-          if (Verbosity() > 0)
-          {
-            cout << "PHG4BSTSteppingAction::UserSteppingAction::"
-                 //
-                 << detector_->GetName() << " - "
-                 << " use scintillating light model at each Geant4 steps. "
-                 << "First step: "
-                 << "Material = "
-                 << aTrack->GetMaterialCutsCouple()->GetMaterial()->GetName()
-                 << ", "
-                 << "Birk Constant = "
-                 << aTrack->GetMaterialCutsCouple()->GetMaterial()->GetIonisation()->GetBirksConstant()
-                 << ","
-                 << "edep = " << edep << ", "
-                 << "eion = " << eion
-                 << ", "
-                 << "light_yield = " << light_yield << endl;
-          }
-        }
-      }
-      else
-      {
-        light_yield = eion;
-      }
-    }
-
-
-
-    // Double_t fE; //deposited energy in the cell
-    // ULong64_t fNphot = 0; // number of optical photons
-    float fNscin = 0; // scintillation photons
-    float fNcerenkov = 0; // Cerenkov photons
-
-    G4int fScinType; // scintillation process type
-    G4int fScinSubType; // scintillation process subtype
-    G4int fCerenkovType; // Cerenkov process type
-    G4int fCerenkovSubType; // Cerenkov process subtype
-
-    G4Scintillation scin;
-    fScinType = scin.GetProcessType();
-    fScinSubType = scin.GetProcessSubType();
-    G4Cerenkov cer;
-    fCerenkovType = cer.GetProcessType();
-    fCerenkovSubType = cer.GetProcessSubType();
-
-    //number of optical photons in the event from secondary tracks
-    // const std::vector<const G4Track*> *sec = aStep->GetSecondaryInCurrentStep();
-    // std::vector<const G4Track*>::const_iterator ittr;
-    // for(ittr = sec->begin(); ittr != sec->end(); ittr++) {
-      // if((*ittr)->GetParentID() <= 0) continue;
-
-      //all optical photons
-    if(aTrack->GetDynamicParticle()->GetParticleDefinition() == G4OpticalPhoton::OpticalPhotonDefinition())
-    {
-      // fNphot++;
-
-      //identify the process
-      G4int ptype = aTrack->GetCreatorProcess()->GetProcessType();
-      G4int pstype = aTrack->GetCreatorProcess()->GetProcessSubType();
-      // cout << aTrack->GetCreatorProcess()->GetProcessName() << endl;
-      //scintillation photons
-      G4Material* prevMaterial = aStep->GetPreStepPoint()->GetMaterial();
-      if((ptype == fScinType) && (pstype == fScinSubType) && (prevMaterial->GetName().find("G4_POLYSTYRENE") != std::string::npos)){ fNscin++;}
-      //Cerenkov photons
-      if( (ptype == fCerenkovType) && (pstype == fCerenkovSubType) && ((prevMaterial->GetName().find("PMMA") != std::string::npos) || (prevMaterial->GetName().find("Quartz") != std::string::npos))){ fNcerenkov++;}
-    //   if(aTrack->GetParentID() > 0)
-    // {
-    //   if(aTrack->GetCreatorProcess()->GetProcessName().find("enkov") != string::npos)cout << aTrack->GetCreatorProcess()->GetProcessName() << endl;
-    // }
-//       if(fNscin>0 || fNcerenkov>0) cout << aTrack->GetCreatorProcess()->GetProcessName() <<  "\tfNscin: " << fNscin << "\tfNcerenkov: " << fNcerenkov << endl;
-    }//secondary tracks loop
-//     cout << __LINE__ << endl;
-//       cout << hit->get_property_float(PHG4Hit::PROPERTY::scint_gammas) <<  "\tadd fNscin: " << fNscin <<  "\t" << hit->get_property_float(PHG4Hit::PROPERTY::cerenkov_gammas) << "\t add fNcerenkov: " << fNcerenkov<< endl;
-    //G4Material* nextMaterial = aStep->GetPostStepPoint()->GetMaterial();
-    //string materialstr = nextMaterial->GetName();
-//     string materialstr2 = prevMaterial->GetName();
-//     if(materialstr.find("G4_AIR") == std::string::npos)cout << materialstr << endl;;
-//     if(materialstr2.find("G4_AIR") == std::string::npos)cout << "\t" << materialstr2 << endl;;
-      hit->set_property(PHG4Hit::PROPERTY::scint_gammas,hit->get_property_float(PHG4Hit::PROPERTY::scint_gammas)+ fNscin);
-    // cout << __LINE__ << endl;
-      hit->set_property(PHG4Hit::PROPERTY::cerenkov_gammas,hit->get_property_float(PHG4Hit::PROPERTY::cerenkov_gammas)+ fNcerenkov);
-//       cout << hit->get_property_float(PHG4Hit::PROPERTY::scint_gammas)<<  "\t" << hit->get_property_float(PHG4Hit::PROPERTY::cerenkov_gammas) << endl;
-//     cout << __LINE__ << endl;
-
-    // //number of optical photons in the event from secondary tracks
-    // const std::vector<const G4Track*> *sec = aStep->GetSecondaryInCurrentStep();
-    // std::vector<const G4Track*>::const_iterator ittr;
-    // for(ittr = sec->begin(); ittr != sec->end(); ittr++) {
-    //   if((*ittr)->GetParentID() <= 0) continue;
-
-    //   //all optical photons
-    //   if((*ittr)->GetDynamicParticle()->GetParticleDefinition() != G4OpticalPhoton::OpticalPhotonDefinition()) continue;
-    //   fNphot++;
-
-    //   //identify the process
-    //   G4int ptype = (*ittr)->GetCreatorProcess()->GetProcessType();
-    //   G4int pstype = (*ittr)->GetCreatorProcess()->GetProcessSubType();
-    //   //scintillation photons
-    //   if(ptype == fScinType && pstype == fScinSubType) fNscin++;
-    //   //Cerenkov photons
-    //   if(ptype == fCerenkovType && pstype == fCerenkovSubType) fNcerenkov++;
-
-    // }//secondary tracks loop
-    // if(sec->size()>0) cout << "fNphot: " << fNphot << "\tfNscin: " << fNscin << "\tfNcerenkov: " << fNcerenkov << endl;
-    // }
-
-
-
-    /* Update exit values- will be overwritten with every step until
-       * we leave the volume or the particle ceases to exist */
+    // here we just update the exit values, it will be overwritten
+    // for every step until we leave the volume or the particle
+    // ceases to exist
     hit->set_x(1, postPoint->GetPosition().x() / cm);
     hit->set_y(1, postPoint->GetPosition().y() / cm);
     hit->set_z(1, postPoint->GetPosition().z() / cm);
 
     hit->set_t(1, postPoint->GetGlobalTime() / nanosecond);
-
-    /* sum up the energy to get total deposited */
+    //sum up the energy to get total deposited
     hit->set_edep(hit->get_edep() + edep);
-    if (whichactive > 0)
-    {
-      hit->set_eion(hit->get_eion() + eion);
-      hit->set_light_yield(hit->get_light_yield() + light_yield);
-    }
-
+    // std::cout << "energy: " << hit->get_edep() + edep << std::endl;
+    hit->set_eion(hit->get_eion() + eion);
+    hit->set_path_length(aTrack->GetTrackLength() / cm);
     if (geantino)
     {
       hit->set_edep(-1);  // only energy=0 g4hits get dropped, this way geantinos survive the g4hit compression
-      if (whichactive > 0)
-      {
-        hit->set_eion(-1);
-        hit->set_light_yield(-1);
-      }
     }
-    if (edep > 0 && (whichactive > 0 || absorbertruth > 0))
+    if (edep > 0)
     {
       if (G4VUserTrackInformation* p = aTrack->GetUserInformation())
       {
-        if (PHG4TrackUserInfoV1* pp = dynamic_cast<PHG4TrackUserInfoV1*>(p))
+        if (PHG4TrackUserInfoV1* pp =
+                dynamic_cast<PHG4TrackUserInfoV1*>(p))
         {
           pp->SetKeep(1);  // we want to keep the track
         }
@@ -399,10 +204,10 @@ bool PHG4BSTSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
       // save only hits with energy deposit (or -1 for geantino)
       if (hit->get_edep())
       {
-        hitcontainer->AddHit(layer_id, hit);
+        hits_->AddHit(layer_id, hit);
         if (saveshower)
         {
-          saveshower->add_g4hit_id(hitcontainer->GetID(), hit->get_hit_id());
+          saveshower->add_g4hit_id(hits_->GetID(), hit->get_hit_id());
         }
         // ownership has been transferred to container, set to null
         // so we will create a new hit for the next track
@@ -417,6 +222,8 @@ bool PHG4BSTSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
       }
     }
 
+    //       hit->identify();
+    // return true to indicate the hit was used
     return true;
   }
   else
@@ -459,40 +266,6 @@ void PHG4BSTSteppingAction::SetInterfacePointers(PHCompositeNode* topNode)
       cout << "PHG4BSTSteppingAction::SetTopNode - unable to find " << absorbernodename << endl;
     }
   }
-}
-
-int PHG4BSTSteppingAction::FindTowerIndexFromPosition(G4StepPoint* prePoint, int& j, int& k)
-{
-  int j_0 = 0;  //The j and k indices for the scintillator / tower
-  int k_0 = 0;  //The j and k indices for the scintillator / tower
-
-  // G4VPhysicalVolume* tower = touch->GetVolume(1);  //Get the tower solid
-  // ParseG4VolumeName(tower, j_0, k_0);
-  if(_towerdivision==0.){
-    int maxsubtow = (int) ( (_tower_size) / (_readout_size));
-    _towerdivision = (_tower_size - (maxsubtow * _readout_size))/maxsubtow;
-    _towerdivision+=_readout_size;
-  }
-  j_0 = (int) ( ( _detector_size + ( prePoint->GetPosition().x() ) ) / _towerdivision ); //TODO DRCALO TOWER SIZE
-  k_0 = (int) ( ( _detector_size + ( prePoint->GetPosition().y() ) ) / _towerdivision ); //TODO DRCALO TOWER SIZE
-  // if(prePoint->GetPosition().x()>290) cout << prePoint->GetPosition().x() << "\t" << k_0 << endl;
-  j = (j_0 * 1);
-  k = (k_0 * 1);
-
-  return 0;
-}
-
-int PHG4BSTSteppingAction::FindTowerIndex(G4TouchableHandle touch, int& j, int& k)
-{
-  int j_0, k_0;  //The j and k indices for the scintillator / tower
-
-  G4VPhysicalVolume* tower = touch->GetVolume(1);  //Get the tower solid
-  ParseG4VolumeName(tower, j_0, k_0);
-
-  j = (j_0 * 1);
-  k = (k_0 * 1);
-
-  return 0;
 }
 
 int PHG4BSTSteppingAction::ParseG4VolumeName(G4VPhysicalVolume* volume, int& j, int& k)

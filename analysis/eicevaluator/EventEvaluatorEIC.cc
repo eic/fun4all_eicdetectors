@@ -957,6 +957,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
           (GetProjectionNameFromIndex(iIndex).find("TTL") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("LBLVTX") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("BARR") != std::string::npos) ||
+          (GetProjectionNameFromIndex(iIndex).find("BST") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("FST") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("SVTX") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("EST") != std::string::npos) ||
@@ -1002,6 +1003,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
                               (GetProjectionNameFromIndex(iIndex).find("EEMCH") != std::string::npos) ||
                               (GetProjectionNameFromIndex(iIndex).find("EEMC") != std::string::npos))) ||
           (GetProjectionNameFromIndex(iIndex).find("TTL") != std::string::npos) ||
+          (GetProjectionNameFromIndex(iIndex).find("BST") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("LBLVTX") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("BARR") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("FST") != std::string::npos) ||
@@ -1046,6 +1048,9 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
             _hits_lightyield[_nHitsLayers] = hit_iter->second->get_light_yield();
             _hits_isAbsorber[_nHitsLayers] = 0;
             _hits_layerID[_nHitsLayers] = iIndex;
+            // TODO possibly add layer information to output (e.g. BST layers)
+            // _hits_detectorLayer[_nHitsLayers] = hit_iter->second->get_index_i();
+              // std::cout << "i " << hit_iter->second->get_index_i() << std::endl;
             // std::cout << "i " << hit_iter->second->get_index_i() << "\tj " <<hit_iter->second->get_index_j() << "\tk " <<hit_iter->second->get_index_k() << "\tl " << hit_iter->second->get_index_l() << "\tsens_x "<< hit_iter->second->get_strip_z_index()<< "\tsens_y "<< hit_iter->second->get_strip_y_index()   << endl;
             if (truthinfocontainerHits)
             {
@@ -2248,7 +2253,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
             for (const auto &g4hit_id_hitset : track->g4hit_ids())
             {
               int iIndex = 0;
-              
+              // hit_iter->second->get_index_i()
               while ( g4hit_id_hitset.first!= 0 && g4hit_id_hitset.first != hitContainerIDs[iIndex] && iIndex < 200){
                 iIndex++;
               }
@@ -2630,6 +2635,8 @@ int EventEvaluatorEIC::GetProjectionIndex(std::string projname)
     return 7;
   else if (projname.find("CTTL_1") != std::string::npos)
     return 8;
+  else if (projname.find("BST") != std::string::npos)
+    return 9;
 
   else if (projname.find("hpDIRC") != std::string::npos)
     return 35;
@@ -2785,6 +2792,8 @@ std::string EventEvaluatorEIC::GetProjectionNameFromIndex(int projindex)
     return "CTTL_0";
   case 8:
     return "CTTL_1";
+  case 9:
+    return "BST";
 
   case 35:
     return "hpDIRC";
@@ -2920,6 +2929,7 @@ int EventEvaluatorEIC::GetExponentFromProjectionIndex(int projindex)
 {
   switch (projindex)
   {
+  case 9: //"BST";
   case 155: //"SVTX_0";
     return 0;
   case 156: //"SVTX_1";

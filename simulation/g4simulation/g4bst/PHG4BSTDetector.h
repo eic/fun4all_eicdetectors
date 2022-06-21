@@ -38,7 +38,7 @@ class PHG4BSTDetector : public PHG4Detector
   virtual void ConstructMe(G4LogicalVolume *world);
 
   //!@name volume accessors
-  int IsInForwardDualReadout(G4VPhysicalVolume *) const;
+  int IsInActiveSensorBST(G4VPhysicalVolume *) const;
 
   //! Select mapping file for calorimeter tower
   void SetTowerMappingFile(const std::string &filename)

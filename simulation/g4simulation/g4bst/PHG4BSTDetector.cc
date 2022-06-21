@@ -83,18 +83,18 @@ PHG4BSTDetector::PHG4BSTDetector(PHG4Subsystem* subsys, PHCompositeNode* Node, c
 {
 }
 //_______________________________________________________________________
-int PHG4BSTDetector::IsInForwardDualReadout(G4VPhysicalVolume* volume) const
+int PHG4BSTDetector::IsInActiveSensorBST(G4VPhysicalVolume* volume) const
 {
-  if (volume->GetName().find(_towerlogicnameprefix) != string::npos)
-  {
-    if (volume->GetName().find("scintillator") != string::npos)
+  // if (volume->GetName().find(_towerlogicnameprefix) != string::npos)
+  // {
+    if (volume->GetName().find("currentVertexLayer") != string::npos)
     {
       if (_active)
         return 1;
       else
         return 0;
     }
-    else if (volume->GetName().find("cherenkov") != string::npos)
+    else if (volume->GetName().find("currentSagittaLayer") != string::npos)
     {
       if (_active)
         return 1;
@@ -113,7 +113,7 @@ int PHG4BSTDetector::IsInForwardDualReadout(G4VPhysicalVolume* volume) const
     {
       return 0;
     }
-  }
+  // }
 
   return 0;
 }
@@ -130,194 +130,548 @@ void PHG4BSTDetector::ConstructMe(G4LogicalVolume* logicWorld)
   // ParseParametersFromTable();
 
   //Create the cone envelope = 'world volume' for the calorimeter
-  G4Material* Air = G4Material::GetMaterial("G4_AIR");
-  G4double minR = 3.0 * cm;
-  G4double maxR = 29.0* cm;
-  G4double lengthBST = 90.0* cm;
-  G4VSolid* bst_envelope_solid = new G4Cons("hbst_envelope_solid",
-                                        minR, maxR,
-                                        minR, maxR,
-                                        lengthBST / 2.0,
-                                        _sPhi, _dPhi);
+  // G4Material* Air = G4Material::GetMaterial("G4_AIR");
+  // G4double minR = 3.0 * cm;
+  // G4double maxR = 29.0* cm;
+  // G4double lengthBST = 90.0* cm;
+  // G4VSolid* bst_envelope_solid = new G4Cons("hbst_envelope_solid",
+  //                                       minR, maxR,
+  //                                       minR, maxR,
+  //                                       lengthBST / 2.0,
+  //                                       _sPhi, _dPhi);
 
-  G4LogicalVolume* bst_envelope_log = new G4LogicalVolume(bst_envelope_solid, Air, G4String("hbst_envelope"), 0, 0, 0);
+  // G4LogicalVolume* bst_envelope_log = new G4LogicalVolume(bst_envelope_solid, Air, G4String("hbst_envelope"), 0, 0, 0);
 
-  m_DisplayAction->AddVolume(bst_envelope_log, "Invisible");
+  // m_DisplayAction->AddVolume(bst_envelope_log, "Invisible");
   // m_DisplayAction->AddVolume(bst_envelope_log, "FbstEnvelope");
 
   //Define rotation attributes for envelope cone
-  G4RotationMatrix bst_rotm;
-  bst_rotm.rotateX(_rot_in_x);
-  bst_rotm.rotateY(_rot_in_y);
-  bst_rotm.rotateZ(_rot_in_z);
+  // G4RotationMatrix bst_rotm;
+  // bst_rotm.rotateX(_rot_in_x);
+  // bst_rotm.rotateY(_rot_in_y);
+  // bst_rotm.rotateZ(_rot_in_z);
 
   //Place envelope cone in simulation
-  ostringstream name_envelope;
-  name_envelope.str("");
-  name_envelope << _towerlogicnameprefix << "_envelope" << endl;
+  // ostringstream name_envelope;
+  // name_envelope.str("");
+  // name_envelope << _towerlogicnameprefix << "_envelope" << endl;
 
-  new G4PVPlacement(G4Transform3D(bst_rotm, G4ThreeVector(_place_in_x, _place_in_y, _place_in_z)),
-                    bst_envelope_log, name_envelope.str().c_str(), logicWorld, 0, false, OverlapCheck());
+  // new G4PVPlacement(G4Transform3D(bst_rotm, G4ThreeVector(_place_in_x, _place_in_y, _place_in_z)),
+  //                   bst_envelope_log, name_envelope.str().c_str(), logicWorld, 0, false, OverlapCheck());
 
-  ConstructBarrel(bst_envelope_log);
+  ConstructBarrel(logicWorld);
   // ConstructOuterBarrel(bst_envelope_log);
   return;
 }
 
 void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
 
+  bool do_internal_supports = true;
+  bool do_external_supports = true;
 
+  // Sensor sizes available from the ALPIDE wafer
+  G4double sensor_widths[4] = {56.5 * mm, 75.5 * mm, 94.3 * mm, 113.1 *mm};
+  G4double sensor_length[4] = {270 * mm, 270 * mm, 270 * mm, 240 *mm};
   G4double layer_sensor_thickness = 0.05 / 100 * 9.37 * cm; // 0.05% of Si rad length 9.37cm
   G4Material *layer_material = GetDetectorMaterial("G4_Si");
-  G4double deadarea_seam = 0.1 * cm;
 
-  const int nLayersInner = 3;
-  G4double layer_radius_inner[nLayersInner] = {3.40 * cm, 5.67 * cm, 7.93 * cm};
-  G4double layer_length_inner[nLayersInner] = {30.0 * cm, 30.0 * cm, 30.0 * cm};
+  // default seam where two half shells connect
+  G4double deadarea_seam = 0.5 * mm;
+  // default seam where two half shells connect
+  G4double deadarea_sensoredge = 0.5 * mm;
 
 
-  const int nLayersOuter = 2;
-  G4double layer_radius_outer[nLayersOuter] = {15.3 * cm, 17.0 * cm};
-  G4double layer_length_outer[nLayersOuter] = {30.0 * cm, 30.0 * cm}; // two layers of 30cm
-  int layer_segments[nLayersOuter] = {12, 12};
-  G4double copperWire_diam = 0.64 * mm;
-
-  G4double support_radius_inner = 9.0 * cm;
-  G4double support_length_inner = 2 * 19.44 * cm;
+  G4double support_radius_inner = 7.5 * cm; // was 9 cm
+  G4double support_length_inner = 38.88 * cm;
   G4double support_thickness_foam = 0.2 * cm;
   G4double support_thickness_shell = 0.1 * mm;
   G4double support_thickness_shell_outer = 0.2 * mm;
   // G4double support_seam = 0.1 * cm;
 
-  G4double support_radius_outer = 18.5 * cm;
-  G4double support_length_outer = 2 * 37.7861 * cm;
+  G4double support_radius_outer = 22.5 * cm; // was 18.5
+  G4double support_length_outer = 2 * 37.7861 * cm; // was 2 * 37.7861
+
+  // 3 vertex layers, 2 sagitta layers
+  const int nLayersInner = 3;
+  G4double layer_radius_inner[nLayersInner] = {0};
+  G4double layer_length_inner[nLayersInner] = {0};
+  int nSensorsInner[nLayersInner] = {0};
+  G4double layer_sensor_width_inner[nLayersInner][9] = {0};
+
+  const int nLayersOuter = 2;
+  G4double layer_radius_outer[nLayersOuter] = {0};
+  G4double layer_length_outer[nLayersOuter] = {0};
+  int nSensorsOuter[nLayersOuter] = {0};
+  G4double layer_sensor_width_outer[nLayersOuter][9] = {0};
+
+  // vertex layers sensor setup
+  nSensorsInner[0] = 1;
+  layer_radius_inner[0] = (sensor_widths[3]+deadarea_seam)/M_PI; // 36.319158 mm -> eta 1.92
+  layer_sensor_width_inner[0][0] = sensor_widths[3];
+  layer_length_inner[0] = sensor_length[3];
+
+  bool use_different_vertex_sensors = false;
+  if(use_different_vertex_sensors){
+    nSensorsInner[0] = 2;
+    layer_radius_inner[0] = (2*sensor_widths[0]+deadarea_seam)/M_PI; // 36.287327 mm -> eta 2.0
+    layer_sensor_width_inner[0][0] = sensor_widths[0];
+    layer_sensor_width_inner[0][1] = sensor_widths[0];
+    layer_length_inner[0] = sensor_length[0];
+  }
+
+  nSensorsInner[1] = 2;
+  layer_radius_inner[1] = (2*sensor_widths[1]+deadarea_seam)/M_PI; // 48.383103 mm
+  layer_sensor_width_inner[1][0] = sensor_widths[1];
+  layer_sensor_width_inner[1][1] = sensor_widths[1];
+  layer_length_inner[1] = sensor_length[1];
+
+  nSensorsInner[2] = 2;
+  layer_radius_inner[2] = (2*sensor_widths[2]+deadarea_seam)/M_PI; // 60.351554 mm -> eta 1.49
+  layer_sensor_width_inner[2][0] = sensor_widths[2];
+  layer_sensor_width_inner[2][1] = sensor_widths[2];
+  layer_length_inner[2] = sensor_length[2];
+
+  for(int i=0; i<nLayersInner; i++){
+    cout << "layer " << i << " radius " << layer_radius_inner[i] << " length " << layer_length_inner[i] << " nSensors " << nSensorsInner[i] << endl;
+    for(int j=0; j<nSensorsInner[i]; j++){
+      cout << "\tlayer " << i << " sensor " << j << " width " << layer_sensor_width_inner[i][j] << endl;
+    }
+  }
+  // sagitta layers sensor setup
+  // Sagitta1(nonproj+): 5*94.3+2*75.5 = radius 198 -> eta 0.95
+  // Sagitta2(nonproj+): 7*94.3 = radius 210 -> eta 0.89
+  nSensorsOuter[0] = 7;
+  layer_radius_outer[0] = (5*sensor_widths[2]+2*sensor_widths[1]+deadarea_seam)/M_PI; // 198.46621 mm
+  for(int i=0;i<5;i++){
+    layer_sensor_width_outer[0][i] = sensor_widths[2];
+  }
+  layer_sensor_width_outer[0][5] = sensor_widths[1];
+  layer_sensor_width_outer[0][6] = sensor_widths[1];
+  layer_length_outer[0] = sensor_length[2];
+
+  nSensorsOuter[1] = 7;
+  layer_radius_outer[1] = (7*sensor_widths[2]+deadarea_seam)/M_PI; // 210.43467 mm
+  for(int i=0;i<7;i++){
+    layer_sensor_width_outer[1][i] = sensor_widths[2];
+  }
+  layer_length_outer[1] = sensor_length[2];
+
+
+  bool use_sagitta_setup_1 = false;
+  if(use_sagitta_setup_1){
+    // Sagitta1: 5*94.3 = radius 150.09 -> eta 1.25
+    // Sagitta2: 94.3*4+75.5*2 = radius 168.13 -> eta 1.13
+    // OR 94.3*5+56.5 = radius 168.07 -> eta 1.13
+    nSensorsOuter[0] = 5;
+    layer_radius_outer[0] = (5*sensor_widths[2]+deadarea_seam)/M_PI; // 150.40142 mm
+    for(int i=0;i<5;i++){
+      layer_sensor_width_outer[0][i] = sensor_widths[2];
+    }
+    layer_length_outer[0] = sensor_length[2];
+
+
+    nSensorsOuter[1] = 6;
+    layer_radius_outer[1] = (4*sensor_widths[2]+2*sensor_widths[1]+deadarea_seam)/M_PI; // 168.44959 mm
+    for(int i=0;i<4;i++){
+      layer_sensor_width_outer[1][i] = sensor_widths[2];
+    }
+    layer_sensor_width_outer[1][4] = sensor_widths[1];
+    layer_sensor_width_outer[1][5] = sensor_widths[1];
+    layer_length_outer[1] = sensor_length[2];
+
+    support_radius_outer = 18.2 * cm;
+  }
+
+  bool use_sagitta_setup_2 = false;
+  if(use_sagitta_setup_2){
+    // Sagitta1(nonproj): 7*94.3 = radius 210 -> eta 0.89
+    // Sagitta2(nonproj): 6*94.3+2*75.5 = radius 228 -> eta 0.77
+    nSensorsOuter[0] = 7;
+    layer_radius_outer[0] = (7*sensor_widths[2]+deadarea_seam)/M_PI; // 210.43467 mm
+    for(int i=0;i<7;i++){
+      layer_sensor_width_outer[0][i] = sensor_widths[2];
+    }
+    layer_length_outer[0] = sensor_length[2];
+
+
+    nSensorsOuter[1] = 8;
+    layer_radius_outer[1] = (6*sensor_widths[2]+2*sensor_widths[1]+deadarea_seam)/M_PI; // 228.48284 mm
+    for(int i=0;i<6;i++){
+      layer_sensor_width_outer[1][i] = sensor_widths[2];
+    }
+    layer_sensor_width_outer[1][6] = sensor_widths[1];
+    layer_sensor_width_outer[1][7] = sensor_widths[1];
+    layer_length_outer[1] = sensor_length[2];
+
+    support_radius_outer = 24.2 * cm;
+  }
+
+  for(int i=0; i<nLayersOuter; i++){
+    cout << "layer " << i+nLayersInner << " radius " << layer_radius_outer[i] << " length " << layer_length_outer[i] << " nSensors " << nSensorsOuter[i] << endl;
+    for(int j=0; j<nSensorsOuter[i]; j++){
+      cout << "\tlayer " << i+nLayersInner << " sensor " << j << " width " << layer_sensor_width_outer[i][j] << endl;
+    }
+  }
+  // int layer_segments[nLayersOuter] = {12, 12};
+  G4double copperWire_diam = 0.64 * mm;
+
 
   G4Material *foam_material = MakeCarbonFoamMaterial();
-  G4double foam_length = 1.0 * cm;
-  G4double foam_spacing = 1.3 * cm;
-  G4double foam_thickness = 0.25 * cm;
-  G4double foam_endwheel_depth = 1.3 * cm;
-  int foam_endwheel_holes_inner = 12;
-  G4double foam_endwheel_hole_diam_inner[nLayersInner] = {(layer_radius_inner[1]-layer_radius_inner[0])/3, (layer_radius_inner[2]-layer_radius_inner[1])/3, (support_radius_inner-layer_radius_inner[2])/2};
-  int foam_endwheel_holes_outer = 30;
-  G4double foam_endwheel_hole_diam_outer[nLayersOuter] = {(layer_radius_outer[1]-layer_radius_outer[0])/3, (support_radius_outer-layer_radius_outer[1])/3};
+  G4double foam_length = 0.8 * cm;
+  // G4double foam_spacing = 1.3 * cm;
+  G4double foam_thickness = 0.4 * cm;
+  G4double foam_endwheel_depth = 1.0 * cm;
+  G4double foam_midwheel_depth = 0.7 * cm;
+  int foam_endwheel_holes_inner = 16;
+  G4double foam_endwheel_hole_diam_inner[nLayersInner] = {(layer_radius_inner[1]-layer_radius_inner[0])/2.5, (layer_radius_inner[2]-layer_radius_inner[1])/2.5, (support_radius_inner-layer_radius_inner[2])/2};
+  int foam_endwheel_holes_outer = 60;
+  G4double foam_endwheel_hole_diam_outer[nLayersOuter] = {(layer_radius_outer[1]-layer_radius_outer[0])/2, (support_radius_outer-layer_radius_outer[1])/2.5};
 
 
   for(int i = 0; i < nLayersInner; i++){
-    G4double deadangle_seam = deadarea_seam / layer_radius_inner[i];
-    G4VSolid* currentLayerSolid  = new G4Tubs(G4String("currentVertexLayerSolid"),
+    G4double layer_half_circumference = M_PI * layer_radius_inner[i];
+    G4double angle_deadarea_sensoredge = M_PI * (deadarea_sensoredge / 2.0) / layer_half_circumference;
+
+    G4double current_angle = M_PI * (deadarea_seam / 2.0) / layer_half_circumference;
+    current_angle += angle_deadarea_sensoredge;
+
+    for(int j = 0; j < nSensorsInner[i]; j++){
+      G4double angle_current_layer = M_PI * (layer_sensor_width_inner[i][j] - deadarea_sensoredge) / layer_half_circumference;
+      cout << "layer_sensor_width_inner[" << i << "][" << j << "] = " << layer_sensor_width_inner[i][j] << "\tangle_current_layer = " << angle_current_layer << "\tstarting_angle = " << current_angle << endl;
+      G4VSolid* currentLayerSolid  = new G4Tubs(G4String( "BST_"+std::to_string(i)+"_currentVertexLayerSolid_" + std::to_string(i) + "_" + std::to_string(j)),
                                             layer_radius_inner[i] - layer_sensor_thickness / 2,
                                             layer_radius_inner[i] + layer_sensor_thickness / 2,
                                             layer_length_inner[i] / 2,
-                                            0.+deadangle_seam,M_PI*rad-deadangle_seam);
+                                            0,angle_current_layer);
+
+      G4LogicalVolume* currentLayerLogic = new G4LogicalVolume(currentLayerSolid,
+                                                            layer_material,
+                                                            "BST_"+std::to_string(i)+"_currentVertexLayerLogic_"+std::to_string(i) + "_" + std::to_string(j),
+                                                            0, 0, 0);
   
-    G4LogicalVolume* currentLayerLogic = new G4LogicalVolume(currentLayerSolid,
-                                                          layer_material,
-                                                          "currentVertexLayerLogic_"+std::to_string(i),
-                                                          0, 0, 0);
- 
-    m_DisplayAction->AddVolume(currentLayerLogic, "InnerBarrel");
+      m_DisplayAction->AddVolume(currentLayerLogic, "InnerBarrel");
+
+      G4RotationMatrix bstlayer_rotm;
+      bstlayer_rotm.rotateZ(current_angle);
+      new G4PVPlacement(G4Transform3D(bstlayer_rotm, G4ThreeVector( 0.0, 0.0, 0.0)),
+                        currentLayerLogic,
+                        "BST_"+std::to_string(i)+"_currentVertexLayerPlacedTop"+std::to_string(i)+ "_" + std::to_string(j),
+                        mother,
+                        0, 0, OverlapCheck());
+
+      G4RotationMatrix bstlayer_rotm_bottom;
+      bstlayer_rotm_bottom.rotateZ(current_angle+M_PI);
+
+      new G4PVPlacement(G4Transform3D(bstlayer_rotm_bottom, G4ThreeVector( 0.0, 0.0, 0.0)),
+                        currentLayerLogic,
+                        "BST_"+std::to_string(i)+"_currentVertexLayerPlacedBottom"+std::to_string(i)+ "_" + std::to_string(j),
+                        mother,
+                        0, 0, OverlapCheck());
+      current_angle+=(angle_current_layer+2*angle_deadarea_sensoredge);
 
 
-    G4double angle_foam = foam_thickness / layer_radius_inner[i];
+      if(do_internal_supports){
+        G4double angle_foam = M_PI * foam_thickness / layer_half_circumference;
 
-    G4VSolid* foamblockSolid  = new G4Tubs(G4String("foamblockSolid"),
-                                            layer_radius_inner[i] + layer_sensor_thickness / 2,
-                                            i<nLayersInner-1 ? layer_radius_inner[i+1] - layer_sensor_thickness / 2 : support_radius_inner - support_thickness_foam / 2 - support_thickness_shell,
-                                            foam_length / 2,
-                                            -angle_foam/2,angle_foam/2);
-  
-    G4LogicalVolume* foamblockLogic = new G4LogicalVolume(foamblockSolid,
-                                                          foam_material,
-                                                          "foamblockLogic_"+std::to_string(i),
-                                                          0, 0, 0);
- 
-    m_DisplayAction->AddVolume(foamblockLogic, "Foam");
-
-    G4VSolid* foamEndWheelSolid  = new G4Tubs(G4String("foamEndWheelSolid"),
-                                            layer_radius_inner[i] + layer_sensor_thickness / 2,
-                                            i<nLayersInner-1 ? layer_radius_inner[i+1] - layer_sensor_thickness / 2 : support_radius_inner - support_thickness_foam / 2 - support_thickness_shell,
-                                            foam_endwheel_depth / 2,
-                                            0.,M_PI*rad);
-                                            // 0.+deadangle_seam,M_PI*rad-deadangle_seam);
-    G4VSolid* foamEndWheelStencilSolid  = new G4Tubs(G4String("foamEndWheelStencilSolid"),
-                                            0,
-                                            foam_endwheel_hole_diam_inner[i] / 2,
-                                            foam_endwheel_depth,
-                                            0.,2*M_PI);
-    for(int j = 1; j < foam_endwheel_holes_inner; j++){
-      foamEndWheelSolid = new G4SubtractionSolid(G4String("foamEndWheelSolid"+std::to_string(j)),
-                                            foamEndWheelSolid,
-                                            foamEndWheelStencilSolid, 0,
-                                            G4ThreeVector((layer_radius_inner[i]+(i<nLayersInner-1 ? layer_radius_inner[i+1] : support_radius_inner))/2 * cos(M_PI*j/foam_endwheel_holes_inner),(layer_radius_inner[i]+(i<nLayersInner-1 ? layer_radius_inner[i+1] : support_radius_inner))/2 * sin(M_PI*j/foam_endwheel_holes_inner),0));
-    }
-    G4LogicalVolume* foamEndWheelLogic = new G4LogicalVolume(foamEndWheelSolid,
-                                                          foam_material,
-                                                          "foamEndWheelLogic_"+std::to_string(i),
-                                                          0, 0, 0);
- 
-    m_DisplayAction->AddVolume(foamEndWheelLogic, "FoamEndWheel");
-
-    new G4PVPlacement(0, G4ThreeVector( 0.0, 0.0, 0.0),
-                      currentLayerLogic,
-                      "currentVertexLayerLogicTop"+std::to_string(i),
-                      mother,
-                      0, 0, OverlapCheck());
-    G4RotationMatrix bstlayer_rotm;
-    bstlayer_rotm.rotateZ(M_PI);
-
-    new G4PVPlacement(G4Transform3D(bstlayer_rotm, G4ThreeVector( 0.0, 0.0, 0.0)),
-                      currentLayerLogic,
-                      "currentVertexLayerLogicBottom"+std::to_string(i),
-                      mother,
-                      0, 0, OverlapCheck());
-
-    new G4PVPlacement(0, G4ThreeVector( 0.0, 0.0, -layer_length_inner[i] / 2 + foam_length / 2),
-                      foamEndWheelLogic,
-                      "foamEndWheelPlacedFrontTop"+std::to_string(i),
-                      mother,
-                      0, 0, OverlapCheck());
-    new G4PVPlacement(0, G4ThreeVector( 0.0, 0.0, layer_length_inner[i] / 2 - foam_length / 2),
-                      foamEndWheelLogic,
-                      "foamEndWheelPlacedBackTop"+std::to_string(i),
-                      mother,
-                      0, 0, OverlapCheck());
+        G4VSolid* foamblockSolid  = new G4Tubs(G4String("foamblockSolid"),
+                                                layer_radius_inner[i] + layer_sensor_thickness / 2,
+                                                i<nLayersInner-1 ? layer_radius_inner[i+1] - layer_sensor_thickness / 2 : support_radius_inner - support_thickness_foam / 2 - support_thickness_shell,
+                                                foam_length / 2,
+                                                -angle_foam/2,angle_foam/2);
+      
+        G4LogicalVolume* foamblockLogic = new G4LogicalVolume(foamblockSolid,
+                                                              foam_material,
+                                                              "foamblockLogic_"+std::to_string(i),
+                                                              0, 0, 0);
+    
+        m_DisplayAction->AddVolume(foamblockLogic, "Foam");
 
 
-    new G4PVPlacement(G4Transform3D(bstlayer_rotm, G4ThreeVector( 0.0, 0.0, -layer_length_inner[i] / 2 + foam_length / 2)),
-                      foamEndWheelLogic,
-                      "foamEndWheelPlacedFrontBottom"+std::to_string(i),
-                      mother,
-                      0, 0, OverlapCheck());
-    new G4PVPlacement(G4Transform3D(bstlayer_rotm, G4ThreeVector( 0.0, 0.0, layer_length_inner[i] / 2 - foam_length / 2)),
-                      foamEndWheelLogic,
-                      "foamEndWheelPlacedBackBottom"+std::to_string(i),
-                      mother,
-                      0, 0, OverlapCheck());
+        double addRotate[3] = {-1.5*angle_foam, 0, 1.5*angle_foam};
+        for(int ifoamphi=0; ifoamphi<3; ifoamphi++){
+          G4RotationMatrix foam_rotm;
+          if(ifoamphi==0){
+            foam_rotm.rotateZ(current_angle - (angle_deadarea_sensoredge) + addRotate[ifoamphi]);
+          } else if(ifoamphi==1){
+            foam_rotm.rotateZ(current_angle - (angle_deadarea_sensoredge + angle_current_layer/2.0) + addRotate[ifoamphi]);
+          } else if(ifoamphi==2){
+            foam_rotm.rotateZ(current_angle - (angle_deadarea_sensoredge + angle_current_layer) + addRotate[ifoamphi]);
+          }
+          G4RotationMatrix foam_rotm2;
+          if(ifoamphi==0){
+            foam_rotm2.rotateZ(M_PI+current_angle - (angle_deadarea_sensoredge) + addRotate[ifoamphi]);
+          } else if(ifoamphi==1){
+            foam_rotm2.rotateZ(M_PI+current_angle - (angle_deadarea_sensoredge + angle_current_layer/2.0) + addRotate[ifoamphi]);
+          } else if(ifoamphi==2){
+            foam_rotm2.rotateZ(M_PI+current_angle - (angle_deadarea_sensoredge + angle_current_layer) + addRotate[ifoamphi]);
+          }
+          G4double spaceForSpacers = layer_length_inner[0] / 3.0;
+          for(int ispacerow=-1; ispacerow<2; ispacerow++){
+            for(int ifoamz=-1; ifoamz<2; ifoamz++){
+              new G4PVPlacement(G4Transform3D(foam_rotm, G4ThreeVector( 0.0, 0.0, ispacerow*spaceForSpacers + ifoamz*(spaceForSpacers/3.0))),
+                                foamblockLogic,
+                                "foamblockLogicTop_"+std::to_string(ispacerow)+"_"+std::to_string(ifoamz)+"_"+std::to_string(ifoamphi)+"_"+std::to_string(i)+ "_" + std::to_string(j),
+                                mother,
+                                0, 0, OverlapCheck());
+              new G4PVPlacement(G4Transform3D(foam_rotm2, G4ThreeVector( 0.0, 0.0, ispacerow*spaceForSpacers + ifoamz*(spaceForSpacers/3.0))),
+                                foamblockLogic,
+                                "foamblockLogicBottom_"+std::to_string(ispacerow)+"_"+std::to_string(ifoamz)+"_"+std::to_string(ifoamphi)+"_"+std::to_string(i)+ "_" + std::to_string(j),
+                                mother,
+                                0, 0, OverlapCheck());
 
-    double addRotate[3] = {1.5*angle_foam, 0, -1.5*angle_foam};
-    for(int ifoamphi=0; ifoamphi<3; ifoamphi++){
-      for(int ifoamz=1; ifoamz<(int)(layer_length_inner[i]/(foam_length+foam_spacing))-1; ifoamz++){
-        G4RotationMatrix foam_rotm;
-        foam_rotm.rotateZ(ifoamphi*M_PI/2 + addRotate[ifoamphi]+deadangle_seam/2);
-        new G4PVPlacement(G4Transform3D(foam_rotm, G4ThreeVector( 0.0, 0.0, -layer_length_inner[i]/2 + (foam_length+foam_spacing)*(ifoamz+0.5))),
-                          foamblockLogic,
-                          "foamblockLogicTop_"+std::to_string(ifoamz)+"_"+std::to_string(ifoamphi),
-                          mother,
-                          0, 0, OverlapCheck());
-
-        G4RotationMatrix foam_rotm2;
-        foam_rotm2.rotateZ(ifoamphi*M_PI/2 + addRotate[ifoamphi]+M_PI+deadangle_seam/2);
-        new G4PVPlacement(G4Transform3D(foam_rotm2, G4ThreeVector( 0.0, 0.0, -layer_length_inner[i]/2 + (foam_length+foam_spacing)*(ifoamz+0.5))),
-                          foamblockLogic,
-                          "foamblockLogicBottom_"+std::to_string(ifoamz)+"_"+std::to_string(ifoamphi),
-                          mother,
-                          0, 0, OverlapCheck());
+              // new G4PVPlacement(G4Transform3D(foam_rotm2, G4ThreeVector( 0.0, 0.0, -layer_length_inner[i]/2 + (foam_length+foam_spacing)*(ifoamz+0.5))),
+              //                   foamblockLogic,
+              //                   "foamblockLogicBottom_"+std::to_string(ifoamz)+"_"+std::to_string(ifoamphi)+"_"+std::to_string(i)+ "_" + std::to_string(j),
+              //                   mother,
+              //                   0, 0, OverlapCheck());
+            }
+          }
+        }
       }
+    }
 
+
+    if(do_internal_supports){
+      G4VSolid* foamEndWheelSolid  = new G4Tubs(G4String("foamEndWheelSolid"),
+                                              layer_radius_inner[i] + layer_sensor_thickness / 2,
+                                              i<nLayersInner-1 ? layer_radius_inner[i+1] - layer_sensor_thickness / 2 : support_radius_inner - support_thickness_foam / 2 - support_thickness_shell,
+                                              foam_endwheel_depth / 2,
+                                              0.,M_PI*rad);
+                                              // 0.+deadangle_seam,M_PI*rad-deadangle_seam);
+      G4VSolid* foamEndWheelStencilSolid  = new G4Tubs(G4String("foamEndWheelStencilSolid"),
+                                              0,
+                                              foam_endwheel_hole_diam_inner[i] / 2,
+                                              foam_endwheel_depth,
+                                              0.,2*M_PI);
+      for(int j = 1; j < foam_endwheel_holes_inner; j++){
+        foamEndWheelSolid = new G4SubtractionSolid(G4String("foamEndWheelSolid"+std::to_string(j)),
+                                              foamEndWheelSolid,
+                                              foamEndWheelStencilSolid, 0,
+                                              G4ThreeVector((layer_radius_inner[i]+(i<nLayersInner-1 ? layer_radius_inner[i+1] : support_radius_inner))/2 * cos(M_PI*j/foam_endwheel_holes_inner),(layer_radius_inner[i]+(i<nLayersInner-1 ? layer_radius_inner[i+1] : support_radius_inner))/2 * sin(M_PI*j/foam_endwheel_holes_inner),0));
+      }
+      G4LogicalVolume* foamEndWheelLogic = new G4LogicalVolume(foamEndWheelSolid,
+                                                            foam_material,
+                                                            "foamEndWheelLogic_"+std::to_string(i),
+                                                            0, 0, 0);
+  
+      m_DisplayAction->AddVolume(foamEndWheelLogic, "FoamEndWheel");
+
+      G4VSolid* foamMidWheelSolid  = new G4Tubs(G4String("foamMidWheelSolid"),
+                                              layer_radius_inner[i] + layer_sensor_thickness / 2,
+                                              i<nLayersInner-1 ? layer_radius_inner[i+1] - layer_sensor_thickness / 2 : support_radius_inner - support_thickness_foam / 2 - support_thickness_shell,
+                                              foam_midwheel_depth / 2,
+                                              0.,M_PI*rad);
+                                              // 0.+deadangle_seam,M_PI*rad-deadangle_seam);
+      G4VSolid* foamMidWheelStencilSolid  = new G4Tubs(G4String("foamMidWheelStencilSolid"),
+                                              0,
+                                              foam_endwheel_hole_diam_inner[i] / 2,
+                                              foam_midwheel_depth,
+                                              0.,2*M_PI);
+      for(int j = 1; j < foam_endwheel_holes_inner; j++){
+        foamMidWheelSolid = new G4SubtractionSolid(G4String("foamMidWheelSolid"+std::to_string(j)),
+                                              foamMidWheelSolid,
+                                              foamMidWheelStencilSolid, 0,
+                                              G4ThreeVector((layer_radius_inner[i]+(i<nLayersInner-1 ? layer_radius_inner[i+1] : support_radius_inner))/2 * cos(M_PI*j/foam_endwheel_holes_inner),(layer_radius_inner[i]+(i<nLayersInner-1 ? layer_radius_inner[i+1] : support_radius_inner))/2 * sin(M_PI*j/foam_endwheel_holes_inner),0));
+      }
+      G4LogicalVolume* foamMidWheelLogic = new G4LogicalVolume(foamMidWheelSolid,
+                                                            foam_material,
+                                                            "foamMidWheelLogic_"+std::to_string(i),
+                                                            0, 0, 0);
+  
+      m_DisplayAction->AddVolume(foamMidWheelLogic, "FoamEndWheel");
+
+
+      new G4PVPlacement(0, G4ThreeVector( 0.0, 0.0, -layer_length_inner[i] / 2 + foam_length / 2),
+                        foamEndWheelLogic,
+                        "foamEndWheelPlacedFrontTop"+std::to_string(i),
+                        mother,
+                        0, 0, OverlapCheck());
+      new G4PVPlacement(0, G4ThreeVector( 0.0, 0.0, layer_length_inner[i] / 2 - foam_length / 2),
+                        foamEndWheelLogic,
+                        "foamEndWheelPlacedBackTop"+std::to_string(i),
+                        mother,
+                        0, 0, OverlapCheck());
+
+      new G4PVPlacement(0, G4ThreeVector( 0.0, 0.0, -layer_length_inner[0] / 6 + foam_length / 2),
+                        foamMidWheelLogic,
+                        "foamMidWheelPlacedFrontTop"+std::to_string(i),
+                        mother,
+                        0, 0, OverlapCheck());
+      new G4PVPlacement(0, G4ThreeVector( 0.0, 0.0, layer_length_inner[0] / 6 - foam_length / 2),
+                        foamMidWheelLogic,
+                        "foamMidWheelPlacedBackTop"+std::to_string(i),
+                        mother,
+                        0, 0, OverlapCheck());
+
+      G4RotationMatrix bstlayer_rotm_wheel;
+      bstlayer_rotm_wheel.rotateZ(M_PI);
+
+      new G4PVPlacement(G4Transform3D(bstlayer_rotm_wheel, G4ThreeVector( 0.0, 0.0, -layer_length_inner[i] / 2 + foam_length / 2)),
+                        foamEndWheelLogic,
+                        "foamEndWheelPlacedFrontBottom"+std::to_string(i),
+                        mother,
+                        0, 0, OverlapCheck());
+      new G4PVPlacement(G4Transform3D(bstlayer_rotm_wheel, G4ThreeVector( 0.0, 0.0, layer_length_inner[i] / 2 - foam_length / 2)),
+                        foamEndWheelLogic,
+                        "foamEndWheelPlacedBackBottom"+std::to_string(i),
+                        mother,
+                        0, 0, OverlapCheck());
+
+      new G4PVPlacement(G4Transform3D(bstlayer_rotm_wheel, G4ThreeVector( 0.0, 0.0, -layer_length_inner[0] / 6 + foam_length / 2)),
+                        foamMidWheelLogic,
+                        "foamMidWheelPlacedFrontBottom"+std::to_string(i),
+                        mother,
+                        0, 0, OverlapCheck());
+      new G4PVPlacement(G4Transform3D(bstlayer_rotm_wheel, G4ThreeVector( 0.0, 0.0, layer_length_inner[0] / 6 - foam_length / 2)),
+                        foamMidWheelLogic,
+                        "foamMidWheelPlacedBackBottom"+std::to_string(i),
+                        mother,
+                        0, 0, OverlapCheck());
     }
   }
 
+  for(int i = 0; i < nLayersOuter; i++){
+    G4double layer_half_circumference = M_PI * layer_radius_outer[i];
+    G4double angle_deadarea_sensoredge = M_PI * (deadarea_sensoredge / 2.0) / layer_half_circumference;
+
+    G4double current_angle = M_PI * (deadarea_seam / 2.0) / layer_half_circumference;
+    current_angle += angle_deadarea_sensoredge;
+
+    for(int j = 0; j < nSensorsOuter[i]; j++){
+      G4double angle_current_layer = M_PI * (layer_sensor_width_outer[i][j] - deadarea_sensoredge) / layer_half_circumference;
+      cout << "layer_sensor_width_outer[" << i << "][" << j << "] = " << layer_sensor_width_outer[i][j] << "\tangle_current_layer = " << angle_current_layer << "\tstarting_angle = " << current_angle << endl;
+      G4VSolid* currentLayerSolid  = new G4Tubs(G4String("BST_"+std::to_string(nLayersInner+i)+"_currentSagittaLayerSolid_" + std::to_string(i) + "_" + std::to_string(j)),
+                                            layer_radius_outer[i] - layer_sensor_thickness / 2,
+                                            layer_radius_outer[i] + layer_sensor_thickness / 2,
+                                            layer_length_outer[i] / 2,
+                                            0,angle_current_layer);
+
+      G4LogicalVolume* currentLayerLogic = new G4LogicalVolume(currentLayerSolid,
+                                                            layer_material,
+                                                            "BST_"+std::to_string(nLayersInner+i)+"_currentSagittaLayerLogic_"+std::to_string(i) + "_" + std::to_string(j),
+                                                            0, 0, 0);
+  
+      m_DisplayAction->AddVolume(currentLayerLogic, "InnerBarrel");
+
+      G4RotationMatrix bstlayer_rotm;
+      bstlayer_rotm.rotateZ(current_angle);
+      new G4PVPlacement(G4Transform3D(bstlayer_rotm, G4ThreeVector( 0.0, 0.0, deadarea_seam / 2.0 + layer_length_outer[i] / 2)),
+                        currentLayerLogic,
+                        "BST_"+std::to_string(nLayersInner+i)+"_currentSagittaLayerPlacedTopBack_"+std::to_string(i)+ "_" + std::to_string(j),
+                        mother,
+                        0, 0, OverlapCheck());
+      new G4PVPlacement(G4Transform3D(bstlayer_rotm, G4ThreeVector( 0.0, 0.0, -(deadarea_seam / 2.0 + layer_length_outer[i] / 2))),
+                        currentLayerLogic,
+                        "BST_"+std::to_string(nLayersInner+i)+"_currentSagittaLayerPlacedTopFront_"+std::to_string(i)+ "_" + std::to_string(j),
+                        mother,
+                        0, 0, OverlapCheck());
+
+      G4RotationMatrix bstlayer_rotm_bottom;
+      bstlayer_rotm_bottom.rotateZ(current_angle+M_PI);
+
+      new G4PVPlacement(G4Transform3D(bstlayer_rotm_bottom, G4ThreeVector( 0.0, 0.0, deadarea_seam / 2.0 + layer_length_outer[i] / 2)),
+                        currentLayerLogic,
+                        "BST_"+std::to_string(nLayersInner+i)+"_currentSagittaLayerPlacedBottomBack_"+std::to_string(i)+ "_" + std::to_string(j),
+                        mother,
+                        0, 0, OverlapCheck());
+      new G4PVPlacement(G4Transform3D(bstlayer_rotm_bottom, G4ThreeVector( 0.0, 0.0, -(deadarea_seam / 2.0 + layer_length_outer[i] / 2))),
+                        currentLayerLogic,
+                        "BST_"+std::to_string(nLayersInner+i)+"_currentSagittaLayerPlacedBottomFront_"+std::to_string(i)+ "_" + std::to_string(j),
+                        mother,
+                        0, 0, OverlapCheck());
+
+      G4VSolid* copperWireSolid  = new G4Tubs("copperWireSolid_"+std::to_string(i)+ "_" + std::to_string(j),
+                                              0,
+                                              copperWire_diam / 2,
+                                              layer_length_outer[i] / 4 -  foam_endwheel_depth,
+                                              0.,(2*M_PI*rad));
+    
+      G4LogicalVolume* copperWireLogic = new G4LogicalVolume(copperWireSolid,
+                                                            GetDetectorMaterial("G4_Cu", false),
+                                                            "copperWireLogic_"+std::to_string(i)+ "_" + std::to_string(j),
+                                                            0, 0, 0);
+
+      m_DisplayAction->AddVolume(copperWireLogic, "CopperWire");
+
+      if((j)%2==0){
+        // place copper wire between every second sensor
+        for(int k=-2; k<3; k++){
+          if(k==0) continue;
+          new G4PVPlacement(0, G4ThreeVector((layer_radius_outer[i]+(i<nLayersOuter-1 ? layer_radius_outer[i+1] : support_radius_outer))/2 * cos(current_angle),(layer_radius_outer[i]+(i<nLayersOuter-1 ? layer_radius_outer[i+1] : support_radius_outer))/2 * sin(current_angle),k*layer_length_outer[i] / 2 + (k<0 ? layer_length_outer[i]/4 : -layer_length_outer[i]/4)),
+                                    copperWireLogic,
+                                    "copperWireLogicTop_"+std::to_string(i)+ "_" + std::to_string(j)+ "_" + std::to_string(k),
+                                    mother,
+                                    0, 0, OverlapCheck());
+          new G4PVPlacement(0, G4ThreeVector((layer_radius_outer[i]+(i<nLayersOuter-1 ? layer_radius_outer[i+1] : support_radius_outer))/2 * cos(current_angle+M_PI),(layer_radius_outer[i]+(i<nLayersOuter-1 ? layer_radius_outer[i+1] : support_radius_outer))/2 * sin(current_angle+M_PI),k*layer_length_outer[i] / 2 + (k<0 ? layer_length_outer[i]/4 : -layer_length_outer[i]/4)),
+                                    copperWireLogic,
+                                    "copperWireLogicBottom_"+std::to_string(i)+ "_" + std::to_string(j)+ "_" + std::to_string(k),
+                                    mother,
+                                    0, 0, OverlapCheck());
+        }
+      }
+
+
+      if(do_internal_supports){
+        G4double angle_foam = M_PI * foam_thickness / layer_half_circumference;
+
+        G4VSolid* foamblockSolid  = new G4Tubs(G4String("foamblockSolid"),
+                                                layer_radius_outer[i] + layer_sensor_thickness / 2,
+                                                i<nLayersOuter-1 ? layer_radius_outer[i+1] - layer_sensor_thickness / 2 : support_radius_outer - support_thickness_foam / 2 - support_thickness_shell_outer,
+                                                foam_length / 2,
+                                                -angle_foam/2,angle_foam/2);
+      
+        G4LogicalVolume* foamblockLogic = new G4LogicalVolume(foamblockSolid,
+                                                              foam_material,
+                                                              "foamblockSagittaLogic_"+std::to_string(i),
+                                                              0, 0, 0);
+    
+        m_DisplayAction->AddVolume(foamblockLogic, "Foam");
+
+        current_angle+=(angle_current_layer+2*angle_deadarea_sensoredge);
+
+        double addRotate[3] = {-1.5*angle_foam, 0, 1.5*angle_foam};
+        for(int ifoamphi=0; ifoamphi<3; ifoamphi++){
+          G4RotationMatrix foam_rotm;
+          if(ifoamphi==0){
+            foam_rotm.rotateZ(current_angle - (angle_deadarea_sensoredge) + addRotate[ifoamphi]);
+          } else if(ifoamphi==1){
+            foam_rotm.rotateZ(current_angle - (angle_deadarea_sensoredge + angle_current_layer/2.0) + addRotate[ifoamphi]);
+          } else if(ifoamphi==2){
+            foam_rotm.rotateZ(current_angle - (angle_deadarea_sensoredge + angle_current_layer) + addRotate[ifoamphi]);
+          }
+          G4RotationMatrix foam_rotm2;
+          if(ifoamphi==0){
+            foam_rotm2.rotateZ(M_PI+current_angle - (angle_deadarea_sensoredge) + addRotate[ifoamphi]);
+          } else if(ifoamphi==1){
+            foam_rotm2.rotateZ(M_PI+current_angle - (angle_deadarea_sensoredge + angle_current_layer/2.0) + addRotate[ifoamphi]);
+          } else if(ifoamphi==2){
+            foam_rotm2.rotateZ(M_PI+current_angle - (angle_deadarea_sensoredge + angle_current_layer) + addRotate[ifoamphi]);
+          }
+          G4double spaceForSpacers = layer_length_outer[i] / 2.0;
+          for(int ispacerow=0; ispacerow<4; ispacerow++){
+            for(int ifoamz=-2; ifoamz<3; ifoamz++){
+              new G4PVPlacement(G4Transform3D(foam_rotm, G4ThreeVector( 0.0, 0.0, - layer_length_outer[i] + spaceForSpacers/2.0 + ispacerow*spaceForSpacers + ifoamz*(spaceForSpacers/5.0))),
+                                foamblockLogic,
+                                "foamblockSagittaPlacedTop_"+std::to_string(ispacerow)+"_"+std::to_string(ifoamz)+"_"+std::to_string(ifoamphi)+"_"+std::to_string(i)+ "_" + std::to_string(j),
+                                mother,
+                                0, 0, OverlapCheck());
+              new G4PVPlacement(G4Transform3D(foam_rotm2, G4ThreeVector( 0.0, 0.0, - layer_length_outer[i] + spaceForSpacers/2.0 + ispacerow*spaceForSpacers + ifoamz*(spaceForSpacers/5.0))),
+                                foamblockLogic,
+                                "foamblockSagittaPlacedBottom_"+std::to_string(ispacerow)+"_"+std::to_string(ifoamz)+"_"+std::to_string(ifoamphi)+"_"+std::to_string(i)+ "_" + std::to_string(j),
+                                mother,
+                                0, 0, OverlapCheck());
+
+              // new G4PVPlacement(G4Transform3D(foam_rotm2, G4ThreeVector( 0.0, 0.0, -layer_length_inner[i]/2 + (foam_length+foam_spacing)*(ifoamz+0.5))),
+              //                   foamblockLogic,
+              //                   "foamblockLogicBottom_"+std::to_string(ifoamz)+"_"+std::to_string(ifoamphi)+"_"+std::to_string(i)+ "_" + std::to_string(j),
+              //                   mother,
+              //                   0, 0, OverlapCheck());
+            }
+          }
+        }
+      }
+    }
+/*
   for(int i = 0; i < nLayersOuter; i++){
     G4double deadangle_seam = deadarea_seam / layer_radius_outer[i];
     G4VSolid* currentLayerSolid  = new G4Tubs("currentSagittaLayerSolid"+std::to_string(i),
@@ -372,100 +726,147 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
                           0, 0, OverlapCheck());
       }
     }
+*/
+    if(do_internal_supports){
+      G4VSolid* foamEndWheelSagittaSolid  = new G4Tubs(G4String("foamEndWheelSagittaSolid"),
+                                              layer_radius_outer[i] + layer_sensor_thickness / 2,
+                                              i<nLayersOuter-1 ? layer_radius_outer[i+1] - layer_sensor_thickness / 2 : support_radius_outer - support_thickness_foam / 2 - support_thickness_shell_outer,
+                                              foam_endwheel_depth / 2,
+                                              0.,M_PI*rad);
+                                              // 0.+deadangle_seam,M_PI*rad-deadangle_seam);
+      G4VSolid* foamEndWheelSagittaStencilSolid  = new G4Tubs(G4String("foamEndWheelSagittaStencilSolid"),
+                                              0,
+                                              foam_endwheel_hole_diam_outer[i] / 2,
+                                              foam_endwheel_depth,
+                                              0.,2*M_PI);
+      for(int j = 1; j < foam_endwheel_holes_outer; j++){
+        foamEndWheelSagittaSolid = new G4SubtractionSolid(G4String("foamEndWheelSagittaSolid"+std::to_string(j)),
+                                              foamEndWheelSagittaSolid,
+                                              foamEndWheelSagittaStencilSolid, 0,
+                                              G4ThreeVector((layer_radius_outer[i]+(i<nLayersOuter-1 ? layer_radius_outer[i+1] : support_radius_outer))/2 * cos(M_PI*j/foam_endwheel_holes_outer),(layer_radius_outer[i]+(i<nLayersOuter-1 ? layer_radius_outer[i+1] : support_radius_outer))/2 * sin(M_PI*j/foam_endwheel_holes_outer),0));
+      }
+      G4LogicalVolume* foamEndWheelSagittaLogic = new G4LogicalVolume(foamEndWheelSagittaSolid,
+                                                            foam_material,
+                                                            "foamEndWheelSagittaLogic_"+std::to_string(i),
+                                                            0, 0, 0);
+      m_DisplayAction->AddVolume(foamEndWheelSagittaLogic, "FoamEndWheel");
 
-    G4VSolid* foamEndWheelSagittaSolid  = new G4Tubs(G4String("foamEndWheelSagittaSolid"),
-                                            layer_radius_outer[i] + layer_sensor_thickness / 2,
-                                            i<nLayersOuter-1 ? layer_radius_outer[i+1] - layer_sensor_thickness / 2 : support_radius_outer - support_thickness_foam / 2 - support_thickness_shell_outer,
-                                            foam_endwheel_depth / 2,
-                                            0.,M_PI*rad);
-                                            // 0.+deadangle_seam,M_PI*rad-deadangle_seam);
-    G4VSolid* foamEndWheelSagittaStencilSolid  = new G4Tubs(G4String("foamEndWheelSagittaStencilSolid"),
-                                            0,
-                                            foam_endwheel_hole_diam_outer[i] / 2,
-                                            foam_endwheel_depth,
-                                            0.,2*M_PI);
-    for(int j = 1; j < foam_endwheel_holes_outer; j++){
-      foamEndWheelSagittaSolid = new G4SubtractionSolid(G4String("foamEndWheelSagittaSolid"+std::to_string(j)),
-                                            foamEndWheelSagittaSolid,
-                                            foamEndWheelSagittaStencilSolid, 0,
-                                            G4ThreeVector((layer_radius_outer[i]+(i<nLayersOuter-1 ? layer_radius_outer[i+1] : support_radius_outer))/2 * cos(M_PI*j/foam_endwheel_holes_outer),(layer_radius_outer[i]+(i<nLayersOuter-1 ? layer_radius_outer[i+1] : support_radius_outer))/2 * sin(M_PI*j/foam_endwheel_holes_outer),0));
+      G4VSolid* foamMidWheelSagittaSolid  = new G4Tubs(G4String("foamMidWheelSagittaSolid"),
+                                              layer_radius_outer[i] + layer_sensor_thickness / 2,
+                                              i<nLayersOuter-1 ? layer_radius_outer[i+1] - layer_sensor_thickness / 2 : support_radius_outer - support_thickness_foam / 2 - support_thickness_shell_outer,
+                                              foam_midwheel_depth / 2,
+                                              0.,M_PI*rad);
+                                              // 0.+deadangle_seam,M_PI*rad-deadangle_seam);
+      G4VSolid* foamMidWheelSagittaStencilSolid  = new G4Tubs(G4String("foamMidWheelSagittaStencilSolid"),
+                                              0,
+                                              foam_endwheel_hole_diam_outer[i] / 2,
+                                              foam_endwheel_depth,
+                                              0.,2*M_PI);
+      for(int j = 1; j < foam_endwheel_holes_outer; j++){
+        foamMidWheelSagittaSolid = new G4SubtractionSolid(G4String("foamMidWheelSagittaSolid"+std::to_string(j)),
+                                              foamMidWheelSagittaSolid,
+                                              foamMidWheelSagittaStencilSolid, 0,
+                                              G4ThreeVector((layer_radius_outer[i]+(i<nLayersOuter-1 ? layer_radius_outer[i+1] : support_radius_outer))/2 * cos(M_PI*j/foam_endwheel_holes_outer),(layer_radius_outer[i]+(i<nLayersOuter-1 ? layer_radius_outer[i+1] : support_radius_outer))/2 * sin(M_PI*j/foam_endwheel_holes_outer),0));
+      }
+      G4LogicalVolume* foamMidWheelSagittaLogic = new G4LogicalVolume(foamMidWheelSagittaSolid,
+                                                            foam_material,
+                                                            "foamMidWheelSagittaLogic_"+std::to_string(i),
+                                                            0, 0, 0);
+      m_DisplayAction->AddVolume(foamMidWheelSagittaLogic, "FoamEndWheel");
+
+      new G4PVPlacement(0, G4ThreeVector( 0.0, 0.0, -layer_length_outer[i] + foam_length / 2),
+                        foamEndWheelSagittaLogic,
+                        "foamEndWheelSagittaPlacedFrontTop"+std::to_string(i),
+                        mother,
+                        0, 0, OverlapCheck());
+      new G4PVPlacement(0, G4ThreeVector( 0.0, 0.0, 0.0),
+                        foamEndWheelSagittaLogic,
+                        "foamEndWheelSagittaPlacedCenterTop"+std::to_string(i),
+                        mother,
+                        0, 0, OverlapCheck());
+      new G4PVPlacement(0, G4ThreeVector( 0.0, 0.0, layer_length_outer[i] - foam_length / 2),
+                        foamEndWheelSagittaLogic,
+                        "foamEndWheelSagittaPlacedBackTop"+std::to_string(i),
+                        mother,
+                        0, 0, OverlapCheck());
+
+      new G4PVPlacement(0, G4ThreeVector( 0.0, 0.0, -layer_length_outer[i]/2 + foam_length / 2),
+                        foamMidWheelSagittaLogic,
+                        "foamMidWheelSagittaPlacedFrontTop"+std::to_string(i),
+                        mother,
+                        0, 0, OverlapCheck());
+      new G4PVPlacement(0, G4ThreeVector( 0.0, 0.0, layer_length_outer[i]/2 - foam_length / 2),
+                        foamMidWheelSagittaLogic,
+                        "foamMidWheelSagittaPlacedBackTop"+std::to_string(i),
+                        mother,
+                        0, 0, OverlapCheck());
+
+      G4RotationMatrix bstlayer_rotm180;
+      bstlayer_rotm180.rotateZ(M_PI);
+      new G4PVPlacement(G4Transform3D(bstlayer_rotm180, G4ThreeVector( 0.0, 0.0, -layer_length_outer[i] + foam_length / 2)),
+                        foamEndWheelSagittaLogic,
+                        "foamEndWheelSagittaPlacedFrontBottom"+std::to_string(i),
+                        mother,
+                        0, 0, OverlapCheck());
+      new G4PVPlacement(G4Transform3D(bstlayer_rotm180, G4ThreeVector( 0.0, 0.0, 0.0)),
+                        foamEndWheelSagittaLogic,
+                        "foamEndWheelSagittaPlacedCenterBottom"+std::to_string(i),
+                        mother,
+                        0, 0, OverlapCheck());
+      new G4PVPlacement(G4Transform3D(bstlayer_rotm180, G4ThreeVector( 0.0, 0.0, layer_length_outer[i] - foam_length / 2)),
+                        foamEndWheelSagittaLogic,
+                        "foamEndWheelSagittaPlacedBackBottom"+std::to_string(i),
+                        mother,
+                        0, 0, OverlapCheck());
+
+      new G4PVPlacement(G4Transform3D(bstlayer_rotm180, G4ThreeVector( 0.0, 0.0, -layer_length_outer[i]/2 + foam_length / 2)),
+                        foamMidWheelSagittaLogic,
+                        "foamMidWheelSagittaPlacedFrontBottom"+std::to_string(i),
+                        mother,
+                        0, 0, OverlapCheck());
+      new G4PVPlacement(G4Transform3D(bstlayer_rotm180, G4ThreeVector( 0.0, 0.0, layer_length_outer[i]/2 - foam_length / 2)),
+                        foamMidWheelSagittaLogic,
+                        "foamMidWheelSagittaPlacedBackBottom"+std::to_string(i),
+                        mother,
+                        0, 0, OverlapCheck());
     }
-    G4LogicalVolume* foamEndWheelSagittaLogic = new G4LogicalVolume(foamEndWheelSagittaSolid,
-                                                          foam_material,
-                                                          "foamEndWheelSagittaLogic_"+std::to_string(i),
-                                                          0, 0, 0);
-    m_DisplayAction->AddVolume(foamEndWheelSagittaLogic, "FoamEndWheel");
-
-    new G4PVPlacement(0, G4ThreeVector( 0.0, 0.0, -layer_length_outer[i] + foam_length / 2),
-                      foamEndWheelSagittaLogic,
-                      "foamEndWheelSagittaPlacedFrontTop"+std::to_string(i),
-                      mother,
-                      0, 0, OverlapCheck());
-    new G4PVPlacement(0, G4ThreeVector( 0.0, 0.0, 0.0),
-                      foamEndWheelSagittaLogic,
-                      "foamEndWheelSagittaPlacedCenterTop"+std::to_string(i),
-                      mother,
-                      0, 0, OverlapCheck());
-    new G4PVPlacement(0, G4ThreeVector( 0.0, 0.0, layer_length_outer[i] - foam_length / 2),
-                      foamEndWheelSagittaLogic,
-                      "foamEndWheelSagittaPlacedBackTop"+std::to_string(i),
-                      mother,
-                      0, 0, OverlapCheck());
-
-    G4RotationMatrix bstlayer_rotm180;
-    bstlayer_rotm180.rotateZ(M_PI);
-    new G4PVPlacement(G4Transform3D(bstlayer_rotm180, G4ThreeVector( 0.0, 0.0, -layer_length_outer[i] + foam_length / 2)),
-                      foamEndWheelSagittaLogic,
-                      "foamEndWheelSagittaPlacedFrontBottom"+std::to_string(i),
-                      mother,
-                      0, 0, OverlapCheck());
-    new G4PVPlacement(G4Transform3D(bstlayer_rotm180, G4ThreeVector( 0.0, 0.0, 0.0)),
-                      foamEndWheelSagittaLogic,
-                      "foamEndWheelSagittaPlacedCenterBottom"+std::to_string(i),
-                      mother,
-                      0, 0, OverlapCheck());
-    new G4PVPlacement(G4Transform3D(bstlayer_rotm180, G4ThreeVector( 0.0, 0.0, layer_length_outer[i] - foam_length / 2)),
-                      foamEndWheelSagittaLogic,
-                      "foamEndWheelSagittaPlacedBackBottom"+std::to_string(i),
-                      mother,
-                      0, 0, OverlapCheck());
-
   }
+  if(do_external_supports){
 
-  G4Material *support_material = GetCarbonFiber();
-  G4double support_seamangle_inner = 0;//support_seam / support_radius_inner;
+    G4Material *support_material = GetCarbonFiber();
+    G4double support_seamangle_inner = 0;//support_seam / support_radius_inner;
 
-  // construct support 2mm thick foam with 0.1mm carbon skins
-  G4VSolid* supportCylinderFoamSolid  = new G4Tubs(G4String("supportVertexCylinderSolid"),
-                                          support_radius_inner - support_thickness_foam / 2,
-                                          support_radius_inner + support_thickness_foam / 2,
-                                          support_length_inner / 2,
-                                          0.+support_seamangle_inner,M_PI*rad-support_seamangle_inner);
-  G4LogicalVolume* supportCylinderFoamLogic = new G4LogicalVolume(supportCylinderFoamSolid,
-                                                        foam_material,
-                                                        "supportCylinderFoamLogic",
-                                                        0, 0, 0);
+    // construct support 2mm thick foam with 0.1mm carbon skins
+    G4VSolid* supportCylinderFoamSolid  = new G4Tubs(G4String("supportVertexCylinderSolid"),
+                                            support_radius_inner - support_thickness_foam / 2,
+                                            support_radius_inner + support_thickness_foam / 2,
+                                            support_length_inner / 2,
+                                            0.+support_seamangle_inner,M_PI*rad-support_seamangle_inner);
+    G4LogicalVolume* supportCylinderFoamLogic = new G4LogicalVolume(supportCylinderFoamSolid,
+                                                          foam_material,
+                                                          "supportCylinderFoamLogic",
+                                                          0, 0, 0);
 
-  G4VSolid* supportCylinderOuterShellSolid  = new G4Tubs(G4String("supportVertexCylinderSolid"),
-                                          support_radius_inner + support_thickness_foam / 2,
-                                          support_radius_inner + support_thickness_foam / 2 + support_thickness_shell,
-                                          support_length_inner / 2,
-                                          0.+support_seamangle_inner,M_PI*rad-support_seamangle_inner);
-  G4LogicalVolume* supportCylinderOuterShellLogic = new G4LogicalVolume(supportCylinderOuterShellSolid,
-                                                        support_material,
-                                                        "supportCylinderOuterShellLogic",
-                                                        0, 0, 0);
- 
-  G4VSolid* supportCylinderInnerShellSolid  = new G4Tubs(G4String("supportVertexCylinderSolid"),
-                                          support_radius_inner - support_thickness_foam / 2 - support_thickness_shell,
-                                          support_radius_inner - support_thickness_foam / 2,
-                                          support_length_inner / 2,
-                                          0.+support_seamangle_inner,M_PI*rad-support_seamangle_inner);
-  G4LogicalVolume* supportCylinderInnerShellLogic = new G4LogicalVolume(supportCylinderInnerShellSolid,
-                                                        support_material,
-                                                        "supportCylinderInnerShellLogic",
-                                                        0, 0, 0);
- 
+    G4VSolid* supportCylinderOuterShellSolid  = new G4Tubs(G4String("supportVertexCylinderSolid"),
+                                            support_radius_inner + support_thickness_foam / 2,
+                                            support_radius_inner + support_thickness_foam / 2 + support_thickness_shell,
+                                            support_length_inner / 2,
+                                            0.+support_seamangle_inner,M_PI*rad-support_seamangle_inner);
+    G4LogicalVolume* supportCylinderOuterShellLogic = new G4LogicalVolume(supportCylinderOuterShellSolid,
+                                                          support_material,
+                                                          "supportCylinderOuterShellLogic",
+                                                          0, 0, 0);
+  
+    G4VSolid* supportCylinderInnerShellSolid  = new G4Tubs(G4String("supportVertexCylinderSolid"),
+                                            support_radius_inner - support_thickness_foam / 2 - support_thickness_shell,
+                                            support_radius_inner - support_thickness_foam / 2,
+                                            support_length_inner / 2,
+                                            0.+support_seamangle_inner,M_PI*rad-support_seamangle_inner);
+    G4LogicalVolume* supportCylinderInnerShellLogic = new G4LogicalVolume(supportCylinderInnerShellSolid,
+                                                          support_material,
+                                                          "supportCylinderInnerShellLogic",
+                                                          0, 0, 0);
+
     m_DisplayAction->AddVolume(supportCylinderFoamLogic, "Foam");
     m_DisplayAction->AddVolume(supportCylinderOuterShellLogic, "CShell");
     m_DisplayAction->AddVolume(supportCylinderInnerShellLogic, "CShell");
@@ -505,39 +906,39 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
                       0, 0, OverlapCheck());
 
 
-  G4double support_seamangle_outer = 0;//support_seam / support_radius_outer;
+    G4double support_seamangle_outer = 0;//support_seam / support_radius_outer;
 
-  // construct support 2mm thick foam with 0.1mm carbon skins
-  G4VSolid* supportSagittaFoamSolid  = new G4Tubs(G4String("supportVertexCylinderSolid"),
-                                          support_radius_outer - support_thickness_foam / 2,
-                                          support_radius_outer + support_thickness_foam / 2,
-                                          support_length_outer / 2,
-                                          0.+support_seamangle_outer,M_PI*rad-support_seamangle_outer);
-  G4LogicalVolume* supportSagittaFoamLogic = new G4LogicalVolume(supportSagittaFoamSolid,
-                                                        foam_material,
-                                                        "supportSagittaFoamLogic",
-                                                        0, 0, 0);
+    // construct support 2mm thick foam with 0.1mm carbon skins
+    G4VSolid* supportSagittaFoamSolid  = new G4Tubs(G4String("supportVertexCylinderSolid"),
+                                            support_radius_outer - support_thickness_foam / 2,
+                                            support_radius_outer + support_thickness_foam / 2,
+                                            support_length_outer / 2,
+                                            0.+support_seamangle_outer,M_PI*rad-support_seamangle_outer);
+    G4LogicalVolume* supportSagittaFoamLogic = new G4LogicalVolume(supportSagittaFoamSolid,
+                                                          foam_material,
+                                                          "supportSagittaFoamLogic",
+                                                          0, 0, 0);
 
-  G4VSolid* supportSagittaOuterShellSolid  = new G4Tubs(G4String("supportVertexCylinderSolid"),
-                                          support_radius_outer + support_thickness_foam / 2,
-                                          support_radius_outer + support_thickness_foam / 2 + support_thickness_shell_outer,
-                                          support_length_outer / 2,
-                                          0.+support_seamangle_outer,M_PI*rad-support_seamangle_outer);
-  G4LogicalVolume* supportSagittaOuterShellLogic = new G4LogicalVolume(supportSagittaOuterShellSolid,
-                                                        support_material,
-                                                        "supportSagittaOuterShellLogic",
-                                                        0, 0, 0);
- 
-  G4VSolid* supportSagittaInnerShellSolid  = new G4Tubs(G4String("supportVertexCylinderSolid"),
-                                          support_radius_outer - support_thickness_foam / 2 - support_thickness_shell_outer,
-                                          support_radius_outer - support_thickness_foam / 2,
-                                          support_length_outer / 2,
-                                          0.+support_seamangle_outer,M_PI*rad-support_seamangle_outer);
-  G4LogicalVolume* supportSagittaInnerShellLogic = new G4LogicalVolume(supportSagittaInnerShellSolid,
-                                                        support_material,
-                                                        "supportSagittaInnerShellLogic",
-                                                        0, 0, 0);
- 
+    G4VSolid* supportSagittaOuterShellSolid  = new G4Tubs(G4String("supportVertexCylinderSolid"),
+                                            support_radius_outer + support_thickness_foam / 2,
+                                            support_radius_outer + support_thickness_foam / 2 + support_thickness_shell_outer,
+                                            support_length_outer / 2,
+                                            0.+support_seamangle_outer,M_PI*rad-support_seamangle_outer);
+    G4LogicalVolume* supportSagittaOuterShellLogic = new G4LogicalVolume(supportSagittaOuterShellSolid,
+                                                          support_material,
+                                                          "supportSagittaOuterShellLogic",
+                                                          0, 0, 0);
+  
+    G4VSolid* supportSagittaInnerShellSolid  = new G4Tubs(G4String("supportVertexCylinderSolid"),
+                                            support_radius_outer - support_thickness_foam / 2 - support_thickness_shell_outer,
+                                            support_radius_outer - support_thickness_foam / 2,
+                                            support_length_outer / 2,
+                                            0.+support_seamangle_outer,M_PI*rad-support_seamangle_outer);
+    G4LogicalVolume* supportSagittaInnerShellLogic = new G4LogicalVolume(supportSagittaInnerShellSolid,
+                                                          support_material,
+                                                          "supportSagittaInnerShellLogic",
+                                                          0, 0, 0);
+  
     m_DisplayAction->AddVolume(supportSagittaFoamLogic, "Foam");
     m_DisplayAction->AddVolume(supportSagittaOuterShellLogic, "CShell");
     m_DisplayAction->AddVolume(supportSagittaInnerShellLogic, "CShell");
@@ -576,7 +977,7 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
                       "supportSagittaInnerShellLogicLogicBottom",
                       mother,
                       0, 0, OverlapCheck());
-
+  }
   return;
 }
 
@@ -585,8 +986,9 @@ G4Material* PHG4BSTDetector::MakeCarbonFoamMaterial(){
   if(!carbon_foam){
     G4double density;
     G4int ncomponents;
-    carbon_foam = new G4Material("C_FOAM_BST", density = 0.26 * g / cm3, ncomponents = 2);
-    // carbon_foam = new G4Material("C_FOAM_BST", density = 0.06 * g / cm3, ncomponents = 2);
+    carbon_foam = new G4Material("C_FOAM_BST", density = 0.50 * g / cm3, ncomponents = 2); // VERY CONSERVATIVE DENSITY
+    // carbon_foam = new G4Material("C_FOAM_BST", density = 0.26 * g / cm3, ncomponents = 2); // CONSERVATIVE DENSITY
+    // carbon_foam = new G4Material("C_FOAM_BST", density = 0.06 * g / cm3, ncomponents = 2); // LIGHTEST DENSITY
     carbon_foam->AddElement(G4NistManager::Instance()->FindOrBuildElement("C"), 0.97);
     carbon_foam->AddElement(G4NistManager::Instance()->FindOrBuildElement("H"), 0.03);
   }
