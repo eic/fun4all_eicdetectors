@@ -18,6 +18,7 @@ class PHCompositeNode;
 class PHG4BSTDisplayAction;
 class PHG4BSTSteppingAction;
 class PHG4Subsystem;
+class PHParameters;
 
 /**
  * \file ${file_name}
@@ -29,7 +30,7 @@ class PHG4BSTDetector : public PHG4Detector
 {
  public:
   //! constructor
-  PHG4BSTDetector(PHG4Subsystem *subsys, PHCompositeNode *Node, const std::string &dnam);
+  PHG4BSTDetector(PHG4Subsystem *subsys, PHCompositeNode *Node, PHParameters *parameters, const std::string &dnam);
 
   //! destructor
   virtual ~PHG4BSTDetector() {}
@@ -160,6 +161,9 @@ class PHG4BSTDetector : public PHG4Detector
   std::map<std::string, G4double> m_GlobalParameterMap;
 
   std::map<std::string, towerposition> _map_tower;
+
+  PHParameters *m_Params = nullptr;
+
 };
 
 #endif

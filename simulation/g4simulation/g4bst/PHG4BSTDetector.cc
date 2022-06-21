@@ -6,6 +6,8 @@
 #include <g4main/PHG4DisplayAction.h>  // for PHG4DisplayAction
 #include <g4main/PHG4Subsystem.h>
 
+#include <phparameter/PHParameters.h>
+
 #include <Geant4/G4Box.hh>
 #include <Geant4/G4Tubs.hh>
 #include <Geant4/G4SubtractionSolid.hh>
@@ -41,7 +43,7 @@ class PHCompositeNode;
 using namespace std;
 
 //_______________________________________________________________________
-PHG4BSTDetector::PHG4BSTDetector(PHG4Subsystem* subsys, PHCompositeNode* Node, const std::string& dnam)
+PHG4BSTDetector::PHG4BSTDetector(PHG4Subsystem* subsys, PHCompositeNode* Node, PHParameters *parameters, const std::string& dnam)
   : PHG4Detector(subsys, Node, dnam)
   , m_DisplayAction(dynamic_cast<PHG4BSTDisplayAction*>(subsys->GetDisplayAction()))
   , m_SteppingAction(0)
@@ -80,6 +82,7 @@ PHG4BSTDetector::PHG4BSTDetector(PHG4Subsystem* subsys, PHCompositeNode* Node, c
   , _towerlogicnameprefix("hbstTower")
   , _superdetector("NONE")
   , _mapping_tower_file("")
+  , m_Params(parameters)
 {
 }
 //_______________________________________________________________________
@@ -126,41 +129,7 @@ void PHG4BSTDetector::ConstructMe(G4LogicalVolume* logicWorld)
     cout << "PHG4BSTDetector: Begin Construction" << endl;
   }
 
-  //Read parameters for detector construction from file
-  // ParseParametersFromTable();
-
-  //Create the cone envelope = 'world volume' for the calorimeter
-  // G4Material* Air = G4Material::GetMaterial("G4_AIR");
-  // G4double minR = 3.0 * cm;
-  // G4double maxR = 29.0* cm;
-  // G4double lengthBST = 90.0* cm;
-  // G4VSolid* bst_envelope_solid = new G4Cons("hbst_envelope_solid",
-  //                                       minR, maxR,
-  //                                       minR, maxR,
-  //                                       lengthBST / 2.0,
-  //                                       _sPhi, _dPhi);
-
-  // G4LogicalVolume* bst_envelope_log = new G4LogicalVolume(bst_envelope_solid, Air, G4String("hbst_envelope"), 0, 0, 0);
-
-  // m_DisplayAction->AddVolume(bst_envelope_log, "Invisible");
-  // m_DisplayAction->AddVolume(bst_envelope_log, "FbstEnvelope");
-
-  //Define rotation attributes for envelope cone
-  // G4RotationMatrix bst_rotm;
-  // bst_rotm.rotateX(_rot_in_x);
-  // bst_rotm.rotateY(_rot_in_y);
-  // bst_rotm.rotateZ(_rot_in_z);
-
-  //Place envelope cone in simulation
-  // ostringstream name_envelope;
-  // name_envelope.str("");
-  // name_envelope << _towerlogicnameprefix << "_envelope" << endl;
-
-  // new G4PVPlacement(G4Transform3D(bst_rotm, G4ThreeVector(_place_in_x, _place_in_y, _place_in_z)),
-  //                   bst_envelope_log, name_envelope.str().c_str(), logicWorld, 0, false, OverlapCheck());
-
   ConstructBarrel(logicWorld);
-  // ConstructOuterBarrel(bst_envelope_log);
   return;
 }
 
@@ -172,8 +141,10 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
   // Sensor sizes available from the ALPIDE wafer
   G4double sensor_widths[4] = {56.5 * mm, 75.5 * mm, 94.3 * mm, 113.1 *mm};
   G4double sensor_length[4] = {270 * mm, 270 * mm, 270 * mm, 240 *mm};
-  G4double layer_sensor_thickness = 0.05 / 100 * 9.37 * cm; // 0.05% of Si rad length 9.37cm
+  G4double layer_sensor_thickness = 0.05 / 100 * 9.37 * cm; // 0.05% of Si rad length 9.37cm // 46.85 microns
   G4Material *layer_material = GetDetectorMaterial("G4_Si");
+  G4double layer_backing_thickness = m_Params->get_double_param("layer_backing_thickness"); //0.07 / 100 * 28.57 * cm; // 200 microns of Kapton
+  G4Material *backing_material = GetDetectorMaterial("G4_KAPTON");
 
   // default seam where two half shells connect
   G4double deadarea_seam = 0.5 * mm;
@@ -231,12 +202,6 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
   layer_sensor_width_inner[2][1] = sensor_widths[2];
   layer_length_inner[2] = sensor_length[2];
 
-  for(int i=0; i<nLayersInner; i++){
-    cout << "layer " << i << " radius " << layer_radius_inner[i] << " length " << layer_length_inner[i] << " nSensors " << nSensorsInner[i] << endl;
-    for(int j=0; j<nSensorsInner[i]; j++){
-      cout << "\tlayer " << i << " sensor " << j << " width " << layer_sensor_width_inner[i][j] << endl;
-    }
-  }
   // sagitta layers sensor setup
   // Sagitta1(nonproj+): 5*94.3+2*75.5 = radius 198 -> eta 0.95
   // Sagitta2(nonproj+): 7*94.3 = radius 210 -> eta 0.89
@@ -305,12 +270,17 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
 
     support_radius_outer = 24.2 * cm;
   }
-
+  for(int i=0; i<nLayersInner; i++){
+    cout << "BST layer " << i << " radius " << layer_radius_inner[i] << " length " << layer_length_inner[i] << " nSensors " << nSensorsInner[i] << endl;
+    // for(int j=0; j<nSensorsInner[i]; j++){
+    //   cout << "\tlayer " << i << " sensor " << j << " width " << layer_sensor_width_inner[i][j] << endl;
+    // }
+  }
   for(int i=0; i<nLayersOuter; i++){
-    cout << "layer " << i+nLayersInner << " radius " << layer_radius_outer[i] << " length " << layer_length_outer[i] << " nSensors " << nSensorsOuter[i] << endl;
-    for(int j=0; j<nSensorsOuter[i]; j++){
-      cout << "\tlayer " << i+nLayersInner << " sensor " << j << " width " << layer_sensor_width_outer[i][j] << endl;
-    }
+    cout << "BST layer " << i+nLayersInner << " radius " << layer_radius_outer[i] << " length " << layer_length_outer[i] << " nSensors " << nSensorsOuter[i] << endl;
+    // for(int j=0; j<nSensorsOuter[i]; j++){
+    //   cout << "\tlayer " << i+nLayersInner << " sensor " << j << " width " << layer_sensor_width_outer[i][j] << endl;
+    // }
   }
   // int layer_segments[nLayersOuter] = {12, 12};
   G4double copperWire_diam = 0.64 * mm;
@@ -337,7 +307,7 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
 
     for(int j = 0; j < nSensorsInner[i]; j++){
       G4double angle_current_layer = M_PI * (layer_sensor_width_inner[i][j] - deadarea_sensoredge) / layer_half_circumference;
-      cout << "layer_sensor_width_inner[" << i << "][" << j << "] = " << layer_sensor_width_inner[i][j] << "\tangle_current_layer = " << angle_current_layer << "\tstarting_angle = " << current_angle << endl;
+      // cout << "layer_sensor_width_inner[" << i << "][" << j << "] = " << layer_sensor_width_inner[i][j] << "\tangle_current_layer = " << angle_current_layer << "\tstarting_angle = " << current_angle << endl;
       G4VSolid* currentLayerSolid  = new G4Tubs(G4String( "BST_"+std::to_string(i)+"_currentVertexLayerSolid_" + std::to_string(i) + "_" + std::to_string(j)),
                                             layer_radius_inner[i] - layer_sensor_thickness / 2,
                                             layer_radius_inner[i] + layer_sensor_thickness / 2,
@@ -539,7 +509,7 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
 
     for(int j = 0; j < nSensorsOuter[i]; j++){
       G4double angle_current_layer = M_PI * (layer_sensor_width_outer[i][j] - deadarea_sensoredge) / layer_half_circumference;
-      cout << "layer_sensor_width_outer[" << i << "][" << j << "] = " << layer_sensor_width_outer[i][j] << "\tangle_current_layer = " << angle_current_layer << "\tstarting_angle = " << current_angle << endl;
+      // cout << "layer_sensor_width_outer[" << i << "][" << j << "] = " << layer_sensor_width_outer[i][j] << "\tangle_current_layer = " << angle_current_layer << "\tstarting_angle = " << current_angle << endl;
       G4VSolid* currentLayerSolid  = new G4Tubs(G4String("BST_"+std::to_string(nLayersInner+i)+"_currentSagittaLayerSolid_" + std::to_string(i) + "_" + std::to_string(j)),
                                             layer_radius_outer[i] - layer_sensor_thickness / 2,
                                             layer_radius_outer[i] + layer_sensor_thickness / 2,
@@ -553,6 +523,23 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
   
       m_DisplayAction->AddVolume(currentLayerLogic, "InnerBarrel");
 
+      G4LogicalVolume* currentLayerBackingLogic = nullptr;
+      if(layer_backing_thickness>0){
+        G4VSolid* currentLayerBackingSolid  = new G4Tubs(G4String("SagittaBackingLayerSolid_" + std::to_string(i) + "_" + std::to_string(j)),
+                                              layer_radius_outer[i] + layer_sensor_thickness / 2,
+                                              layer_radius_outer[i] + layer_sensor_thickness / 2 + layer_backing_thickness,
+                                              layer_length_outer[i] / 2,
+                                              0,angle_current_layer);
+
+        currentLayerBackingLogic = new G4LogicalVolume(currentLayerBackingSolid,
+                                                              backing_material,
+                                                              "SagittaBackingLayerLogic_"+std::to_string(i) + "_" + std::to_string(j),
+                                                              0, 0, 0);
+    
+        m_DisplayAction->AddVolume(currentLayerBackingLogic, "BackingMaterial");
+      }
+
+
       G4RotationMatrix bstlayer_rotm;
       bstlayer_rotm.rotateZ(current_angle);
       new G4PVPlacement(G4Transform3D(bstlayer_rotm, G4ThreeVector( 0.0, 0.0, deadarea_seam / 2.0 + layer_length_outer[i] / 2)),
@@ -565,7 +552,18 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
                         "BST_"+std::to_string(nLayersInner+i)+"_currentSagittaLayerPlacedTopFront_"+std::to_string(i)+ "_" + std::to_string(j),
                         mother,
                         0, 0, OverlapCheck());
-
+      if(currentLayerBackingLogic){
+        new G4PVPlacement(G4Transform3D(bstlayer_rotm, G4ThreeVector( 0.0, 0.0, deadarea_seam / 2.0 + layer_length_outer[i] / 2)),
+                          currentLayerBackingLogic,
+                          "BackingSagittaLayerPlacedTopBack_"+std::to_string(i)+ "_" + std::to_string(j),
+                          mother,
+                          0, 0, OverlapCheck());
+        new G4PVPlacement(G4Transform3D(bstlayer_rotm, G4ThreeVector( 0.0, 0.0, -(deadarea_seam / 2.0 + layer_length_outer[i] / 2))),
+                          currentLayerBackingLogic,
+                          "BackingSagittaLayerPlacedTopFront_"+std::to_string(i)+ "_" + std::to_string(j),
+                          mother,
+                          0, 0, OverlapCheck());
+      }
       G4RotationMatrix bstlayer_rotm_bottom;
       bstlayer_rotm_bottom.rotateZ(current_angle+M_PI);
 
@@ -579,6 +577,18 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
                         "BST_"+std::to_string(nLayersInner+i)+"_currentSagittaLayerPlacedBottomFront_"+std::to_string(i)+ "_" + std::to_string(j),
                         mother,
                         0, 0, OverlapCheck());
+      if(currentLayerBackingLogic){
+        new G4PVPlacement(G4Transform3D(bstlayer_rotm_bottom, G4ThreeVector( 0.0, 0.0, deadarea_seam / 2.0 + layer_length_outer[i] / 2)),
+                          currentLayerBackingLogic,
+                          "BackingSagittaLayerPlacedBottomBack_"+std::to_string(i)+ "_" + std::to_string(j),
+                          mother,
+                          0, 0, OverlapCheck());
+        new G4PVPlacement(G4Transform3D(bstlayer_rotm_bottom, G4ThreeVector( 0.0, 0.0, -(deadarea_seam / 2.0 + layer_length_outer[i] / 2))),
+                          currentLayerBackingLogic,
+                          "BackingSagittaLayerPlacedBottomFront_"+std::to_string(i)+ "_" + std::to_string(j),
+                          mother,
+                          0, 0, OverlapCheck());
+      }
 
       G4VSolid* copperWireSolid  = new G4Tubs("copperWireSolid_"+std::to_string(i)+ "_" + std::to_string(j),
                                               0,
@@ -615,7 +625,7 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
         G4double angle_foam = M_PI * foam_thickness / layer_half_circumference;
 
         G4VSolid* foamblockSolid  = new G4Tubs(G4String("foamblockSolid"),
-                                                layer_radius_outer[i] + layer_sensor_thickness / 2,
+                                                layer_radius_outer[i] + layer_sensor_thickness / 2 + layer_backing_thickness,
                                                 i<nLayersOuter-1 ? layer_radius_outer[i+1] - layer_sensor_thickness / 2 : support_radius_outer - support_thickness_foam / 2 - support_thickness_shell_outer,
                                                 foam_length / 2,
                                                 -angle_foam/2,angle_foam/2);
@@ -671,65 +681,10 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
         }
       }
     }
-/*
-  for(int i = 0; i < nLayersOuter; i++){
-    G4double deadangle_seam = deadarea_seam / layer_radius_outer[i];
-    G4VSolid* currentLayerSolid  = new G4Tubs("currentSagittaLayerSolid"+std::to_string(i),
-                                            layer_radius_outer[i] - layer_sensor_thickness / 2,
-                                            layer_radius_outer[i] + layer_sensor_thickness / 2,
-                                            layer_length_outer[i] / 2,
-                                            0.+deadangle_seam,(2*M_PI*rad/layer_segments[i])-deadangle_seam);
-  
-    G4LogicalVolume* currentLayerLogic = new G4LogicalVolume(currentLayerSolid,
-                                                          layer_material,
-                                                          "currentSagittaLayerLogic_"+std::to_string(i),
-                                                          0, 0, 0);
 
-    m_DisplayAction->AddVolume(currentLayerLogic, "OuterBarrel");
-
-    G4VSolid* copperWireSolid  = new G4Tubs("copperWireSolid"+std::to_string(i),
-                                            0,
-                                            copperWire_diam / 2,
-                                            layer_length_outer[i] / 2 -  support_thickness_foam,
-                                            0.,(2*M_PI*rad));
-  
-    G4LogicalVolume* copperWireLogic = new G4LogicalVolume(copperWireSolid,
-                                                          GetDetectorMaterial("G4_Cu", false),
-                                                          "copperWireLogic_"+std::to_string(i),
-                                                          0, 0, 0);
-
-    m_DisplayAction->AddVolume(copperWireLogic, "CopperWire");
-    for(int iseg = 0; iseg < layer_segments[i]; iseg++){
-      G4RotationMatrix bstlayer_rotm;
-      bstlayer_rotm.rotateZ(2*M_PI*iseg/layer_segments[i]);
-
-      new G4PVPlacement(G4Transform3D(bstlayer_rotm, G4ThreeVector( 0.0, 0.0, deadarea_seam+ layer_length_outer[i] / 2)),
-                        currentLayerLogic,
-                        "currentSagittaLayerLogicFront"+std::to_string(iseg),
-                        mother,
-                        0, 0, OverlapCheck());
-      new G4PVPlacement(G4Transform3D(bstlayer_rotm, G4ThreeVector( 0.0, 0.0, -(deadarea_seam+layer_length_outer[i] / 2))),
-                        currentLayerLogic,
-                        "currentSagittaLayerLogicBack"+std::to_string(iseg),
-                        mother,
-                        0, 0, OverlapCheck());
-      if((iseg-1)%2==0){
-        new G4PVPlacement(0, G4ThreeVector((layer_radius_outer[i]+(i<nLayersOuter-1 ? layer_radius_outer[i+1] : support_radius_outer))/2 * cos(2*M_PI*iseg/layer_segments[i]),(layer_radius_outer[i]+(i<nLayersOuter-1 ? layer_radius_outer[i+1] : support_radius_outer))/2 * sin(2*M_PI*iseg/layer_segments[i]),layer_length_outer[i] / 2),
-                          copperWireLogic,
-                          "copperWireLogicBack"+std::to_string(iseg),
-                          mother,
-                          0, 0, OverlapCheck());
-        new G4PVPlacement(0, G4ThreeVector((layer_radius_outer[i]+(i<nLayersOuter-1 ? layer_radius_outer[i+1] : support_radius_outer))/2 * cos(2*M_PI*iseg/layer_segments[i]),(layer_radius_outer[i]+(i<nLayersOuter-1 ? layer_radius_outer[i+1] : support_radius_outer))/2 * sin(2*M_PI*iseg/layer_segments[i]),-layer_length_outer[i] / 2),
-                          copperWireLogic,
-                          "copperWireLogicFront"+std::to_string(iseg),
-                          mother,
-                          0, 0, OverlapCheck());
-      }
-    }
-*/
     if(do_internal_supports){
       G4VSolid* foamEndWheelSagittaSolid  = new G4Tubs(G4String("foamEndWheelSagittaSolid"),
-                                              layer_radius_outer[i] + layer_sensor_thickness / 2,
+                                              layer_radius_outer[i] + layer_sensor_thickness / 2 + layer_backing_thickness,
                                               i<nLayersOuter-1 ? layer_radius_outer[i+1] - layer_sensor_thickness / 2 : support_radius_outer - support_thickness_foam / 2 - support_thickness_shell_outer,
                                               foam_endwheel_depth / 2,
                                               0.,M_PI*rad);
@@ -752,7 +707,7 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
       m_DisplayAction->AddVolume(foamEndWheelSagittaLogic, "FoamEndWheel");
 
       G4VSolid* foamMidWheelSagittaSolid  = new G4Tubs(G4String("foamMidWheelSagittaSolid"),
-                                              layer_radius_outer[i] + layer_sensor_thickness / 2,
+                                              layer_radius_outer[i] + layer_sensor_thickness / 2 + layer_backing_thickness,
                                               i<nLayersOuter-1 ? layer_radius_outer[i+1] - layer_sensor_thickness / 2 : support_radius_outer - support_thickness_foam / 2 - support_thickness_shell_outer,
                                               foam_midwheel_depth / 2,
                                               0.,M_PI*rad);

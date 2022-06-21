@@ -53,6 +53,12 @@ void PHG4BSTDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
       visatt->SetVisibility(true);
       visatt->SetForceWireframe(true);
     }
+    else if (it.second == "BackingMaterial")
+    {
+      visatt->SetColour(212./255,50./255,55./255);
+      visatt->SetVisibility(true);
+      visatt->SetForceWireframe(true);
+    }
     else if (it.second == "CopperWire")
     {
       visatt->SetColour(G4Color::Red());

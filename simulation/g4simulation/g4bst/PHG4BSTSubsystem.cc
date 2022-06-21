@@ -35,6 +35,7 @@ PHG4BSTSubsystem::PHG4BSTSubsystem(const std::string& name, const int lyr)
   , detector_type(name)
   , mappingfile_("")
 {
+  InitializeParameters();
 }
 
 //_______________________________________________________________________
@@ -52,7 +53,7 @@ int PHG4BSTSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
   // create display settings before detector
   m_DisplayAction = new PHG4BSTDisplayAction(Name());
   // create detector
-  m_Detector = new PHG4BSTDetector(this, topNode, Name());
+  m_Detector = new PHG4BSTDetector(this, topNode, GetParams(), Name());
   m_Detector->SetActive(active);
   m_Detector->SetAbsorberActive(absorber_active);
   m_Detector->BlackHole(blackhole);
@@ -140,6 +141,7 @@ PHG4Detector* PHG4BSTSubsystem::GetDetector() const
 
 void PHG4BSTSubsystem::SetDefaultParameters()
 {
+  set_default_double_param("layer_backing_thickness", 0.0);
   set_default_double_param("place_x", 0.);
   set_default_double_param("place_y", 0.);
   set_default_double_param("place_z", 375.);
