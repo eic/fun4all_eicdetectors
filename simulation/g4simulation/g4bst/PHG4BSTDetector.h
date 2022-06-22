@@ -92,7 +92,8 @@ class PHG4BSTDetector : public PHG4Detector
   G4Material *GetScintillatorMaterial();
   G4Material *GetQuartzMaterial();
   G4Material *GetPMMAMaterial();
-  G4Material *MakeCarbonFoamMaterial();
+  G4Material *MakeCarbonFoamMaterial_Longeron();
+  G4Material *MakeCarbonFoamMaterial_Wheel();
   G4Material *GetCarbonFiber();
   int PlaceTower(G4LogicalVolume *envelope, G4LogicalVolume *tower);
   int ParseParametersFromTable();

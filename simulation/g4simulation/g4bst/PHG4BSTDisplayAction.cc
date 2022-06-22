@@ -49,9 +49,9 @@ void PHG4BSTDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
     }
     else if (it.second == "InnerBarrel")
     {
-      visatt->SetColour(212./255,175./255,55./255);
+      visatt->SetColour(212./255,175./255,55./255,0.6);
       visatt->SetVisibility(true);
-      visatt->SetForceWireframe(true);
+      // visatt->SetForceWireframe(true);
     }
     else if (it.second == "BackingMaterial")
     {
@@ -62,35 +62,38 @@ void PHG4BSTDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
     else if (it.second == "CopperWire")
     {
       visatt->SetColour(G4Color::Red());
+      // visatt->SetColour(250./255,10./255,10./255, 0.7);
       visatt->SetVisibility(true);
       // visatt->SetForceWireframe(true);
     }
     else if (it.second == "OuterBarrel")
     {
-      visatt->SetColour(207./255,181./255,59./255);
+      visatt->SetColour(207./255,181./255,59./255,0.6);
       visatt->SetVisibility(true);
-      visatt->SetForceWireframe(true);
+      // visatt->SetForceWireframe(true);
     }
     else if (it.second == "Support")
     {
       visatt->SetColour(62./255,62./255,64./255);
       visatt->SetVisibility(true);
     }
-    else if (it.second == "Foam")
-    {
-      visatt->SetColour(85./255,85./255,74./255, 0.7);
-      visatt->SetVisibility(true);
-    }
     else if (it.second == "FoamEndWheel")
     {
-      visatt->SetColour(85./255,85./255,74./255, 0.7);
+      visatt->SetColour(0.6*85./255,0.6*85./255,0.6*74./255, 1.0);
+      visatt->SetVisibility(true);
+    }
+    else if (it.second == "Foam")
+    {
+      visatt->SetColour(85./255,85./255,74./255, 1.0);
       visatt->SetVisibility(true);
       // visatt->SetForceWireframe(true);
     }
     else if (it.second == "CShell")
     {
-      visatt->SetColour(G4Colour::Black());
+      visatt->SetColour(G4Colour::Blue());
+      // visatt->SetColour(G4Colour::Black());
       visatt->SetVisibility(true);
+      visatt->SetForceWireframe(true);
     }
     else if (it.second == "Invisible")
     {

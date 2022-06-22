@@ -153,6 +153,8 @@ void PHG4BSTSubsystem::SetDefaultParameters()
   set_default_double_param("rMax1", 220.);
   set_default_double_param("rMin2", 20.);
   set_default_double_param("rMax2", 220.);
+  set_default_int_param("do_internal_supports", 1);
+  set_default_int_param("do_external_supports", 1);
   // set_default_double_param("wls_dw", 0.3);
   // set_default_double_param("support_dw", 0.2);
   set_default_double_param("rot_x", 0.);
