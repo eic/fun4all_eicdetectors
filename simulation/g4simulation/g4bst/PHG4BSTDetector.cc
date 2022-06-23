@@ -689,36 +689,37 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
                           0, 0, OverlapCheck());
       }
 
-      G4VSolid* copperWireSolid  = new G4Tubs("copperWireSolid_"+std::to_string(i)+ "_" + std::to_string(j),
-                                              0,
-                                              copperWire_diam / 2,
-                                              layer_length_outer[i] / 4 -  foam_endwheel_depth,
-                                              0.,(2*M_PI*rad));
-    
-      G4LogicalVolume* copperWireLogic = new G4LogicalVolume(copperWireSolid,
-                                                            GetDetectorMaterial("G4_Cu", false),
-                                                            "copperWireLogic_"+std::to_string(i)+ "_" + std::to_string(j),
-                                                            0, 0, 0);
+      if(do_internal_supports){
+        G4VSolid* copperWireSolid  = new G4Tubs("copperWireSolid_"+std::to_string(i)+ "_" + std::to_string(j),
+                                                0,
+                                                copperWire_diam / 2,
+                                                layer_length_outer[i] / 4 -  foam_endwheel_depth,
+                                                0.,(2*M_PI*rad));
+      
+        G4LogicalVolume* copperWireLogic = new G4LogicalVolume(copperWireSolid,
+                                                              GetDetectorMaterial("G4_Cu", false),
+                                                              "copperWireLogic_"+std::to_string(i)+ "_" + std::to_string(j),
+                                                              0, 0, 0);
 
-      m_DisplayAction->AddVolume(copperWireLogic, "CopperWire");
+        m_DisplayAction->AddVolume(copperWireLogic, "CopperWire");
 
-      if((j)%2==0){
-        // place copper wire between every second sensor
-        for(int k=-2; k<3; k++){
-          if(k==0) continue;
-          new G4PVPlacement(0, G4ThreeVector((layer_radius_outer[i]+(i<nLayersOuter-1 ? layer_radius_outer[i+1] : support_radius_outer))/2 * cos(current_angle),(layer_radius_outer[i]+(i<nLayersOuter-1 ? layer_radius_outer[i+1] : support_radius_outer))/2 * sin(current_angle),k*layer_length_outer[i] / 2 + (k<0 ? layer_length_outer[i]/4 : -layer_length_outer[i]/4)),
-                                    copperWireLogic,
-                                    "copperWireLogicTop_"+std::to_string(i)+ "_" + std::to_string(j)+ "_" + std::to_string(k),
-                                    mother,
-                                    0, 0, OverlapCheck());
-          new G4PVPlacement(0, G4ThreeVector((layer_radius_outer[i]+(i<nLayersOuter-1 ? layer_radius_outer[i+1] : support_radius_outer))/2 * cos(current_angle+M_PI),(layer_radius_outer[i]+(i<nLayersOuter-1 ? layer_radius_outer[i+1] : support_radius_outer))/2 * sin(current_angle+M_PI),k*layer_length_outer[i] / 2 + (k<0 ? layer_length_outer[i]/4 : -layer_length_outer[i]/4)),
-                                    copperWireLogic,
-                                    "copperWireLogicBottom_"+std::to_string(i)+ "_" + std::to_string(j)+ "_" + std::to_string(k),
-                                    mother,
-                                    0, 0, OverlapCheck());
+        if((j)%2==0){
+          // place copper wire between every second sensor
+          for(int k=-2; k<3; k++){
+            if(k==0) continue;
+            new G4PVPlacement(0, G4ThreeVector((layer_radius_outer[i]+(i<nLayersOuter-1 ? layer_radius_outer[i+1] : support_radius_outer))/2 * cos(current_angle),(layer_radius_outer[i]+(i<nLayersOuter-1 ? layer_radius_outer[i+1] : support_radius_outer))/2 * sin(current_angle),k*layer_length_outer[i] / 2 + (k<0 ? layer_length_outer[i]/4 : -layer_length_outer[i]/4)),
+                                      copperWireLogic,
+                                      "copperWireLogicTop_"+std::to_string(i)+ "_" + std::to_string(j)+ "_" + std::to_string(k),
+                                      mother,
+                                      0, 0, OverlapCheck());
+            new G4PVPlacement(0, G4ThreeVector((layer_radius_outer[i]+(i<nLayersOuter-1 ? layer_radius_outer[i+1] : support_radius_outer))/2 * cos(current_angle+M_PI),(layer_radius_outer[i]+(i<nLayersOuter-1 ? layer_radius_outer[i+1] : support_radius_outer))/2 * sin(current_angle+M_PI),k*layer_length_outer[i] / 2 + (k<0 ? layer_length_outer[i]/4 : -layer_length_outer[i]/4)),
+                                      copperWireLogic,
+                                      "copperWireLogicBottom_"+std::to_string(i)+ "_" + std::to_string(j)+ "_" + std::to_string(k),
+                                      mother,
+                                      0, 0, OverlapCheck());
+          }
         }
       }
-
 
       if(do_internal_supports){
 

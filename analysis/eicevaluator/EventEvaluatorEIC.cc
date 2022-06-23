@@ -2420,8 +2420,11 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
             mcSteps += 1;
           }
         }
-        if (g4particle->get_parent_id()<0 && mcSteps > _depth_MCstack) continue;
-
+        if(_depth_MCstack==0){
+          if (mcSteps > _depth_MCstack) continue;
+        } else {
+          if (g4particle->get_parent_id()<0 && mcSteps > _depth_MCstack) continue;
+        }
         // evaluating true primary vertex
         if (_do_VERTEX && _nMCPart == 0)
         {

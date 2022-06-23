@@ -49,6 +49,7 @@ void PHG4BSTDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
     }
     else if (it.second == "InnerBarrel")
     {
+      // visatt->SetColour(212./255,175./255,55./255);
       visatt->SetColour(212./255,175./255,55./255,0.6);
       visatt->SetVisibility(true);
       // visatt->SetForceWireframe(true);
@@ -69,6 +70,7 @@ void PHG4BSTDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
     else if (it.second == "OuterBarrel")
     {
       visatt->SetColour(207./255,181./255,59./255,0.6);
+      // visatt->SetColour(207./255,181./255,59./255);
       visatt->SetVisibility(true);
       // visatt->SetForceWireframe(true);
     }
