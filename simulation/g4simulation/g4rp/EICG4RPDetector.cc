@@ -237,10 +237,11 @@ void EICG4RPDetector::ConstructMe(G4LogicalVolume *logicWorld)
   G4VisAttributes *visVirt = new G4VisAttributes( G4Color(1.0, 1.0, 1.0, 0.0) );
   visVirt->SetForceSolid(true);
   logicalVirt->SetVisAttributes(visVirt);
+
   G4ThreeVector positionVirt = G4ThreeVector( 
       center_X,
       center_Y,
-      center_Z - sensorDepth/2.0 - virtPlaneDepth/2.0 - enclosureCenter );
+      center_Z - sensorDepth/2.0 - virtPlaneDepth - enclosureCenter );
 
   G4VPhysicalVolume *physicalVirt = new G4PVPlacement( rotm, positionVirt, logicalVirt, "EICG4RPVirt", 
       logicWorld, 0, false, OverlapCheck());
