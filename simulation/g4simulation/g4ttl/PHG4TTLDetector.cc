@@ -190,17 +190,17 @@ void PHG4TTLDetector::BuildBarrelTTLStaves(G4LogicalVolume *logicWorld)
   int nSensorsMother = (int) (module_length / (sensor_length+sensor_gap));
   std::cout << "nSensorsMother: " << nSensorsMother << std::endl;
   // module long envelope for sensors
-  G4VSolid *sol_sensor_envelope = new G4Box("sol_sensor_envelope",
-                                          sensor_width / 2,
-                                          sensor_thickness / 2,
-                                          module_length / 2);
-  G4LogicalVolume *log_sensor_envelope = new G4LogicalVolume(sol_sensor_envelope, GetDetectorMaterial("G4_AIR"), "log_sensor_envelope");
-  // element for sensor that gets replicated
-  G4VSolid *sol_sensor_mother = new G4Box("sol_sensor",
-                                          sensor_width / 2,
-                                          sensor_thickness / 2,
-                                          (sensor_length+sensor_gap) / 2);
-  G4LogicalVolume *log_sensor_mother = new G4LogicalVolume(sol_sensor_mother, GetDetectorMaterial("G4_AIR"), "log_sensor_mother");
+  // G4VSolid *sol_sensor_envelope = new G4Box("sol_sensor_envelope",
+  //                                         sensor_width / 2,
+  //                                         sensor_thickness / 2,
+  //                                         module_length / 2);
+  // G4LogicalVolume *log_sensor_envelope = new G4LogicalVolume(sol_sensor_envelope, GetDetectorMaterial("G4_AIR"), "log_sensor_envelope");
+  // // element for sensor that gets replicated
+  // G4VSolid *sol_sensor_mother = new G4Box("sol_sensor",
+  //                                         sensor_width / 2,
+  //                                         sensor_thickness / 2,
+  //                                         (sensor_length+sensor_gap) / 2);
+  // G4LogicalVolume *log_sensor_mother = new G4LogicalVolume(sol_sensor_mother, GetDetectorMaterial("G4_AIR"), "log_sensor_mother");
   // sensor that is placed in replicated volume
   G4VSolid *sol_sensor = new G4Box("sol_sensor",
                                           sensor_width / 2,
@@ -208,23 +208,28 @@ void PHG4TTLDetector::BuildBarrelTTLStaves(G4LogicalVolume *logicWorld)
                                           sensor_length / 2);
   G4LogicalVolume *log_sensor = new G4LogicalVolume(sol_sensor, GetDetectorMaterial("G4_Si"), "log_sensor");
 
-  RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(0, 0, 0), log_sensor,
-                                            "physical_Sensor", log_sensor_mother, false, 0, overlapcheck_sector),true);
+  // RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(0, 0, 0), log_sensor,
+  //                                           "physical_Sensor", log_sensor_mother, false, 0, overlapcheck_sector),true);
 
   // place sensors along log_module_box
-  new G4PVReplica("placed_sensor_replicas", log_sensor_mother, log_sensor_envelope,
-                kZAxis, nSensorsMother, sensor_length+sensor_gap, 0);
+  // new G4PVReplica("placed_sensor_replicas", log_sensor_mother, log_sensor_envelope,
+  //               kZAxis, nSensorsMother, sensor_length+sensor_gap, 0);
 
   RegisterLogicalVolume(log_sensor);
-  RegisterLogicalVolume(log_sensor_envelope);
-  RegisterLogicalVolume(log_sensor_mother);
+  // RegisterLogicalVolume(log_sensor_envelope);
+  // RegisterLogicalVolume(log_sensor_mother);
   m_DisplayAction->AddVolume(log_sensor, "Sensor");
-  m_DisplayAction->AddVolume(log_sensor_envelope, "Black");
-  m_DisplayAction->AddVolume(log_sensor_mother, "Black");
+  // m_DisplayAction->AddVolume(log_sensor_envelope, "Black");
+  // m_DisplayAction->AddVolume(log_sensor_mother, "Black");
 
 
-  RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(module_width/2-sensor_width/2, -module_height/2 + sensor_thickness/2, 0), log_sensor_envelope,
-                                            "physical_SensorReplicas", log_module_box, false, 0, overlapcheck_sector),false);
+  // RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(module_width/2-sensor_width/2, -module_height/2 + sensor_thickness/2, 0), log_sensor_envelope,
+  //                                           "physical_SensorReplicas", log_module_box, false, 0, overlapcheck_sector),false);
+  for(int i=0; i<nSensorsMother; i++)
+  {
+    RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(module_width/2-sensor_width/2, -module_height/2 + sensor_thickness/2, -module_length/2 + (sensor_length+sensor_gap)/2 + (sensor_length+sensor_gap)*i), log_sensor,
+                                              "physical_Sensor_"+std::to_string(i), log_module_box, false, i, overlapcheck_sector),true);
+  }
 
   // frontend ASIC
   G4VSolid *sol_ASIC = new G4Box("sol_ASIC",
