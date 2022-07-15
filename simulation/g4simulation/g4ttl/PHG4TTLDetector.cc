@@ -74,8 +74,187 @@ void PHG4TTLDetector::ConstructMe(G4LogicalVolume *logicWorld)
   }
   else
   {
-    BuildBarrelTTL(logicWorld);
+    if(m_Params->get_int_param("isECCE"))
+      BuildBarrelTTL(logicWorld);
+    else
+      BuildBarrelTTLStaves(logicWorld);
   }
+}
+
+void PHG4TTLDetector::BuildBarrelTTLStaves(G4LogicalVolume *logicWorld)
+{
+
+  G4double rCenter = m_Params->get_double_param("rMin");  // center location of Al support plate
+  // G4double det_height = 2.1 * cm;
+  G4double place_z = m_Params->get_double_param("place_z");
+  // G4ThreeVector detzvec(0, 0, place_z);
+  G4double detlength = m_Params->get_double_param("length");
+
+  G4double carbonsupport_height = 0.6 * cm;
+  G4double carbonfoam_length = 3.1 * cm;
+  G4double carbonhoneycomb_length = 2.5 * cm;
+
+  G4double sensor_width = 3.2 * cm;
+  G4double sensor_length = 5.5 * cm;
+  G4double sensor_thickness = 0.3 * mm;
+  G4double sensor_overlap = 3.0 * mm;
+
+  G4double ASIC_thickness = 0.3 * mm;
+  G4double ASIC_width = 1.0 * cm;
+
+  G4double module_width = 5.6 * cm;
+  G4double module_length = detlength ; //67.5 * cm;
+  G4double module_height = sensor_thickness>ASIC_thickness ? carbonsupport_height+sensor_thickness : carbonsupport_height+ASIC_thickness;
+
+  // make module mother volume
+  G4VSolid *sol_module_box = new G4Box("sol_module_box",
+                                          module_width / 2,
+                                          module_height / 2,
+                                          module_length / 2);
+  G4LogicalVolume *log_module_box = new G4LogicalVolume(sol_module_box, GetDetectorMaterial("G4_AIR"), "log_module_box");
+  RegisterLogicalVolume(log_module_box);
+  m_DisplayAction->AddVolume(log_module_box, "StripBox");
+
+  // create individual module components
+  // carbon honeycomb with cooling pipe
+  G4VSolid *sol_carbonhoneycomb_module_mother = new G4Box("sol_carbonhoneycomb_module_mother",
+                                          carbonhoneycomb_length / 2,
+                                          carbonsupport_height / 2,
+                                          module_length / 2);
+  G4VSolid *sol_carbonhoneycomb_module = new G4Box("sol_carbonhoneycomb_module_tmp",
+                                          carbonhoneycomb_length / 2,
+                                          carbonsupport_height / 2,
+                                          module_length / 2);
+
+  G4double diameter_coolingtube = 5 * mm;
+  G4double wallthickness_coolingtube = 1 * mm;
+  G4VSolid *sol_cutout_tube = new G4Tubs("sol_cutout_tube",
+                                          0.,
+                                          1.003*diameter_coolingtube / 2,
+                                          (module_length * 2) / 2,
+                                          0.,2*M_PI);
+  G4VSolid *sol_cooling_tube = new G4Tubs("sol_cooling_tube_tmp",
+                                          (diameter_coolingtube - 2*wallthickness_coolingtube) / 2,
+                                          diameter_coolingtube / 2,
+                                          (module_length - 0.2 * mm) / 2,
+                                          0.,2*M_PI);
+  sol_carbonhoneycomb_module = new G4SubtractionSolid(G4String("sol_carbonhoneycomb_module"), sol_carbonhoneycomb_module, sol_cutout_tube, 0, G4ThreeVector(0,0,0));
+
+  G4LogicalVolume *Log_cooling_tube = new G4LogicalVolume(sol_cooling_tube, GetDetectorMaterial("G4_Al"), "Log_cooling_tube");
+  RegisterLogicalVolume(Log_cooling_tube);
+  m_DisplayAction->AddVolume(Log_cooling_tube, "Cooling_tube");
+
+  G4VSolid *sol_water_cooling = new G4Tubs("sol_water_cooling",
+                                          0,
+                                          0.99*(diameter_coolingtube - 2*wallthickness_coolingtube) / 2,
+                                          (module_length - 0.2 * mm) / 2,
+                                          0.,2*M_PI);
+  G4LogicalVolume *Log_water_cooling = new G4LogicalVolume(sol_water_cooling,  //
+                                                           GetDetectorMaterial("G4_WATER"), "Log_water_cooling");
+  RegisterLogicalVolume(Log_water_cooling);
+  m_DisplayAction->AddVolume(Log_water_cooling, "Water_cooling");
+  
+  
+  G4LogicalVolume *log_carbonhoneycomb_module_mother = new G4LogicalVolume(sol_carbonhoneycomb_module_mother, GetDetectorMaterial("G4_AIR"), "log_carbonhoneycomb_module_mother");
+  G4LogicalVolume *log_carbonhoneycomb_module = new G4LogicalVolume(sol_carbonhoneycomb_module, MakeCarbonFoamMaterial(), "log_carbonhoneycomb_module");
+
+  RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(-(carbonhoneycomb_length+carbonfoam_length)/2 + carbonhoneycomb_length/2, module_height/2-carbonsupport_height/2, 0), log_carbonhoneycomb_module_mother,
+                                            "physical_carbonhoneycomb_module_mother", log_module_box, false, 0, overlapcheck_sector),false);
+  RegisterLogicalVolume(log_carbonhoneycomb_module_mother);
+  m_DisplayAction->AddVolume(log_carbonhoneycomb_module_mother, "Invisible");
+
+  RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(0, 0, 0), log_carbonhoneycomb_module,
+                                            "physical_carbonhoneycomb_module", log_carbonhoneycomb_module_mother, false, 0, overlapcheck_sector),false);
+  RegisterLogicalVolume(log_carbonhoneycomb_module);
+  m_DisplayAction->AddVolume(log_carbonhoneycomb_module, "CarbonHoneycomb");
+
+  // place cooling pipe and water
+  RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(0, 0, 0), Log_cooling_tube,
+                                            "physical_cooling_tube", log_carbonhoneycomb_module_mother, false, 0, overlapcheck_sector),false);
+  RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(0, 0, 0), Log_water_cooling,
+                                            "physical_water_cooling", log_carbonhoneycomb_module_mother, false, 0, overlapcheck_sector),false);
+
+  // carbon foam
+  G4VSolid *sol_carbonfoam_module = new G4Box("sol_carbonfoam_module",
+                                          carbonfoam_length / 2,
+                                          carbonsupport_height / 2,
+                                          module_length / 2);
+  G4LogicalVolume *log_carbonfoam_module = new G4LogicalVolume(sol_carbonfoam_module, MakeCarbonFoamMaterial(), "log_carbonfoam_module");
+  RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(((carbonfoam_length+carbonhoneycomb_length)/2 - carbonfoam_length/2), module_height/2-carbonsupport_height/2, 0), log_carbonfoam_module,
+                                            "physical_carbonfoam_module", log_module_box, false, 0, overlapcheck_sector),false);
+  RegisterLogicalVolume(log_carbonfoam_module);
+  m_DisplayAction->AddVolume(log_carbonfoam_module, "CarbonFoam");
+
+  // sensor 3.2 x 5.5 cm
+  G4double sensor_gap = 0.1 * cm;
+  int nSensorsMother = (int) (module_length / (sensor_length+sensor_gap));
+  std::cout << "nSensorsMother: " << nSensorsMother << std::endl;
+  // module long envelope for sensors
+  G4VSolid *sol_sensor_envelope = new G4Box("sol_sensor_envelope",
+                                          sensor_width / 2,
+                                          sensor_thickness / 2,
+                                          module_length / 2);
+  G4LogicalVolume *log_sensor_envelope = new G4LogicalVolume(sol_sensor_envelope, GetDetectorMaterial("G4_AIR"), "log_sensor_envelope");
+  // element for sensor that gets replicated
+  G4VSolid *sol_sensor_mother = new G4Box("sol_sensor",
+                                          sensor_width / 2,
+                                          sensor_thickness / 2,
+                                          (sensor_length+sensor_gap) / 2);
+  G4LogicalVolume *log_sensor_mother = new G4LogicalVolume(sol_sensor_mother, GetDetectorMaterial("G4_AIR"), "log_sensor_mother");
+  // sensor that is placed in replicated volume
+  G4VSolid *sol_sensor = new G4Box("sol_sensor",
+                                          sensor_width / 2,
+                                          sensor_thickness / 2,
+                                          sensor_length / 2);
+  G4LogicalVolume *log_sensor = new G4LogicalVolume(sol_sensor, GetDetectorMaterial("G4_Si"), "log_sensor");
+
+  RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(0, 0, 0), log_sensor,
+                                            "physical_Sensor", log_sensor_mother, false, 0, overlapcheck_sector),true);
+
+  // place sensors along log_module_box
+  new G4PVReplica("placed_sensor_replicas", log_sensor_mother, log_sensor_envelope,
+                kZAxis, nSensorsMother, sensor_length+sensor_gap, 0);
+
+  RegisterLogicalVolume(log_sensor);
+  RegisterLogicalVolume(log_sensor_envelope);
+  RegisterLogicalVolume(log_sensor_mother);
+  m_DisplayAction->AddVolume(log_sensor, "Sensor");
+  m_DisplayAction->AddVolume(log_sensor_envelope, "Black");
+  m_DisplayAction->AddVolume(log_sensor_mother, "Black");
+
+
+  RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(module_width/2-sensor_width/2, -module_height/2 + sensor_thickness/2, 0), log_sensor_envelope,
+                                            "physical_SensorReplicas", log_module_box, false, 0, overlapcheck_sector),false);
+
+  // frontend ASIC
+  G4VSolid *sol_ASIC = new G4Box("sol_ASIC",
+                                          ASIC_width / 2,
+                                          ASIC_thickness / 2,
+                                          module_length / 2);
+  G4LogicalVolume *log_ASIC = new G4LogicalVolume(sol_ASIC, GetDetectorMaterial("G4_Si"), "log_ASIC");
+
+
+  RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(module_width/2-sensor_width - 3*mm - ASIC_width/2, -module_height/2 + ASIC_thickness/2, 0), log_ASIC,
+                                            "physical_ASIC", log_module_box, false, 0, overlapcheck_sector),false);
+  RegisterLogicalVolume(log_ASIC);
+  m_DisplayAction->AddVolume(log_ASIC, "ASIC");
+
+  // place log_module_box at radial position rCenter tilted by 18 degrees
+  // make loop to place module at multiple places in azimuth at radius rCenter
+  // int nAzimuth = m_Params->get_int_param("nAzimuth");
+  // int nAzimuth = 1 + sensor_overlap - sensor_overlap;
+  int nAzimuth = 2 * M_PI * rCenter / (sensor_width * cos(18 * deg) - sensor_overlap);
+  std::cout << "nAzimuth = " << nAzimuth << std::endl;
+  for(int i = 0; i < nAzimuth; i++)
+  {
+    G4RotationMatrix *rot_module = new G4RotationMatrix();
+    rot_module->rotateZ(i * 360.0 * deg / nAzimuth + 18.0 * deg);
+    G4double phi = i * 2 * M_PI / nAzimuth;//m_Params->get_int_param("n_azimuthal")
+    G4ThreeVector detzvec(rCenter * sin(phi), rCenter * cos(phi), place_z);
+    RegisterPhysicalVolume(new G4PVPlacement(rot_module, detzvec, log_module_box,
+                                              "physical_module_"+std::to_string(i), logicWorld, false, i, overlapcheck_sector),false);
+  }
+
 }
 
 void PHG4TTLDetector::BuildBarrelTTL(G4LogicalVolume *logicWorld)
@@ -1084,6 +1263,31 @@ void PHG4TTLDetector::BuildForwardTTL(G4LogicalVolume *logicWorld)
   }
 }
 
+
+G4Material* PHG4TTLDetector::MakeCarbonFoamMaterial(){
+  G4Material* carbon_foam = GetDetectorMaterial("C_FOAM_TTL", false);  // false suppresses warning that material does not exist
+  if(!carbon_foam){
+    G4double density;
+    G4int ncomponents;
+    carbon_foam = new G4Material("C_FOAM_TTL", density = 0.20 * g / cm3, ncomponents = 2); // VERY CONSERVATIVE DENSITY
+    carbon_foam->AddElement(G4NistManager::Instance()->FindOrBuildElement("C"), 0.97);
+    carbon_foam->AddElement(G4NistManager::Instance()->FindOrBuildElement("H"), 0.03);
+  }
+  return carbon_foam;
+
+}
+
+G4Material* PHG4TTLDetector::GetCarbonFiber()
+{
+  G4Material* carbonfiber = G4Material::GetMaterial("TTLCarbonFiber", false);  // false suppresses warning that material does not exist
+  if (!carbonfiber)
+  {
+    G4double density_carbon_fiber = 1.44 * g / cm3;
+    carbonfiber = new G4Material("TTLCarbonFiber", density_carbon_fiber, 1);
+    carbonfiber->AddElement(G4Element::GetElement("C"), 1);
+  }
+  return carbonfiber;
+}
 
 G4LogicalVolume *
 PHG4TTLDetector::RegisterLogicalVolume(G4LogicalVolume *v)

@@ -100,7 +100,7 @@ void PHG4TTLDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
       visatt->SetColour(G4Colour::Blue());
       // visatt->SetForceSolid(true);
       visatt->SetForceWireframe(true);
-      visatt->SetVisibility(false);
+      // visatt->SetVisibility(false);
     }
     else if (it.second == "Cooling_tube")
     {
@@ -119,7 +119,25 @@ void PHG4TTLDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
     else if (it.second == "Epoxy")
     {
       visatt->SetColour(G4Colour(G4Colour::White()));
-      visatt->SetForceSolid(true);
+      // visatt->SetForceSolid(true);
+      visatt->SetForceWireframe(true);
+    }
+    else if (it.second == "Black")
+    {
+      visatt->SetColour(G4Colour(G4Colour::Black()));
+      // visatt->SetForceSolid(true);
+      visatt->SetForceWireframe(true);
+    }
+    else if (it.second == "Sensor")
+    {
+      visatt->SetVisibility(true);
+      visatt->SetColour(G4Colour(G4Colour::Green()));
+      // visatt->SetForceWireframe(true);
+    }
+    else if (it.second == "ASIC")
+    {
+      visatt->SetVisibility(true);
+      visatt->SetColour(G4Colour(G4Colour::Red()));
       // visatt->SetForceWireframe(true);
     }
     else if (it.second == "SensorStack" || it.second == "SensorLadder" || it.second == "SensorAndReadoutLadder")
@@ -148,6 +166,10 @@ void PHG4TTLDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
       // visatt->SetForceSolid(true);
       visatt->SetForceWireframe(true);
     }
+    else if (it.second == "Invisible")
+    {
+      visatt->SetVisibility(false);
+    }
 
     else if (it.second == "Water_cooling")
     {
@@ -173,6 +195,18 @@ void PHG4TTLDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
     else if (it.second == "Module_Mother")
     {
       visatt->SetVisibility(false);
+    }
+    else if (it.second == "CarbonFoam")
+    {
+      visatt->SetColour(105./255,105./255,94./255, 1.0);
+      visatt->SetVisibility(true);
+      // visatt->SetForceWireframe(true);
+    }
+    else if (it.second == "CarbonHoneycomb")
+    {
+      visatt->SetColour(75./255,75./255,64./255, 1.0);
+      visatt->SetVisibility(true);
+      // visatt->SetForceWireframe(true);
     }
     else if (it.second == "DetectorBox")
     {

@@ -1127,7 +1127,7 @@ G4Material* PHG4BSTDetector::MakeCarbonFoamMaterial_Longeron(){
   if(!carbon_foam){
     G4double density;
     G4int ncomponents;
-    carbon_foam = new G4Material("C_FOAM_BST", density = 0.07 * g / cm3, ncomponents = 2); // VERY CONSERVATIVE DENSITY
+    carbon_foam = new G4Material("C_FOAM_BST_LONGERON", density = 0.07 * g / cm3, ncomponents = 2); // VERY CONSERVATIVE DENSITY
     // carbon_foam = new G4Material("C_FOAM_BST", density = 0.26 * g / cm3, ncomponents = 2); // CONSERVATIVE DENSITY
     // carbon_foam = new G4Material("C_FOAM_BST", density = 0.06 * g / cm3, ncomponents = 2); // LIGHTEST DENSITY
     carbon_foam->AddElement(G4NistManager::Instance()->FindOrBuildElement("C"), 0.97);
@@ -1142,7 +1142,7 @@ G4Material* PHG4BSTDetector::MakeCarbonFoamMaterial_Wheel(){
   if(!carbon_foam){
     G4double density;
     G4int ncomponents;
-    carbon_foam = new G4Material("C_FOAM_BST", density = 0.20 * g / cm3, ncomponents = 2); // VERY CONSERVATIVE DENSITY
+    carbon_foam = new G4Material("C_FOAM_BST_WHEEL", density = 0.20 * g / cm3, ncomponents = 2); // VERY CONSERVATIVE DENSITY
     // carbon_foam = new G4Material("C_FOAM_BST", density = 0.26 * g / cm3, ncomponents = 2); // CONSERVATIVE DENSITY
     // carbon_foam = new G4Material("C_FOAM_BST", density = 0.06 * g / cm3, ncomponents = 2); // LIGHTEST DENSITY
     carbon_foam->AddElement(G4NistManager::Instance()->FindOrBuildElement("C"), 0.97);

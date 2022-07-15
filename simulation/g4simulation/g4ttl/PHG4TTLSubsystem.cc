@@ -104,6 +104,7 @@ PHG4TTLSubsystem::GetDetector(void) const
 void PHG4TTLSubsystem::SetDefaultParameters()
 {
   set_default_int_param("isForward", 1);
+  set_default_int_param("isECCE", 1);
   set_default_double_param("length", 100. * cm);
   set_default_double_param("place_x", 0.);
   set_default_double_param("place_y", 0.);

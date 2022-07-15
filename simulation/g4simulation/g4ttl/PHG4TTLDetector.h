@@ -110,7 +110,9 @@ class PHG4TTLDetector : public PHG4Detector
 
   void BuildForwardTTL(G4LogicalVolume *world);
   void BuildBarrelTTL(G4LogicalVolume *world);
-
+  void BuildBarrelTTLStaves(G4LogicalVolume *world);
+  G4Material *MakeCarbonFoamMaterial();
+  G4Material *GetCarbonFiber();
   typedef std::pair<G4String, G4int> phy_vol_idx_t;
   typedef std::map<phy_vol_idx_t, G4PVPlacement *> map_phy_vol_t;
   map_phy_vol_t map_phy_vol;         //! all physics volume
