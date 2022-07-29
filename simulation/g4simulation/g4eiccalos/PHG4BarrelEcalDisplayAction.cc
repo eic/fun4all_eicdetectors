@@ -47,6 +47,36 @@ void PHG4BarrelEcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
       // visatt->SetForceWireframe(false);
       visatt->SetVisibility(false);
     }
+    else if (it.second == "Family1")
+    {
+      visatt->SetColour(G4Colour::Cyan());
+      visatt->SetForceSolid(true);
+    }
+    else if (it.second == "Family2")
+    {
+      visatt->SetColour(G4Colour::Red());
+      visatt->SetForceSolid(true);
+    }
+    else if (it.second == "Family3")
+    {
+      visatt->SetColour(G4Colour::Yellow());
+      visatt->SetForceSolid(true);
+    }
+    else if (it.second == "Family4")
+    {
+      visatt->SetColour(G4Colour::Magenta());
+      visatt->SetForceSolid(true);
+    }
+    else if (it.second == "Family5")
+    {
+      visatt->SetColour(G4Colour::Green());
+      visatt->SetForceSolid(true);
+    }
+    else if (it.second == "Family6")
+    {
+      visatt->SetColour(G4Colour::Brown());
+      visatt->SetForceSolid(true);
+    }
     else if (it.second == "Block1")
     {
       visatt->SetColour(G4Colour(1., 0.5, 0.));

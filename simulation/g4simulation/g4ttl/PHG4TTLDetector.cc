@@ -156,7 +156,7 @@ void PHG4TTLDetector::BuildBarrelTTLStaves(G4LogicalVolume *logicWorld)
   
   
   G4LogicalVolume *log_carbonhoneycomb_module_mother = new G4LogicalVolume(sol_carbonhoneycomb_module_mother, GetDetectorMaterial("G4_AIR"), "log_carbonhoneycomb_module_mother");
-  G4LogicalVolume *log_carbonhoneycomb_module = new G4LogicalVolume(sol_carbonhoneycomb_module, MakeCarbonFoamMaterial(), "log_carbonhoneycomb_module");
+  G4LogicalVolume *log_carbonhoneycomb_module = new G4LogicalVolume(sol_carbonhoneycomb_module, MakeCarbonHoneyCombMaterial(), "log_carbonhoneycomb_module");
 
   RegisterPhysicalVolume(new G4PVPlacement(0, G4ThreeVector(-(carbonhoneycomb_length+carbonfoam_length)/2 + carbonhoneycomb_length/2, module_height/2-carbonsupport_height/2, 0), log_carbonhoneycomb_module_mother,
                                             "physical_carbonhoneycomb_module_mother", log_module_box, false, 0, overlapcheck_sector),false);
@@ -1274,12 +1274,28 @@ G4Material* PHG4TTLDetector::MakeCarbonFoamMaterial(){
   if(!carbon_foam){
     G4double density;
     G4int ncomponents;
-    carbon_foam = new G4Material("C_FOAM_TTL", density = 0.20 * g / cm3, ncomponents = 2); // VERY CONSERVATIVE DENSITY
-    carbon_foam->AddElement(G4NistManager::Instance()->FindOrBuildElement("C"), 0.97);
-    carbon_foam->AddElement(G4NistManager::Instance()->FindOrBuildElement("H"), 0.03);
+    carbon_foam = new G4Material("C_FOAM_TTL", density = 0.09 * g / cm3, ncomponents = 1); // VERY CONSERVATIVE DENSITY
+    carbon_foam->AddElement(G4NistManager::Instance()->FindOrBuildElement("C"), 1.00);
   }
   return carbon_foam;
+}
 
+
+
+G4Material* PHG4TTLDetector::MakeCarbonHoneyCombMaterial()
+{
+  G4Material* carbonfiber = G4Material::GetMaterial("TTLCarbonHoneyComb", false);  // false suppresses warning that material does not exist
+  if (!carbonfiber)
+  {
+    G4double density_carbon_fiber = 0.03 * g / cm3;
+    carbonfiber = new G4Material("TTLCarbonHoneyComb", density_carbon_fiber, 3);
+    carbonfiber->AddElement(G4Element::GetElement("O"), 0.074);
+    carbonfiber->AddElement(G4Element::GetElement("C"), 0.903);
+    // carbonfiber->AddElement(G4Element::GetElement("C"), 0.870);
+    carbonfiber->AddElement(G4Element::GetElement("H"), 0.023);
+    // carbonfiber->AddElement(G4Element::GetElement("G4_Cl"), 0.033);
+  }
+  return carbonfiber;
 }
 
 G4Material* PHG4TTLDetector::GetCarbonFiber()

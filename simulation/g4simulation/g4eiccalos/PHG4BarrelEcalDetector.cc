@@ -26,9 +26,20 @@
 #include <Geant4/G4VPhysicalVolume.hh>  // for G4VPhysicalVolume
 #include <Geant4/G4TwoVector.hh>  // for G4VPhysicalVolume
 #include <Geant4/G4GenericTrap.hh>  // for G4VPhysicalVolume
+#include <Geant4/G4GDMLReadStructure.hh>  // for G4VPhysicalVolume
+#include <Geant4/G4GDMLParser.hh>  // for G4VPhysicalVolume
+#include <Geant4/G4AssemblyVolume.hh>  // for G4VPhysicalVolume
 
 #include <g4gdml/PHG4GDMLConfig.hh>
 #include <g4gdml/PHG4GDMLUtility.hh>
+
+
+#include <calobase/RawTower.h>               // for RawTower
+#include <calobase/RawTowerDefs.h>           // for convert_name_to_caloid
+#include <calobase/RawTowerGeom.h>           // for RawTowerGeom
+#include <calobase/RawTowerGeomContainer.h>  // for RawTowerGeomContainer
+#include <calobase/RawTowerGeomContainer_Cylinderv1.h>
+#include <calobase/RawTowerGeomv4.h>
 
 #include <cmath>
 #include <cstdlib>
@@ -102,12 +113,113 @@ void PHG4BarrelEcalDetector::ConstructMe(G4LogicalVolume* logicWorld)
     gSystem->Exit(1);
   }
 
-  ParseParametersFromTable();
 
-  PlaceTower(logicWorld);
+  if(m_Params->get_int_param("use_gdml"))
+  {
+    ReadGDMLFileAndPlaceTowers(logicWorld);
+  }
+  else
+  {
+    ParseParametersFromTable();
+    PlaceTower(logicWorld);
+  }
+
   
   return;
 }
+
+int PHG4BarrelEcalDetector::ReadGDMLFileAndPlaceTowers(G4LogicalVolume* sec)
+{
+  unique_ptr<G4GDMLReadStructure> reader(new G4GDMLReadStructure());
+  G4GDMLParser gdmlParser(reader.get());
+  gdmlParser.SetOverlapCheck(OverlapCheck());
+
+  //necessary rearrangement due to incorrect export of tower order from CAD model
+  int etaIDs[] = {15, 51, 50, 16, 17, 49, 18, 48, 19, 47, 20, 46, 45, 21, 22, 44, 24, 43, 23, 42, 25, 41, 26, 40, 27, 39, 28, 29, 37, 30, 36, 31, 35, 38, 32, 34, 33, 52, 14, 53, 10, 13, 54, 12, 55, 11, 56, 57, 9, 58, 8, 59, 7, 60, 6, 62, 5, 61, 4, 63, 64, 3, 2, 65, 1, 66};
+
+  // loop over all 66 towers in eta
+  for(int ieta=0; ieta<66; ieta++) {
+    // std::cout << ieta << "\t loading input " << etaIDs[ieta] << endl;
+
+    // load gdml file for the current tower
+    G4String towerGeometryFile = m_Params->get_string_param("mapping_file") + "1" + std::to_string(etaIDs[ieta]) + ".gdml";
+    gdmlParser.Read(towerGeometryFile, OverlapCheck());
+
+    // get logical volume for current tower
+    G4LogicalVolume* vol = reader->GetVolume("slice1"+ std::to_string(etaIDs[ieta]));
+
+    // in case something goes wrong
+    if (not vol)
+    {
+      cout << "PHG4GDMLDetector::Construct - Fatal Error - failed to find G4LogicalVolume " << towerGeometryFile << " - Print: ";
+      Print();
+      exit(121);
+    }
+
+    // change material of tower to SciGlass
+    vol->SetMaterial(GetSciGlass());
+
+    // for tower family visualization, set different colors for different towers
+    if(ieta>=26 && ieta<=45){
+      m_DisplayAction->AddVolume(vol, "Family1");
+    } else if ((ieta>=20 && ieta<=25) || (ieta>=46 && ieta<=51)){
+      m_DisplayAction->AddVolume(vol, "Family2");
+    } else if ((ieta>=15 && ieta<=19) || (ieta>=52 && ieta<=56)){
+      m_DisplayAction->AddVolume(vol, "Family3");
+    } else if ((ieta>=10 && ieta<=14) || (ieta>=57 && ieta<=61)){
+      m_DisplayAction->AddVolume(vol, "Family4");
+    } else if ((ieta>=5 && ieta<=9) || (ieta>=62 && ieta<=66)){
+      m_DisplayAction->AddVolume(vol, "Family5");
+    } else if ((ieta>=0 && ieta<=4)){
+      m_DisplayAction->AddVolume(vol, "Family6");
+    }
+
+    // make towers active volumes
+    m_ScintiLogicalVolSet.insert(vol);
+
+    // settings for correct arrangement of towers in phi
+    // 24 supermodules, with 15 degrees between centers of neighboring modules
+    // 5 towers per SM, with 2.92 degrees between centers of neighboring towers
+    int ntowphi = 5;
+    float towrot = 2.92/180*M_PI;
+    int nSM = 24;
+    float SMrot = 15./180 * M_PI;
+
+    // loop over supermodules
+    for(int iSM=0; iSM<nSM; iSM++){
+      // loop over towers in supermodules
+      for(int iphi=0; iphi<ntowphi; iphi++){
+        // rotation of towers (based on SM number and tower number)
+        G4RotationMatrix* rotm = new G4RotationMatrix();
+        rotm->rotateZ(iSM*SMrot + towrot * iphi);
+
+        // placement vector at 0,0,0 due to gdml position info in logical volume
+        G4ThreeVector placeVec(0, 0, 0);
+
+        // copynumber for later identification of ieta and iphi for clusterizer
+        int copyno = ((iphi + ntowphi*iSM) << 16) + (ieta);
+        // cout << "\tcopyno: " << copyno << "\tiphi " << iphi + ntowphi*iSM << "\tieta " << ieta << "\tiSM " << iSM << endl;
+
+        // name of tower including SM, ieta and iphi
+        G4String towname = "BEMC_Tower_" + std::to_string(iSM) + "_" + std::to_string(ieta) + "_" + std::to_string(iphi + ntowphi*iSM);
+        // cout << towname << endl;
+
+        // place tower in correct position
+        G4PVPlacement* gdml_phys =
+            new G4PVPlacement(rotm, placeVec,
+                              vol,
+                              towname,
+                              sec, false, copyno, OverlapCheck());
+
+        // not sure if line below is needed
+        gdml_config->exclude_physical_vol(gdml_phys);
+      }
+    }
+  }
+
+  return 0;
+}
+
 
 int PHG4BarrelEcalDetector::PlaceTower(G4LogicalVolume* sec)
 {
@@ -244,8 +356,6 @@ G4Material* PHG4BarrelEcalDetector::GetSciGlass()
     sciglass = new G4Material(matname, density = 4.22 * g / cm3, ncomponents = 4, kStateSolid);
     sciglass->AddElement(ele_Ba, 0.3875);
     sciglass->AddElement(ele_Gd, 0.2146);
-    // sciglass->AddElement(G4Element::GetElement("Ba"), 0.3875);
-    // sciglass->AddElement(G4Element::GetElement("Gd"), 0.2146);
     sciglass->AddElement(G4Element::GetElement("Si"), 0.1369);
     sciglass->AddElement(G4Element::GetElement("O"), 0.2610);
   }

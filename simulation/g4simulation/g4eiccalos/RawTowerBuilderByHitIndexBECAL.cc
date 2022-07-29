@@ -27,6 +27,12 @@
 #include <TRotation.h>
 #include <TVector3.h>
 #include <Geant4/G4Types.hh>            // for G4double, G4int
+#include <Geant4/G4GDMLReadStructure.hh>  // for G4VPhysicalVolume
+#include <Geant4/G4GDMLParser.hh>  // for G4VPhysicalVolume
+#include <Geant4/G4AssemblyVolume.hh>  // for G4VPhysicalVolume
+
+#include <g4gdml/PHG4GDMLConfig.hh>
+#include <g4gdml/PHG4GDMLUtility.hh>
 
 #include <cstdlib>    // for exit
 #include <exception>  // for exception
@@ -48,6 +54,7 @@ RawTowerBuilderByHitIndexBECAL::RawTowerBuilderByHitIndexBECAL(const std::string
   , m_CaloId(RawTowerDefs::NONE)
   , m_Emin(1e-6)
   , m_Tmax(1e5)
+  , m_useGDML(false)
 {
 }
 
@@ -76,7 +83,12 @@ int RawTowerBuilderByHitIndexBECAL::InitRun(PHCompositeNode *topNode)
 
   try
   {
-    ReadGeometryFromTable();
+    if(m_useGDML){
+      ReadGeometryFromGDML();
+    }
+    else{
+      ReadGeometryFromTable();
+    }
   }
   catch (std::exception &e)
   {
@@ -218,6 +230,68 @@ void RawTowerBuilderByHitIndexBECAL::CreateNodes(PHCompositeNode *topNode)
   return;
 }
 
+bool RawTowerBuilderByHitIndexBECAL::ReadGeometryFromGDML()
+{
+  /* read geometry from gdmls */
+
+  unique_ptr<G4GDMLReadStructure> reader(new G4GDMLReadStructure());
+  G4GDMLParser gdmlParser(reader.get());
+
+  //necessary rearrangement due to incorrect export of tower order from CAD model
+  int etaIDs[] = {15, 51, 50, 16, 17, 49, 18, 48, 19, 47, 20, 46, 45, 21, 22, 44, 24, 43, 23, 42, 25, 41, 26, 40, 27, 39, 28, 29, 37, 30, 36, 31, 35, 38, 32, 34, 33, 52, 14, 53, 10, 13, 54, 12, 55, 11, 56, 57, 9, 58, 8, 59, 7, 60, 6, 62, 5, 61, 4, 63, 64, 3, 2, 65, 1, 66};
+
+  // loop over all 66 towers in eta
+  for(int ieta=0; ieta<66; ieta++) {
+    // std::cout << ieta << "\t loading input " << etaIDs[ieta] << endl;
+
+    // load gdml file for the current tower
+    G4String towerGeometryFile = m_MappingTowerFile + "1" + std::to_string(etaIDs[ieta]) + ".gdml";
+    gdmlParser.Read(towerGeometryFile, false);
+
+
+    // get center of tower for geometry
+    G4ThreeVector posvolweighted(0, 0, 0);
+    for(int icorner=0; icorner<8; icorner++){
+      G4ThreeVector posvol = reader->GetPosition("slice1"+ std::to_string(etaIDs[ieta])+"_v"+ std::to_string(icorner));
+      posvolweighted+=posvol;
+    }
+    posvolweighted/=8.0;
+
+    // settings for correct arrangement of towers in phi
+    // 24 supermodules, with 15 degrees between centers of neighboring modules
+    // 5 towers per SM, with 2.92 degrees between centers of neighboring towers
+    int ntowphi = 5;
+    float towrot = 2.92/180*M_PI;
+    int nSM = 24;
+    float SMrot = 15./180 * M_PI;
+
+    // loop over supermodules
+    for(int iSM=0; iSM<nSM; iSM++){
+      // loop over towers in supermodules
+      for(int iphi=0; iphi<ntowphi; iphi++){
+        /* Construct unique Tower ID */
+        unsigned int temp_id = RawTowerDefs::encode_towerid(RawTowerDefs::convert_name_to_caloid("BECAL"), ieta, iphi + ntowphi*iSM);
+
+        TVector3 posTower(posvolweighted.x(), posvolweighted.y(), posvolweighted.z());
+        posTower.RotateZ(iSM*SMrot + towrot * iphi);
+        /* Create tower geometry object */
+        RawTowerGeom *temp_geo = new RawTowerGeomv4(temp_id);
+        temp_geo->set_center_x(posTower.X());
+        temp_geo->set_center_y(posTower.Y());
+        temp_geo->set_center_z(posTower.Z());
+        // cout << "PHG4GDMLDetector::Construct - " << "Tower " << temp_id << " at " << posTower.X() << " " << posTower.Y() << " " << posTower.Z() << endl;
+
+        m_Geoms->add_tower_geometry(temp_geo);
+
+      }
+    }
+  }
+  if (Verbosity())
+  {
+    cout << "size tower geom container:" << m_Geoms->size() << "\t" << m_Detector << endl;
+  }
+  return true;
+}
 bool RawTowerBuilderByHitIndexBECAL::ReadGeometryFromTable()
 {
   /* Stream to read table from file */

@@ -69,6 +69,7 @@ class PHG4BarrelEcalDetector : public PHG4Detector
   G4double support_length;
 
   int PlaceTower(G4LogicalVolume *envelope);
+  int ReadGDMLFileAndPlaceTowers(G4LogicalVolume *envelope);
   int ParseParametersFromTable();
 
   struct towerposition

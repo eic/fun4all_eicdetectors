@@ -154,6 +154,7 @@ void PHG4BarrelEcalSubsystem::SetDefaultParameters()
   set_default_double_param("support_length", 1.5);
   set_default_int_param("useLeadGlass", 0);
   set_default_int_param("projective", 1);
+  set_default_int_param("use_gdml", 0);
   return;
 }
 

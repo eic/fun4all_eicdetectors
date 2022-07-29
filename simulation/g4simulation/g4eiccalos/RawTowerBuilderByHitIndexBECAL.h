@@ -69,6 +69,13 @@ class RawTowerBuilderByHitIndexBECAL : public SubsysReco
   {
     m_Tmax = tmax;
   }
+  /** Set gdml geometry loading.
+   */
+  void
+  set_use_gdml(bool usegdml)
+  {
+    m_useGDML = usegdml;
+  }
  private:
   /** Create nodes for output.
    *
@@ -79,6 +86,7 @@ class RawTowerBuilderByHitIndexBECAL : public SubsysReco
   /** Read geometry information from table stored in text-file
    */
   bool ReadGeometryFromTable();
+  bool ReadGeometryFromGDML();
 
   RawTowerContainer *m_Towers;
   RawTowerGeomContainer *m_Geoms;
@@ -96,6 +104,7 @@ class RawTowerBuilderByHitIndexBECAL : public SubsysReco
 
   double m_Emin;
   double m_Tmax;
+  bool m_useGDML;
 
   std::map<std::string, double> m_GlobalParameterMap;
 };
