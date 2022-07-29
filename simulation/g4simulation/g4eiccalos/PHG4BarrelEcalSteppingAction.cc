@@ -40,12 +40,13 @@
 class PHCompositeNode;
 
 //____________________________________________________________________________..
-PHG4BarrelEcalSteppingAction::PHG4BarrelEcalSteppingAction(PHG4BarrelEcalDetector* detector, const PHParameters* parameters)
+PHG4BarrelEcalSteppingAction::PHG4BarrelEcalSteppingAction(PHG4BarrelEcalDetector* detector, PHParameters* parameters)
   : PHG4SteppingAction(detector->GetName())
   , m_Detector(detector)
   , m_ActiveFlag(parameters->get_int_param("active"))
   , m_AbsorberTruthFlag(parameters->get_int_param("absorberactive"))
   , m_BlackHoleFlag(parameters->get_int_param("blackhole"))
+  , m_Params(parameters)
 {
 }
 
@@ -76,7 +77,10 @@ bool PHG4BarrelEcalSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
   {
     return false;
   }
-  unsigned int icopy = touch->GetVolume(0)->GetCopyNo();
+  unsigned int icopy = touch->GetVolume(1)->GetCopyNo();
+  if(m_Params->get_int_param("use_gdml")){
+    icopy = touch->GetVolume(0)->GetCopyNo();
+  }
   int idx_k = icopy >> 16;
   int idx_j = icopy & 0xFFFF;
 
