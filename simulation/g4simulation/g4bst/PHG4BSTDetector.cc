@@ -10,9 +10,11 @@
 
 #include <Geant4/G4Box.hh>
 #include <Geant4/G4Tubs.hh>
+#include <Geant4/G4Trd.hh>
 #include <Geant4/G4SubtractionSolid.hh>
 #include <Geant4/G4Cons.hh>
 #include <Geant4/G4LogicalVolume.hh>
+#include <Geant4/G4AssemblyVolume.hh>
 #include <Geant4/G4PVPlacement.hh>
 #include <Geant4/G4RotationMatrix.hh>  // for G4RotationMatrix
 #include <Geant4/G4String.hh>              // for G4String
@@ -130,6 +132,701 @@ void PHG4BSTDetector::ConstructMe(G4LogicalVolume* logicWorld)
   }
 
   ConstructBarrel(logicWorld);
+  if(m_Params->get_int_param("use_EPIC_setup")){
+    ConstructStaves(logicWorld);
+    ConstructStavesOuter(logicWorld);
+  }
+  return;
+}
+
+void PHG4BSTDetector::ConstructStavesOuter(G4LogicalVolume* mother){
+  bool overlapcheck_sector = false;
+
+  G4double rCenter = 42.0*cm;//m_Params->get_double_param("rMin");  // center location of Al support plate
+  // G4double det_height = 2.1 * cm;
+  G4double place_z = 0.0;//m_Params->get_double_param("place_z");
+
+  G4double stave_overlap = 4.3 * mm;
+  G4double stave_width = 2*2*18.85* mm - stave_overlap;
+  G4double half_stave_width = 2*18.85* mm;
+  G4double stave_length = 84*cm;//m_Params->get_double_param("length");
+
+  G4AssemblyVolume* asm_module = new G4AssemblyVolume();
+
+
+  G4double carbonfleece_thickness = 20 * um;
+
+  G4double graphite_foil_thickness = 30 * um;
+
+  G4double diameter_coolingtube = 2.67 * mm;
+  G4double wallthickness_coolingtube = 65. * um;
+
+  G4double carbonplate_thickness = 70 * um; // NOTE was 120 um, reduced to meet the new requirement of the BST
+
+  G4double glue_thickness = 100. * um;
+
+  G4double sensor_thickness = 50. * um;
+
+  G4double flex_circuitboard_metal_thickness = 35. * um; // NOTE was 50um, reduced to meet material budget requirements
+  G4double flex_circuitboard_insulation_thickness = 50. * um;
+
+  G4double powerbus_metal_thickness = 50. * um; // NOTE was 200um, reduced to meet material budget requirements
+  G4double powerbus_insulation_thickness = 100. * um;
+
+  G4double half_stave_offset = half_stave_width/2 - stave_overlap/2;
+  G4double half_stave_height_diff = 1.5 * mm;
+
+  G4double stave_carbon_support_triangle_length = 50. * mm;
+  //-------------------------------------------------------------------
+  //NOTE create individual module components
+  //-------------------------------------------------------------------
+
+  //-------------------------------------------------------------------
+  //NOTE support structure M60J fibre, 0.018% X0
+  //-------------------------------------------------------------------
+    G4double carbon_support_rowing_thickness = 50. * um;
+    G4double carbon_support_rowing_depth_end = stave_length;//2. * mm;
+    G4double carbon_support_height = sqrt(2.)*stave_carbon_support_triangle_length;//2. * mm;
+
+
+    G4VSolid *sol_carbon_support_rowing_end = new G4Box("sol_carbon_support_rowing_end",
+                                            0.99*stave_carbon_support_triangle_length / 2,
+                                            carbon_support_rowing_thickness / 2,
+                                            carbon_support_rowing_depth_end / 2);
+    G4LogicalVolume *Log_carbon_support_rowing_end = new G4LogicalVolume(sol_carbon_support_rowing_end, GetCarbonFiber(), "Log_carbon_support_rowing_end");
+    m_DisplayAction->AddVolume(Log_carbon_support_rowing_end, "CarbonFleece");
+
+
+    // place carbon support rowing end pieces
+    G4double carbon_support_y_position =diameter_coolingtube + 2*wallthickness_coolingtube+carbon_support_rowing_thickness/2+half_stave_height_diff/2 ;
+    G4ThreeVector pos_carbon_support_rowing_end1 (-stave_carbon_support_triangle_length / 4, carbon_support_y_position+carbon_support_height/3, 0);
+    G4ThreeVector pos_carbon_support_rowing_end2 (stave_carbon_support_triangle_length / 4, carbon_support_y_position+carbon_support_height/3, 0);
+    G4ThreeVector pos_carbon_support_rowing_end3 (0, carbon_support_y_position, 0);
+    G4RotationMatrix *rot_carbon_support_rowing_end1  = new G4RotationMatrix();
+    rot_carbon_support_rowing_end1->rotateZ(M_PI/3);
+    G4RotationMatrix *rot_carbon_support_rowing_end2  = new G4RotationMatrix();
+    rot_carbon_support_rowing_end2->rotateZ(-M_PI/3);
+    G4RotationMatrix *rot_carbon_support_rowing_end3  = new G4RotationMatrix();
+    asm_module->AddPlacedVolume(Log_carbon_support_rowing_end, pos_carbon_support_rowing_end1 , rot_carbon_support_rowing_end1 );
+    asm_module->AddPlacedVolume(Log_carbon_support_rowing_end, pos_carbon_support_rowing_end2 , rot_carbon_support_rowing_end2 );
+    asm_module->AddPlacedVolume(Log_carbon_support_rowing_end, pos_carbon_support_rowing_end3 , rot_carbon_support_rowing_end3 );
+
+  //-------------------------------------------------------------------
+  //NOTE carbon fleece 20um, 106.80cm X0, 0.002% X0
+  //-------------------------------------------------------------------
+    // needs to be three pieces to go around cooling pipes
+    G4double carbon_fleece_top_width_piece_edge = half_stave_width/3 - (diameter_coolingtube/2 + wallthickness_coolingtube);
+    G4double carbon_fleece_top_width_piece_center = half_stave_width/3 - 2*( diameter_coolingtube/2 + wallthickness_coolingtube);
+    G4VSolid *sol_carbon_fleece_top_edge = new G4Box("sol_carbon_fleece_top_edge",
+                                            carbon_fleece_top_width_piece_edge / 2,
+                                            carbonfleece_thickness / 2,
+                                            stave_length / 2);
+    G4LogicalVolume *Log_carbon_fleece_top_edge = new G4LogicalVolume(sol_carbon_fleece_top_edge, MakeCarbonFleece(), "Log_carbon_fleece_top_edge");
+    m_DisplayAction->AddVolume(Log_carbon_fleece_top_edge, "CarbonFleece");
+
+    G4VSolid *sol_carbon_fleece_top_center = new G4Box("sol_carbon_fleece_top_center",
+                                            carbon_fleece_top_width_piece_center / 2,
+                                            carbonfleece_thickness / 2,
+                                            stave_length / 2);
+    G4LogicalVolume *Log_carbon_fleece_top_center = new G4LogicalVolume(sol_carbon_fleece_top_center, MakeCarbonFleece(), "Log_carbon_fleece_top_center");
+    m_DisplayAction->AddVolume(Log_carbon_fleece_top_center, "CarbonFleece");
+
+    // place carbon plate
+    G4double carbon_fleece_top_y_position = graphite_foil_thickness + carbonfleece_thickness/2 ;
+    G4RotationMatrix *rot_carbon_fleece_top  = new G4RotationMatrix();
+    G4ThreeVector pos_carbon_fleece_top_left1 (-half_stave_offset - half_stave_width/2 + carbon_fleece_top_width_piece_edge/2, carbon_fleece_top_y_position+half_stave_height_diff/2, 0.);
+    G4ThreeVector pos_carbon_fleece_top_left2 (-half_stave_offset, carbon_fleece_top_y_position+half_stave_height_diff/2, 0.);
+    G4ThreeVector pos_carbon_fleece_top_left3 (-half_stave_offset + half_stave_width/2 - carbon_fleece_top_width_piece_edge/2, carbon_fleece_top_y_position+half_stave_height_diff/2, 0.);
+    asm_module->AddPlacedVolume(Log_carbon_fleece_top_edge, pos_carbon_fleece_top_left1 , rot_carbon_fleece_top );
+    asm_module->AddPlacedVolume(Log_carbon_fleece_top_center, pos_carbon_fleece_top_left2 , rot_carbon_fleece_top );
+    asm_module->AddPlacedVolume(Log_carbon_fleece_top_edge, pos_carbon_fleece_top_left3 , rot_carbon_fleece_top );
+
+    G4ThreeVector pos_carbon_fleece_top_right1 (half_stave_offset-half_stave_width/2 + carbon_fleece_top_width_piece_edge/2 , carbon_fleece_top_y_position-half_stave_height_diff/2, 0.);
+    G4ThreeVector pos_carbon_fleece_top_right2 (half_stave_offset, carbon_fleece_top_y_position-half_stave_height_diff/2, 0.);
+    G4ThreeVector pos_carbon_fleece_top_right3 (half_stave_offset + half_stave_width/2 - carbon_fleece_top_width_piece_edge/2, carbon_fleece_top_y_position-half_stave_height_diff/2, 0.);
+    asm_module->AddPlacedVolume(Log_carbon_fleece_top_edge, pos_carbon_fleece_top_right1 , rot_carbon_fleece_top );
+    asm_module->AddPlacedVolume(Log_carbon_fleece_top_center, pos_carbon_fleece_top_right2 , rot_carbon_fleece_top );
+    asm_module->AddPlacedVolume(Log_carbon_fleece_top_edge, pos_carbon_fleece_top_right3 , rot_carbon_fleece_top );
+
+  //-------------------------------------------------------------------
+  //NOTE graphite foil 30um, 26.56cm X0, 0.011% X0
+  //-------------------------------------------------------------------
+    // needs to be three pieces to go around cooling pipes
+    G4double graphite_foil_width_piece_edge = half_stave_width/3 - (diameter_coolingtube/2 + wallthickness_coolingtube);
+    G4double graphite_foil_width_piece_center = half_stave_width/3 - 2*( diameter_coolingtube/2 + wallthickness_coolingtube);
+    G4VSolid *sol_graphite_foil_edge = new G4Box("sol_graphite_foil_edge",
+                                            graphite_foil_width_piece_edge / 2,
+                                            graphite_foil_thickness / 2,
+                                            stave_length / 2);
+    G4LogicalVolume *Log_graphite_foil_edge = new G4LogicalVolume(sol_graphite_foil_edge, MakeCarbonFleece(), "Log_graphite_foil_edge");
+    m_DisplayAction->AddVolume(Log_graphite_foil_edge, "GraphiteFoil");
+
+    G4VSolid *sol_graphite_foil_center = new G4Box("sol_graphite_foil_center",
+                                            graphite_foil_width_piece_center / 2,
+                                            graphite_foil_thickness / 2,
+                                            stave_length / 2);
+    G4LogicalVolume *Log_graphite_foil_center = new G4LogicalVolume(sol_graphite_foil_center, MakeCarbonFleece(), "Log_graphite_foil_center");
+    m_DisplayAction->AddVolume(Log_graphite_foil_center, "GraphiteFoil");
+
+    // place carbon plate
+    G4double graphite_foil_y_position = graphite_foil_thickness/2;
+    G4RotationMatrix *rot_graphite_foil  = new G4RotationMatrix();
+    G4ThreeVector pos_graphite_foil_left1 (-half_stave_offset - half_stave_width/2 + graphite_foil_width_piece_edge/2 , graphite_foil_y_position +half_stave_height_diff/2, 0);
+    G4ThreeVector pos_graphite_foil_left2 (-half_stave_offset , graphite_foil_y_position +half_stave_height_diff/2, 0);
+    G4ThreeVector pos_graphite_foil_left3 (-half_stave_offset + half_stave_width/2 - graphite_foil_width_piece_edge/2, graphite_foil_y_position +half_stave_height_diff/2, 0);
+    asm_module->AddPlacedVolume(Log_graphite_foil_edge, pos_graphite_foil_left1 , rot_graphite_foil );
+    asm_module->AddPlacedVolume(Log_graphite_foil_center, pos_graphite_foil_left2 , rot_graphite_foil );
+    asm_module->AddPlacedVolume(Log_graphite_foil_edge, pos_graphite_foil_left3 , rot_graphite_foil );
+
+    G4ThreeVector pos_graphite_foil_right1 (half_stave_offset-half_stave_width/2 + graphite_foil_width_piece_edge/2 , graphite_foil_y_position -half_stave_height_diff/2, 0);
+    G4ThreeVector pos_graphite_foil_right2 (half_stave_offset, graphite_foil_y_position -half_stave_height_diff/2, 0);
+    G4ThreeVector pos_graphite_foil_right3 (half_stave_offset+half_stave_width/2 - graphite_foil_width_piece_edge/2, graphite_foil_y_position -half_stave_height_diff/2, 0);
+    asm_module->AddPlacedVolume(Log_graphite_foil_edge, pos_graphite_foil_right1 , rot_graphite_foil );
+    asm_module->AddPlacedVolume(Log_graphite_foil_center, pos_graphite_foil_right2 , rot_graphite_foil );
+    asm_module->AddPlacedVolume(Log_graphite_foil_edge, pos_graphite_foil_right3 , rot_graphite_foil );
+
+    //TODO add part around cooling pipe
+
+  //-------------------------------------------------------------------
+  //NOTE Cooling pipes (Kapton)
+  //-------------------------------------------------------------------
+    G4VSolid *sol_cooling_tube = new G4Tubs("sol_cooling_tube_tmp",
+                                            (diameter_coolingtube) / 2,
+                                            (diameter_coolingtube + 2*wallthickness_coolingtube) / 2,
+                                            (stave_length - 0.2 * mm) / 2,
+                                            0.,2*M_PI);
+
+    G4LogicalVolume *Log_cooling_tube = new G4LogicalVolume(sol_cooling_tube, GetKapton(), "Log_cooling_tube");
+    m_DisplayAction->AddVolume(Log_cooling_tube, "Kapton");
+
+    G4VSolid *sol_water_cooling = new G4Tubs("sol_water_cooling",
+                                            0,
+                                            0.99*(diameter_coolingtube) / 2,
+                                            (stave_length - 0.2 * mm) / 2,
+                                            0.,2*M_PI);
+    G4LogicalVolume *Log_water_cooling = new G4LogicalVolume(sol_water_cooling, GetDetectorMaterial("G4_WATER"), "Log_water_cooling");
+    m_DisplayAction->AddVolume(Log_water_cooling, "Water_cooling");
+
+    // two pipes per stave at +-2.5mm from center
+    G4double cooling_tube_y_position = diameter_coolingtube/2 + wallthickness_coolingtube;
+    G4RotationMatrix *rot_cooling_tube = new G4RotationMatrix();
+    G4ThreeVector pos_cooling_tube_left1(-half_stave_offset-half_stave_width/6, cooling_tube_y_position +half_stave_height_diff/2, 0);
+    G4ThreeVector pos_cooling_tube_left2(-half_stave_offset+half_stave_width/6, cooling_tube_y_position +half_stave_height_diff/2, 0);
+    asm_module->AddPlacedVolume(Log_cooling_tube, pos_cooling_tube_left1, rot_cooling_tube);
+    asm_module->AddPlacedVolume(Log_water_cooling, pos_cooling_tube_left1, rot_cooling_tube);
+    asm_module->AddPlacedVolume(Log_cooling_tube, pos_cooling_tube_left2, rot_cooling_tube);
+    asm_module->AddPlacedVolume(Log_water_cooling, pos_cooling_tube_left2, rot_cooling_tube);
+    G4ThreeVector pos_cooling_tube_right1(half_stave_offset-half_stave_width/6, cooling_tube_y_position-half_stave_height_diff/2, 0);
+    G4ThreeVector pos_cooling_tube_right2(half_stave_offset+half_stave_width/6, cooling_tube_y_position-half_stave_height_diff/2, 0);
+    asm_module->AddPlacedVolume(Log_cooling_tube, pos_cooling_tube_right1, rot_cooling_tube);
+    asm_module->AddPlacedVolume(Log_water_cooling, pos_cooling_tube_right1, rot_cooling_tube);
+    asm_module->AddPlacedVolume(Log_cooling_tube, pos_cooling_tube_right2, rot_cooling_tube);
+    asm_module->AddPlacedVolume(Log_water_cooling, pos_cooling_tube_right2, rot_cooling_tube);
+
+  //-------------------------------------------------------------------
+  //NOTE Plate K13 D2U fibre 120um (Carbon plate), 26.08cm X0, 0.027% X0
+  //-------------------------------------------------------------------
+    G4VSolid *sol_carbonplate_stave = new G4Box("sol_carbonplate_stave",
+                                            half_stave_width / 2,
+                                            carbonplate_thickness / 2,
+                                            stave_length / 2);
+    G4LogicalVolume *Log_carbonplate_stave = new G4LogicalVolume(sol_carbonplate_stave, GetCarbonFiber(), "Log_carbonplate_stave");
+    m_DisplayAction->AddVolume(Log_carbonplate_stave, "CarbonPlate");
+
+    // place carbon plate
+    G4double carbonplate_stave_y_position = -carbonplate_thickness/2;
+    G4RotationMatrix *rot_carbonplate_stave  = new G4RotationMatrix();
+    G4ThreeVector pos_carbonplate_stave_left (-half_stave_offset, carbonplate_stave_y_position+half_stave_height_diff/2, 0);
+    asm_module->AddPlacedVolume(Log_carbonplate_stave, pos_carbonplate_stave_left , rot_carbonplate_stave );
+    G4ThreeVector pos_carbonplate_stave_right (half_stave_offset, carbonplate_stave_y_position-half_stave_height_diff/2, 0);
+    asm_module->AddPlacedVolume(Log_carbonplate_stave, pos_carbonplate_stave_right , rot_carbonplate_stave );
+
+  //-------------------------------------------------------------------
+  //NOTE carbon fleece 20um, 106.80cm X0, 0.002% X0
+  //-------------------------------------------------------------------
+    G4VSolid *sol_carbonfleece_bottom = new G4Box("sol_carbonfleece_bottom",
+                                            half_stave_width / 2,
+                                            carbonfleece_thickness / 2,
+                                            stave_length / 2);
+    G4LogicalVolume *Log_carbonfleece_bottom = new G4LogicalVolume(sol_carbonfleece_bottom, MakeCarbonFleece(), "Log_carbonfleece_bottom");
+    m_DisplayAction->AddVolume(Log_carbonfleece_bottom, "CarbonFleece");
+
+    // place carbon plate
+    G4double carbonfleece_bottom_y_position = -carbonplate_thickness - carbonfleece_thickness/2;
+    G4RotationMatrix *rot_carbonfleece_bottom  = new G4RotationMatrix();
+    G4ThreeVector pos_carbonfleece_bottom_left (-half_stave_offset, carbonfleece_bottom_y_position+half_stave_height_diff/2 , 0);
+    asm_module->AddPlacedVolume(Log_carbonfleece_bottom, pos_carbonfleece_bottom_left , rot_carbonfleece_bottom );
+    G4ThreeVector pos_carbonfleece_bottom_right (half_stave_offset, carbonfleece_bottom_y_position-half_stave_height_diff/2 , 0);
+    asm_module->AddPlacedVolume(Log_carbonfleece_bottom, pos_carbonfleece_bottom_right , rot_carbonfleece_bottom );
+
+  //-------------------------------------------------------------------
+  //NOTE Glue Eccobond45 100um, 44.37cm X0, 0.023% X0
+  //-------------------------------------------------------------------
+    G4VSolid *sol_glue_layer = new G4Box("sol_glue_layer",
+                                            half_stave_width / 2,
+                                            glue_thickness / 2,
+                                            stave_length / 2);
+    G4LogicalVolume *Log_glue_layer = new G4LogicalVolume(sol_glue_layer, MakeGlue(), "Log_glue_layer");
+    m_DisplayAction->AddVolume(Log_glue_layer, "Glue");
+
+    // place carbon plate
+    G4double glue_layer_y_position = -carbonplate_thickness - carbonfleece_thickness - glue_thickness/2;
+    G4RotationMatrix *rot_glue_layer  = new G4RotationMatrix();
+    G4ThreeVector pos_glue_layer_left (-half_stave_offset, glue_layer_y_position +half_stave_height_diff/2, 0);
+    asm_module->AddPlacedVolume(Log_glue_layer, pos_glue_layer_left , rot_glue_layer );
+    G4ThreeVector pos_glue_layer_right (half_stave_offset, glue_layer_y_position -half_stave_height_diff/2, 0);
+    asm_module->AddPlacedVolume(Log_glue_layer, pos_glue_layer_right , rot_glue_layer );
+
+  //-------------------------------------------------------------------
+  //NOTE Pixel chip 50um G4_Si
+  //-------------------------------------------------------------------
+    G4VSolid *sol_sensor = new G4Box("BST_4_sol_currentSagittaLayer_sensor",
+                                            half_stave_width / 2,
+                                            sensor_thickness / 2,
+                                            stave_length / 2);
+    G4LogicalVolume *Log_sensor = new G4LogicalVolume(sol_sensor, GetDetectorMaterial("G4_Si"), "BST_4_Log_currentSagittaLayer_sensor");
+    m_DisplayAction->AddVolume(Log_sensor, "Sensor");
+
+    // place carbon plate
+    G4double sensor_y_position = -carbonplate_thickness - carbonfleece_thickness - glue_thickness - sensor_thickness/2;
+    G4RotationMatrix *rot_sensor  = new G4RotationMatrix();
+    G4ThreeVector pos_sensor_left (-half_stave_offset, sensor_y_position +half_stave_height_diff/2, 0);
+    asm_module->AddPlacedVolume(Log_sensor, pos_sensor_left , rot_sensor );
+    G4ThreeVector pos_sensor_right (half_stave_offset, sensor_y_position -half_stave_height_diff/2, 0);
+    asm_module->AddPlacedVolume(Log_sensor, pos_sensor_right , rot_sensor );
+
+  //-------------------------------------------------------------------
+  //NOTE FPC Kapton Insulation layer 50um
+  //-------------------------------------------------------------------
+    G4VSolid *sol_flex_circuitboard_insul_top = new G4Box("sol_flex_circuitboard_insul_top",
+                                            half_stave_width / 2,
+                                            flex_circuitboard_insulation_thickness / 2,
+                                            stave_length / 2);
+    G4LogicalVolume *Log_flex_circuitboard_insul_top = new G4LogicalVolume(sol_flex_circuitboard_insul_top, GetKapton(), "Log_flex_circuitboard_insul_top");
+    m_DisplayAction->AddVolume(Log_flex_circuitboard_insul_top, "Kapton");
+
+    // place carbon plate
+    G4double flex_circuitboard_insul_top_y_position = -carbonplate_thickness - carbonfleece_thickness - glue_thickness - sensor_thickness - flex_circuitboard_insulation_thickness/2;
+    G4RotationMatrix *rot_flex_circuitboard_insul_top  = new G4RotationMatrix();
+    G4ThreeVector pos_flex_circuitboard_insul_top_left (-half_stave_offset, flex_circuitboard_insul_top_y_position +half_stave_height_diff/2, 0);
+    asm_module->AddPlacedVolume(Log_flex_circuitboard_insul_top, pos_flex_circuitboard_insul_top_left , rot_flex_circuitboard_insul_top );
+    G4ThreeVector pos_flex_circuitboard_insul_top_right (half_stave_offset, flex_circuitboard_insul_top_y_position -half_stave_height_diff/2, 0);
+    asm_module->AddPlacedVolume(Log_flex_circuitboard_insul_top, pos_flex_circuitboard_insul_top_right , rot_flex_circuitboard_insul_top );
+
+  //-------------------------------------------------------------------
+  //NOTE FPC Metal 50um Al
+  //-------------------------------------------------------------------
+    G4VSolid *sol_flex_circuitboard_metal = new G4Box("sol_flex_circuitboard_metal",
+                                            half_stave_width / 2,
+                                            flex_circuitboard_metal_thickness / 2,
+                                            stave_length / 2);
+    G4LogicalVolume *Log_flex_circuitboard_metal = new G4LogicalVolume(sol_flex_circuitboard_metal, GetDetectorMaterial("G4_Al"), "Log_flex_circuitboard_metal");
+    m_DisplayAction->AddVolume(Log_flex_circuitboard_metal, "CircuitBoard");
+
+    // place carbon plate
+    G4double flex_circuitboard_metal_y_position = -carbonplate_thickness - carbonfleece_thickness - glue_thickness - sensor_thickness - flex_circuitboard_insulation_thickness - flex_circuitboard_metal_thickness/2;
+    G4RotationMatrix *rot_flex_circuitboard_metal  = new G4RotationMatrix();
+    G4ThreeVector pos_flex_circuitboard_metal_left (-half_stave_offset, flex_circuitboard_metal_y_position +half_stave_height_diff/2 , 0);
+    asm_module->AddPlacedVolume(Log_flex_circuitboard_metal, pos_flex_circuitboard_metal_left , rot_flex_circuitboard_metal );
+    G4ThreeVector pos_flex_circuitboard_metal_right (half_stave_offset, flex_circuitboard_metal_y_position -half_stave_height_diff/2, 0);
+    asm_module->AddPlacedVolume(Log_flex_circuitboard_metal, pos_flex_circuitboard_metal_right , rot_flex_circuitboard_metal );
+
+  //-------------------------------------------------------------------
+  //NOTE FPC Kapton Insulation layer 50um
+  //-------------------------------------------------------------------
+    G4VSolid *sol_flex_circuitboard_insul_bottom = new G4Box("sol_flex_circuitboard_insul_bottom",
+                                            half_stave_width / 2,
+                                            flex_circuitboard_insulation_thickness / 2,
+                                            stave_length / 2);
+    G4LogicalVolume *Log_flex_circuitboard_insul_bottom = new G4LogicalVolume(sol_flex_circuitboard_insul_bottom, GetKapton(), "Log_flex_circuitboard_insul_bottom");
+    m_DisplayAction->AddVolume(Log_flex_circuitboard_insul_bottom, "Kapton");
+
+    // place carbon plate
+    G4double flex_circuitboard_insul_bottom_y_position = -carbonplate_thickness - carbonfleece_thickness - glue_thickness - sensor_thickness - flex_circuitboard_insulation_thickness -flex_circuitboard_metal_thickness - flex_circuitboard_insulation_thickness/2;
+    G4RotationMatrix *rot_flex_circuitboard_insul_bottom  = new G4RotationMatrix();
+    G4ThreeVector pos_flex_circuitboard_insul_bottom_left (-half_stave_offset, flex_circuitboard_insul_bottom_y_position+half_stave_height_diff/2, 0);
+    asm_module->AddPlacedVolume(Log_flex_circuitboard_insul_bottom, pos_flex_circuitboard_insul_bottom_left , rot_flex_circuitboard_insul_bottom );
+    G4ThreeVector pos_flex_circuitboard_insul_bottom_right (half_stave_offset, flex_circuitboard_insul_bottom_y_position-half_stave_height_diff/2, 0);
+    asm_module->AddPlacedVolume(Log_flex_circuitboard_insul_bottom, pos_flex_circuitboard_insul_bottom_right , rot_flex_circuitboard_insul_bottom );
+
+
+
+  //-------------------------------------------------------------------
+  //NOTE Glue Eccobond45 100um, 44.37cm X0, 0.023% X0
+  //-------------------------------------------------------------------
+    G4VSolid *sol_glue_layer_powerbus = new G4Box("sol_glue_layer_powerbus",
+                                            half_stave_width / 2,
+                                            glue_thickness / 2,
+                                            stave_length / 2);
+    G4LogicalVolume *Log_glue_layer_powerbus = new G4LogicalVolume(sol_glue_layer_powerbus, MakeGlue(), "Log_glue_layer_powerbus");
+    m_DisplayAction->AddVolume(Log_glue_layer_powerbus, "Glue");
+
+    // place carbon plate
+    G4double glue_layer_powerbus_y_position = -carbonplate_thickness - carbonfleece_thickness - glue_thickness - sensor_thickness - flex_circuitboard_insulation_thickness -flex_circuitboard_metal_thickness - flex_circuitboard_insulation_thickness - glue_thickness / 2;
+    G4RotationMatrix *rot_glue_layer_powerbus  = new G4RotationMatrix();
+    G4ThreeVector pos_glue_layer_powerbus_left (-half_stave_offset, glue_layer_powerbus_y_position+half_stave_height_diff/2, 0);
+    asm_module->AddPlacedVolume(Log_glue_layer_powerbus, pos_glue_layer_powerbus_left , rot_glue_layer_powerbus );
+    G4ThreeVector pos_glue_layer_powerbus_right (half_stave_offset, glue_layer_powerbus_y_position-half_stave_height_diff/2, 0);
+    asm_module->AddPlacedVolume(Log_glue_layer_powerbus, pos_glue_layer_powerbus_right , rot_glue_layer_powerbus );
+
+
+  //-------------------------------------------------------------------
+  //NOTE FPC Kapton Insulation layer 50um
+  //-------------------------------------------------------------------
+    G4VSolid *sol_powerbus_insul_top = new G4Box("sol_powerbus_insul_top",
+                                            half_stave_width / 2,
+                                            powerbus_insulation_thickness / 2,
+                                            stave_length / 2);
+    G4LogicalVolume *Log_powerbus_insul_top = new G4LogicalVolume(sol_powerbus_insul_top, GetKapton(), "Log_powerbus_insul_top");
+    m_DisplayAction->AddVolume(Log_powerbus_insul_top, "Kapton");
+
+    // place carbon plate
+    G4double powerbus_insul_top_y_position = -carbonplate_thickness - carbonfleece_thickness - glue_thickness - sensor_thickness - flex_circuitboard_insulation_thickness -flex_circuitboard_metal_thickness - flex_circuitboard_insulation_thickness - glue_thickness - powerbus_insulation_thickness/ 2;
+    G4RotationMatrix *rot_powerbus_insul_top  = new G4RotationMatrix();
+    G4ThreeVector pos_powerbus_insul_top_left (-half_stave_offset, powerbus_insul_top_y_position + half_stave_height_diff/2, 0);
+    asm_module->AddPlacedVolume(Log_powerbus_insul_top, pos_powerbus_insul_top_left , rot_powerbus_insul_top );
+    G4ThreeVector pos_powerbus_insul_top_right (half_stave_offset, powerbus_insul_top_y_position - half_stave_height_diff/2, 0);
+    asm_module->AddPlacedVolume(Log_powerbus_insul_top, pos_powerbus_insul_top_right , rot_powerbus_insul_top );
+
+  //-------------------------------------------------------------------
+  //NOTE FPC Metal 50um Al
+  //-------------------------------------------------------------------
+    G4VSolid *sol_powerbus_metal = new G4Box("sol_powerbus_metal",
+                                            half_stave_width / 2,
+                                            powerbus_metal_thickness / 2,
+                                            stave_length / 2);
+    G4LogicalVolume *Log_powerbus_metal = new G4LogicalVolume(sol_powerbus_metal, GetDetectorMaterial("G4_Al"), "Log_powerbus_metal");
+    m_DisplayAction->AddVolume(Log_powerbus_metal, "CircuitBoard");
+
+    // place carbon plate
+    G4double powerbus_metal_y_position = -carbonplate_thickness - carbonfleece_thickness - glue_thickness - sensor_thickness - flex_circuitboard_insulation_thickness -flex_circuitboard_metal_thickness - flex_circuitboard_insulation_thickness - glue_thickness - powerbus_insulation_thickness - powerbus_metal_thickness/ 2;
+    G4RotationMatrix *rot_powerbus_metal  = new G4RotationMatrix();
+    G4ThreeVector pos_powerbus_metal_left (-half_stave_offset, powerbus_metal_y_position+half_stave_height_diff/2 , 0);
+    asm_module->AddPlacedVolume(Log_powerbus_metal, pos_powerbus_metal_left , rot_powerbus_metal );
+    G4ThreeVector pos_powerbus_metal_right (half_stave_offset, powerbus_metal_y_position-half_stave_height_diff/2, 0);
+    asm_module->AddPlacedVolume(Log_powerbus_metal, pos_powerbus_metal_right , rot_powerbus_metal );
+
+  //-------------------------------------------------------------------
+  //NOTE FPC Kapton Insulation layer 50um
+  //-------------------------------------------------------------------
+    G4VSolid *sol_powerbus_insul_bottom = new G4Box("sol_powerbus_insul_bottom",
+                                            half_stave_width / 2,
+                                            powerbus_insulation_thickness / 2,
+                                            stave_length / 2);
+    G4LogicalVolume *Log_powerbus_insul_bottom = new G4LogicalVolume(sol_powerbus_insul_bottom, GetKapton(), "Log_powerbus_insul_bottom");
+    m_DisplayAction->AddVolume(Log_powerbus_insul_bottom, "Kapton");
+
+    // place carbon plate
+    G4double powerbus_insul_bottom_y_position = -carbonplate_thickness - carbonfleece_thickness - glue_thickness - sensor_thickness - flex_circuitboard_insulation_thickness -flex_circuitboard_metal_thickness - flex_circuitboard_insulation_thickness - glue_thickness - powerbus_insulation_thickness - powerbus_metal_thickness - powerbus_insulation_thickness/ 2;
+    G4RotationMatrix *rot_powerbus_insul_bottom  = new G4RotationMatrix();
+    G4ThreeVector pos_powerbus_insul_bottom_left (-half_stave_offset, powerbus_insul_bottom_y_position+half_stave_height_diff/2, 0);
+    asm_module->AddPlacedVolume(Log_powerbus_insul_bottom, pos_powerbus_insul_bottom_left , rot_powerbus_insul_bottom );
+    G4ThreeVector pos_powerbus_insul_bottom_right (half_stave_offset, powerbus_insul_bottom_y_position-half_stave_height_diff/2, 0);
+    asm_module->AddPlacedVolume(Log_powerbus_insul_bottom, pos_powerbus_insul_bottom_right , rot_powerbus_insul_bottom );
+
+
+
+  //NOTE place staves in full azimuth
+  int nAzimuth = 2 * M_PI * rCenter / (stave_width * cos(0 * deg) - stave_overlap);
+  std::cout << "nAzimuth in outer BST staves = " << nAzimuth << std::endl;
+  for(int i = 0; i < nAzimuth; i++)
+  // for(int i = 0; i < 3; i++)
+  {
+    G4RotationMatrix *rot_module = new G4RotationMatrix();
+    rot_module->rotateZ(- i * 360.0 * deg / nAzimuth + 0.0 * deg);
+    G4double phi = i * 2 * M_PI / nAzimuth;
+    G4ThreeVector detzvec(rCenter * sin(phi), rCenter * cos(phi), place_z);
+    asm_module->MakeImprint(mother, detzvec, rot_module, i, overlapcheck_sector);
+  }
+  return;
+}
+
+void PHG4BSTDetector::ConstructStaves(G4LogicalVolume* mother){
+  bool overlapcheck_sector = false;
+
+  G4double rCenter = 27.0*cm;//m_Params->get_double_param("rMin");  // center location of Al support plate
+  G4double place_z = 0.0;//m_Params->get_double_param("place_z");
+
+  G4double stave_overlap = 2.23 * mm;
+  G4double stave_width = 18.85 * mm;
+  G4double stave_length = 54*cm;//m_Params->get_double_param("length");
+  G4double stave_height = 4.0*mm;//m_Params->get_double_param("length");
+
+  G4AssemblyVolume* asm_module = new G4AssemblyVolume();
+
+
+  G4double carbonfleece_thickness = 20 * um;
+
+  G4double graphite_foil_thickness = 30 * um;
+
+  G4double diameter_coolingtube = 1.024 * mm;
+  G4double wallthickness_coolingtube = 25. * um;
+
+  G4double glue_thickness = 100. * um;
+
+  G4double sensor_thickness = 50. * um;
+
+  G4double flex_circuitboard_metal_thickness = 25. * um; // NOTE was 50um, changed to meet material requirements
+  G4double flex_circuitboard_insulation_thickness = 50. * um;
+
+  //-------------------------------------------------------------------
+  //NOTE create individual module components
+  //-------------------------------------------------------------------
+
+  //-------------------------------------------------------------------
+  //NOTE support structure M60J fibre, 0.018% X0
+  //-------------------------------------------------------------------
+    G4double carbon_support_rod_diam = 250. * um;
+    G4double carbon_support_rowing_thickness = 50. * um;
+    G4double carbon_support_rowing_depth_end = stave_length;//2. * mm;
+
+    G4VSolid *sol_carbon_support_rod = new G4Tubs("sol_carbon_support_rod_tmp",
+                                            0.0,
+                                            carbon_support_rod_diam / 2,
+                                            (stave_length - 0.2 * mm) / 2,
+                                            0.,2*M_PI);
+    G4LogicalVolume *Log_carbon_support_rod = new G4LogicalVolume(sol_carbon_support_rod, GetCarbonFiber(), "Log_carbon_support_rod");
+    m_DisplayAction->AddVolume(Log_carbon_support_rod, "CarbonFleece");
+
+    // place carbon support rod
+    G4ThreeVector pos_carbon_support_rod (0, stave_height, 0);
+    G4RotationMatrix *rot_carbon_support_rod  = new G4RotationMatrix();
+    asm_module->AddPlacedVolume(Log_carbon_support_rod, pos_carbon_support_rod , rot_carbon_support_rod );
+
+
+    G4double supportbridge_length = 0.95*sqrt(pow(stave_width / 2,2) + pow(stave_height,2));
+    G4VSolid *sol_carbon_support_rowing_end = new G4Box("sol_carbon_support_rowing_end",
+                                            supportbridge_length / 2,
+                                            carbon_support_rowing_thickness / 2,
+                                            carbon_support_rowing_depth_end / 2);
+    G4LogicalVolume *Log_carbon_support_rowing_end = new G4LogicalVolume(sol_carbon_support_rowing_end, GetCarbonFiber(), "Log_carbon_support_rowing_end");
+    m_DisplayAction->AddVolume(Log_carbon_support_rowing_end, "CarbonFleece");
+
+
+    // place carbon support rowing end pieces
+    G4ThreeVector pos_carbon_support_rowing_end1 (-stave_width / 4, stave_height/2+carbon_support_rod_diam/2, 0);
+    G4ThreeVector pos_carbon_support_rowing_end2 (stave_width / 4, stave_height/2+carbon_support_rod_diam/2, 0);
+    // G4ThreeVector pos_carbon_support_rowing_end1 (-stave_width / 4, stave_height/2+carbon_support_rod_diam/2, stave_length/2-carbon_support_rowing_depth_end/2);
+    // G4ThreeVector pos_carbon_support_rowing_end2 (stave_width / 4, stave_height/2+carbon_support_rod_diam/2, stave_length/2-carbon_support_rowing_depth_end/2);
+    // G4ThreeVector pos_carbon_support_rowing_end3 (-stave_width / 4, stave_height/2+carbon_support_rod_diam/2, -stave_length/2+carbon_support_rowing_depth_end/2);
+    // G4ThreeVector pos_carbon_support_rowing_end4 (stave_width / 4, stave_height/2+carbon_support_rod_diam/2, -stave_length/2+carbon_support_rowing_depth_end/2);
+    G4RotationMatrix *rot_carbon_support_rowing_end1  = new G4RotationMatrix();
+    rot_carbon_support_rowing_end1->rotateZ(asin(stave_height/supportbridge_length));
+    G4RotationMatrix *rot_carbon_support_rowing_end2  = new G4RotationMatrix();
+    rot_carbon_support_rowing_end2->rotateZ(-asin(stave_height/supportbridge_length));
+    asm_module->AddPlacedVolume(Log_carbon_support_rowing_end, pos_carbon_support_rowing_end1 , rot_carbon_support_rowing_end1 );
+    asm_module->AddPlacedVolume(Log_carbon_support_rowing_end, pos_carbon_support_rowing_end2 , rot_carbon_support_rowing_end2 );
+    // asm_module->AddPlacedVolume(Log_carbon_support_rowing_end, pos_carbon_support_rowing_end3 , rot_carbon_support_rowing_end1 );
+    // asm_module->AddPlacedVolume(Log_carbon_support_rowing_end, pos_carbon_support_rowing_end4 , rot_carbon_support_rowing_end2 );
+
+  //-------------------------------------------------------------------
+  //NOTE carbon fleece 20um, 106.80cm X0, 0.002% X0
+  //-------------------------------------------------------------------
+    // needs to be three pieces to go around cooling pipes
+    G4double carbon_fleece_top_width_piece_edge = stave_width/3 - (diameter_coolingtube/2 + wallthickness_coolingtube);
+    G4double carbon_fleece_top_width_piece_center = stave_width/3 - 2*( diameter_coolingtube/2 + wallthickness_coolingtube);
+    G4VSolid *sol_carbon_fleece_top_edge = new G4Box("sol_carbon_fleece_top_edge",
+                                            carbon_fleece_top_width_piece_edge / 2,
+                                            carbonfleece_thickness / 2,
+                                            stave_length / 2);
+    G4LogicalVolume *Log_carbon_fleece_top_edge = new G4LogicalVolume(sol_carbon_fleece_top_edge, MakeCarbonFleece(), "Log_carbon_fleece_top_edge");
+    m_DisplayAction->AddVolume(Log_carbon_fleece_top_edge, "CarbonFleece");
+
+    G4VSolid *sol_carbon_fleece_top_center = new G4Box("sol_carbon_fleece_top_center",
+                                            carbon_fleece_top_width_piece_center / 2,
+                                            carbonfleece_thickness / 2,
+                                            stave_length / 2);
+    G4LogicalVolume *Log_carbon_fleece_top_center = new G4LogicalVolume(sol_carbon_fleece_top_center, MakeCarbonFleece(), "Log_carbon_fleece_top_center");
+    m_DisplayAction->AddVolume(Log_carbon_fleece_top_center, "CarbonFleece");
+
+    // place carbon plate
+    G4ThreeVector pos_carbon_fleece_top1 (-stave_width/2 + carbon_fleece_top_width_piece_edge/2 , graphite_foil_thickness + carbonfleece_thickness/2 , 0);
+    G4ThreeVector pos_carbon_fleece_top2 (0, graphite_foil_thickness + carbonfleece_thickness/2 , 0);
+    G4ThreeVector pos_carbon_fleece_top3 (stave_width/2 - carbon_fleece_top_width_piece_edge/2, graphite_foil_thickness + carbonfleece_thickness/2 , 0);
+    G4RotationMatrix *rot_carbon_fleece_top  = new G4RotationMatrix();
+    asm_module->AddPlacedVolume(Log_carbon_fleece_top_edge, pos_carbon_fleece_top1 , rot_carbon_fleece_top );
+    asm_module->AddPlacedVolume(Log_carbon_fleece_top_center, pos_carbon_fleece_top2 , rot_carbon_fleece_top );
+    asm_module->AddPlacedVolume(Log_carbon_fleece_top_edge, pos_carbon_fleece_top3 , rot_carbon_fleece_top );
+
+  //-------------------------------------------------------------------
+  //NOTE graphite foil 30um, 26.56cm X0, 0.011% X0
+  //-------------------------------------------------------------------
+    // needs to be three pieces to go around cooling pipes
+    G4double graphite_foil_width_piece_edge = stave_width/3 - (diameter_coolingtube/2 + wallthickness_coolingtube);
+    G4double graphite_foil_width_piece_center = stave_width/3 - 2*( diameter_coolingtube/2 + wallthickness_coolingtube);
+    G4VSolid *sol_graphite_foil_edge = new G4Box("sol_graphite_foil_edge",
+                                            graphite_foil_width_piece_edge / 2,
+                                            graphite_foil_thickness / 2,
+                                            stave_length / 2);
+    G4LogicalVolume *Log_graphite_foil_edge = new G4LogicalVolume(sol_graphite_foil_edge, MakeCarbonFleece(), "Log_graphite_foil_edge");
+    m_DisplayAction->AddVolume(Log_graphite_foil_edge, "GraphiteFoil");
+
+    G4VSolid *sol_graphite_foil_center = new G4Box("sol_graphite_foil_center",
+                                            graphite_foil_width_piece_center / 2,
+                                            graphite_foil_thickness / 2,
+                                            stave_length / 2);
+    G4LogicalVolume *Log_graphite_foil_center = new G4LogicalVolume(sol_graphite_foil_center, MakeCarbonFleece(), "Log_graphite_foil_center");
+    m_DisplayAction->AddVolume(Log_graphite_foil_center, "GraphiteFoil");
+
+    // place carbon plate
+    G4ThreeVector pos_graphite_foil1 (-stave_width/2 + graphite_foil_width_piece_edge/2 , graphite_foil_thickness/2 , 0);
+    G4ThreeVector pos_graphite_foil2 (0, graphite_foil_thickness/2 , 0);
+    G4ThreeVector pos_graphite_foil3 (stave_width/2 - graphite_foil_width_piece_edge/2, graphite_foil_thickness/2 , 0);
+    G4RotationMatrix *rot_graphite_foil  = new G4RotationMatrix();
+    asm_module->AddPlacedVolume(Log_graphite_foil_edge, pos_graphite_foil1 , rot_graphite_foil );
+    asm_module->AddPlacedVolume(Log_graphite_foil_center, pos_graphite_foil2 , rot_graphite_foil );
+    asm_module->AddPlacedVolume(Log_graphite_foil_edge, pos_graphite_foil3 , rot_graphite_foil );
+
+    //TODO add part around cooling pipe
+
+  //-------------------------------------------------------------------
+  //NOTE Cooling pipes (Kapton)
+  //-------------------------------------------------------------------
+    G4VSolid *sol_cooling_tube = new G4Tubs("sol_cooling_tube_tmp",
+                                            (diameter_coolingtube) / 2,
+                                            (diameter_coolingtube + 2*wallthickness_coolingtube) / 2,
+                                            (stave_length - 0.2 * mm) / 2,
+                                            0.,2*M_PI);
+
+    G4LogicalVolume *Log_cooling_tube = new G4LogicalVolume(sol_cooling_tube, GetDetectorMaterial("G4_KAPTON"), "Log_cooling_tube");
+    m_DisplayAction->AddVolume(Log_cooling_tube, "Kapton");
+
+    G4VSolid *sol_water_cooling = new G4Tubs("sol_water_cooling",
+                                            0,
+                                            0.99*(diameter_coolingtube) / 2,
+                                            (stave_length - 0.2 * mm) / 2,
+                                            0.,2*M_PI);
+    G4LogicalVolume *Log_water_cooling = new G4LogicalVolume(sol_water_cooling, GetDetectorMaterial("G4_WATER"), "Log_water_cooling");
+    m_DisplayAction->AddVolume(Log_water_cooling, "Water_cooling");
+
+    // two pipes per stave at +-2.5mm from center
+    G4ThreeVector pos_cooling_tube1(-2.5*mm, diameter_coolingtube/2 + wallthickness_coolingtube, 0);
+    G4ThreeVector pos_cooling_tube2(2.5*mm, diameter_coolingtube/2 + wallthickness_coolingtube, 0);
+    G4RotationMatrix *rot_cooling_tube = new G4RotationMatrix();
+    asm_module->AddPlacedVolume(Log_cooling_tube, pos_cooling_tube1, rot_cooling_tube);
+    asm_module->AddPlacedVolume(Log_water_cooling, pos_cooling_tube1, rot_cooling_tube);
+    asm_module->AddPlacedVolume(Log_cooling_tube, pos_cooling_tube2, rot_cooling_tube);
+    asm_module->AddPlacedVolume(Log_water_cooling, pos_cooling_tube2, rot_cooling_tube);
+
+  //-------------------------------------------------------------------
+  //NOTE Plate K13 D2U fibre 70um (Carbon plate), 26.08cm X0, 0.027% X0
+  //-------------------------------------------------------------------
+    G4double carbonplate_thickness = 70 * um;
+    G4VSolid *sol_carbonplate_stave = new G4Box("sol_carbonplate_stave",
+                                            stave_width / 2,
+                                            carbonplate_thickness / 2,
+                                            stave_length / 2);
+    G4LogicalVolume *Log_carbonplate_stave = new G4LogicalVolume(sol_carbonplate_stave, GetCarbonFiber(), "Log_carbonplate_stave");
+    m_DisplayAction->AddVolume(Log_carbonplate_stave, "CarbonPlate");
+
+    // place carbon plate
+    G4ThreeVector pos_carbonplate_stave (0, -carbonplate_thickness/2, 0);
+    G4RotationMatrix *rot_carbonplate_stave  = new G4RotationMatrix();
+    asm_module->AddPlacedVolume(Log_carbonplate_stave, pos_carbonplate_stave , rot_carbonplate_stave );
+
+  //-------------------------------------------------------------------
+  //NOTE carbon fleece 20um, 106.80cm X0, 0.002% X0
+  //-------------------------------------------------------------------
+    G4VSolid *sol_carbonfleece_bottom = new G4Box("sol_carbonfleece_bottom",
+                                            stave_width / 2,
+                                            carbonfleece_thickness / 2,
+                                            stave_length / 2);
+    G4LogicalVolume *Log_carbonfleece_bottom = new G4LogicalVolume(sol_carbonfleece_bottom, MakeCarbonFleece(), "Log_carbonfleece_bottom");
+    m_DisplayAction->AddVolume(Log_carbonfleece_bottom, "CarbonFleece");
+
+    // place carbon plate
+    G4ThreeVector pos_carbonfleece_bottom (0, -carbonplate_thickness - carbonfleece_thickness/2 , 0);
+    G4RotationMatrix *rot_carbonfleece_bottom  = new G4RotationMatrix();
+    asm_module->AddPlacedVolume(Log_carbonfleece_bottom, pos_carbonfleece_bottom , rot_carbonfleece_bottom );
+
+  //-------------------------------------------------------------------
+  //NOTE Glue Eccobond45 100um, 44.37cm X0, 0.023% X0
+  //-------------------------------------------------------------------
+    G4VSolid *sol_glue_layer = new G4Box("sol_glue_layer",
+                                            stave_width / 2,
+                                            glue_thickness / 2,
+                                            stave_length / 2);
+    G4LogicalVolume *Log_glue_layer = new G4LogicalVolume(sol_glue_layer, MakeGlue(), "Log_glue_layer");
+    m_DisplayAction->AddVolume(Log_glue_layer, "Glue");
+
+    // place carbon plate
+    G4ThreeVector pos_glue_layer (0, -carbonplate_thickness - carbonfleece_thickness - glue_thickness/2 , 0);
+    G4RotationMatrix *rot_glue_layer  = new G4RotationMatrix();
+    asm_module->AddPlacedVolume(Log_glue_layer, pos_glue_layer , rot_glue_layer );
+
+  //-------------------------------------------------------------------
+  //NOTE Pixel chip 50um G4_Si
+  //-------------------------------------------------------------------
+    G4VSolid *sol_sensor = new G4Box("BST_3_sol_currentSagittaLayer_sensor",
+                                            stave_width / 2,
+                                            sensor_thickness / 2,
+                                            stave_length / 2);
+    G4LogicalVolume *Log_sensor = new G4LogicalVolume(sol_sensor, GetDetectorMaterial("G4_Si"), "BST_3_Log_currentSagittaLayer_sensor");
+    m_DisplayAction->AddVolume(Log_sensor, "Sensor");
+
+    // place carbon plate
+    G4ThreeVector pos_sensor (0, -carbonplate_thickness - carbonfleece_thickness - glue_thickness - sensor_thickness/2 , 0);
+    G4RotationMatrix *rot_sensor  = new G4RotationMatrix();
+    asm_module->AddPlacedVolume(Log_sensor, pos_sensor , rot_sensor );
+
+  //-------------------------------------------------------------------
+  //NOTE FPC Kapton Insulation layer 50um
+  //-------------------------------------------------------------------
+    G4VSolid *sol_flex_circuitboard_insul_top = new G4Box("sol_flex_circuitboard_insul_top",
+                                            stave_width / 2,
+                                            flex_circuitboard_insulation_thickness / 2,
+                                            stave_length / 2);
+    G4LogicalVolume *Log_flex_circuitboard_insul_top = new G4LogicalVolume(sol_flex_circuitboard_insul_top, GetDetectorMaterial("G4_KAPTON"), "Log_flex_circuitboard_insul_top");
+    m_DisplayAction->AddVolume(Log_flex_circuitboard_insul_top, "Kapton");
+
+    // place carbon plate
+    G4ThreeVector pos_flex_circuitboard_insul_top (0, -carbonplate_thickness - carbonfleece_thickness - glue_thickness - sensor_thickness - flex_circuitboard_insulation_thickness/2, 0);
+    G4RotationMatrix *rot_flex_circuitboard_insul_top  = new G4RotationMatrix();
+    asm_module->AddPlacedVolume(Log_flex_circuitboard_insul_top, pos_flex_circuitboard_insul_top , rot_flex_circuitboard_insul_top );
+
+  //-------------------------------------------------------------------
+  //NOTE FPC Metal 50um Al
+  //-------------------------------------------------------------------
+    G4VSolid *sol_flex_circuitboard_metal = new G4Box("sol_flex_circuitboard_metal",
+                                            stave_width / 2,
+                                            flex_circuitboard_metal_thickness / 2,
+                                            stave_length / 2);
+    G4LogicalVolume *Log_flex_circuitboard_metal = new G4LogicalVolume(sol_flex_circuitboard_metal, GetDetectorMaterial("G4_Al"), "Log_flex_circuitboard_metal");
+    m_DisplayAction->AddVolume(Log_flex_circuitboard_metal, "CircuitBoard");
+
+    // place carbon plate
+    G4ThreeVector pos_flex_circuitboard_metal (0, -carbonplate_thickness - carbonfleece_thickness - glue_thickness - sensor_thickness - flex_circuitboard_insulation_thickness - flex_circuitboard_metal_thickness/2 , 0);
+    G4RotationMatrix *rot_flex_circuitboard_metal  = new G4RotationMatrix();
+    asm_module->AddPlacedVolume(Log_flex_circuitboard_metal, pos_flex_circuitboard_metal , rot_flex_circuitboard_metal );
+
+  //-------------------------------------------------------------------
+  //NOTE FPC Kapton Insulation layer 50um
+  //-------------------------------------------------------------------
+    G4VSolid *sol_flex_circuitboard_insul_bottom = new G4Box("sol_flex_circuitboard_insul_bottom",
+                                            stave_width / 2,
+                                            flex_circuitboard_insulation_thickness / 2,
+                                            stave_length / 2);
+    G4LogicalVolume *Log_flex_circuitboard_insul_bottom = new G4LogicalVolume(sol_flex_circuitboard_insul_bottom, GetDetectorMaterial("G4_KAPTON"), "Log_flex_circuitboard_insul_bottom");
+    m_DisplayAction->AddVolume(Log_flex_circuitboard_insul_bottom, "Kapton");
+
+    // place carbon plate
+    G4ThreeVector pos_flex_circuitboard_insul_bottom (0, -carbonplate_thickness - carbonfleece_thickness - glue_thickness - sensor_thickness - flex_circuitboard_insulation_thickness -flex_circuitboard_metal_thickness - flex_circuitboard_insulation_thickness/2, 0);
+    G4RotationMatrix *rot_flex_circuitboard_insul_bottom  = new G4RotationMatrix();
+    asm_module->AddPlacedVolume(Log_flex_circuitboard_insul_bottom, pos_flex_circuitboard_insul_bottom , rot_flex_circuitboard_insul_bottom );
+
+
+  //NOTE place staves in full azimuth
+  int nAzimuth = 2 * M_PI * rCenter / (stave_width * cos(13 * deg) - stave_overlap);
+  std::cout << "nAzimuth = " << nAzimuth << std::endl;
+  for(int i = 0; i < nAzimuth; i++)
+  {
+    G4RotationMatrix *rot_module = new G4RotationMatrix();
+    rot_module->rotateZ(- i * 360.0 * deg / nAzimuth + 13.0 * deg);
+    G4double phi = i * 2 * M_PI / nAzimuth;
+    G4ThreeVector detzvec(rCenter * sin(phi), rCenter * cos(phi), place_z);
+    asm_module->MakeImprint(mother, detzvec, rot_module, i, overlapcheck_sector);
+  }
+
   return;
 }
 
@@ -138,10 +835,14 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
   bool do_internal_supports = true;
   bool doLongeron = true;
   bool do_external_supports = true;
+  bool use_EPIC_setup = false;
   if(!m_Params->get_int_param("do_internal_supports"))
     do_internal_supports = false;
   if(!m_Params->get_int_param("do_external_supports"))
     do_external_supports = false;
+  if(m_Params->get_int_param("use_EPIC_setup"))
+    use_EPIC_setup = true;
+
 
   // Sensor sizes available from the ALPIDE wafer
   G4double sensor_widths[4] = {56.5 * mm, 75.5 * mm, 94.3 * mm, 113.1 *mm};
@@ -158,6 +859,9 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
 
 
   G4double support_radius_inner = 7.5 * cm; // was 9 cm
+  if(use_EPIC_setup){
+    support_radius_inner = 13.0 * cm; // was 9 cm
+  }
   G4double support_length_inner = 38.88 * cm;
   G4double support_thickness_foam = 0.2 * cm;
   G4double support_thickness_shell = 0.1 * mm;
@@ -181,18 +885,18 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
   G4double layer_sensor_width_outer[nLayersOuter][9] = {0};
 
   // vertex layers sensor setup
-  nSensorsInner[0] = 1;
-  layer_radius_inner[0] = (sensor_widths[3]+deadarea_seam)/M_PI; // 36.319158 mm -> eta 1.92
-  layer_sensor_width_inner[0][0] = sensor_widths[3];
-  layer_length_inner[0] = sensor_length[3];
 
-  bool use_different_vertex_sensors = false;
-  if(use_different_vertex_sensors){
+  if(use_EPIC_setup){
     nSensorsInner[0] = 2;
     layer_radius_inner[0] = (2*sensor_widths[0]+deadarea_seam)/M_PI; // 36.287327 mm -> eta 2.0
     layer_sensor_width_inner[0][0] = sensor_widths[0];
     layer_sensor_width_inner[0][1] = sensor_widths[0];
     layer_length_inner[0] = sensor_length[0];
+  } else {
+    nSensorsInner[0] = 1;
+    layer_radius_inner[0] = (sensor_widths[3]+deadarea_seam)/M_PI; // 36.319158 mm -> eta 1.92
+    layer_sensor_width_inner[0][0] = sensor_widths[3];
+    layer_length_inner[0] = sensor_length[3];
   }
 
   nSensorsInner[1] = 2;
@@ -201,91 +905,107 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
   layer_sensor_width_inner[1][1] = sensor_widths[1];
   layer_length_inner[1] = sensor_length[1];
 
-  nSensorsInner[2] = 2;
-  layer_radius_inner[2] = (2*sensor_widths[2]+deadarea_seam)/M_PI; // 60.351554 mm -> eta 1.49
-  layer_sensor_width_inner[2][0] = sensor_widths[2];
-  layer_sensor_width_inner[2][1] = sensor_widths[2];
-  layer_length_inner[2] = sensor_length[2];
-
+  if(use_EPIC_setup){
+    nSensorsInner[2] = 4;
+    layer_radius_inner[2] = (4*sensor_widths[2]+deadarea_seam)/M_PI; // 60.351554 mm -> eta 1.49
+    layer_sensor_width_inner[2][0] = sensor_widths[2];
+    layer_sensor_width_inner[2][1] = sensor_widths[2];
+    layer_sensor_width_inner[2][2] = sensor_widths[2];
+    layer_sensor_width_inner[2][3] = sensor_widths[2];
+    layer_length_inner[2] = sensor_length[2];
+  } else {
+    nSensorsInner[2] = 2;
+    layer_radius_inner[2] = (2*sensor_widths[2]+deadarea_seam)/M_PI; // 60.351554 mm -> eta 1.49
+    layer_sensor_width_inner[2][0] = sensor_widths[2];
+    layer_sensor_width_inner[2][1] = sensor_widths[2];
+    layer_length_inner[2] = sensor_length[2];
+  }
   // sagitta layers sensor setup
   // Sagitta1(nonproj+): 5*94.3+2*75.5 = radius 198 -> eta 0.95
   // Sagitta2(nonproj+): 7*94.3 = radius 210 -> eta 0.89
-  nSensorsOuter[0] = 7;
-  layer_radius_outer[0] = (5*sensor_widths[2]+2*sensor_widths[1]+deadarea_seam)/M_PI; // 198.46621 mm
-  for(int i=0;i<5;i++){
-    layer_sensor_width_outer[0][i] = sensor_widths[2];
-  }
-  layer_sensor_width_outer[0][5] = sensor_widths[1];
-  layer_sensor_width_outer[0][6] = sensor_widths[1];
-  layer_length_outer[0] = sensor_length[2];
+  if(use_EPIC_setup){
 
-  nSensorsOuter[1] = 7;
-  layer_radius_outer[1] = (7*sensor_widths[2]+deadarea_seam)/M_PI; // 210.43467 mm
-  for(int i=0;i<7;i++){
-    layer_sensor_width_outer[1][i] = sensor_widths[2];
-  }
-  layer_length_outer[1] = sensor_length[2];
-
-
-  bool use_sagitta_setup_1 = false;
-  if(use_sagitta_setup_1){
-    // Sagitta1: 5*94.3 = radius 150.09 -> eta 1.25
-    // Sagitta2: 94.3*4+75.5*2 = radius 168.13 -> eta 1.13
-    // OR 94.3*5+56.5 = radius 168.07 -> eta 1.13
-    nSensorsOuter[0] = 5;
-    layer_radius_outer[0] = (5*sensor_widths[2]+deadarea_seam)/M_PI; // 150.40142 mm
+  } else {
+    nSensorsOuter[0] = 7;
+    layer_radius_outer[0] = (5*sensor_widths[2]+2*sensor_widths[1]+deadarea_seam)/M_PI; // 198.46621 mm
     for(int i=0;i<5;i++){
       layer_sensor_width_outer[0][i] = sensor_widths[2];
     }
+    layer_sensor_width_outer[0][5] = sensor_widths[1];
+    layer_sensor_width_outer[0][6] = sensor_widths[1];
     layer_length_outer[0] = sensor_length[2];
-
-
-    nSensorsOuter[1] = 6;
-    layer_radius_outer[1] = (4*sensor_widths[2]+2*sensor_widths[1]+deadarea_seam)/M_PI; // 168.44959 mm
-    for(int i=0;i<4;i++){
-      layer_sensor_width_outer[1][i] = sensor_widths[2];
-    }
-    layer_sensor_width_outer[1][4] = sensor_widths[1];
-    layer_sensor_width_outer[1][5] = sensor_widths[1];
-    layer_length_outer[1] = sensor_length[2];
-
-    support_radius_outer = 18.2 * cm;
   }
 
-  bool use_sagitta_setup_2 = false;
-  if(use_sagitta_setup_2){
-    // Sagitta1(nonproj): 7*94.3 = radius 210 -> eta 0.89
-    // Sagitta2(nonproj): 6*94.3+2*75.5 = radius 228 -> eta 0.77
-    nSensorsOuter[0] = 7;
-    layer_radius_outer[0] = (7*sensor_widths[2]+deadarea_seam)/M_PI; // 210.43467 mm
+  if(use_EPIC_setup){
+
+  } else {
+    nSensorsOuter[1] = 7;
+    layer_radius_outer[1] = (7*sensor_widths[2]+deadarea_seam)/M_PI; // 210.43467 mm
     for(int i=0;i<7;i++){
-      layer_sensor_width_outer[0][i] = sensor_widths[2];
-    }
-    layer_length_outer[0] = sensor_length[2];
-
-
-    nSensorsOuter[1] = 8;
-    layer_radius_outer[1] = (6*sensor_widths[2]+2*sensor_widths[1]+deadarea_seam)/M_PI; // 228.48284 mm
-    for(int i=0;i<6;i++){
       layer_sensor_width_outer[1][i] = sensor_widths[2];
     }
-    layer_sensor_width_outer[1][6] = sensor_widths[1];
-    layer_sensor_width_outer[1][7] = sensor_widths[1];
     layer_length_outer[1] = sensor_length[2];
 
-    support_radius_outer = 24.2 * cm;
-  }
-  for(int i=0; i<nLayersInner; i++){
-    cout << "BST layer " << i << " radius " << layer_radius_inner[i] << " length " << layer_length_inner[i] << " nSensors " << nSensorsInner[i] << endl;
-    // for(int j=0; j<nSensorsInner[i]; j++){
-    //   cout << "\tlayer " << i << " sensor " << j << " width " << layer_sensor_width_inner[i][j] << endl;
-    // }
-  }
-  for(int i=0; i<nLayersOuter; i++){
-    cout << "BST layer " << i+nLayersInner << " radius " << layer_radius_outer[i] << " length " << layer_length_outer[i] << " nSensors " << nSensorsOuter[i] << endl;
-    // for(int j=0; j<nSensorsOuter[i]; j++){
-    //   cout << "\tlayer " << i+nLayersInner << " sensor " << j << " width " << layer_sensor_width_outer[i][j] << endl;
-    // }
+    bool use_sagitta_setup_1 = false;
+    if(use_sagitta_setup_1){
+      // Sagitta1: 5*94.3 = radius 150.09 -> eta 1.25
+      // Sagitta2: 94.3*4+75.5*2 = radius 168.13 -> eta 1.13
+      // OR 94.3*5+56.5 = radius 168.07 -> eta 1.13
+      nSensorsOuter[0] = 5;
+      layer_radius_outer[0] = (5*sensor_widths[2]+deadarea_seam)/M_PI; // 150.40142 mm
+      for(int i=0;i<5;i++){
+        layer_sensor_width_outer[0][i] = sensor_widths[2];
+      }
+      layer_length_outer[0] = sensor_length[2];
+
+
+      nSensorsOuter[1] = 6;
+      layer_radius_outer[1] = (4*sensor_widths[2]+2*sensor_widths[1]+deadarea_seam)/M_PI; // 168.44959 mm
+      for(int i=0;i<4;i++){
+        layer_sensor_width_outer[1][i] = sensor_widths[2];
+      }
+      layer_sensor_width_outer[1][4] = sensor_widths[1];
+      layer_sensor_width_outer[1][5] = sensor_widths[1];
+      layer_length_outer[1] = sensor_length[2];
+
+      support_radius_outer = 18.2 * cm;
+    }
+
+    bool use_sagitta_setup_2 = false;
+    if(use_sagitta_setup_2){
+      // Sagitta1(nonproj): 7*94.3 = radius 210 -> eta 0.89
+      // Sagitta2(nonproj): 6*94.3+2*75.5 = radius 228 -> eta 0.77
+      nSensorsOuter[0] = 7;
+      layer_radius_outer[0] = (7*sensor_widths[2]+deadarea_seam)/M_PI; // 210.43467 mm
+      for(int i=0;i<7;i++){
+        layer_sensor_width_outer[0][i] = sensor_widths[2];
+      }
+      layer_length_outer[0] = sensor_length[2];
+
+
+      nSensorsOuter[1] = 8;
+      layer_radius_outer[1] = (6*sensor_widths[2]+2*sensor_widths[1]+deadarea_seam)/M_PI; // 228.48284 mm
+      for(int i=0;i<6;i++){
+        layer_sensor_width_outer[1][i] = sensor_widths[2];
+      }
+      layer_sensor_width_outer[1][6] = sensor_widths[1];
+      layer_sensor_width_outer[1][7] = sensor_widths[1];
+      layer_length_outer[1] = sensor_length[2];
+
+      support_radius_outer = 24.2 * cm;
+    }
+    for(int i=0; i<nLayersInner; i++){
+      cout << "BST layer " << i << " radius " << layer_radius_inner[i] << " length " << layer_length_inner[i] << " nSensors " << nSensorsInner[i] << endl;
+      // for(int j=0; j<nSensorsInner[i]; j++){
+      //   cout << "\tlayer " << i << " sensor " << j << " width " << layer_sensor_width_inner[i][j] << endl;
+      // }
+    }
+    for(int i=0; i<nLayersOuter; i++){
+      cout << "BST layer " << i+nLayersInner << " radius " << layer_radius_outer[i] << " length " << layer_length_outer[i] << " nSensors " << nSensorsOuter[i] << endl;
+      // for(int j=0; j<nSensorsOuter[i]; j++){
+      //   cout << "\tlayer " << i+nLayersInner << " sensor " << j << " width " << layer_sensor_width_outer[i][j] << endl;
+      // }
+    }
   }
   // int layer_segments[nLayersOuter] = {12, 12};
   G4double copperWire_diam = 0.64 * mm;
@@ -300,6 +1020,9 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
   G4double foam_midwheel_depth = 0.7 * cm;
   int foam_endwheel_holes_inner = 16;
   G4double foam_endwheel_hole_diam_inner[nLayersInner] = {(layer_radius_inner[1]-layer_radius_inner[0])/2.5, (layer_radius_inner[2]-layer_radius_inner[1])/2.5, (support_radius_inner-layer_radius_inner[2])/2};
+  if(use_EPIC_setup){
+    foam_endwheel_hole_diam_inner[1] = ((layer_radius_inner[2]-layer_radius_inner[1])/2.5) > 1.1*cm ? 1.1*cm : (layer_radius_inner[2]-layer_radius_inner[1])/2.5;
+  }
   int foam_endwheel_holes_outer = 60;
   G4double foam_endwheel_hole_diam_outer[nLayersOuter] = {(layer_radius_outer[1]-layer_radius_outer[0])/2, (support_radius_outer-layer_radius_outer[1])/2.5};
 
@@ -599,6 +1322,7 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
   }
 
   for(int i = 0; i < nLayersOuter; i++){
+    if(use_EPIC_setup) continue;
     // if(i>-1) continue;
     G4double layer_half_circumference = M_PI * layer_radius_outer[i];
     G4double angle_deadarea_sensoredge = M_PI * (deadarea_sensoredge / 2.0) / layer_half_circumference;
@@ -1046,78 +1770,79 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
                       mother,
                       0, 0, OverlapCheck());
 
+    if(!use_EPIC_setup){
+      G4double support_seamangle_outer = 0;//support_seam / support_radius_outer;
 
-    G4double support_seamangle_outer = 0;//support_seam / support_radius_outer;
+      // construct support 2mm thick foam with 0.1mm carbon skins
+      G4VSolid* supportSagittaFoamSolid  = new G4Tubs(G4String("supportVertexCylinderSolid"),
+                                              support_radius_outer - support_thickness_foam / 2,
+                                              support_radius_outer + support_thickness_foam / 2,
+                                              support_length_outer / 2,
+                                              0.+support_seamangle_outer,M_PI*rad-support_seamangle_outer);
+      G4LogicalVolume* supportSagittaFoamLogic = new G4LogicalVolume(supportSagittaFoamSolid,
+                                                            foam_material_wheel,
+                                                            "supportSagittaFoamLogic",
+                                                            0, 0, 0);
 
-    // construct support 2mm thick foam with 0.1mm carbon skins
-    G4VSolid* supportSagittaFoamSolid  = new G4Tubs(G4String("supportVertexCylinderSolid"),
-                                            support_radius_outer - support_thickness_foam / 2,
-                                            support_radius_outer + support_thickness_foam / 2,
-                                            support_length_outer / 2,
-                                            0.+support_seamangle_outer,M_PI*rad-support_seamangle_outer);
-    G4LogicalVolume* supportSagittaFoamLogic = new G4LogicalVolume(supportSagittaFoamSolid,
-                                                          foam_material_wheel,
-                                                          "supportSagittaFoamLogic",
-                                                          0, 0, 0);
-
-    G4VSolid* supportSagittaOuterShellSolid  = new G4Tubs(G4String("supportVertexCylinderSolid"),
-                                            support_radius_outer + support_thickness_foam / 2,
-                                            support_radius_outer + support_thickness_foam / 2 + support_thickness_shell_outer,
-                                            support_length_outer / 2,
-                                            0.+support_seamangle_outer,M_PI*rad-support_seamangle_outer);
-    G4LogicalVolume* supportSagittaOuterShellLogic = new G4LogicalVolume(supportSagittaOuterShellSolid,
-                                                          support_material,
-                                                          "supportSagittaOuterShellLogic",
-                                                          0, 0, 0);
-  
-    G4VSolid* supportSagittaInnerShellSolid  = new G4Tubs(G4String("supportVertexCylinderSolid"),
-                                            support_radius_outer - support_thickness_foam / 2 - support_thickness_shell_outer,
-                                            support_radius_outer - support_thickness_foam / 2,
-                                            support_length_outer / 2,
-                                            0.+support_seamangle_outer,M_PI*rad-support_seamangle_outer);
-    G4LogicalVolume* supportSagittaInnerShellLogic = new G4LogicalVolume(supportSagittaInnerShellSolid,
-                                                          support_material,
-                                                          "supportSagittaInnerShellLogic",
-                                                          0, 0, 0);
-  
-    m_DisplayAction->AddVolume(supportSagittaFoamLogic, "Foam");
-    m_DisplayAction->AddVolume(supportSagittaOuterShellLogic, "CShell");
-    m_DisplayAction->AddVolume(supportSagittaInnerShellLogic, "CShell");
-
-
-    new G4PVPlacement(0, G4ThreeVector( 0.0, 0.0, 0.0),
-                      supportSagittaFoamLogic,
-                      "supportSagittaFoamLogicLogicTop",
-                      mother,
-                      0, 0, OverlapCheck());
-    new G4PVPlacement(0, G4ThreeVector( 0.0, 0.0, 0.0),
-                      supportSagittaOuterShellLogic,
-                      "supportSagittaOuterShellLogicLogicTop",
-                      mother,
-                      0, 0, OverlapCheck());
-                      
-    new G4PVPlacement(0, G4ThreeVector( 0.0, 0.0, 0.0),
-                      supportSagittaInnerShellLogic,
-                      "supportSagittaInnerShellLogicLogicTop",
-                      mother,
-                      0, 0, OverlapCheck());
+      G4VSolid* supportSagittaOuterShellSolid  = new G4Tubs(G4String("supportVertexCylinderSolid"),
+                                              support_radius_outer + support_thickness_foam / 2,
+                                              support_radius_outer + support_thickness_foam / 2 + support_thickness_shell_outer,
+                                              support_length_outer / 2,
+                                              0.+support_seamangle_outer,M_PI*rad-support_seamangle_outer);
+      G4LogicalVolume* supportSagittaOuterShellLogic = new G4LogicalVolume(supportSagittaOuterShellSolid,
+                                                            support_material,
+                                                            "supportSagittaOuterShellLogic",
+                                                            0, 0, 0);
+    
+      G4VSolid* supportSagittaInnerShellSolid  = new G4Tubs(G4String("supportVertexCylinderSolid"),
+                                              support_radius_outer - support_thickness_foam / 2 - support_thickness_shell_outer,
+                                              support_radius_outer - support_thickness_foam / 2,
+                                              support_length_outer / 2,
+                                              0.+support_seamangle_outer,M_PI*rad-support_seamangle_outer);
+      G4LogicalVolume* supportSagittaInnerShellLogic = new G4LogicalVolume(supportSagittaInnerShellSolid,
+                                                            support_material,
+                                                            "supportSagittaInnerShellLogic",
+                                                            0, 0, 0);
+    
+      m_DisplayAction->AddVolume(supportSagittaFoamLogic, "Foam");
+      m_DisplayAction->AddVolume(supportSagittaOuterShellLogic, "CShell");
+      m_DisplayAction->AddVolume(supportSagittaInnerShellLogic, "CShell");
 
 
-    new G4PVPlacement(G4Transform3D(bstsupp_rotm, G4ThreeVector( 0.0, 0.0, 0.0)),
-                      supportSagittaFoamLogic,
-                      "supportSagittaFoamLogicLogicBottom",
-                      mother,
-                      0, 0, OverlapCheck());
-    new G4PVPlacement(G4Transform3D(bstsupp_rotm, G4ThreeVector( 0.0, 0.0, 0.0)),
-                      supportSagittaOuterShellLogic,
-                      "supportSagittaOuterShellLogicLogicBottom",
-                      mother,
-                      0, 0, OverlapCheck());
-    new G4PVPlacement(G4Transform3D(bstsupp_rotm, G4ThreeVector( 0.0, 0.0, 0.0)),
-                      supportSagittaInnerShellLogic,
-                      "supportSagittaInnerShellLogicLogicBottom",
-                      mother,
-                      0, 0, OverlapCheck());
+      new G4PVPlacement(0, G4ThreeVector( 0.0, 0.0, 0.0),
+                        supportSagittaFoamLogic,
+                        "supportSagittaFoamLogicLogicTop",
+                        mother,
+                        0, 0, OverlapCheck());
+      new G4PVPlacement(0, G4ThreeVector( 0.0, 0.0, 0.0),
+                        supportSagittaOuterShellLogic,
+                        "supportSagittaOuterShellLogicLogicTop",
+                        mother,
+                        0, 0, OverlapCheck());
+                        
+      new G4PVPlacement(0, G4ThreeVector( 0.0, 0.0, 0.0),
+                        supportSagittaInnerShellLogic,
+                        "supportSagittaInnerShellLogicLogicTop",
+                        mother,
+                        0, 0, OverlapCheck());
+
+
+      new G4PVPlacement(G4Transform3D(bstsupp_rotm, G4ThreeVector( 0.0, 0.0, 0.0)),
+                        supportSagittaFoamLogic,
+                        "supportSagittaFoamLogicLogicBottom",
+                        mother,
+                        0, 0, OverlapCheck());
+      new G4PVPlacement(G4Transform3D(bstsupp_rotm, G4ThreeVector( 0.0, 0.0, 0.0)),
+                        supportSagittaOuterShellLogic,
+                        "supportSagittaOuterShellLogicLogicBottom",
+                        mother,
+                        0, 0, OverlapCheck());
+      new G4PVPlacement(G4Transform3D(bstsupp_rotm, G4ThreeVector( 0.0, 0.0, 0.0)),
+                        supportSagittaInnerShellLogic,
+                        "supportSagittaInnerShellLogicLogicBottom",
+                        mother,
+                        0, 0, OverlapCheck());
+    }
   }
   return;
 }
@@ -1151,6 +1876,20 @@ G4Material* PHG4BSTDetector::MakeCarbonFoamMaterial_Wheel(){
   return carbon_foam;
 
 }
+G4Material* PHG4BSTDetector::MakeCarbonFleece(){
+  G4Material* carbon_foam = GetDetectorMaterial("C_FLEECE_BST", false);  // false suppresses warning that material does not exist
+  if(!carbon_foam){
+    G4double density;
+    G4int ncomponents;
+    carbon_foam = new G4Material("C_FLEECE_BST", density = 0.40 * g / cm3, ncomponents = 2); // VERY CONSERVATIVE DENSITY
+    // carbon_foam = new G4Material("C_FOAM_BST", density = 0.26 * g / cm3, ncomponents = 2); // CONSERVATIVE DENSITY
+    // carbon_foam = new G4Material("C_FOAM_BST", density = 0.06 * g / cm3, ncomponents = 2); // LIGHTEST DENSITY
+    carbon_foam->AddElement(G4NistManager::Instance()->FindOrBuildElement("C"), 0.97);
+    carbon_foam->AddElement(G4NistManager::Instance()->FindOrBuildElement("H"), 0.03);
+  }
+  return carbon_foam;
+
+}
 
 G4Material* PHG4BSTDetector::GetCarbonFiber()
 {
@@ -1164,6 +1903,57 @@ G4Material* PHG4BSTDetector::GetCarbonFiber()
   }
   return carbonfiber;
 }
+
+G4Material* PHG4BSTDetector::GetKapton()
+{
+  static string matname = "BSTKapton";
+  G4Material* kaptonmat = G4Material::GetMaterial(matname, false);  // false suppresses warning that material does not exist
+  if (!kaptonmat)
+  {
+    G4double density_carbon_fiber = 2.02 * g / cm3; // 28.41cm rad length
+    G4int ncomponents;
+    kaptonmat = new G4Material(matname, density_carbon_fiber, ncomponents = 4);
+    kaptonmat->AddElement(G4NistManager::Instance()->FindOrBuildElement("C"), 22);
+    kaptonmat->AddElement(G4NistManager::Instance()->FindOrBuildElement("H"), 10);
+    kaptonmat->AddElement(G4NistManager::Instance()->FindOrBuildElement("N"), 2);
+    kaptonmat->AddElement(G4NistManager::Instance()->FindOrBuildElement("O"), 5);
+  }
+  return kaptonmat;
+}
+
+
+G4Material* PHG4BSTDetector::MakeCarbonHoneyCombMaterial()
+{
+  G4Material* carbonfiber = G4Material::GetMaterial("TTLCarbonHoneyComb", false);  // false suppresses warning that material does not exist
+  if (!carbonfiber)
+  {
+    G4double density_carbon_fiber = 0.03 * g / cm3;
+    carbonfiber = new G4Material("TTLCarbonHoneyComb", density_carbon_fiber, 3);
+    carbonfiber->AddElement(G4Element::GetElement("O"), 0.074);
+    carbonfiber->AddElement(G4Element::GetElement("C"), 0.903);
+    // carbonfiber->AddElement(G4Element::GetElement("C"), 0.870);
+    carbonfiber->AddElement(G4Element::GetElement("H"), 0.023);
+    // carbonfiber->AddElement(G4Element::GetElement("G4_Cl"), 0.033);
+  }
+  return carbonfiber;
+}
+
+G4Material* PHG4BSTDetector::MakeGlue()
+{
+  G4Material* carbonfiber = G4Material::GetMaterial("BST_GLUE", false);  // false suppresses warning that material does not exist
+  if (!carbonfiber)
+  {
+    G4double density_carbon_fiber = 0.8 * g / cm3;
+    carbonfiber = new G4Material("BST_GLUE", density_carbon_fiber, 3);
+    carbonfiber->AddElement(G4Element::GetElement("O"), 0.074);
+    carbonfiber->AddElement(G4Element::GetElement("C"), 0.903);
+    // carbonfiber->AddElement(G4Element::GetElement("C"), 0.870);
+    carbonfiber->AddElement(G4Element::GetElement("H"), 0.023);
+    // carbonfiber->AddElement(G4Element::GetElement("G4_Cl"), 0.033);
+  }
+  return carbonfiber;
+}
+
 
 int PHG4BSTDetector::ParseParametersFromTable()
 {

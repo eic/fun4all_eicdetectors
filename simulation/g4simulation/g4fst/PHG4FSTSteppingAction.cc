@@ -1,5 +1,5 @@
-#include "PHG4BSTSteppingAction.h"
-#include "PHG4BSTDetector.h"
+#include "PHG4FSTSteppingAction.h"
+#include "PHG4FSTDetector.h"
 
 #include <g4main/PHG4Hit.h>
 #include <g4main/PHG4HitContainer.h>
@@ -56,10 +56,10 @@ class PHCompositeNode;
 using namespace std;
 
 //____________________________________________________________________________..
-PHG4BSTSteppingAction::PHG4BSTSteppingAction(PHG4BSTDetector* detector, const int absorberactive)
+PHG4FSTSteppingAction::PHG4FSTSteppingAction(PHG4FSTDetector* detector, const int absorberactive)
   : PHG4SteppingAction(detector->GetName())
   , detector_(detector)
-  , hits_(0)
+  , hits_(nullptr)
   , absorberhits_(nullptr)
   , hitcontainer(nullptr)
   , hit(nullptr)
@@ -71,10 +71,9 @@ PHG4BSTSteppingAction::PHG4BSTSteppingAction(PHG4BSTDetector* detector, const in
   , absorbertruth(absorberactive)
   , light_scint_model(1)
 {
-  hits_ = new PHG4HitContainer*[5];
 }
 
-PHG4BSTSteppingAction::~PHG4BSTSteppingAction()
+PHG4FSTSteppingAction::~PHG4FSTSteppingAction()
 {
   // if the last hit was a zero energie deposit hit, it is just reset
   // and the memory is still allocated, so we need to delete it here
@@ -84,7 +83,7 @@ PHG4BSTSteppingAction::~PHG4BSTSteppingAction()
 }
 
 //____________________________________________________________________________..
-bool PHG4BSTSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
+bool PHG4FSTSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
 {
   // get volume of the current step
   G4VPhysicalVolume* volume =
@@ -98,20 +97,20 @@ bool PHG4BSTSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
   const G4Track* aTrack = aStep->GetTrack();
 
 
-  if (detector_->IsInActiveSensorBST(volume))
+  if (detector_->IsInActiveSensorFST(volume))
   {
     
     int layer_id = -1;
-    std::string bstLayerNameFind = "BST_";
+    std::string bstLayerNameFind = "FST_";
+    std::string bstLayerNameFind2 = "FST_";
     if (volume->GetName().find(bstLayerNameFind) != std::string::npos) {
+      auto pos = volume->GetName().find(bstLayerNameFind);
+      layer_id = std::stoi(volume->GetName().substr(pos + bstLayerNameFind.size(), pos + bstLayerNameFind.size() + 1));
+    } else if (volume->GetName().find(bstLayerNameFind) != std::string::npos) {
       auto pos = volume->GetName().find(bstLayerNameFind);
       layer_id = std::stoi(volume->GetName().substr(pos + bstLayerNameFind.size(), pos + bstLayerNameFind.size() + 1));
     }
     // cout << volume->GetName() << "\t" << layer_id << "\t" << layer_id << endl;
-    if(layer_id<0 || layer_id>5){
-      cout << "ERROR: BST layer id is out of range" << endl;
-      return false;
-    }
 
     bool geantino = false;
 
@@ -209,10 +208,10 @@ bool PHG4BSTSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
       // save only hits with energy deposit (or -1 for geantino)
       if (hit->get_edep())
       {
-        hits_[layer_id]->AddHit(layer_id, hit);
+        hits_->AddHit(layer_id, hit);
         if (saveshower)
         {
-          saveshower->add_g4hit_id(hits_[layer_id]->GetID(), hit->get_hit_id());
+          saveshower->add_g4hit_id(hits_->GetID(), hit->get_hit_id());
         }
         // ownership has been transferred to container, set to null
         // so we will create a new hit for the next track
@@ -238,7 +237,7 @@ bool PHG4BSTSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
 }
 
 //____________________________________________________________________________..
-void PHG4BSTSteppingAction::SetInterfacePointers(PHCompositeNode* topNode)
+void PHG4FSTSteppingAction::SetInterfacePointers(PHCompositeNode* topNode)
 {
   std::string hitnodename;
   std::string absorbernodename;
@@ -246,42 +245,34 @@ void PHG4BSTSteppingAction::SetInterfacePointers(PHCompositeNode* topNode)
   // std::cout << detector_->SuperDetector() << "\t" <<  detector_->GetName() << endl;
   if (detector_->SuperDetector() != "NONE")
   {
+    hitnodename = "G4HIT_" + detector_->SuperDetector();
     absorbernodename = "G4HIT_ABSORBER_" + detector_->SuperDetector();
   }
   else
   {
+    hitnodename = "G4HIT_" + detector_->GetName();
     absorbernodename = "G4HIT_ABSORBER_" + detector_->GetName();
   }
 
-  for(int ilay=0; ilay<5; ilay++){
-    if (detector_->SuperDetector() != "NONE")
-    {
-      hitnodename = "G4HIT_" + detector_->SuperDetector() + "_" + std::to_string(ilay);
-    }
-    else
-    {
-      hitnodename = "G4HIT_" + detector_->GetName() + "_" + std::to_string(ilay);
-    }
-    //now look for the map and grab a pointer to it.
-    hits_[ilay] = findNode::getClass<PHG4HitContainer>(topNode, hitnodename);
-
-    // if we do not find the node it's messed up.
-    if (!hits_[ilay])
-    {
-      std::cout << "PHG4BSTSteppingAction::SetTopNode - unable to find " << hitnodename << std::endl;
-  }
-  }
+  //now look for the map and grab a pointer to it.
+  hits_ = findNode::getClass<PHG4HitContainer>(topNode, hitnodename);
   absorberhits_ = findNode::getClass<PHG4HitContainer>(topNode, absorbernodename);
+
+  // if we do not find the node it's messed up.
+  if (!hits_)
+  {
+    std::cout << "PHG4FSTSteppingAction::SetTopNode - unable to find " << hitnodename << std::endl;
+  }
   if (!absorberhits_)
   {
     if (Verbosity() > 0)
     {
-      cout << "PHG4BSTSteppingAction::SetTopNode - unable to find " << absorbernodename << endl;
+      cout << "PHG4FSTSteppingAction::SetTopNode - unable to find " << absorbernodename << endl;
     }
   }
 }
 
-int PHG4BSTSteppingAction::ParseG4VolumeName(G4VPhysicalVolume* volume, int& j, int& k)
+int PHG4FSTSteppingAction::ParseG4VolumeName(G4VPhysicalVolume* volume, int& j, int& k)
 {
   // cout << volume->GetName() << endl;
   boost::char_separator<char> sep("_");

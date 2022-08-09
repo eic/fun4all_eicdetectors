@@ -1,7 +1,7 @@
 // Tell emacs that this is a C++ source
 //  -*- C++ -*-.
-#ifndef G4DETECTORS_PHG4BSTDETECTOR_H
-#define G4DETECTORS_PHG4BSTDETECTOR_H
+#ifndef G4DETECTORS_PHG4FSTDETECTOR_H
+#define G4DETECTORS_PHG4FSTDETECTOR_H
 
 #include <g4main/PHG4Detector.h>
 
@@ -15,8 +15,8 @@
 class G4LogicalVolume;
 class G4VPhysicalVolume;
 class PHCompositeNode;
-class PHG4BSTDisplayAction;
-class PHG4BSTSteppingAction;
+class PHG4FSTDisplayAction;
+class PHG4FSTSteppingAction;
 class PHG4Subsystem;
 class PHParameters;
 
@@ -26,20 +26,20 @@ class PHParameters;
  * \author Nils Feege <nils.feege@stonybrook.edu>
  */
 
-class PHG4BSTDetector : public PHG4Detector
+class PHG4FSTDetector : public PHG4Detector
 {
  public:
   //! constructor
-  PHG4BSTDetector(PHG4Subsystem *subsys, PHCompositeNode *Node, PHParameters *parameters, const std::string &dnam);
+  PHG4FSTDetector(PHG4Subsystem *subsys, PHCompositeNode *Node, PHParameters *parameters, const std::string &dnam);
 
   //! destructor
-  virtual ~PHG4BSTDetector() {}
+  virtual ~PHG4FSTDetector() {}
 
   //! construct
   virtual void ConstructMe(G4LogicalVolume *world);
 
   //!@name volume accessors
-  int IsInActiveSensorBST(G4VPhysicalVolume *) const;
+  int IsInActiveSensorFST(G4VPhysicalVolume *) const;
 
   //! Select mapping file for calorimeter tower
   void SetTowerMappingFile(const std::string &filename)
@@ -65,16 +65,13 @@ class PHG4BSTDetector : public PHG4Detector
   void SetYRot(G4double rot_in_y) { _rot_in_y = rot_in_y; }
   void SetZRot(G4double rot_in_z) { _rot_in_z = rot_in_z; }
 
-  void SetMaterialScintillator(G4String material) { _materialScintillator = material; }
-  void SetMaterialAbsorber(G4String material) { _materialAbsorber = material; }
-
   void SetActive(const int i = 1) { _active = i; }
   void SetAbsorberActive(const int i = 1) { _absorberactive = i; }
 
   int IsActive() const { return _active; }
 
   void SuperDetector(const std::string &name) { _superdetector = name; }
-  void SetSteppingAction(PHG4BSTSteppingAction *stpact) { m_SteppingAction = stpact; }
+  void SetSteppingAction(PHG4FSTSteppingAction *stpact) { m_SteppingAction = stpact; }
   const std::string SuperDetector() const { return _superdetector; }
 
   int get_Layer() const { return _layer; }
@@ -83,17 +80,8 @@ class PHG4BSTDetector : public PHG4Detector
   int IsBlackHole() const { return _blackhole; }
 
  private:
-  void ConstructStavesOuter(G4LogicalVolume *mother);
-  void ConstructStaves(G4LogicalVolume *mother);
-  void ConstructBarrel(G4LogicalVolume *mother);
-  // void ConstructOuterBarrel(G4LogicalVolume *mother);
-  G4LogicalVolume *ConstructTowerFCStyle(int type);
-  // G4LogicalVolume *ConstructTowerType1();
-  // G4LogicalVolume *ConstructTowerType2();
-  // G4LogicalVolume *ConstructTowerType3();
-  G4Material *GetScintillatorMaterial();
-  G4Material *GetQuartzMaterial();
-  G4Material *GetPMMAMaterial();
+  void ConstructSTDisk(G4LogicalVolume *mother);
+  void ConstructFST(G4LogicalVolume *mother);
   G4Material *MakeCarbonFoamMaterial_Longeron();
   G4Material *MakeCarbonFleece();
   G4Material *GetKapton();
@@ -102,21 +90,9 @@ class PHG4BSTDetector : public PHG4Detector
   G4Material *GetCarbonFiber();
   G4Material *MakeCarbonHoneyCombMaterial();
   G4Material *MakeCarbonFoamMaterial();
-  int PlaceTower(G4LogicalVolume *envelope, G4LogicalVolume *tower);
-  int ParseParametersFromTable();
 
-  struct towerposition
-  {
-    G4double x;
-    G4double y;
-    G4double z;
-    int idx_j;
-    int idx_k;
-    int type;
-  };
-
-  PHG4BSTDisplayAction *m_DisplayAction;
-  PHG4BSTSteppingAction *m_SteppingAction;
+  PHG4FSTDisplayAction *m_DisplayAction;
+  PHG4FSTSteppingAction *m_SteppingAction;
 
   /* Calorimeter envelope geometry */
   G4double _place_in_x;
@@ -168,7 +144,6 @@ class PHG4BSTDetector : public PHG4Detector
   std::string _mapping_tower_file;
   std::map<std::string, G4double> m_GlobalParameterMap;
 
-  std::map<std::string, towerposition> _map_tower;
 
   PHParameters *m_Params = nullptr;
 

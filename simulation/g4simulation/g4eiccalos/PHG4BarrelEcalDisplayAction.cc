@@ -95,6 +95,7 @@ void PHG4BarrelEcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
       visatt->SetColour(G4Colour(scale*1., scale*0.5, 0.));
       // visatt->SetColour(1., 0.5, 0., 0.6);
       // visatt->SetForceWireframe(true);
+      visatt->SetVisibility(false);
     }
     else if (it.second == "Carbon2")
     {
@@ -102,6 +103,7 @@ void PHG4BarrelEcalDisplayAction::ApplyDisplayAction(G4VPhysicalVolume *physvol)
       // visatt->SetColour(G4Colour::Blue());
       visatt->SetColour(G4Colour(0., 0, scale*1.));
       // visatt->SetForceWireframe(true);
+      visatt->SetVisibility(false);
     }
     else if (it.second == "Glass")
     {

@@ -1006,6 +1006,7 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
           (GetProjectionNameFromIndex(iIndex).find("BST") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("LBLVTX") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("BARR") != std::string::npos) ||
+          // (GetProjectionNameFromIndex(iIndex).find("TrackingService") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("FST") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("SVTX") != std::string::npos) ||
           (GetProjectionNameFromIndex(iIndex).find("EST") != std::string::npos) ||
@@ -2258,6 +2259,12 @@ void EventEvaluatorEIC::fillOutputNtuples(PHCompositeNode* topNode)
                 iIndex++;
               }
               if ( GetExponentFromProjectionIndex(iIndex) != -1){
+                //NOTE if the detector layer is already encoded, then we don't need to add it again
+                // catches rare case of multiple hits in a layer
+                if(hitencoded & (UInt_t)pow(2,GetExponentFromProjectionIndex(iIndex))){
+                  if (Verbosity() > 3) std::cout << g4hit_id_hitset.first << "\t" << pow(2,GetExponentFromProjectionIndex(iIndex)) << " already encoded in hitencoded: " << hitencoded << endl;
+                  continue;
+                }
                 hitencoded += pow(2,GetExponentFromProjectionIndex(iIndex));
                 nHits++;
               }
@@ -2638,8 +2645,6 @@ int EventEvaluatorEIC::GetProjectionIndex(std::string projname)
     return 7;
   else if (projname.find("CTTL_1") != std::string::npos)
     return 8;
-  else if (projname.find("BST") != std::string::npos)
-    return 9;
 
   else if (projname.find("hpDIRC") != std::string::npos)
     return 35;
@@ -2684,6 +2689,9 @@ int EventEvaluatorEIC::GetProjectionIndex(std::string projname)
     return 73;
   else if (projname.find("offMomTruth") != std::string::npos)
     return 74;
+
+  else if (projname.find("TrackingService") != std::string::npos)
+    return 79;
 
   else if (projname.find("BH_1") != std::string::npos)
     return 90;
@@ -2764,10 +2772,21 @@ int EventEvaluatorEIC::GetProjectionIndex(std::string projname)
   else if (projname.find("SVTX_4") != std::string::npos)
     return 159;
 
-  else if (projname.find("BARR") != std::string::npos)
+  else if (projname.find("BST_0") != std::string::npos)
     return 160;
-  else if (projname.find("SVTX") != std::string::npos)
+  else if (projname.find("BST_1") != std::string::npos)
     return 161;
+  else if (projname.find("BST_2") != std::string::npos)
+    return 162;
+  else if (projname.find("BST_3") != std::string::npos)
+    return 163;
+  else if (projname.find("BST_4") != std::string::npos)
+    return 164;
+
+  else if (projname.find("BARR") != std::string::npos)
+    return 170;
+  else if (projname.find("SVTX") != std::string::npos)
+    return 171;
   else
     return -1;
   return -1;
@@ -2795,8 +2814,6 @@ std::string EventEvaluatorEIC::GetProjectionNameFromIndex(int projindex)
     return "CTTL_0";
   case 8:
     return "CTTL_1";
-  case 9:
-    return "BST";
 
   case 35:
     return "hpDIRC";
@@ -2841,6 +2858,9 @@ std::string EventEvaluatorEIC::GetProjectionNameFromIndex(int projindex)
     return "rpTruth2";
   case 74:
     return "offMomTruth";
+
+  case 79:
+    return "TrackingService";
 
   case 90:
     return "BH_1";
@@ -2920,8 +2940,19 @@ std::string EventEvaluatorEIC::GetProjectionNameFromIndex(int projindex)
     return "SVTX_4";
 
   case 160:
-    return "BARR";
+    return "BST_0";
   case 161:
+    return "BST_1";
+  case 162:
+    return "BST_2";
+  case 163:
+    return "BST_3";
+  case 164:
+    return "BST_4";
+
+  case 170:
+    return "BARR";
+  case 171:
     return "SVTX";
   default:
     return "NOTHING";
@@ -2932,15 +2963,19 @@ int EventEvaluatorEIC::GetExponentFromProjectionIndex(int projindex)
 {
   switch (projindex)
   {
-  case 9: //"BST";
+  case 160: //"BST_0";
   case 155: //"SVTX_0";
     return 0;
+  case 161: //"BST_1";
   case 156: //"SVTX_1";
     return 1;
+  case 162: //"BST_2";
   case 157: //"SVTX_2";
     return 2;
+  case 163: //"BST_3";
   case 150: //"BARR_0";
     return 3;
+  case 164: // "BST_4";
   case 151: // "BARR_1";
     return 4;
   case 50: // "FST_0";

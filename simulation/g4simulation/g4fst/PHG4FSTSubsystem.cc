@@ -1,7 +1,7 @@
-#include "PHG4BSTSubsystem.h"
-#include "PHG4BSTDetector.h"
-#include "PHG4BSTDisplayAction.h"
-#include "PHG4BSTSteppingAction.h"
+#include "PHG4FSTSubsystem.h"
+#include "PHG4FSTDetector.h"
+#include "PHG4FSTDisplayAction.h"
+#include "PHG4FSTSteppingAction.h"
 
 #include <g4main/PHG4DisplayAction.h>       // for PHG4DisplayAction
 #include <g4main/PHG4HitContainer.h>
@@ -24,7 +24,7 @@ class PHG4Detector;
 using namespace std;
 
 //_______________________________________________________________________
-PHG4BSTSubsystem::PHG4BSTSubsystem(const std::string& name, const int lyr)
+PHG4FSTSubsystem::PHG4FSTSubsystem(const std::string& name, const int lyr)
   : PHG4DetectorSubsystem(name)
   , m_Detector(nullptr)
   , m_SteppingAction(nullptr)
@@ -39,21 +39,21 @@ PHG4BSTSubsystem::PHG4BSTSubsystem(const std::string& name, const int lyr)
 }
 
 //_______________________________________________________________________
-PHG4BSTSubsystem::~PHG4BSTSubsystem()
+PHG4FSTSubsystem::~PHG4FSTSubsystem()
 {
   delete m_DisplayAction;
 }
 
 //_______________________________________________________________________
-int PHG4BSTSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
+int PHG4FSTSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
 {
   PHNodeIterator iter(topNode);
   PHCompositeNode* dstNode = dynamic_cast<PHCompositeNode*>(iter.findFirst("PHCompositeNode", "DST"));
 
   // create display settings before detector
-  m_DisplayAction = new PHG4BSTDisplayAction(Name());
+  m_DisplayAction = new PHG4FSTDisplayAction(Name());
   // create detector
-  m_Detector = new PHG4BSTDetector(this, topNode, GetParams(), Name());
+  m_Detector = new PHG4FSTDetector(this, topNode, GetParams(), Name());
   m_Detector->SetActive(active);
   m_Detector->SetAbsorberActive(absorber_active);
   m_Detector->BlackHole(blackhole);
@@ -80,24 +80,19 @@ int PHG4BSTSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
         dstNode->addNode(DetNode);
       }
     }
-    for(int ilay=0; ilay<5; ilay++)
+    // create hit output node
+    std::string nodename;
+    if (SuperDetector() != "NONE")
     {
-      // create hit output node
-      std::string nodename;
-      if (SuperDetector() != "NONE")
-      {
-        nodename = "G4HIT_" + SuperDetector() + "_" + std::to_string(ilay);
-      }
-      else
-      {
-        nodename = "G4HIT_" + Name() + "_" + std::to_string(ilay);
-      }
-      nodes.insert(nodename);
+      nodename = "G4HIT_" + SuperDetector();
     }
-
+    else
+    {
+      nodename = "G4HIT_" + Name();
+    }
+    nodes.insert(nodename);
     if (absorber_active)
     {
-      std::string nodename;
       if (SuperDetector() != "NONE")
       {
         nodename = "G4HIT_ABSORBER_" + SuperDetector();
@@ -108,7 +103,6 @@ int PHG4BSTSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
       }
       nodes.insert(nodename);
     }
-
     for (auto thisnode : nodes)
     {
       PHG4HitContainer* g4_hits = findNode::getClass<PHG4HitContainer>(topNode, thisnode);
@@ -119,15 +113,15 @@ int PHG4BSTSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
       }
     }
     // create stepping action
-    m_SteppingAction = new PHG4BSTSteppingAction(m_Detector,absorber_active);
-    m_Detector->SetSteppingAction(dynamic_cast<PHG4BSTSteppingAction*>(m_SteppingAction));
+    m_SteppingAction = new PHG4FSTSteppingAction(m_Detector,absorber_active);
+    m_Detector->SetSteppingAction(dynamic_cast<PHG4FSTSteppingAction*>(m_SteppingAction));
   }
 
   return 0;
 }
 
 //_______________________________________________________________________
-int PHG4BSTSubsystem::process_event(PHCompositeNode* topNode)
+int PHG4FSTSubsystem::process_event(PHCompositeNode* topNode)
 {
   // pass top node to stepping action so that it gets
   // relevant nodes needed internally
@@ -139,13 +133,13 @@ int PHG4BSTSubsystem::process_event(PHCompositeNode* topNode)
 }
 
 //_______________________________________________________________________
-PHG4Detector* PHG4BSTSubsystem::GetDetector() const
+PHG4Detector* PHG4FSTSubsystem::GetDetector() const
 {
   return m_Detector;
 }
 
 
-void PHG4BSTSubsystem::SetDefaultParameters()
+void PHG4FSTSubsystem::SetDefaultParameters()
 {
   set_default_double_param("layer_backing_thickness", 0.0);
   set_default_double_param("place_x", 0.);
@@ -159,7 +153,13 @@ void PHG4BSTSubsystem::SetDefaultParameters()
   set_default_double_param("rMax1", 220.);
   set_default_double_param("rMin2", 20.);
   set_default_double_param("rMax2", 220.);
-  set_default_int_param("do_internal_supports", 1);
+  set_default_double_param("z_position", 220.);
+  set_default_double_param("r_max", 220.);
+  set_default_double_param("r_min", 220.);
+  set_default_double_param("offset_cutout", 0.);
+  set_default_double_param("silicon_thickness",200);
+  set_default_int_param("is_FST", 0);
+  set_default_int_param("is_EST", 0);
   set_default_int_param("do_external_supports", 1);
   set_default_int_param("use_EPIC_setup", 0);
   // set_default_double_param("wls_dw", 0.3);
@@ -176,7 +176,7 @@ void PHG4BSTSubsystem::SetDefaultParameters()
 }
 
 
-void PHG4BSTSubsystem::SetTowerMappingFile(const std::string& filename)
+void PHG4FSTSubsystem::SetTowerMappingFile(const std::string& filename)
 {
   // set_string_param("mapping_file", filename);
   // set_string_param("mapping_file_md5", PHG4Utils::md5sum(get_string_param("mapping_file")));
