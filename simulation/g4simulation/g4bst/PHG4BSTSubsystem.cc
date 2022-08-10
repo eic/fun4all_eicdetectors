@@ -80,7 +80,7 @@ int PHG4BSTSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
         dstNode->addNode(DetNode);
       }
     }
-    for(int ilay=0; ilay<5; ilay++)
+    for(int ilay=0; ilay<6; ilay++)
     {
       // create hit output node
       std::string nodename;
@@ -161,6 +161,8 @@ void PHG4BSTSubsystem::SetDefaultParameters()
   set_default_double_param("rMax2", 220.);
   set_default_int_param("do_internal_supports", 1);
   set_default_int_param("do_external_supports", 1);
+  set_default_int_param("use_bent_wafer_sagittas_default", 0);
+  set_default_int_param("use_bent_wafer_sagittas_mod", 0);
   set_default_int_param("use_EPIC_setup", 0);
   // set_default_double_param("wls_dw", 0.3);
   // set_default_double_param("support_dw", 0.2);

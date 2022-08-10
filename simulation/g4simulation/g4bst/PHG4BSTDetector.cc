@@ -133,15 +133,19 @@ void PHG4BSTDetector::ConstructMe(G4LogicalVolume* logicWorld)
 
   ConstructBarrel(logicWorld);
   if(m_Params->get_int_param("use_EPIC_setup")){
-    ConstructStaves(logicWorld);
-    ConstructStavesOuter(logicWorld);
+    if(m_Params->get_int_param("use_bent_wafer_sagittas_mod") || m_Params->get_int_param("use_bent_wafer_sagittas_default")){
+      ConstructStavesOuter(logicWorld);
+    } else {
+      ConstructStavesOuter(logicWorld);
+      ConstructStaves(logicWorld);
+    }
   }
   return;
 }
 
 void PHG4BSTDetector::ConstructStavesOuter(G4LogicalVolume* mother){
   bool overlapcheck_sector = false;
-
+  int use_bent_wafer_sagittas = m_Params->get_int_param("use_bent_wafer_sagittas_mod") + m_Params->get_int_param("use_bent_wafer_sagittas_default");
   G4double rCenter = 42.0*cm;//m_Params->get_double_param("rMin");  // center location of Al support plate
   // G4double det_height = 2.1 * cm;
   G4double place_z = 0.0;//m_Params->get_double_param("place_z");
@@ -380,11 +384,11 @@ void PHG4BSTDetector::ConstructStavesOuter(G4LogicalVolume* mother){
   //-------------------------------------------------------------------
   //NOTE Pixel chip 50um G4_Si
   //-------------------------------------------------------------------
-    G4VSolid *sol_sensor = new G4Box("BST_4_sol_currentSagittaLayer_sensor",
+    G4VSolid *sol_sensor = new G4Box(use_bent_wafer_sagittas ? "BST_5_sol_currentSagittaLayer_sensor" : "BST_4_sol_currentSagittaLayer_sensor",
                                             half_stave_width / 2,
                                             sensor_thickness / 2,
                                             stave_length / 2);
-    G4LogicalVolume *Log_sensor = new G4LogicalVolume(sol_sensor, GetDetectorMaterial("G4_Si"), "BST_4_Log_currentSagittaLayer_sensor");
+    G4LogicalVolume *Log_sensor = new G4LogicalVolume(sol_sensor, GetDetectorMaterial("G4_Si"), use_bent_wafer_sagittas ? "BST_5_Log_currentSagittaLayer_sensor" : "BST_4_Log_currentSagittaLayer_sensor");
     m_DisplayAction->AddVolume(Log_sensor, "Sensor");
 
     // place carbon plate
@@ -836,12 +840,27 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
   bool doLongeron = true;
   bool do_external_supports = true;
   bool use_EPIC_setup = false;
+  bool use_bent_wafer_sagittas_mod = false;
+  bool use_bent_wafer_sagittas_default = false;
   if(!m_Params->get_int_param("do_internal_supports"))
     do_internal_supports = false;
   if(!m_Params->get_int_param("do_external_supports"))
     do_external_supports = false;
-  if(m_Params->get_int_param("use_EPIC_setup"))
+  if(m_Params->get_int_param("use_EPIC_setup")){
     use_EPIC_setup = true;
+    if(m_Params->get_int_param("use_bent_wafer_sagittas_mod")){
+      use_bent_wafer_sagittas_mod = true;
+      cout << "using radially modified wafer-scale sensors for first sagitta layer" << endl;
+    }
+    if(m_Params->get_int_param("use_bent_wafer_sagittas_default")){
+      use_bent_wafer_sagittas_default = true;
+      cout << "using wafer-scale sensors for first sagitta layer" << endl;
+    }
+    if(use_bent_wafer_sagittas_default && use_bent_wafer_sagittas_mod){
+      cout << "ERROR: cannot use both radially modified and default wafer-scale sensors for first sagitta layer" << endl;
+      exit(1);
+    }
+  }
 
 
   // Sensor sizes available from the ALPIDE wafer
@@ -878,11 +897,11 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
   int nSensorsInner[nLayersInner] = {0};
   G4double layer_sensor_width_inner[nLayersInner][9] = {0};
 
-  const int nLayersOuter = 2;
-  G4double layer_radius_outer[nLayersOuter] = {0};
-  G4double layer_length_outer[nLayersOuter] = {0};
-  int nSensorsOuter[nLayersOuter] = {0};
-  G4double layer_sensor_width_outer[nLayersOuter][9] = {0};
+  int nLayersOuter = 2;
+  G4double layer_radius_outer[] = {0,0};
+  G4double layer_length_outer[] = {0,0};
+  int nSensorsOuter[] = {0,0};
+  G4double layer_sensor_width_outer[][9] = {{0},{0}};
 
   // vertex layers sensor setup
 
@@ -923,8 +942,17 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
   // sagitta layers sensor setup
   // Sagitta1(nonproj+): 5*94.3+2*75.5 = radius 198 -> eta 0.95
   // Sagitta2(nonproj+): 7*94.3 = radius 210 -> eta 0.89
-  if(use_EPIC_setup){
-
+  if(use_EPIC_setup && !use_bent_wafer_sagittas_default){
+    nLayersOuter = 0;
+    if(use_bent_wafer_sagittas_mod){
+      nLayersOuter = 2;
+      nSensorsOuter[0] = 8;
+      layer_radius_outer[0] = (8*sensor_widths[2]+deadarea_seam)/M_PI; // 270.316 mm
+      for(int i=0;i<8;i++){
+        layer_sensor_width_outer[0][i] = sensor_widths[2];
+      }
+      layer_length_outer[0] = sensor_length[2];
+    }
   } else {
     nSensorsOuter[0] = 7;
     layer_radius_outer[0] = (5*sensor_widths[2]+2*sensor_widths[1]+deadarea_seam)/M_PI; // 198.46621 mm
@@ -936,8 +964,16 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
     layer_length_outer[0] = sensor_length[2];
   }
 
-  if(use_EPIC_setup){
-
+  if(use_EPIC_setup && !use_bent_wafer_sagittas_default){
+    if(use_bent_wafer_sagittas_mod){
+      nSensorsOuter[1] = 8;
+      layer_radius_outer[1] = (9*sensor_widths[2]+deadarea_seam)/M_PI; // 24.03 mm
+      for(int i=0;i<9;i++){
+        layer_sensor_width_outer[1][i] = sensor_widths[2];
+      }
+      layer_length_outer[1] = sensor_length[2];
+      support_radius_outer = layer_radius_outer[1]+1*cm;
+    }
   } else {
     nSensorsOuter[1] = 7;
     layer_radius_outer[1] = (7*sensor_widths[2]+deadarea_seam)/M_PI; // 210.43467 mm
@@ -994,18 +1030,18 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
 
       support_radius_outer = 24.2 * cm;
     }
-    for(int i=0; i<nLayersInner; i++){
-      cout << "BST layer " << i << " radius " << layer_radius_inner[i] << " length " << layer_length_inner[i] << " nSensors " << nSensorsInner[i] << endl;
-      // for(int j=0; j<nSensorsInner[i]; j++){
-      //   cout << "\tlayer " << i << " sensor " << j << " width " << layer_sensor_width_inner[i][j] << endl;
-      // }
-    }
-    for(int i=0; i<nLayersOuter; i++){
-      cout << "BST layer " << i+nLayersInner << " radius " << layer_radius_outer[i] << " length " << layer_length_outer[i] << " nSensors " << nSensorsOuter[i] << endl;
-      // for(int j=0; j<nSensorsOuter[i]; j++){
-      //   cout << "\tlayer " << i+nLayersInner << " sensor " << j << " width " << layer_sensor_width_outer[i][j] << endl;
-      // }
-    }
+  }
+  for(int i=0; i<nLayersInner; i++){
+    cout << "BST layer " << i << " radius " << layer_radius_inner[i] << " length " << layer_length_inner[i] << " nSensors " << nSensorsInner[i] << endl;
+    // for(int j=0; j<nSensorsInner[i]; j++){
+    //   cout << "\tlayer " << i << " sensor " << j << " width " << layer_sensor_width_inner[i][j] << endl;
+    // }
+  }
+  for(int i=0; i<nLayersOuter; i++){
+    cout << "BST layer " << i+nLayersInner << " radius " << layer_radius_outer[i] << " length " << layer_length_outer[i] << " nSensors " << nSensorsOuter[i] << endl;
+    // for(int j=0; j<nSensorsOuter[i]; j++){
+    //   cout << "\tlayer " << i+nLayersInner << " sensor " << j << " width " << layer_sensor_width_outer[i][j] << endl;
+    // }
   }
   // int layer_segments[nLayersOuter] = {12, 12};
   G4double copperWire_diam = 0.64 * mm;
@@ -1025,7 +1061,9 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
   }
   int foam_endwheel_holes_outer = 60;
   G4double foam_endwheel_hole_diam_outer[nLayersOuter] = {(layer_radius_outer[1]-layer_radius_outer[0])/2, (support_radius_outer-layer_radius_outer[1])/2.5};
-
+  // if(use_EPIC_setup && use_bent_wafer_sagittas_mod){
+  //   foam_endwheel_hole_diam_outer[0] = (support_radius_outer-layer_radius_outer[0])/2.5;
+  // }
 
   for(int i = 0; i < nLayersInner; i++){
     // if(i>-1) continue;
@@ -1322,7 +1360,7 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
   }
 
   for(int i = 0; i < nLayersOuter; i++){
-    if(use_EPIC_setup) continue;
+    if(use_EPIC_setup && !use_bent_wafer_sagittas_mod && !use_bent_wafer_sagittas_default) continue;
     // if(i>-1) continue;
     G4double layer_half_circumference = M_PI * layer_radius_outer[i];
     G4double angle_deadarea_sensoredge = M_PI * (deadarea_sensoredge / 2.0) / layer_half_circumference;
@@ -1770,7 +1808,7 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
                       mother,
                       0, 0, OverlapCheck());
 
-    if(!use_EPIC_setup){
+    if(!use_EPIC_setup || (use_EPIC_setup && use_bent_wafer_sagittas_mod) || (use_EPIC_setup && use_bent_wafer_sagittas_default)){
       G4double support_seamangle_outer = 0;//support_seam / support_radius_outer;
 
       // construct support 2mm thick foam with 0.1mm carbon skins

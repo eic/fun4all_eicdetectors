@@ -71,7 +71,7 @@ PHG4BSTSteppingAction::PHG4BSTSteppingAction(PHG4BSTDetector* detector, const in
   , absorbertruth(absorberactive)
   , light_scint_model(1)
 {
-  hits_ = new PHG4HitContainer*[5];
+  hits_ = new PHG4HitContainer*[6];
 }
 
 PHG4BSTSteppingAction::~PHG4BSTSteppingAction()
@@ -108,7 +108,7 @@ bool PHG4BSTSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
       layer_id = std::stoi(volume->GetName().substr(pos + bstLayerNameFind.size(), pos + bstLayerNameFind.size() + 1));
     }
     // cout << volume->GetName() << "\t" << layer_id << "\t" << layer_id << endl;
-    if(layer_id<0 || layer_id>5){
+    if(layer_id<0 || layer_id>6){
       cout << "ERROR: BST layer id is out of range" << endl;
       return false;
     }
@@ -253,7 +253,7 @@ void PHG4BSTSteppingAction::SetInterfacePointers(PHCompositeNode* topNode)
     absorbernodename = "G4HIT_ABSORBER_" + detector_->GetName();
   }
 
-  for(int ilay=0; ilay<5; ilay++){
+  for(int ilay=0; ilay<6; ilay++){
     if (detector_->SuperDetector() != "NONE")
     {
       hitnodename = "G4HIT_" + detector_->SuperDetector() + "_" + std::to_string(ilay);

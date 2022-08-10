@@ -2782,6 +2782,8 @@ int EventEvaluatorEIC::GetProjectionIndex(std::string projname)
     return 163;
   else if (projname.find("BST_4") != std::string::npos)
     return 164;
+  else if (projname.find("BST_5") != std::string::npos)
+    return 165;
 
   else if (projname.find("BARR") != std::string::npos)
     return 170;
@@ -2949,6 +2951,8 @@ std::string EventEvaluatorEIC::GetProjectionNameFromIndex(int projindex)
     return "BST_3";
   case 164:
     return "BST_4";
+  case 165:
+    return "BST_5";
 
   case 170:
     return "BARR";
@@ -2980,7 +2984,7 @@ int EventEvaluatorEIC::GetExponentFromProjectionIndex(int projindex)
     return 4;
   case 50: // "FST_0";
     return 5;
-  case 51: // "FST_1";
+  case 51: // "FST_0";
     return 6;
   case 52: // "FST_2";
     return 7;
@@ -3012,7 +3016,7 @@ int EventEvaluatorEIC::GetExponentFromProjectionIndex(int projindex)
     return 20;    
   case 1: // "FTTL_1";
     return 21;
-  case 2: //  "FTTL_1";
+  case 165: //  "BST_5";
     return 22;    
   case 3: // "ETTL_0";
     return 23;
