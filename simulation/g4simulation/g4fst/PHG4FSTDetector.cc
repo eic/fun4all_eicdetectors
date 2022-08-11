@@ -134,7 +134,7 @@ void PHG4FSTDetector::ConstructSTDisk(G4LogicalVolume* mother){
   G4double place_z = m_Params->get_double_param("z_position") *cm;
   G4double min_radius = m_Params->get_double_param("r_min") * cm;
   G4double max_radius = m_Params->get_double_param("r_max") *cm;
-  G4double silicon_thickness = m_Params->get_double_param("silicon_thickness");
+  G4double silicon_thickness = 35 *um;
   G4double offset_cutout = m_Params->get_double_param("offset_cutout")*cm;
 
   string  layer_name[] = {"SiliconSensor", "Metalconnection", "HDI", "Cooling", "Support", "Support_Gap", "Support2"};
