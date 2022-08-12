@@ -139,7 +139,7 @@ void PHG4FSTDetector::ConstructSTDisk(G4LogicalVolume* mother){
 
   string  layer_name[] = {"SiliconSensor", "Metalconnection", "HDI", "Cooling", "Support", "Support_Gap", "Support2"};
   G4Material* materialLayer[] = {GetDetectorMaterial("G4_Si"), GetDetectorMaterial("G4_Al"), GetDetectorMaterial("G4_KAPTON"), GetDetectorMaterial("G4_WATER"), GetDetectorMaterial("G4_GRAPHITE"), GetDetectorMaterial("G4_AIR"), GetDetectorMaterial("G4_GRAPHITE")};
-  G4double thicknessLayer[] = {silicon_thickness *cm, 15 * um, 20 * um, 100 * um, 50 * um, 1 * cm, 50 * um};
+  G4double thicknessLayer[] = {silicon_thickness, 15 * um, 20 * um, 100 * um, 50 * um, 1 * cm, 50 * um};
 
   G4double totalThickness = 0;
   for(int ilay=0; ilay<7; ilay++){
