@@ -133,7 +133,7 @@ void PHG4BSTDetector::ConstructMe(G4LogicalVolume* logicWorld)
 
   ConstructBarrel(logicWorld);
   if(m_Params->get_int_param("use_EPIC_setup")){
-    if(m_Params->get_int_param("use_bent_wafer_sagittas_mod") || m_Params->get_int_param("use_bent_wafer_sagittas_default")){
+    if(m_Params->get_int_param("use_bent_wafer_sagittas_mod") || m_Params->get_int_param("use_bent_wafer_sagittas_default") || m_Params->get_int_param("use_ECCE_with_OuterStave")){
       ConstructStavesOuter(logicWorld);
     } else {
       ConstructStavesOuter(logicWorld);
@@ -145,7 +145,7 @@ void PHG4BSTDetector::ConstructMe(G4LogicalVolume* logicWorld)
 
 void PHG4BSTDetector::ConstructStavesOuter(G4LogicalVolume* mother){
   bool overlapcheck_sector = false;
-  int use_bent_wafer_sagittas = m_Params->get_int_param("use_bent_wafer_sagittas_mod") + m_Params->get_int_param("use_bent_wafer_sagittas_default");
+  int use_bent_wafer_sagittas = m_Params->get_int_param("use_bent_wafer_sagittas_mod") + m_Params->get_int_param("use_bent_wafer_sagittas_default") + m_Params->get_int_param("use_ECCE_with_OuterStave");
   G4double rCenter = 42.0*cm;//m_Params->get_double_param("rMin");  // center location of Al support plate
   // G4double det_height = 2.1 * cm;
   G4double place_z = 0.0;//m_Params->get_double_param("place_z");
@@ -848,6 +848,10 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
     do_external_supports = false;
   if(m_Params->get_int_param("use_EPIC_setup")){
     use_EPIC_setup = true;
+    if(m_Params->get_int_param("use_ECCE_with_OuterStave")){
+      use_EPIC_setup = false;
+      cout << "using ECCE wafer-scale sensors with additional outer stave layer" << endl;
+    }
     if(m_Params->get_int_param("use_bent_wafer_sagittas_mod")){
       use_bent_wafer_sagittas_mod = true;
       cout << "using radially modified wafer-scale sensors for first sagitta layer" << endl;
