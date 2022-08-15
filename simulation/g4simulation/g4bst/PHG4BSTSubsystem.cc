@@ -159,6 +159,7 @@ void PHG4BSTSubsystem::SetDefaultParameters()
   set_default_double_param("rMax1", 220.);
   set_default_double_param("rMin2", 20.);
   set_default_double_param("rMax2", 220.);
+  set_default_double_param("radius_outer_stave", 42.);
   set_default_int_param("do_internal_supports", 1);
   set_default_int_param("do_external_supports", 1);
   set_default_int_param("use_bent_wafer_sagittas_default", 0);

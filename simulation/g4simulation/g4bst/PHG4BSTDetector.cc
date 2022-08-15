@@ -146,7 +146,7 @@ void PHG4BSTDetector::ConstructMe(G4LogicalVolume* logicWorld)
 void PHG4BSTDetector::ConstructStavesOuter(G4LogicalVolume* mother){
   bool overlapcheck_sector = false;
   int use_bent_wafer_sagittas = m_Params->get_int_param("use_bent_wafer_sagittas_mod") + m_Params->get_int_param("use_bent_wafer_sagittas_default") + m_Params->get_int_param("use_ECCE_with_OuterStave");
-  G4double rCenter = 42.0*cm;//m_Params->get_double_param("rMin");  // center location of Al support plate
+  G4double rCenter = m_Params->get_double_param("radius_outer_stave") * cm;  // center location of Al support plate
   // G4double det_height = 2.1 * cm;
   G4double place_z = 0.0;//m_Params->get_double_param("place_z");
 
@@ -909,18 +909,18 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
 
   // vertex layers sensor setup
 
-  if(use_EPIC_setup){
-    nSensorsInner[0] = 2;
-    layer_radius_inner[0] = (2*sensor_widths[0]+deadarea_seam)/M_PI; // 36.287327 mm -> eta 2.0
-    layer_sensor_width_inner[0][0] = sensor_widths[0];
-    layer_sensor_width_inner[0][1] = sensor_widths[0];
-    layer_length_inner[0] = sensor_length[0];
-  } else {
-    nSensorsInner[0] = 1;
-    layer_radius_inner[0] = (sensor_widths[3]+deadarea_seam)/M_PI; // 36.319158 mm -> eta 1.92
-    layer_sensor_width_inner[0][0] = sensor_widths[3];
-    layer_length_inner[0] = sensor_length[3];
-  }
+  // if(use_EPIC_setup){
+  nSensorsInner[0] = 2;
+  layer_radius_inner[0] = (2*sensor_widths[0]+deadarea_seam)/M_PI; // 36.287327 mm -> eta 2.0
+  layer_sensor_width_inner[0][0] = sensor_widths[0];
+  layer_sensor_width_inner[0][1] = sensor_widths[0];
+  layer_length_inner[0] = sensor_length[0];
+  // } else {
+  //   nSensorsInner[0] = 1;
+  //   layer_radius_inner[0] = (sensor_widths[3]+deadarea_seam)/M_PI; // 36.319158 mm -> eta 1.92
+  //   layer_sensor_width_inner[0][0] = sensor_widths[3];
+  //   layer_length_inner[0] = sensor_length[3];
+  // }
 
   nSensorsInner[1] = 2;
   layer_radius_inner[1] = (2*sensor_widths[1]+deadarea_seam)/M_PI; // 48.383103 mm
@@ -930,7 +930,7 @@ void PHG4BSTDetector::ConstructBarrel(G4LogicalVolume* mother){
 
   if(use_EPIC_setup){
     nSensorsInner[2] = 4;
-    layer_radius_inner[2] = (4*sensor_widths[2]+deadarea_seam)/M_PI; // 60.351554 mm -> eta 1.49
+    layer_radius_inner[2] = (4*sensor_widths[2]+deadarea_seam)/M_PI; // 120.351554 mm -> eta 1.49
     layer_sensor_width_inner[2][0] = sensor_widths[2];
     layer_sensor_width_inner[2][1] = sensor_widths[2];
     layer_sensor_width_inner[2][2] = sensor_widths[2];
