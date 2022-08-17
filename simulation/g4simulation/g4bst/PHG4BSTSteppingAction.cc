@@ -33,6 +33,7 @@
 #include <Geant4/G4OpticalPhoton.hh>
 #include <Geant4/G4Scintillation.hh>
 #include <Geant4/G4Cerenkov.hh>
+#include <TSystem.h>
 
 #include <boost/tokenizer.hpp>
 // this is an ugly hack, the gcc optimizer has a bug which
@@ -269,6 +270,7 @@ void PHG4BSTSteppingAction::SetInterfacePointers(PHCompositeNode* topNode)
     if (!hits_[ilay])
     {
       std::cout << "PHG4BSTSteppingAction::SetTopNode - unable to find " << hitnodename << std::endl;
+      gSystem->Exit(1);
   }
   }
   absorberhits_ = findNode::getClass<PHG4HitContainer>(topNode, absorbernodename);

@@ -2646,12 +2646,20 @@ int EventEvaluatorEIC::GetProjectionIndex(std::string projname)
   else if (projname.find("CTTL_1") != std::string::npos)
     return 8;
 
+  else if (projname.find("hpDIRC_Plane_0") != std::string::npos)
+    return 36;
+  else if (projname.find("hpDIRC_Plane_1") != std::string::npos)
+    return 37;
+  else if (projname.find("mRICH_Plane_0") != std::string::npos)
+    return 38;
+  else if (projname.find("mRICH_Plane_1") != std::string::npos)
+    return 39;
+  else if (projname.find("dRICH_Plane_0") != std::string::npos)
+    return 40;
+  else if (projname.find("dRICH_Plane_1") != std::string::npos)
+    return 41;
   else if (projname.find("hpDIRC") != std::string::npos)
     return 35;
-  else if (projname.find("mRICH_Plane") != std::string::npos)
-    return 36;
-  else if (projname.find("dRICH_Plane") != std::string::npos)
-    return 37;
 
   else if (projname.find("FST_0") != std::string::npos)
     return 50;
@@ -2820,9 +2828,17 @@ std::string EventEvaluatorEIC::GetProjectionNameFromIndex(int projindex)
   case 35:
     return "hpDIRC";
   case 36:
-    return "mRICH_Plane";
+    return "hpDIRC_Plane_0";
   case 37:
-    return "dRICH_Plane";
+    return "hpDIRC_Plane_1";
+  case 38:
+    return "mRICH_Plane_0";
+  case 39:
+    return "mRICH_Plane_1";
+  case 40:
+    return "dRICH_Plane_0";
+  case 41:
+    return "dRICH_Plane_1";
 
   case 50:
     return "FST_0";
