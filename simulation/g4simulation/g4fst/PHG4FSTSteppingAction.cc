@@ -97,19 +97,20 @@ bool PHG4FSTSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
   const G4Track* aTrack = aStep->GetTrack();
 
 
-  if (detector_->IsInActiveSensorFST(volume))
+  if (detector_->IsInActiveSensorFST(volume,detector_->SuperDetector()))
   {
     
-    int layer_id = -1;
-    std::string bstLayerNameFind = "FST_";
-    std::string bstLayerNameFind2 = "FST_";
-    if (volume->GetName().find(bstLayerNameFind) != std::string::npos) {
-      auto pos = volume->GetName().find(bstLayerNameFind);
-      layer_id = std::stoi(volume->GetName().substr(pos + bstLayerNameFind.size(), pos + bstLayerNameFind.size() + 1));
-    } else if (volume->GetName().find(bstLayerNameFind) != std::string::npos) {
-      auto pos = volume->GetName().find(bstLayerNameFind);
-      layer_id = std::stoi(volume->GetName().substr(pos + bstLayerNameFind.size(), pos + bstLayerNameFind.size() + 1));
-    }
+    int layer_id = std::stoi(detector_->SuperDetector().substr(4, 5));
+    // std::string bstLayerNameFind = detector_->SuperDetector();
+    // // std::string bstLayerNameFind2 = "EST_";
+    // if (volume->GetName().find(bstLayerNameFind) != std::string::npos) {
+    //   auto pos = volume->GetName().find(bstLayerNameFind);
+    //   layer_id = std::stoi(volume->GetName().substr(pos + bstLayerNameFind.size(), pos + bstLayerNameFind.size() + 1));
+    // } 
+    // else if (volume->GetName().find(bstLayerNameFind) != std::string::npos) {
+    //   auto pos = volume->GetName().find(bstLayerNameFind);
+    //   layer_id = std::stoi(volume->GetName().substr(pos + bstLayerNameFind.size(), pos + bstLayerNameFind.size() + 1));
+    // }
     // cout << volume->GetName() << "\t" << layer_id << "\t" << layer_id << endl;
 
     bool geantino = false;

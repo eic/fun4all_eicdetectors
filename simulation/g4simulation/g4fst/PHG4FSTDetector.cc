@@ -88,31 +88,27 @@ PHG4FSTDetector::PHG4FSTDetector(PHG4Subsystem* subsys, PHCompositeNode* Node, P
 {
 }
 //_______________________________________________________________________
-int PHG4FSTDetector::IsInActiveSensorFST(G4VPhysicalVolume* volume) const
+int PHG4FSTDetector::IsInActiveSensorFST(G4VPhysicalVolume* volume,const std::string supdet) const
 {
-  // if (volume->GetName().find(_towerlogicnameprefix) != string::npos)
-  // {
-    if (volume->GetName().find("SiliconSensor") != string::npos)
-    {
-      if (_active)
-        return 1;
-      else
-        return 0;
-    }
-    //only record energy in actual absorber- drop energy lost in air gaps inside FST envelope
-    else if (volume->GetName().find("absorber") != string::npos)
-    {
-      if (_absorberactive)
-        return -1;
-      else
-        return 0;
-    }
-    else if (volume->GetName().find("envelope") != string::npos)
-    {
+  if (volume->GetName().find(supdet +"_SiliconSensor") != string::npos)
+  {
+    if (_active)
+      return 1;
+    else
       return 0;
-    }
-  // }
-
+  }
+  //only record energy in actual absorber- drop energy lost in air gaps inside FST envelope
+  else if (volume->GetName().find("absorber") != string::npos)
+  {
+    if (_absorberactive)
+      return -1;
+    else
+      return 0;
+  }
+  else if (volume->GetName().find("envelope") != string::npos)
+  {
+    return 0;
+  }
   return 0;
 }
 

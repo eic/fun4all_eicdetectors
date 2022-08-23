@@ -62,7 +62,7 @@ int PHG4FSTSubsystem::InitRunSubsystem(PHCompositeNode* topNode)
   // m_Detector->SetTowerMappingFile(mappingfile_);
   m_Detector->SuperDetector(SuperDetector());
 
-
+  // cout << "PHG4FSTSubsystem::InitRunSubsystem - set active flag for " << Name() << "\t" << SuperDetector() << "\tto " << active << endl;
 
 
 

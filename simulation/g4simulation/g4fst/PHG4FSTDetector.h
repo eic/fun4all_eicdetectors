@@ -39,7 +39,7 @@ class PHG4FSTDetector : public PHG4Detector
   virtual void ConstructMe(G4LogicalVolume *world);
 
   //!@name volume accessors
-  int IsInActiveSensorFST(G4VPhysicalVolume *) const;
+  int IsInActiveSensorFST(G4VPhysicalVolume *, const std::string) const;
 
   //! Select mapping file for calorimeter tower
   void SetTowerMappingFile(const std::string &filename)
